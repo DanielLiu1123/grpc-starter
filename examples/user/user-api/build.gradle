@@ -1,0 +1,17 @@
+dependencies {
+    compileOnly("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
+    compileOnly("io.grpc:grpc-stub:${grpcVersion}")
+    compileOnly("org.apache.tomcat:annotations-api:6.0.53") // necessary for Java 9+
+}
+
+apply from: "${rootDir}/protobuf.gradle"
+
+sourceSets {
+    main {
+        proto {
+            srcDir "proto"
+        }
+    }
+}
+
+apply from: "${rootDir}/deploy.gradle"

@@ -1,0 +1,10 @@
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation(project(":starters:grpc-boot-starter"))
+    implementation(project(":starters:grpc-starter-validation"))
+}
+
+apply from: "${rootDir}/protobuf.gradle"

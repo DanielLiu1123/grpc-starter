@@ -1,0 +1,4 @@
+grpc:
+  server:
+    debug:
+      enabled: true

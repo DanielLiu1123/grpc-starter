@@ -1,0 +1,16 @@
+rootProject.name = 'grpc-starter'
+
+// autoconfigure
+include(":grpc-boot-autoconfigure")
+
+// starters
+include(":starters:grpc-boot-starter")
+include(":starters:grpc-client-boot-starter")
+include(":starters:grpc-server-boot-starter")
+include(":starters:grpc-starter-validation")
+
+// examples
+include(":examples")
+include(":examples:simple")
+include(":examples:user:user-api")
+include(":examples:user:user-server")

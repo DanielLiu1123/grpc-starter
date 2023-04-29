@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package fm.foo.v1;
+
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+
+option java_package = "com.freemanan.foo.v1.api";
+option java_multiple_files = true;
+
+message Foo {
+  string id = 1 [(validate.rules).string = {
+    ignore_empty: true,
+    min_len: 1,
+    max_len: 10
+  }];
+  string name = 2 [(validate.rules).string = {
+    ignore_empty: true,
+    pattern: "^[a-zA-Z0-9_]+$"
+  }];
+}
+
+service FooService {
+  rpc Valid (Foo) returns (Foo) {}
+  rpc Stream (stream Foo) returns (stream Foo) {}
+  rpc ClintStream (stream Foo) returns (Foo) {}
+}

@@ -1,0 +1,76 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+version = version as String
+version = System.getenv('RELEASE') ? version.substring(0, version.lastIndexOf('-SNAPSHOT')) : version
+
+def isRelease = !version.endsWith('-SNAPSHOT')
+
+tasks.register('sourcesJar', Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier.set('sources')
+}
+
+def githubUrl = 'https://github.com/DanielLiu1123/grpc-starter'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact sourcesJar
+            from components.java
+
+            // see  https://docs.gradle.org/current/userguide/publishing_maven.html
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+            pom {
+                url = "${githubUrl}"
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://www.opensource.org/licenses/mit-license.php'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'Freeman'
+                        name = 'Freeman Liu'
+                        email = 'freemanlau1228@gmail.com'
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://${githubUrl.substring(8)}.git"
+                    developerConnection = "scm:git:ssh@${githubUrl.substring(8)}.git"
+                    url = "${githubUrl}"
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                username System.getenv('OSSRH_USER')
+                password System.getenv('OSSRH_PASSWORD')
+            }
+            if (version.endsWith('-SNAPSHOT')) {
+                url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+            } else {
+                url 'https://s01.oss.sonatype.org/content/repositories/releases/'
+            }
+        }
+    }
+
+    tasks.withType(Sign).configureEach {
+        onlyIf { isRelease }
+    }
+
+    signing {
+        sign publishing.publications.mavenJava
+    }
+}

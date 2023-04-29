@@ -1,0 +1,5 @@
+dependencies {
+    api("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
+}
+
+apply from: "${rootDir}/deploy.gradle"

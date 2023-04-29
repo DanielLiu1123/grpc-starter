@@ -1,0 +1,9 @@
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation(project(":examples:user:user-api"))
+    implementation(project(":starters:grpc-server-boot-starter"))
+    implementation(project(":starters:grpc-starter-validation"))
+}
