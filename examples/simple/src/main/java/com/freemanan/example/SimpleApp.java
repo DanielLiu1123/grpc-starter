@@ -32,7 +32,7 @@ public class SimpleApp implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        System.out.println(fooBlockingStub.valid(
+        System.out.println(fooBlockingStub.create(
                 Foo.newBuilder().setId("111111").setName("naae").build()));
     }
 }

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Controller;
 public class FooController extends FooServiceGrpc.FooServiceImplBase {
 
     @Override
-    public void valid(Foo request, StreamObserver<Foo> responseObserver) {
+    public void create(Foo request, StreamObserver<Foo> responseObserver) {
         if (request.getName().length() <= 3) {
             throw new IllegalArgumentException("name length must be greater than 3");
         }

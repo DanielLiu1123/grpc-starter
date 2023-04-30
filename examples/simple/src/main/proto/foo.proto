@@ -21,7 +21,7 @@ message Foo {
 }
 
 service FooService {
-  rpc Valid (Foo) returns (Foo) {}
+  rpc Create (Foo) returns (Foo) {}
   rpc Stream (stream Foo) returns (stream Foo) {}
   rpc ClintStream (stream Foo) returns (Foo) {}
 }
