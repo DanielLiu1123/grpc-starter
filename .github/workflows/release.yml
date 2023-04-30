@@ -1,0 +1,25 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Decrypt secring.gpg
+        run: openssl enc -aes-256-cbc -d -pbkdf2 -in secring.gpg.bin -out secring.gpg -pass pass:${{ secrets.privateKeyPassword }}
+
+      - name: Release
+        run: RELEASE=true OSSRH_USER=${{ secrets.OSSRH_USER }} OSSRH_PASSWORD=${{ secrets.OSSRH_PASSWORD }} ./gradlew publish -Psigning.secretKeyRingFile=secring.gpg -Psigning.keyId=${{ secrets.signKeyId }} -Psigning.password=${{ secrets.signPassword }}
