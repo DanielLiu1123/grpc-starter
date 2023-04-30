@@ -1,0 +1,69 @@
+apply plugin: 'java-platform'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+version = version as String
+version = System.getenv('RELEASE') ? version.substring(0, version.lastIndexOf('-SNAPSHOT')) : version
+
+def isRelease = !version.endsWith('-SNAPSHOT')
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+javaPlatform {
+    allowDependencies()
+}
+
+dependencies {
+    constraints {
+        api(project(":grpc-boot-autoconfigure"))
+        api(project(":starters:grpc-boot-starter"))
+        api(project(":starters:grpc-client-boot-starter"))
+        api(project(":starters:grpc-server-boot-starter"))
+        api(project(":starters:grpc-starter-validation"))
+    }
+
+    api(platform("io.grpc:grpc-bom:${grpcVersion}"))
+    api(platform("com.google.protobuf:protobuf-bom:${protobufVersion}"))
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.javaPlatform
+
+            pom {
+                developers {
+                    developer {
+                        id = 'Freeman'
+                        name = 'Freeman Liu'
+                        email = 'freemanlau1228@gmail.com'
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                username System.getenv('OSSRH_USER')
+                password System.getenv('OSSRH_PASSWORD')
+            }
+            if (version.endsWith('-SNAPSHOT')) {
+                url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+            } else {
+                url 'https://s01.oss.sonatype.org/content/repositories/releases/'
+            }
+        }
+    }
+
+    tasks.withType(Sign).configureEach {
+        onlyIf { isRelease }
+    }
+
+    signing {
+        sign publishing.publications.mavenJava
+    }
+}

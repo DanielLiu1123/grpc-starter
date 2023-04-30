@@ -9,6 +9,9 @@ include(":starters:grpc-client-boot-starter")
 include(":starters:grpc-server-boot-starter")
 include(":starters:grpc-starter-validation")
 
+// bom
+include(":grpc-starter-dependencies")
+
 // examples
 include(":examples")
 include(":examples:simple")

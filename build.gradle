@@ -7,8 +7,19 @@ plugins {
 }
 
 subprojects {
+    if (it.name == "grpc-starter-dependencies") {
+        // skip the bom project
+        return
+    }
+
     apply plugin: 'java'
     apply plugin: 'java-library'
+
+    java {
+        registerFeature('optionalSupport') {
+            usingSourceSet(sourceSets.main)
+        }
+    }
 
     repositories {
         mavenLocal()
@@ -36,6 +47,8 @@ subprojects {
     dependencyManagement {
         imports {
             mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+            mavenBom "com.google.protobuf:protobuf-bom:${protobufVersion}"
+            mavenBom "io.grpc:grpc-bom:${grpcVersion}"
         }
     }
     // spotless
