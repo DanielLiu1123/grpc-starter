@@ -5,7 +5,7 @@ import static com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceStub;
 
 import com.freemanan.foo.v1.api.Foo;
 import com.freemanan.starter.grpc.client.EnableGrpcClients;
-import com.freemanan.starter.grpc.server.feature.exceptionhandling.DefaultExceptionHandler;
+import com.freemanan.starter.grpc.server.extension.exceptionhandling.DefaultExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;

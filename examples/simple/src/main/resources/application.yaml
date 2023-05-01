@@ -3,11 +3,11 @@ grpc:
     debug:
       enabled: true
   client:
-    stubs:
-      - stub-class: com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceBlockingStub
-        authority: localhost:${grpc.server.port:9090}
+    channels:
+      - authority: localhost:${grpc.server.port:9090}
         metadata:
           - key: foo
-            values: [bar, bar, foo]
-      - stub-class: com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceStub
-        authority: localhost:${grpc.server.port:9090}
+            values: [ bar, bar, foo ]
+        stubs:
+          - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceBlockingStub
+          - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceStub

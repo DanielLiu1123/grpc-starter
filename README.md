@@ -1,15 +1,28 @@
 # gRPC Starter
 
-[![Build](https://img.shields.io/github/actions/workflow/status/DanielLiu1123/httpexchange-spring-boot-starter/build.yml?branch=main)](https://github.com/DanielLiu1123/httpexchange-spring-boot-starter/actions)
-[![Maven Central](https://img.shields.io/maven-central/v/com.freemanan/httpexchange-spring-boot-starter)](https://search.maven.org/artifact/com.freemanan/httpexchange-spring-boot-starter)
+[![Build](https://img.shields.io/github/actions/workflow/status/DanielLiu1123/grpc-starter/build.yml?branch=main)](https://github.com/DanielLiu1123/grpc-starter/actions)
+[![Maven Central](https://img.shields.io/maven-central/v/com.freemanan/grpc-starter-dependencies)](https://search.maven.org/artifact/com.freemanan/grpc-starter-dependencies)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 [Documentation](https://danielliu1123.github.io/grpc-starter)
 
 ## Overview
 
-This project provides Spring Boot Starters based on gRPC ecosystem, which provides autoconfigure and highly extendable
+This project provides Spring Boot Starters for gRPC ecosystem, which provides autoconfigure and highly extendable
 capabilities, making gRPC application development easier.
+
+## Features
+
+***Core:***
+
+- [x] gRPC server autoconfigure
+    - [x] Exception handling
+    - [x] Health check
+- [x] gRPC client autoconfigure
+
+***Extensions:***
+
+- [x] Protobuf validation, implemented by [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate)
 
 ## Quick Start
 
@@ -18,89 +31,121 @@ capabilities, making gRPC application development easier.
 implementation 'com.freemanan:grpc-boot-starter:3.0.0'
 ```
 
-```protobuf
-syntax = "proto3";
+1. Proto definition
 
-package fm.foo.v1;
+   <details>
+     <summary>foo.proto</summary>
 
-option java_package = "com.freemanan.foo.v1.api";
-option java_multiple_files = true;
+      ```protobuf
+      syntax = "proto3";
+      
+      package fm.foo.v1;
+      
+      option java_package = "com.freemanan.foo.v1.api";
+      option java_multiple_files = true;
+      
+      message Foo {
+        string id = 1;
+        string name = 2;
+      }
+      
+      service FooService {
+        rpc Create (Foo) returns (Foo) {}
+      }
+      ```
+   </details>
 
-message Foo {
-  string id = 1;
-  string name = 2;
-}
+2. Server implementation
 
-service FooService {
-  rpc Create (Foo) returns (Foo) {}
-}
-```
+   <details>
+     <summary>FooServiceImpl.java</summary>
 
-Server implementation:
+      ```java
+      
+      @Controller // register to Spring context, support any @Component based annotation
+      public class FooServiceImpl extends FooServiceGrpc.FooServiceImplBase {
+      
+          @Autowired
+          private FooRepository fooRepository;
+      
+          @Override
+          public void create(Foo request, StreamObserver<Foo> responseObserver) {
+              Foo foo = fooRepository.save(request);
+              responseObserver.onNext(foo);
+              responseObserver.onCompleted();
+          }
+      }
+      ```
+   </details>
 
-```java
+3. Using gRPC stubs
 
-@Controller
-public class FooController extends FooServiceGrpc.FooServiceImplBase {
+    1. Use `@EnableGrpcClients` to specify which gRPC stubs to scan
 
-    @Autowired
-    private FooRepository fooRepository;
+       <details>
+         <summary>SimpleApp.java</summary>
 
-    @Override
-    public void create(Foo request, StreamObserver<Foo> responseObserver) {
-        Foo foo = fooRepository.save(request);
-        responseObserver.onNext(foo);
-        responseObserver.onCompleted();
-    }
-}
-```
-
-Using gRPC stubs:
-
-1. Use `@EnableGrpcClients` to specify which gRPC stubs to scan
-
-    ```java
-    @SpringBootApplication
-    @EnableGrpcClients(clients = FooServiceBlockingStub.class)
-    public class SimpleApp {
-        public static void main(String[] args) {
-            SpringApplication.run(SimpleApp.class, args);
+        ```java
+        @SpringBootApplication
+        @EnableGrpcClients(clients = FooServiceBlockingStub.class)
+        public class SimpleApp {
+            public static void main(String[] args) {
+                SpringApplication.run(SimpleApp.class, args);
+            }
         }
-    }
-    ```
+        ```
+       </details>
 
-   > The usage of `@EnableGrpcClients` is very similar to Spring Cloud Openfeign `@EnableFeignClients`, except it is used to scan gRPC stubs.
+       > The usage of `@EnableGrpcClients` is very similar to Spring Cloud Openfeign `@EnableFeignClients`, except it is
+       used to scan gRPC stubs.
 
-2. Configure the address of the stub
+    2. Configure the address of the stub
 
-    ```yaml
-    grpc:
-      client:
-        authority: localhost:9090
-    ```
+       <details>
+         <summary>application.yml</summary>
 
-3. Inject using `@Autowired`
+        ```yaml
+        grpc:
+          client:
+            authority: localhost:9090
+        ```
+       </details>
 
-    ```java
-    @SpringBootApplication
-    @EnableGrpcClients(clients = FooServiceBlockingStub.class)
-    public class SimpleApp implements ApplicationRunner {
-        public static void main(String[] args) {
-            SpringApplication.run(SimpleApp.class, args);
+    3. Inject using `@Autowired`
+
+       <details>
+         <summary>SimpleApp.java</summary>
+
+        ```java
+        @SpringBootApplication
+        @EnableGrpcClients(clients = FooServiceBlockingStub.class)
+        public class SimpleApp implements ApplicationRunner {
+            public static void main(String[] args) {
+                SpringApplication.run(SimpleApp.class, args);
+            }
+     
+            @Autowired
+            FooServiceBlockingStub fooBlockingStub;
+     
+            @Override
+            public void run(ApplicationArguments args) {
+                Foo foo = Foo.newBuilder().setName("foo").build();
+                Foo result = fooBlockingStub.create(foo);
+            }
         }
-    
-        @Autowired
-        FooServiceBlockingStub fooBlockingStub;
-    
-        @Override
-        public void run(ApplicationArguments args) {
-            Foo foo = Foo.newBuilder().setName("foo").build();
-            Foo result = fooBlockingStub.create(foo);
-        }
-    }
-    ```
+        ```
+       </details>
 
 You can refer to the [example](examples/simple) project.
+
+## Version
+
+The major/minor version of this project is consistent with the version of `Spring Boot`. Therefore, `3.0.x` of this
+project should work with `3.0.x` of `Spring Boot`. Please always use the latest version.
+
+| Spring Boot | grpc-boot-starter |
+|-------------|-------------------|
+| 3.0.x       | 3.0.0             |
 
 ## License
 

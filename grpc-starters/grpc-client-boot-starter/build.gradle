@@ -1,0 +1,10 @@
+dependencies {
+    api("org.springframework.boot:spring-boot-starter")
+
+    api(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
+    runtimeOnly("io.grpc:grpc-netty-shaded")
+
+    optionalSupportApi("io.grpc:grpc-netty")
+}
+
+apply from: "${rootDir}/deploy.gradle"

@@ -1,6 +1,0 @@
-dependencies {
-    api("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
-    api(project(":grpc-boot-autoconfigure"))
-}
-
-apply from: "${rootDir}/deploy.gradle"

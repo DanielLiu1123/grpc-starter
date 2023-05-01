@@ -1,0 +1,17 @@
+dependencies {
+    api("org.springframework.boot:spring-boot-starter")
+    api("javax.annotation:javax.annotation-api:${javaxValidationApiVersion}") // necessary for Java 9+, @javax.annotation.Generated
+    api("io.grpc:grpc-core")
+    api("io.grpc:grpc-protobuf")
+    api("io.grpc:grpc-services")
+
+    optionalSupportApi(project(":grpc-extensions:grpc-validation"))
+
+    // health check support
+    optionalSupportApi("org.springframework.boot:spring-boot-starter-jdbc")
+    optionalSupportApi("org.springframework.boot:spring-boot-starter-data-redis")
+
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+}

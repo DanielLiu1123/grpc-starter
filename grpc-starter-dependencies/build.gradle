@@ -18,11 +18,18 @@ javaPlatform {
 
 dependencies {
     constraints {
-        api(project(":grpc-boot-autoconfigure"))
-        api(project(":starters:grpc-boot-starter"))
-        api(project(":starters:grpc-client-boot-starter"))
-        api(project(":starters:grpc-server-boot-starter"))
-        api(project(":starters:grpc-starter-validation"))
+        // autoconfigure
+        api(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
+        api(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+
+        // extensions
+        api(project(":grpc-extensions:grpc-validation"))
+
+        // starters
+        api(project(":grpc-starters:grpc-boot-starter"))
+        api(project(":grpc-starters:grpc-client-boot-starter"))
+        api(project(":grpc-starters:grpc-server-boot-starter"))
+        api(project(":grpc-starters:grpc-starter-validation"))
     }
 
     api(platform("io.grpc:grpc-bom:${grpcVersion}"))
@@ -38,7 +45,7 @@ publishing {
                 developers {
                     developer {
                         id = 'Freeman'
-                        name = 'Freeman Liu'
+                        name = 'Freeman Lau'
                         email = 'freemanlau1228@gmail.com'
                     }
                 }

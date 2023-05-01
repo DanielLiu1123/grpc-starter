@@ -1,0 +1,11 @@
+dependencies {
+    optionalSupportApi(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
+    optionalSupportApi(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+
+    api("io.grpc:grpc-stub")
+    api("io.grpc:grpc-protobuf")
+    api("javax.annotation:javax.annotation-api:${javaxValidationApiVersion}") // necessary for Java 9+, @javax.annotation.Generated
+    api(project(":grpc-extensions:grpc-validation"))
+}
+
+apply from: "${rootDir}/deploy.gradle"
