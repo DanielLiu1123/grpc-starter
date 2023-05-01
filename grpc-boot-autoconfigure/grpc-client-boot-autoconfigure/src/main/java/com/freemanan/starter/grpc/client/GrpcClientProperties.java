@@ -7,6 +7,7 @@ import io.grpc.stub.AbstractStub;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -165,7 +166,7 @@ public class GrpcClientProperties implements InitializingBean {
             }
             List<Metadata> merged = total.entrySet().stream()
                     .map(e -> new Metadata(e.getKey(), e.getValue()))
-                    .toList();
+                    .collect(Collectors.toList());
             stub.setMetadata(merged);
         }
     }

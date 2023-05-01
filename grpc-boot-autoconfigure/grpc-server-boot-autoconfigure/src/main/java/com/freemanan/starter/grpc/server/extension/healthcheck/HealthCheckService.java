@@ -8,6 +8,7 @@ import io.grpc.health.v1.HealthCheckResponse;
 import io.grpc.health.v1.HealthGrpc;
 import io.grpc.stub.StreamObserver;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -21,7 +22,7 @@ public class HealthCheckService extends HealthGrpc.HealthImplBase {
     private final List<HealthChecker> healthCheckers;
 
     public HealthCheckService(ObjectProvider<HealthChecker> healthCheckers) {
-        this.healthCheckers = healthCheckers.orderedStream().toList();
+        this.healthCheckers = healthCheckers.orderedStream().collect(Collectors.toList());
     }
 
     @Override

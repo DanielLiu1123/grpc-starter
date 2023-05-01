@@ -21,7 +21,7 @@ class Cache {
     private static final ConcurrentMap<String, List<Class<?>>> serviceToStubClasses = new ConcurrentHashMap<>();
 
     public static Set<Class<?>> getStubClasses() {
-        return serviceToStubClasses.values().stream().flatMap(List::stream).collect(Collectors.toUnmodifiableSet());
+        return serviceToStubClasses.values().stream().flatMap(List::stream).collect(Collectors.toSet());
     }
 
     public static Set<String> getServices() {
