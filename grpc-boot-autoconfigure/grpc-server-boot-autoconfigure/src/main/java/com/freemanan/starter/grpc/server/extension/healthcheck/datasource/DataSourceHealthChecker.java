@@ -5,6 +5,7 @@ import com.freemanan.starter.grpc.server.extension.healthcheck.HealthChecker;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,6 @@ public class DataSourceHealthChecker implements HealthChecker, BeanFactoryAware,
     public void afterSingletonsInstantiated() {
         // Do NOT inject DataSource here, we don't want to effect the order of auto-configurations
         this.dataSources =
-                beanFactory.getBeanProvider(DataSource.class).orderedStream().toList();
+                beanFactory.getBeanProvider(DataSource.class).orderedStream().collect(Collectors.toList());
     }
 }

@@ -1,6 +1,7 @@
 package com.freemanan.starter.grpc.client;
 
 import io.grpc.stub.AbstractStub;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -58,7 +59,7 @@ class GrpcClientsRegistrar implements ImportBeanDefinitionRegistrar, ResourceLoa
 
         Map<String, Object> attrs = Optional.ofNullable(
                         metadata.getAnnotationAttributes(EnableGrpcClients.class.getName()))
-                .orElse(Map.of());
+                .orElse(Collections.emptyMap());
 
         // Shouldn't scan base packages when using clients property only
         Class<?>[] clientClasses = (Class<?>[]) attrs.getOrDefault("clients", new Class<?>[0]);

@@ -2,6 +2,7 @@ package com.freemanan.starter.grpc.server.extension.healthcheck.redis;
 
 import com.freemanan.starter.grpc.server.extension.healthcheck.HealthChecker;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -44,6 +45,6 @@ public class RedisHealthChecker implements HealthChecker, BeanFactoryAware, Smar
         this.connectionFactories = beanFactory
                 .getBeanProvider(RedisConnectionFactory.class)
                 .orderedStream()
-                .toList();
+                .collect(Collectors.toList());
     }
 }

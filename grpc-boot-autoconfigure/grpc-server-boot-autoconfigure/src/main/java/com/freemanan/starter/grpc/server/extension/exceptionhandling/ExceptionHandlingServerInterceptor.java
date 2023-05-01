@@ -5,6 +5,7 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.Ordered;
 
@@ -20,9 +21,9 @@ public class ExceptionHandlingServerInterceptor implements ServerInterceptor, Or
     public ExceptionHandlingServerInterceptor(
             ObjectProvider<ExceptionHandler> exceptionHandlers,
             ObjectProvider<UnhandledExceptionProcessor> unhandledExceptionProcessors) {
-        this.exceptionHandlers = exceptionHandlers.orderedStream().toList();
+        this.exceptionHandlers = exceptionHandlers.orderedStream().collect(Collectors.toList());
         this.unhandledExceptionProcessors =
-                unhandledExceptionProcessors.orderedStream().toList();
+                unhandledExceptionProcessors.orderedStream().collect(Collectors.toList());
     }
 
     @Override
