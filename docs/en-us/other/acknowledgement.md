@@ -1,0 +1,2 @@
+- Thanks to the developers of [Spring](https://spring.io) and [gRPC](https://grpc.io) for creating such excellent frameworks.
+- Thanks to [yidongnan](https://github.com/yidongnan)'s project [grpc-spring-boot-starter](https://github.com/yidongnan/grpc-spring-boot-starter), which provided many ideas for the implementation and documentation of this project.
