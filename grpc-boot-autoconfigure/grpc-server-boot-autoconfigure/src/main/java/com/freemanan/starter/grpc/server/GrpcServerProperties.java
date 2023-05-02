@@ -129,15 +129,24 @@ public class GrpcServerProperties {
         public static final String PREFIX = GrpcServerProperties.PREFIX + ".exception-handling";
 
         /**
-         * Whether to enable exception handling, default {@code true}
+         * Whether to enable exception handler, default {@code true}
          */
         private boolean enabled = true;
         /**
-         * Whether to enable default exception handler, default {@code true}
-         *
-         * <p> Default exception handler is {@link com.freemanan.starter.grpc.server.extension.exceptionhandling.DefaultExceptionHandler}.
+         * Default exception handler configuration.
          */
-        private boolean useDefault = true;
+        private DefaultExceptionHandler defaultExceptionHandler = new DefaultExceptionHandler();
+
+        @Data
+        public static class DefaultExceptionHandler {
+            public static final String PREFIX = ExceptionHandling.PREFIX + ".default-exception-handler";
+            /**
+             * Whether to enable default exception handler, default {@code true}
+             *
+             * <p> Default exception handler is {@link com.freemanan.starter.grpc.server.extension.exceptionhandling.DefaultExceptionHandler}.
+             */
+            private boolean enabled = true;
+        }
     }
 
     @Data

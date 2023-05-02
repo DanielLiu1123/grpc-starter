@@ -1,6 +1,5 @@
 plugins {
     id 'org.springframework.boot'
-    id 'com.parmet.buf'
 }
 
 dependencies {
@@ -9,7 +8,3 @@ dependencies {
 }
 
 apply from: "${rootDir}/protobuf.gradle"
-
-buf {
-    enforceFormat = true
-}
