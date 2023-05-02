@@ -5,8 +5,6 @@ dependencies {
     api("io.grpc:grpc-protobuf")
     api("io.grpc:grpc-stub")
 
-    optionalSupportApi(project(":grpc-extensions:grpc-validation"))
-
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")

@@ -5,8 +5,6 @@ dependencies {
     api("io.grpc:grpc-protobuf")
     api("io.grpc:grpc-services")
 
-    optionalSupportApi(project(":grpc-extensions:grpc-validation"))
-
     // health check support
     optionalSupportApi("org.springframework.boot:spring-boot-starter-jdbc")
     optionalSupportApi("org.springframework.boot:spring-boot-starter-data-redis")

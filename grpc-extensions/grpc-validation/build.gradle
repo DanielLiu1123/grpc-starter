@@ -1,3 +1,10 @@
 dependencies {
+    optionalSupportApi(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
+    optionalSupportApi(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+
     api("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
+
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 }

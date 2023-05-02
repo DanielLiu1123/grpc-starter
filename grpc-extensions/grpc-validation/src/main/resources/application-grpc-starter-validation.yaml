@@ -1,0 +1,9 @@
+grpc:
+  validation:
+    enabled: true    # enable validation
+    client:
+      enabled: true  # enable validation for client
+      order: 0       # order of validating client interceptor
+    server:
+      enabled: true  # enable validation for server
+      order: 0       # order of validating server interceptor

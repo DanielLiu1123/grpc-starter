@@ -3,7 +3,6 @@ package com.freemanan.starter.grpc.server;
 import com.freemanan.starter.grpc.server.extension.debug.Debug;
 import com.freemanan.starter.grpc.server.extension.exceptionhandling.ExceptionHandling;
 import com.freemanan.starter.grpc.server.extension.healthcheck.HealthCheck;
-import com.freemanan.starter.grpc.server.extension.validation.Validation;
 import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerInterceptor;
@@ -34,6 +33,6 @@ public class GrpcServerAutoConfiguration {
     }
 
     @Configuration(proxyBeanMethods = false)
-    @Import({Debug.class, Validation.class, HealthCheck.class, ExceptionHandling.class})
+    @Import({Debug.class, HealthCheck.class, ExceptionHandling.class})
     static class Extensions {}
 }

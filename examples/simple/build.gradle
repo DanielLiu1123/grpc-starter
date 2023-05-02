@@ -5,6 +5,8 @@ plugins {
 dependencies {
     implementation(project(":grpc-starters:grpc-boot-starter"))
     implementation(project(":grpc-starters:grpc-starter-validation"))
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 apply from: "${rootDir}/protobuf.gradle"
