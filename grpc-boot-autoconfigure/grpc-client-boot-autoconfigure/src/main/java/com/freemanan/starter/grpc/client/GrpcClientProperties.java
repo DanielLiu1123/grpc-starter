@@ -30,10 +30,6 @@ public class GrpcClientProperties implements InitializingBean {
      */
     private boolean enabled = true;
     /**
-     * Validation configuration.
-     */
-    private Validation validation = new Validation();
-    /**
      * Default authority.
      *
      * <p> e.g. {@code localhost:8080}
@@ -120,15 +116,6 @@ public class GrpcClientProperties implements InitializingBean {
          * Header values.
          */
         private List<String> values = new ArrayList<>();
-    }
-
-    @Data
-    public static class Validation {
-        public static final String PREFIX = GrpcClientProperties.PREFIX + ".validation";
-        /**
-         * Whether to enable validation, default {@code true}.
-         */
-        private boolean enabled = true;
     }
 
     @Data

@@ -6,20 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p> This is a relatively simple exception handling implementation, which is suitable for default exception handling,
- * but users still need to manually register this class to the Spring container.
- *
- * <p> Register bean:
- * <pre>{@code
- * @Bean
- * public ExceptionHandler defaultExceptionHandler() {
- *    return new DefaultExceptionHandler();
- * }
- * }</pre>
- * <p> Import bean:
- * <pre>{@code
- * @Import(DefaultExceptionHandler.class)
- * }</pre>
+ * This is a relatively simple exception handling implementation, which is suitable for default exception handling.
  *
  * <p> NOTE: the framework provides the ability to handle exceptions, but does not do any exception handling itself.
  *

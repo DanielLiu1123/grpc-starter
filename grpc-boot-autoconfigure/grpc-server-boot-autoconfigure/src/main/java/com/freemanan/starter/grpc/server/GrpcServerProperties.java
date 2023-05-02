@@ -32,10 +32,6 @@ public class GrpcServerProperties {
      */
     private Debug debug = new Debug();
     /**
-     * Validation configuration.
-     */
-    private Validation validation = new Validation();
-    /**
      * Health check configuration.
      */
     private HealthCheck healthCheck = new HealthCheck();
@@ -64,16 +60,6 @@ public class GrpcServerProperties {
          * Whether to enable debug mode (register reflection service), default {@code false}.
          */
         private boolean enabled = false;
-    }
-
-    @Data
-    public static class Validation {
-        public static final String PREFIX = GrpcServerProperties.PREFIX + ".validation";
-
-        /**
-         * Whether to enable validation, default {@code false}
-         */
-        private boolean enabled = true;
     }
 
     @Data
@@ -133,11 +119,11 @@ public class GrpcServerProperties {
          */
         private boolean enabled = true;
         /**
-         * Whether to enable default exception handler, default {@code true}
+         * Whether to enable default exception handler, default {@code false}
          *
          * <p> Default exception handler is {@link com.freemanan.starter.grpc.server.extension.exceptionhandling.DefaultExceptionHandler}.
          */
-        private boolean useDefault = true;
+        private boolean useDefault = false;
     }
 
     @Data

@@ -16,10 +16,7 @@ public class ExceptionHandling {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(
-            prefix = GrpcServerProperties.ExceptionHandling.PREFIX,
-            name = "use-default",
-            matchIfMissing = true)
+    @ConditionalOnProperty(prefix = GrpcServerProperties.ExceptionHandling.PREFIX, name = "use-default")
     public DefaultExceptionHandler grpcDefaultExceptionHandler() {
         return new DefaultExceptionHandler();
     }
