@@ -25,7 +25,7 @@ public class GrpcClientAutoConfiguration implements SmartInitializingSingleton {
 
     @Configuration(proxyBeanMethods = false)
     @Import({Validation.class})
-    static class ExtensionsConfiguration {}
+    static class Extensions {}
 
     private final GrpcClientProperties properties;
 

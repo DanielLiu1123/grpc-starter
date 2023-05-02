@@ -12,6 +12,10 @@ import org.springframework.util.ReflectionUtils;
  */
 @UtilityClass
 class Util {
+    /**
+     * Service name field name for gRPC service.
+     */
+    public static final String SERVICE_NAME = "SERVICE_NAME";
 
     public static Optional<GrpcClientProperties.Channel> findMatchedConfig(
             Class<?> clz, GrpcClientProperties properties) {
@@ -34,9 +38,9 @@ class Util {
         return channelConfig.getServices().stream().anyMatch(svc -> Objects.equals(svc, service));
     }
 
-    static String serviceName(Class<?> stubClass) {
-        Field serviceNameField = ReflectionUtils.findField(stubClass.getEnclosingClass(), "SERVICE_NAME");
-        Assert.notNull(serviceNameField, "SERVICE_NAME field not found");
+    public static String serviceName(Class<?> stubClass) {
+        Field serviceNameField = ReflectionUtils.findField(stubClass.getEnclosingClass(), SERVICE_NAME);
+        Assert.notNull(serviceNameField, SERVICE_NAME + " field not found");
         return (String) ReflectionUtils.getField(serviceNameField, null);
     }
 }

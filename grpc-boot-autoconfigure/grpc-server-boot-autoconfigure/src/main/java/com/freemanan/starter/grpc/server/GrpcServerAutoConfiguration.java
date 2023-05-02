@@ -35,5 +35,5 @@ public class GrpcServerAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
     @Import({Debug.class, Validation.class, HealthCheck.class, ExceptionHandling.class})
-    static class ExtensionsConfiguration {}
+    static class Extensions {}
 }
