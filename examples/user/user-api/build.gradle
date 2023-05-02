@@ -1,5 +1,5 @@
 dependencies {
-    compileOnly(project(":grpc-starters:grpc-starter-validation"))
+    api(project(":grpc-starters:grpc-starter-validation"))
 }
 
 apply from: "${rootDir}/protobuf.gradle"

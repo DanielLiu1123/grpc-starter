@@ -5,5 +5,4 @@ plugins {
 dependencies {
     implementation(project(":examples:user:user-api"))
     implementation(project(":grpc-starters:grpc-server-boot-starter"))
-    implementation(project(":grpc-starters:grpc-starter-validation"))
 }
