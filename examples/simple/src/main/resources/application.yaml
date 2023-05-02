@@ -2,6 +2,8 @@ grpc:
   server:
     debug:
       enabled: true
+    exception-handling:
+      use-default: true
   client:
     channels:
       - authority: localhost:${grpc.server.port:9090}
