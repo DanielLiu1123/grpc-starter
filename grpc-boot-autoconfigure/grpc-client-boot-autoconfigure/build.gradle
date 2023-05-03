@@ -9,3 +9,5 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 }
+
+apply from: "${rootDir}/deploy.gradle"
