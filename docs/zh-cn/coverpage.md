@@ -1,4 +1,4 @@
-![logo](../assets/images/logo.png)
+![logo](assets/images/logo.png)
 
 # gRPC Starter <small>3.0.0</small>
 
