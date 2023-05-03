@@ -1,4 +1,4 @@
-* [Home](/zh-cn/README.md)
+* [Home](/en-us/README.md)
 * [Issues and Feedback](https://github.com/DanielLiu1123/grpc-starter/issues)
 * Language
     * [English](/en-us/)

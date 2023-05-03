@@ -1,18 +1,37 @@
 #### Add dependencies
 
+<!-- tabs:start -->
+
+#### ** Gradle **
+
 ```groovy
-// gradle, client + server
-implementation 'com.freemanan:grpc-boot-starter:3.0.0'
+implementation platform('com.freemanan:grpc-starter-dependencies:3.0.0')
+implementation 'com.freemanan:grpc-boot-starter'
 ```
 
+#### ** Maven **
+
 ```xml
-<!-- maven -->
+
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>com.freemanan</groupId>
+      <artifactId>grpc-starter-dependencies</artifactId>
+      <version>3.0.0</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
 <dependency>
-    <groupId>com.freemanan</groupId>
-    <artifactId>grpc-boot-starter</artifactId>
-    <version>3.0.0</version>
+  <groupId>com.freemanan</groupId>
+  <artifactId>grpc-boot-starter</artifactId>
 </dependency>
 ```
+
+<!-- tabs:end -->
 
 #### Write proto definition
 
