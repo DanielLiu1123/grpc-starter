@@ -1,0 +1,16 @@
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation(project(":grpc-testing"))
+    implementation(project(":grpc-starters:grpc-starter-webflux"))
+    implementation(project(":grpc-starters:grpc-starter-validation"))
+
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+
+apply from: "${rootDir}/protobuf.gradle"

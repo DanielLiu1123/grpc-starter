@@ -5,20 +5,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 /**
- * Alias for {@link Component}, for gRPC service implementation.
+ * Alias for {@link Controller}, for gRPC service implementation.
  *
  * @author Freeman
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Component
+@Controller
 public @interface GrpcService {
     /**
-     * @see Component#value()
+     * @see Controller#value()
      */
-    @AliasFor(annotation = Component.class)
+    @AliasFor(annotation = Controller.class)
     String value() default "";
 }
