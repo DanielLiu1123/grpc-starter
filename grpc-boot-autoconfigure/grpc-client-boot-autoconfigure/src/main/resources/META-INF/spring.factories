@@ -1,0 +1,3 @@
+# for Spring Boot 2.x
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.freemanan.starter.grpc.client.GrpcClientAutoConfiguration

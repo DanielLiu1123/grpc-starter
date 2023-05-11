@@ -7,7 +7,7 @@ import org.springframework.core.Ordered;
 /**
  * @author Freeman
  */
-class OrderedValidatingServerInterceptor extends ValidatingServerInterceptor implements Ordered {
+public class OrderedValidatingServerInterceptor extends ValidatingServerInterceptor implements Ordered {
 
     private final int order;
 

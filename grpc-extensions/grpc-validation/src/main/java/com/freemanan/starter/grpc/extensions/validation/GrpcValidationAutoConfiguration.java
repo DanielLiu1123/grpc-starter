@@ -3,7 +3,6 @@ package com.freemanan.starter.grpc.extensions.validation;
 import io.envoyproxy.pgv.ReflectiveValidatorIndex;
 import io.envoyproxy.pgv.grpc.ValidatingClientInterceptor;
 import io.envoyproxy.pgv.grpc.ValidatingServerInterceptor;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -14,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Freeman
  */
-@AutoConfiguration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(prefix = GrpcValidationProperties.PREFIX, name = "enabled", matchIfMissing = true)
 @EnableConfigurationProperties(GrpcValidationProperties.class)
 public class GrpcValidationAutoConfiguration {

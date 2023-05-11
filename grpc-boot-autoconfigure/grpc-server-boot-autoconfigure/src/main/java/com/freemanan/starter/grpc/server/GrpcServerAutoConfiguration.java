@@ -7,7 +7,6 @@ import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerInterceptor;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -18,7 +17,7 @@ import org.springframework.context.annotation.Import;
 /**
  * @author Freeman
  */
-@AutoConfiguration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(Server.class)
 @ConditionalOnProperty(prefix = GrpcServerProperties.PREFIX, name = "enabled", matchIfMissing = true)
 @EnableConfigurationProperties(GrpcServerProperties.class)
