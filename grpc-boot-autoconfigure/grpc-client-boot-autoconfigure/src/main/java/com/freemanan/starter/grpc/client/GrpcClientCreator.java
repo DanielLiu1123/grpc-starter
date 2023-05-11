@@ -91,7 +91,10 @@ class GrpcClientCreator {
         builder.usePlaintext();
 
         // apply customizers
-        beanFactory.getBeanProvider(GrpcChannelCustomizer.class).orderedStream().forEach(cc -> cc.customize(builder));
+        beanFactory
+                .getBeanProvider(GrpcChannelCustomizer.class)
+                .orderedStream()
+                .forEach(cc -> cc.customize(channelConfig, builder));
 
         return builder.build();
     }

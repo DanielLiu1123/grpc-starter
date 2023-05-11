@@ -12,7 +12,8 @@ public interface GrpcChannelCustomizer {
     /**
      * Customize the given {@link ManagedChannelBuilder}.
      *
+     * @param channelConfig  current channel configuration
      * @param channelBuilder the channel to customize
      */
-    void customize(ManagedChannelBuilder<?> channelBuilder);
+    void customize(GrpcClientProperties.Channel channelConfig, ManagedChannelBuilder<?> channelBuilder);
 }
