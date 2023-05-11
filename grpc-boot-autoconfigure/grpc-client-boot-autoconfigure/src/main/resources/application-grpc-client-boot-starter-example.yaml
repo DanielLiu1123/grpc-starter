@@ -6,8 +6,6 @@ grpc:
     metadata:                     # global default metadata
       - key: foo1
         values: [bar1, bar2]
-    validation:
-      enabled: true               # whether to enable validation
     channels:
       - authority: localhost:9090 # override default authority
         max-message-size: 8MB     # override default max message size
