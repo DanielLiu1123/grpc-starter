@@ -32,8 +32,4 @@ class Cache {
         String service = Util.serviceName(stubClass);
         serviceToStubClasses.computeIfAbsent(service, k -> new ArrayList<>()).add(stubClass);
     }
-
-    public static void clear() {
-        serviceToStubClasses.clear();
-    }
 }

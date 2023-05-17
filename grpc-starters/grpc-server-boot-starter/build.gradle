@@ -1,6 +1,4 @@
 dependencies {
-    api("org.springframework.boot:spring-boot-starter")
-
     api(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
     runtimeOnly("io.grpc:grpc-netty-shaded")
     api("io.grpc:grpc-services")

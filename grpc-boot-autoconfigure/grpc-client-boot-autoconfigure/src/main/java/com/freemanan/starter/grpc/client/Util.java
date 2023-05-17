@@ -4,14 +4,19 @@ import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.experimental.UtilityClass;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
+ * Messy utils for gRPC client module.
+ *
  * @author Freeman
  */
 @UtilityClass
 class Util {
+
     /**
      * Service name field name for gRPC service.
      */
@@ -42,5 +47,13 @@ class Util {
         Field serviceNameField = ReflectionUtils.findField(stubClass.getEnclosingClass(), SERVICE_NAME);
         Assert.notNull(serviceNameField, SERVICE_NAME + " field not found");
         return (String) ReflectionUtils.getField(serviceNameField, null);
+    }
+
+    public static GrpcClientProperties getProperties(Environment environment) {
+        GrpcClientProperties properties = Binder.get(environment)
+                .bind(GrpcClientProperties.PREFIX, GrpcClientProperties.class)
+                .orElseGet(GrpcClientProperties::new);
+        properties.merge();
+        return properties;
     }
 }
