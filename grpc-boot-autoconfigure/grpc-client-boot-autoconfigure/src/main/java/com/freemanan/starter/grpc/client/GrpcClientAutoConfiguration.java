@@ -9,6 +9,7 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -27,13 +28,18 @@ public class GrpcClientAutoConfiguration implements SmartInitializingSingleton {
         this.properties = properties;
     }
 
+    @Bean
+    public static GrpcStubBeanDefinitionRegistry genGrpcBeanDefinitionRegistry() {
+        return new GrpcStubBeanDefinitionRegistry();
+    }
+
     @Override
     public void afterSingletonsInstantiated() {
-        warningUselessConfigurations();
+        warningUnusedConfigurations();
     }
 
     @SuppressWarnings("rawtypes")
-    private void warningUselessConfigurations() {
+    private void warningUnusedConfigurations() {
         Set<Class<?>> stubClasses = Cache.getStubClasses();
         Set<String> services = Cache.getServices();
         List<GrpcClientProperties.Channel> channels = properties.getChannels();
@@ -44,8 +50,11 @@ public class GrpcClientAutoConfiguration implements SmartInitializingSingleton {
                 String service = chanServices.get(j);
                 if (!services.contains(service)) {
                     log.warn(
-                            "Configuration item '{}' doesn't take effect, please remove it.",
-                            GrpcClientProperties.PREFIX + ".channels[" + i + "].services[" + j + "]: " + service);
+                            "Configuration item '{}.channels[{}].services[{}]: {}' doesn't take effect, please remove it.",
+                            GrpcClientProperties.PREFIX,
+                            i,
+                            j,
+                            service);
                 }
             }
             List<Class<? extends AbstractStub>> stubs = chan.getStubs();
@@ -53,9 +62,11 @@ public class GrpcClientAutoConfiguration implements SmartInitializingSingleton {
                 Class<?> stubClass = stubs.get(j);
                 if (!stubClasses.contains(stubClass)) {
                     log.warn(
-                            "Configuration item '{}' doesn't take effect, please remove it.",
-                            GrpcClientProperties.PREFIX + ".channels[" + i + "].stubs[" + j + "]: "
-                                    + stubClass.getCanonicalName());
+                            "Configuration item '{}.channels[{}].stubs[{}]: {}' doesn't take effect, please remove it.",
+                            GrpcClientProperties.PREFIX,
+                            i,
+                            j,
+                            stubClass.getCanonicalName());
                 }
             }
         }

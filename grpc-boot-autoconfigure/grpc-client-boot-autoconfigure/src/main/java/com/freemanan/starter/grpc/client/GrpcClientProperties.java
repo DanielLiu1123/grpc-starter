@@ -36,6 +36,13 @@ public class GrpcClientProperties implements InitializingBean {
      */
     private String authority;
     /**
+     * Base packages to scan for gRPC stubs.
+     *
+     * <p> This value will merge with {@link EnableGrpcClients#basePackages}, only takes effect if {@link EnableGrpcClients#basePackages} is not set.
+     * <p> The advantage of using configuration is no need to introduce external annotations.
+     */
+    private List<String> basePackages = new ArrayList<>();
+    /**
      * Default max message size, default value is {@code 4MB}.
      *
      * @see DataSize

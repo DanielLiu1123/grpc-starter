@@ -1,20 +1,22 @@
 grpc:
   client:
-    authority: localhost:9090     # global default authority
-    max-message-size: 4MB         # global default max message size
-    max-metadata-size: 8KB        # global default max metadata size
-    metadata:                     # global default metadata
+    enabled: true
+    base-packages: [com.example]   # base packages to scan for stubs
+    authority: localhost:9090      # global default authority
+    max-message-size: 4MB          # global default max message size
+    max-metadata-size: 8KB         # global default max metadata size
+    metadata:                      # global default metadata
       - key: foo1
         values: [bar1, bar2]
     channels:
-      - authority: localhost:9090 # override default authority
-        max-message-size: 8MB     # override default max message size
-        max-metadata-size: 16KB   # override default max metadata size
-        metadata:                 # merge with default metadata, result is {foo1=[bar1, bar2], foo2=[bar3, bar4]}
+      - authority: localhost:9090  # override default authority
+        max-message-size: 8MB      # override default max message size
+        max-metadata-size: 16KB    # override default max metadata size
+        metadata:                  # merge with default metadata, result is {foo1=[bar1, bar2], foo2=[bar3, bar4]}
           - key: foo2
             values: [bar3, bar4]
-        services:                 # services to apply this channel
+        services:                  # services to apply this channel
           - fm.foo.v1.FooService
-        stubs:                    # stub classes to apply this channel, use this or services, not this first if both set
+        stubs:                     # stub classes to apply this channel, use this or services, not this first if both set
           - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceBlockingStub
           - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceStub
