@@ -8,5 +8,3 @@ grpc:
         stubs:
           - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceBlockingStub
           - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceStub
-    base-packages:
-      - com.freemanan

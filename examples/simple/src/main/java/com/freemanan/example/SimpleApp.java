@@ -15,9 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Freeman
  */
 @SpringBootApplication
-@EnableGrpcClients(
-        value = "com.freemanan",
-        clients = {FooServiceBlockingStub.class, FooServiceStub.class})
+@EnableGrpcClients(clients = {FooServiceBlockingStub.class, FooServiceStub.class})
 public class SimpleApp implements ApplicationRunner {
     public static void main(String[] args) {
         SpringApplication.run(SimpleApp.class, args);
