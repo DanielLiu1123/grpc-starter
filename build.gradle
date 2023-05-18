@@ -64,12 +64,20 @@ subprojects {
             palantirJavaFormat()
 
             targetExclude "build/generated/**"
+
+            custom('Refuse wildcard imports', {
+                if (it =~ /\nimport .*\*;/) {
+                    throw new IllegalStateException("Do not use wildcard imports, 'spotlessApply' cannot resolve this issue, please fix it manually.")
+                }
+            })
         }
     }
+
     // spotbugs
     apply plugin: 'com.github.spotbugs'
     spotbugs {
         spotbugsTest.enabled = false
         omitVisitors.addAll 'FindReturnRef', 'MethodReturnCheck'
+        excludeFilter = file("${rootDir}/config/spotbugs/exclude.xml")
     }
 }

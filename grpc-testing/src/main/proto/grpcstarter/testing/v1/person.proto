@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package grpcstarter.testing.v1;
+
+option java_multiple_files = true;
+option java_package = "com.freemanan.grpcstarter.testing.v1";
+
+message Person {
+  string name = 1;
+  int32 age = 2;
+  repeated string hobbies = 3;
+}
+
+message GetPersonRequest {
+  string name = 1;
+}
+
+message GetPersonResponse {
+  Person person = 1;
+}
+
+service PersonService {
+  rpc GetPerson(GetPersonRequest) returns (GetPersonResponse);
+}

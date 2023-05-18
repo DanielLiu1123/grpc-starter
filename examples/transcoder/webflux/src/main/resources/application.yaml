@@ -1,0 +1,9 @@
+grpc:
+  server:
+    debug:
+      enabled: true
+    exception-handling:
+      use-default: false
+server:
+  error:
+    include-message: always
