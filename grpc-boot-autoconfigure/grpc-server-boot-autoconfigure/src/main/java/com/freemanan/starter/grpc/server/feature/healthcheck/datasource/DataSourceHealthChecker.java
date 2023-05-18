@@ -1,7 +1,7 @@
-package com.freemanan.starter.grpc.server.extension.healthcheck.datasource;
+package com.freemanan.starter.grpc.server.feature.healthcheck.datasource;
 
 import com.freemanan.starter.grpc.server.GrpcServerProperties;
-import com.freemanan.starter.grpc.server.extension.healthcheck.HealthChecker;
+import com.freemanan.starter.grpc.server.feature.healthcheck.HealthChecker;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.List;

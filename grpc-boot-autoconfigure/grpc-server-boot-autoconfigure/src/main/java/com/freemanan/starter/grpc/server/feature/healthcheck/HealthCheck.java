@@ -1,8 +1,8 @@
-package com.freemanan.starter.grpc.server.extension.healthcheck;
+package com.freemanan.starter.grpc.server.feature.healthcheck;
 
 import com.freemanan.starter.grpc.server.GrpcServerProperties;
-import com.freemanan.starter.grpc.server.extension.healthcheck.datasource.DataSourceHealthChecker;
-import com.freemanan.starter.grpc.server.extension.healthcheck.redis.RedisHealthChecker;
+import com.freemanan.starter.grpc.server.feature.healthcheck.datasource.DataSourceHealthChecker;
+import com.freemanan.starter.grpc.server.feature.healthcheck.redis.RedisHealthChecker;
 import io.grpc.health.v1.HealthGrpc;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;

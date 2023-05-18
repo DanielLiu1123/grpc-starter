@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.server.extension.debug;
+package com.freemanan.starter.grpc.server.feature.debug;
 
 import com.freemanan.starter.grpc.server.GrpcServerProperties;
 import io.grpc.BindableService;

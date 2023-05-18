@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.server.extension.healthcheck;
+package com.freemanan.starter.grpc.server.feature.healthcheck;
 
 /**
  * @author Freeman

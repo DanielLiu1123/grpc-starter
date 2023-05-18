@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.server.extension.exceptionhandling;
+package com.freemanan.starter.grpc.server.feature.exceptionhandling;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;

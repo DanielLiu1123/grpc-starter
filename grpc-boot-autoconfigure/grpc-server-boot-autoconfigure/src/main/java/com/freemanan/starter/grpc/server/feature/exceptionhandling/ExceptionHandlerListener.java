@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.server.extension.exceptionhandling;
+package com.freemanan.starter.grpc.server.feature.exceptionhandling;
 
 import io.grpc.ForwardingServerCallListener.SimpleForwardingServerCallListener;
 import io.grpc.Metadata;
@@ -11,16 +11,18 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Freeman
+ * @param <I> input/request message type
+ * @param <O> output/response message type
  */
-public class ExceptionHandlerListener<ReqT, RespT> extends SimpleForwardingServerCallListener<ReqT> {
+public class ExceptionHandlerListener<I, O> extends SimpleForwardingServerCallListener<I> {
     private static final Logger log = LoggerFactory.getLogger(ExceptionHandlerListener.class);
-    private final ServerCall<ReqT, RespT> call;
+    private final ServerCall<I, O> call;
     private final List<ExceptionHandler> exceptionHandlers;
     private final List<UnhandledExceptionProcessor> unhandledExceptionProcessors;
 
     protected ExceptionHandlerListener(
-            ServerCall.Listener<ReqT> delegate,
-            ServerCall<ReqT, RespT> call,
+            ServerCall.Listener<I> delegate,
+            ServerCall<I, O> call,
             List<ExceptionHandler> exceptionHandlers,
             List<UnhandledExceptionProcessor> unhandledExceptionProcessors) {
         super(delegate);
@@ -30,10 +32,10 @@ public class ExceptionHandlerListener<ReqT, RespT> extends SimpleForwardingServe
     }
 
     @Override
-    public void onMessage(ReqT message) {
+    public void onMessage(I message) {
         try {
             super.onMessage(message);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             if (!handle(e)) {
                 throw e;
             }
@@ -44,14 +46,14 @@ public class ExceptionHandlerListener<ReqT, RespT> extends SimpleForwardingServe
     public void onHalfClose() {
         try {
             super.onHalfClose();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             if (!handle(e)) {
                 throw e;
             }
         }
     }
 
-    private boolean handle(Throwable e) {
+    private boolean handle(Exception e) {
         for (ExceptionHandler handler : exceptionHandlers) {
             if (handler.support(e)) {
                 StatusRuntimeException sre = handler.handle(e);

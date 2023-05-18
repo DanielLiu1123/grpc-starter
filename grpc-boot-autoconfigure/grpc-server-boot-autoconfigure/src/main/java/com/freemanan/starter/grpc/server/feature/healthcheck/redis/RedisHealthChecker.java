@@ -1,6 +1,6 @@
-package com.freemanan.starter.grpc.server.extension.healthcheck.redis;
+package com.freemanan.starter.grpc.server.feature.healthcheck.redis;
 
-import com.freemanan.starter.grpc.server.extension.healthcheck.HealthChecker;
+import com.freemanan.starter.grpc.server.feature.healthcheck.HealthChecker;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.server.extension.healthcheck;
+package com.freemanan.starter.grpc.server.feature.healthcheck;
 
 import static io.grpc.health.v1.HealthCheckResponse.ServingStatus;
 import static io.grpc.health.v1.HealthCheckResponse.newBuilder;

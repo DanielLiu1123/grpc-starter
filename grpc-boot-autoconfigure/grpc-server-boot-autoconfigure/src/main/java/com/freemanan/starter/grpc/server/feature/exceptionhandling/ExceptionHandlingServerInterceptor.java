@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.server.extension.exceptionhandling;
+package com.freemanan.starter.grpc.server.feature.exceptionhandling;
 
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
@@ -27,8 +27,8 @@ public class ExceptionHandlingServerInterceptor implements ServerInterceptor, Or
     }
 
     @Override
-    public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
-            ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
+    public <I, O> ServerCall.Listener<I> interceptCall(
+            ServerCall<I, O> call, Metadata headers, ServerCallHandler<I, O> next) {
         return new ExceptionHandlerListener<>(
                 next.startCall(call, headers), call, exceptionHandlers, unhandledExceptionProcessors);
     }
