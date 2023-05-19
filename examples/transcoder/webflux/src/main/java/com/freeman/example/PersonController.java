@@ -1,9 +1,9 @@
 package com.freeman.example;
 
-import com.freemanan.grpcstarter.testing.v1.GetPersonRequest;
-import com.freemanan.grpcstarter.testing.v1.GetPersonResponse;
-import com.freemanan.grpcstarter.testing.v1.Person;
-import com.freemanan.grpcstarter.testing.v1.PersonServiceGrpc;
+import com.freemanan.sample.pet.v1.GetPersonRequest;
+import com.freemanan.sample.pet.v1.GetPersonResponse;
+import com.freemanan.sample.pet.v1.Person;
+import com.freemanan.sample.pet.v1.PersonServiceGrpc;
 import com.freemanan.starter.grpc.server.GrpcService;
 import io.grpc.stub.StreamObserver;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -1,10 +1,7 @@
 dependencies {
-    // TODO: remove grpc-starter-validation dependency
-    api(project(":grpc-starters:grpc-starter-validation"))
     api("org.springframework.boot:spring-boot-starter-test")
     optionalSupportApi(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
     optionalSupportApi(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
 }
 
 apply from: "$rootDir/deploy.gradle"
-apply from: "$rootDir/protobuf.gradle"

@@ -3,9 +3,8 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":grpc-extensions:grpc-test"))
+    implementation(project(":examples:grpc-sample-api"))
     implementation(project(":grpc-starters:grpc-starter-webflux"))
-    implementation(project(":grpc-starters:grpc-starter-validation"))
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

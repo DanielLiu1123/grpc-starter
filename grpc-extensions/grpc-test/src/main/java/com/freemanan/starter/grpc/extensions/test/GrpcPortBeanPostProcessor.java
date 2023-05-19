@@ -15,7 +15,7 @@ import org.springframework.util.ReflectionUtils;
 /**
  * @author Freeman
  */
-public class GrpcPortBeanPostProcessor implements ApplicationListener<GrpcServerStartedEvent>, BeanPostProcessor {
+class GrpcPortBeanPostProcessor implements ApplicationListener<GrpcServerStartedEvent>, BeanPostProcessor {
 
     private final List<Object> beans = new ArrayList<>();
     private int port;

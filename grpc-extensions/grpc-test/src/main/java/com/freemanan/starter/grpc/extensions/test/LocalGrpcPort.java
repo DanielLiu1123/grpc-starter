@@ -8,6 +8,16 @@ import java.lang.annotation.Target;
 /**
  * Annotation at the field that injects the gRPC server port that was allocated at runtime.
  *
+ * <p> Example:
+ *
+ * <pre>{@code
+ * @SpringBootTest
+ * class FooTest{
+ *     @LocalGrpcPort
+ *     int port;
+ * }
+ * }</pre>
+ *
  * @author Freeman
  * @see org.springframework.boot.test.web.server.LocalServerPort
  */

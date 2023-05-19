@@ -22,7 +22,7 @@ include(":grpc-starters:grpc-starter-webflux")
 include(":grpc-starter-dependencies")
 
 // examples
-include(":examples")
+include(":examples:grpc-sample-api")
 include(":examples:simple")
 include(":examples:user:user-api")
 include(":examples:user:user-server")
