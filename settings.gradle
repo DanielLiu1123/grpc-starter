@@ -7,6 +7,7 @@ include(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure")
 // extensions
 include(":grpc-extensions:grpc-transcoder-http")
 include(":grpc-extensions:grpc-validation")
+include(":grpc-extensions:grpc-test")
 
 // starters
 include(":grpc-starters:grpc-boot-starter")
@@ -18,9 +19,6 @@ include(":grpc-starters:grpc-starter-webflux")
 
 // bom
 include(":grpc-starter-dependencies")
-
-// testing
-include(":grpc-testing")
 
 // examples
 include(":examples")

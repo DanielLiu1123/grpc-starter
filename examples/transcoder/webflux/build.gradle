@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":grpc-testing"))
+    implementation(project(":grpc-extensions:grpc-test"))
     implementation(project(":grpc-starters:grpc-starter-webflux"))
     implementation(project(":grpc-starters:grpc-starter-validation"))
 
