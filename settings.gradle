@@ -5,14 +5,15 @@ include(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure")
 include(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure")
 
 // extensions
+include(":grpc-extensions:grpc-test")
 include(":grpc-extensions:grpc-transcoder-http")
 include(":grpc-extensions:grpc-validation")
-include(":grpc-extensions:grpc-test")
 
 // starters
 include(":grpc-starters:grpc-boot-starter")
 include(":grpc-starters:grpc-client-boot-starter")
 include(":grpc-starters:grpc-server-boot-starter")
+include(":grpc-starters:grpc-starter-test")
 include(":grpc-starters:grpc-starter-validation")
 include(":grpc-starters:grpc-starter-web")
 include(":grpc-starters:grpc-starter-webflux")

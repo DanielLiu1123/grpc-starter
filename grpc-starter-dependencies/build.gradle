@@ -19,16 +19,19 @@ javaPlatform {
 dependencies {
     constraints {
         // autoconfigure
-//        api(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
-//        api(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+        api(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
+        api(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
 
         // extensions
-//        api(project(":grpc-extensions:grpc-validation"))
+        api(project(":grpc-extensions:grpc-test"))
+        api(project(":grpc-extensions:grpc-transcoder-http"))
+        api(project(":grpc-extensions:grpc-validation"))
 
         // starters
         api(project(":grpc-starters:grpc-boot-starter"))
         api(project(":grpc-starters:grpc-client-boot-starter"))
         api(project(":grpc-starters:grpc-server-boot-starter"))
+        api(project(":grpc-starters:grpc-starter-test"))
         api(project(":grpc-starters:grpc-starter-validation"))
         api(project(":grpc-starters:grpc-starter-web"))
         api(project(":grpc-starters:grpc-starter-webflux"))
