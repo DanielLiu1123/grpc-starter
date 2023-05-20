@@ -8,8 +8,8 @@
 
 ## Overview
 
-This project provides Spring Boot Starters for gRPC ecosystem, which provides autoconfigure and highly extendable
-capabilities, making gRPC application development easier.
+This project provides Spring Boot starters for gRPC ecosystem, which provides autoconfigure and highly extendable
+capabilities. _Make gRPC integration with Spring Boot feel seamless and native._
 
 ## Features
 
@@ -19,10 +19,13 @@ capabilities, making gRPC application development easier.
     - [x] Exception handling
     - [x] Health check
 - [x] gRPC client autoconfigure
+    - [x] `@Autowired` support
 
 ***Extensions:***
 
-- [x] Protobuf validation, implemented by [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate)
+- [x] Protobuf validation, implemented by [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).
+- [x] JSON transcoder, one set of code supports both gRPC and HTTP/JSON.
+- [x] Testing support.
 
 ## Quick Start
 
