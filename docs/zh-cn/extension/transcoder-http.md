@@ -1,4 +1,4 @@
-将 gRPC 服务转换为 HTTP 服务，直接通过 HTTP 调用 gRPC 服务，**_一套代码同时支持 gRPC 和 HTTP 调用_**。
+将 gRPC 服务转换为 HTTP/JSON 服务，**_只需要写一套 gRPC service 实现，就可以同时支持 gRPC 和 HTTP/JSON 两种调用方式_**。
 
 ### 使用步骤
 

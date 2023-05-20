@@ -6,7 +6,7 @@ For example, the number of retries for a gRPC channel can be configured in the f
 @Component
 public class RetryGrpcChannelCustomizer implements GrpcChannelCustomizer {
     @Override
-    public void customize(ManagedChannelBuilder<?> channelBuilder) {
+    void customize(GrpcClientProperties.Channel channelConfig, ManagedChannelBuilder<?> channelBuilder) {
         channelBuilder.enableRetry().maxRetryAttempts(3);
     }
 }

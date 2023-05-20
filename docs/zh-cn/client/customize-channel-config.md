@@ -6,7 +6,7 @@
 @Component
 public class RetryGrpcChannelCustomizer implements GrpcChannelCustomizer {
     @Override
-    public void customize(ManagedChannelBuilder<?> channelBuilder) {
+    void customize(GrpcClientProperties.Channel channelConfig, ManagedChannelBuilder<?> channelBuilder) {
         channelBuilder.enableRetry().maxRetryAttempts(3);
     }
 }
