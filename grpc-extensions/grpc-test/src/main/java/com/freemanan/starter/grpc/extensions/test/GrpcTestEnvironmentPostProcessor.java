@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -45,7 +46,7 @@ public class GrpcTestEnvironmentPostProcessor implements EnvironmentPostProcesso
 
         MapPropertySource ps = new MapPropertySource("grpc.extensions.test.property_source", configMap);
 
-        environment.getPropertySources().addLast(ps);
+        environment.getPropertySources().addAfter(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, ps);
     }
 
     private static void startGrpcWithInProcessIfNecessary(
@@ -60,11 +61,9 @@ public class GrpcTestEnvironmentPostProcessor implements EnvironmentPostProcesso
                 configMap.put(clientProperty, name);
             }
         } else if (GRPC_SERVER_STARTER_EXISTS) {
-            // use random port if not manually configure the port
+            // use random port
             String portProperty = GrpcServerProperties.PREFIX + ".port";
-            if (!environment.containsProperty(portProperty)) {
-                configMap.put(portProperty, 0);
-            }
+            configMap.put(portProperty, 0);
         }
     }
 }

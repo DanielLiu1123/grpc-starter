@@ -18,6 +18,8 @@
 
 - 扩展
     - [Protobuf 校验](zh-cn/extension/protobuf-validation.md)
+    - [JSON transcoder](zh-cn/extension/transcoder-http.md)
+    - [Test](zh-cn/extension/test.md)
 
 - 其他
     - [致谢](zh-cn/other/acknowledgement.md)

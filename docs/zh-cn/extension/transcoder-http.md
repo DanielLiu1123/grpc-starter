@@ -2,12 +2,18 @@
 
 ### 使用步骤
 
-1. 引入依赖
+1. 添加依赖
 
     ```groovy
-    implementation 'com.freemanan:grpc-starter-http'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'com.freemanan:grpc-starter-web'
     ```
+   
+   如果你更喜欢 webflux
+    ```groovy
+    implementation 'com.freemanan:grpc-starter-webflux'
+    ```
+   
+   > 因为 webflux 和 gRPC 都是用的 netty，所以此时 gRPC 使用的 netty 依赖为 `grpc-netty`，而不是 `grpc-netty-shaded`，使用的 netty 版本是由 Spring Boot 管理的。
 
 2. Proto definition
 

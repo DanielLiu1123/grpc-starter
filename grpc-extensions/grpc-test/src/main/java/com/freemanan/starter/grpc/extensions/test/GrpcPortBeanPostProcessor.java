@@ -22,9 +22,10 @@ class GrpcPortBeanPostProcessor implements ApplicationListener<GrpcServerStarted
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
 
         // test class instance logic
-        if (AnnotationUtils.findAnnotation(AopProxyUtils.ultimateTargetClass(bean), SpringBootTest.class) != null) {
+        if (AnnotationUtils.findAnnotation(targetClass, SpringBootTest.class) != null) {
             // This bean is test class instance, test class instance inject fields after Spring context initialization
             // see org.springframework.test.context.support.DependencyInjectionTestExecutionListener#injectDependencies
             beans.add(bean);
@@ -33,7 +34,7 @@ class GrpcPortBeanPostProcessor implements ApplicationListener<GrpcServerStarted
         }
 
         // normal bean logic
-        Class<?> searchType = AopProxyUtils.ultimateTargetClass(bean);
+        Class<?> searchType = targetClass;
         while (Object.class != searchType && searchType != null) {
             Field[] fields = searchType.getDeclaredFields();
             for (Field field : fields) {
