@@ -35,6 +35,9 @@ dependencies {
         api(project(":grpc-starters:grpc-starter-validation"))
         api(project(":grpc-starters:grpc-starter-web"))
         api(project(":grpc-starters:grpc-starter-webflux"))
+
+        // sample api
+        api(project(":examples:grpc-sample-api"))
     }
 
     api(platform("io.grpc:grpc-bom:${grpcVersion}"))
