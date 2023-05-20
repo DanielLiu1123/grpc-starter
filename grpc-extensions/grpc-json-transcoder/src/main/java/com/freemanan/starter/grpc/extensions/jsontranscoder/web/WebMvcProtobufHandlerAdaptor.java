@@ -121,7 +121,9 @@ public class WebMvcProtobufHandlerAdaptor extends AbstractHandlerAdaptor impleme
     }
 
     /**
+     * @deprecated since Spring 5.3.9
      * @see RequestMappingHandlerAdapter#getLastModifiedInternal
+     * @see HandlerAdapter#getLastModified
      */
     @Override
     @Deprecated

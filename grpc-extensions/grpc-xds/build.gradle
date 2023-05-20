@@ -1,0 +1,11 @@
+dependencies {
+    api(project(":grpc-starters:grpc-server-boot-starter"))
+
+    api("io.envoyproxy.controlplane:server:${javaControlPlaneVersion}")
+
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+}
+
+apply from: "${rootDir}/deploy.gradle"

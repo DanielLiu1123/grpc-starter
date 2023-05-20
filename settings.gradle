@@ -8,6 +8,7 @@ include(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure")
 include(":grpc-extensions:grpc-json-transcoder")
 include(":grpc-extensions:grpc-test")
 include(":grpc-extensions:grpc-validation")
+include(":grpc-extensions:grpc-xds")
 
 // bom
 include(":grpc-starter-dependencies")
