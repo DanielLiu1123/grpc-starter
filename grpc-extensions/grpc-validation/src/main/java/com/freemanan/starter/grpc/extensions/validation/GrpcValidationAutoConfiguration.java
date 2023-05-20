@@ -1,5 +1,9 @@
 package com.freemanan.starter.grpc.extensions.validation;
 
+import com.freemanan.starter.grpc.client.ConditionOnGrpcClientEnabled;
+import com.freemanan.starter.grpc.client.GrpcClientProperties;
+import com.freemanan.starter.grpc.server.ConditionOnGrpcServerEnabled;
+import com.freemanan.starter.grpc.server.GrpcServerProperties;
 import io.envoyproxy.pgv.ReflectiveValidatorIndex;
 import io.envoyproxy.pgv.grpc.ValidatingClientInterceptor;
 import io.envoyproxy.pgv.grpc.ValidatingServerInterceptor;
@@ -19,11 +23,12 @@ import org.springframework.context.annotation.Configuration;
 public class GrpcValidationAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)
-    @ConditionalOnClass(ValidatingClientInterceptor.class)
+    @ConditionalOnClass({ValidatingClientInterceptor.class, GrpcClientProperties.class})
     @ConditionalOnProperty(prefix = GrpcValidationProperties.Client.PREFIX, name = "enabled", matchIfMissing = true)
     static class Client {
 
         @Bean
+        @ConditionOnGrpcClientEnabled
         @ConditionalOnMissingBean
         public ValidatingClientInterceptor grpcValidatingClientInterceptor(GrpcValidationProperties properties) {
             return new OrderedValidatingClientInterceptor(
@@ -32,11 +37,12 @@ public class GrpcValidationAutoConfiguration {
     }
 
     @Configuration(proxyBeanMethods = false)
-    @ConditionalOnClass(ValidatingServerInterceptor.class)
+    @ConditionalOnClass({ValidatingServerInterceptor.class, GrpcServerProperties.class})
     @ConditionalOnProperty(prefix = GrpcValidationProperties.Server.PREFIX, name = "enabled", matchIfMissing = true)
     static class Server {
 
         @Bean
+        @ConditionOnGrpcServerEnabled
         @ConditionalOnMissingBean
         public ValidatingServerInterceptor grpcValidatingServerInterceptor(GrpcValidationProperties properties) {
             return new OrderedValidatingServerInterceptor(

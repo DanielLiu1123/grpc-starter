@@ -6,8 +6,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +14,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Freeman
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(AbstractStub.class)
-@ConditionalOnProperty(prefix = GrpcClientProperties.PREFIX, name = "enabled", matchIfMissing = true)
+@ConditionOnGrpcClientEnabled
 @EnableConfigurationProperties(GrpcClientProperties.class)
 public class GrpcClientAutoConfiguration implements SmartInitializingSingleton {
     private static final Logger log = LoggerFactory.getLogger(GrpcClientAutoConfiguration.class);
