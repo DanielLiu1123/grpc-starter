@@ -1,8 +1,5 @@
 package com.freemanan.starter.grpc.client;
 
-import static java.util.Collections.reverseOrder;
-import static java.util.stream.Collectors.toList;
-
 import io.grpc.Channel;
 import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
@@ -11,8 +8,8 @@ import io.grpc.Metadata;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.MetadataUtils;
 import java.lang.reflect.Method;
-import java.util.List;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -81,12 +78,9 @@ class GrpcClientCreator {
         builder.intercept(metadataInterceptor);
 
         // set interceptors, gRPC invoke interceptors in reverse order
-        List<ClientInterceptor> interceptors = beanFactory
-                .getBeanProvider(ClientInterceptor.class)
-                .orderedStream()
-                .sorted(reverseOrder())
-                .collect(toList());
-        builder.intercept(interceptors);
+        beanFactory.getBeanProvider(ClientInterceptor.class).stream()
+                .sorted(AnnotationAwareOrderComparator.INSTANCE.reversed())
+                .forEach(builder::intercept);
 
         // use plaintext
         builder.usePlaintext();

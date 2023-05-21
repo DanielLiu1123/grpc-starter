@@ -8,18 +8,16 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.internal.GrpcUtil;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 
 /**
@@ -64,12 +62,10 @@ public class GrpcServer implements SmartLifecycle, ApplicationEventPublisherAwar
         // add services
         serviceProvider.forEach(builder::addService);
 
-        // add interceptors
-        List<ServerInterceptor> interceptors =
-                interceptorProvider.orderedStream().collect(Collectors.toList());
-        // grpc invoke interceptor in reverse order
-        Collections.reverse(interceptors);
-        interceptors.forEach(builder::intercept);
+        // add interceptors, gRPC applies interceptors in reversed order
+        interceptorProvider.stream()
+                .sorted(AnnotationAwareOrderComparator.INSTANCE.reversed())
+                .forEach(builder::intercept);
 
         builder.maxInboundMessageSize((int) properties.getMaxMessageSize().toBytes());
         builder.maxInboundMetadataSize((int) properties.getMaxMetadataSize().toBytes());
@@ -94,7 +90,7 @@ public class GrpcServer implements SmartLifecycle, ApplicationEventPublisherAwar
             waitUntilShutdown();
         } catch (IOException e) {
             gracefulShutdown(server, Duration.ofMillis(properties.getShutdownTimeout()));
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -124,7 +120,8 @@ public class GrpcServer implements SmartLifecycle, ApplicationEventPublisherAwar
                                 // wait here until terminate
                                 latch.await();
                             } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
+                                log.warn("gRPC server await termination interrupted", e);
+                                Thread.currentThread().interrupt();
                             }
                         },
                         "grpc-termination-awaiter")
@@ -142,8 +139,8 @@ public class GrpcServer implements SmartLifecycle, ApplicationEventPublisherAwar
                 server.awaitTermination();
             }
         } catch (InterruptedException e) {
+            log.warn("gRPC server graceful shutdown interrupted", e);
             Thread.currentThread().interrupt();
-            log.warn("gRPC server await termination interrupted", e);
         }
         if (!server.isTerminated()) {
             server.shutdownNow();
