@@ -127,6 +127,8 @@ public class GrpcClientProperties implements InitializingBean {
 
     @Data
     public static class InProcess {
+        public static final String PREFIX = "in-process";
+
         /**
          * In-process client name.
          *

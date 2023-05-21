@@ -52,8 +52,8 @@ public class GrpcTestEnvironmentPostProcessor implements EnvironmentPostProcesso
     private static void startGrpcWithInProcessIfNecessary(
             ConfigurableEnvironment environment, Map<String, Object> configMap) {
         if (GRPC_CLIENT_STARTER_EXISTS && GRPC_SERVER_STARTER_EXISTS) {
-            String serverProperty = GrpcServerProperties.PREFIX + ".in-process.name";
-            String clientProperty = GrpcClientProperties.PREFIX + ".in-process.name";
+            String serverProperty = GrpcServerProperties.InProcess.PREFIX + ".name";
+            String clientProperty = GrpcClientProperties.InProcess.PREFIX + ".name";
             if (!environment.containsProperty(serverProperty) && !environment.containsProperty(clientProperty)) {
                 // use in-process if not manually configured
                 String name = UUID.randomUUID().toString();

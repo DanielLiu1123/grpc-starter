@@ -128,6 +128,8 @@ public class GrpcServerProperties {
 
     @Data
     public static class InProcess {
+        public static final String PREFIX = GrpcServerProperties.PREFIX + ".in-process";
+
         /**
          * In-process server name, if configured, will create in-process server, usually for testing.
          */
