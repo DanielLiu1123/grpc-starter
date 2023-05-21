@@ -23,7 +23,7 @@ public class ExceptionHandling {
 
     @Bean
     @ConditionalOnMissingBean
-    public ExceptionHandlingServerInterceptor grpcHandleExceptionServerInterceptor(
+    public ExceptionHandlingServerInterceptor grpcExceptionHandlingServerInterceptor(
             ObjectProvider<ExceptionHandler> exceptionHandlers,
             ObjectProvider<UnhandledExceptionProcessor> unhandledExceptionProcessors) {
         return new ExceptionHandlingServerInterceptor(exceptionHandlers, unhandledExceptionProcessors);
