@@ -2,8 +2,8 @@ package com.freemanan.starter.grpc.extensions.test;
 
 import com.freemanan.starter.grpc.server.GrpcServerStartedEvent;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -17,7 +17,7 @@ import org.springframework.util.ReflectionUtils;
  */
 class GrpcPortBeanPostProcessor implements ApplicationListener<GrpcServerStartedEvent>, BeanPostProcessor {
 
-    private final List<Object> beans = new ArrayList<>();
+    private final Map<Object, Boolean> beans = new HashMap<>();
     private int port;
 
     @Override
@@ -28,7 +28,8 @@ class GrpcPortBeanPostProcessor implements ApplicationListener<GrpcServerStarted
         if (AnnotationUtils.findAnnotation(targetClass, SpringBootTest.class) != null) {
             // This bean is test class instance, test class instance inject fields after Spring context initialization
             // see org.springframework.test.context.support.DependencyInjectionTestExecutionListener#injectDependencies
-            beans.add(bean);
+            beans.put(bean, false);
+            // inject port for test class instance
             injectPort();
             return bean;
         }
@@ -39,7 +40,7 @@ class GrpcPortBeanPostProcessor implements ApplicationListener<GrpcServerStarted
             Field[] fields = searchType.getDeclaredFields();
             for (Field field : fields) {
                 if (AnnotationUtils.findAnnotation(field, LocalGrpcPort.class) != null) {
-                    beans.add(bean);
+                    beans.put(bean, false);
                     return bean;
                 }
             }
@@ -51,10 +52,17 @@ class GrpcPortBeanPostProcessor implements ApplicationListener<GrpcServerStarted
     @Override
     public void onApplicationEvent(GrpcServerStartedEvent event) {
         this.port = event.getSource().getPort();
+        // inject port for normal beans
+        injectPort();
     }
 
     private void injectPort() {
-        for (Object bean : beans) {
+        for (Map.Entry<Object, Boolean> en : beans.entrySet()) {
+            boolean injected = en.getValue();
+            if (injected) {
+                continue;
+            }
+            Object bean = en.getKey();
             ReflectionUtils.doWithFields(AopProxyUtils.ultimateTargetClass(bean), field -> {
                 if (AnnotationUtils.findAnnotation(field, LocalGrpcPort.class) != null) {
                     ReflectionUtils.makeAccessible(field);
@@ -73,6 +81,7 @@ class GrpcPortBeanPostProcessor implements ApplicationListener<GrpcServerStarted
                     }
                 }
             });
+            en.setValue(true);
         }
     }
 }
