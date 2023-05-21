@@ -63,25 +63,29 @@ class GrpcPortBeanPostProcessor implements ApplicationListener<GrpcServerStarted
                 continue;
             }
             Object bean = en.getKey();
-            ReflectionUtils.doWithFields(AopProxyUtils.ultimateTargetClass(bean), field -> {
-                if (AnnotationUtils.findAnnotation(field, LocalGrpcPort.class) != null) {
-                    ReflectionUtils.makeAccessible(field);
-                    Class<?> type = field.getType();
-                    if (type == int.class || type == Integer.class) {
-                        ReflectionUtils.setField(field, bean, port);
-                    } else if (type == long.class || type == Long.class) {
-                        ReflectionUtils.setField(field, bean, (long) port);
-                    } else if (type == String.class) {
-                        ReflectionUtils.setField(field, bean, String.valueOf(port));
-                    } else {
-                        throw new UnsupportedOperationException(String.format(
-                                "@LocalGrpcPort can only be applied to fields of type int/Integer, long/Long, String; "
-                                        + "found: %s",
-                                type.getSimpleName()));
-                    }
-                }
-            });
+            injectPort4Bean(bean);
             en.setValue(true);
         }
+    }
+
+    private void injectPort4Bean(Object bean) {
+        ReflectionUtils.doWithFields(AopProxyUtils.ultimateTargetClass(bean), field -> {
+            if (AnnotationUtils.findAnnotation(field, LocalGrpcPort.class) != null) {
+                ReflectionUtils.makeAccessible(field);
+                Class<?> type = field.getType();
+                if (type == int.class || type == Integer.class) {
+                    ReflectionUtils.setField(field, bean, port);
+                } else if (type == long.class || type == Long.class) {
+                    ReflectionUtils.setField(field, bean, (long) port);
+                } else if (type == String.class) {
+                    ReflectionUtils.setField(field, bean, String.valueOf(port));
+                } else {
+                    throw new UnsupportedOperationException(String.format(
+                            "@LocalGrpcPort can only be applied to fields of type int/Integer, long/Long, String; "
+                                    + "found: %s",
+                            type.getSimpleName()));
+                }
+            }
+        });
     }
 }
