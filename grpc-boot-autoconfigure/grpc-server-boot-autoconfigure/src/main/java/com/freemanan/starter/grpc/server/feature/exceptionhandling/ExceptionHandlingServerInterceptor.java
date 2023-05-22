@@ -7,13 +7,13 @@ import io.grpc.ServerInterceptor;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.core.PriorityOrdered;
+import org.springframework.core.Ordered;
 
 /**
  * @author Freeman
  */
-public class ExceptionHandlingServerInterceptor implements ServerInterceptor, PriorityOrdered {
-    public static final int ORDER = 0;
+public class ExceptionHandlingServerInterceptor implements ServerInterceptor, Ordered {
+    public static final int ORDER = Ordered.LOWEST_PRECEDENCE - 1000;
 
     private final List<ExceptionHandler> exceptionHandlers;
     private final List<UnhandledExceptionProcessor> unhandledExceptionProcessors;
