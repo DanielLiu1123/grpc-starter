@@ -6,7 +6,7 @@ include(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure")
 
 // extensions
 include(":grpc-extensions:grpc-test")
-include(":grpc-extensions:grpc-transcoder-http")
+include(":grpc-extensions:grpc-transcoder-json")
 include(":grpc-extensions:grpc-validation")
 
 // starters

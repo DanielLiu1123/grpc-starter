@@ -1,5 +1,5 @@
 dependencies {
-    api(project(":grpc-extensions:grpc-transcoder-http"))
+    api(project(":grpc-extensions:grpc-transcoder-json"))
     api("org.springframework.boot:spring-boot-starter-web")
 }
 
