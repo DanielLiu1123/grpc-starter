@@ -3,6 +3,9 @@ dependencies {
     runtimeOnly("io.grpc:grpc-netty-shaded")
 
     optionalSupportApi("io.grpc:grpc-netty")
+
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
+    testImplementation(project(":examples:grpc-sample-api"))
 }
 
 apply from: "${rootDir}/deploy.gradle"
