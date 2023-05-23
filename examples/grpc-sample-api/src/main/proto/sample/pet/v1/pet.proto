@@ -7,22 +7,18 @@ option java_package = "com.freemanan.sample.pet.v1";
 
 import "validate/validate.proto";
 
-message Person {
+message Pet {
   string name = 1 [(validate.rules).string = {
     max_len: 10
   }];
   int32 age = 2;
-  repeated string hobbies = 3;
+  repeated string favorite_foods = 3;
 }
 
-message GetPersonRequest {
+message GetPetRequest {
   string name = 1;
 }
 
-message GetPersonResponse {
-  Person person = 1;
-}
-
-service PersonService {
-  rpc GetPerson(GetPersonRequest) returns (GetPersonResponse);
+service PetService {
+  rpc GetPet(GetPetRequest) returns (Pet);
 }

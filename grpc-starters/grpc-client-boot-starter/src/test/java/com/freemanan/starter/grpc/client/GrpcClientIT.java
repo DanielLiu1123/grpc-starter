@@ -2,7 +2,7 @@ package com.freemanan.starter.grpc.client;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import com.freemanan.sample.pet.v1.PersonServiceGrpc;
+import com.freemanan.sample.pet.v1.PetServiceGrpc;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -21,7 +21,7 @@ class GrpcClientIT {
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class).run();
 
         assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(PersonServiceGrpc.PersonServiceBlockingStub.class))
+        assertThatCode(() -> ctx.getBean(PetServiceGrpc.PetServiceBlockingStub.class))
                 .isInstanceOf(NoSuchBeanDefinitionException.class);
 
         ctx.close();
@@ -34,7 +34,7 @@ class GrpcClientIT {
                 .run();
 
         assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(PersonServiceGrpc.PersonServiceBlockingStub.class))
+        assertThatCode(() -> ctx.getBean(PetServiceGrpc.PetServiceBlockingStub.class))
                 .isInstanceOf(BeanCreationException.class)
                 .rootCause()
                 .hasMessageStartingWith("Not configure authority for stub");
@@ -50,7 +50,7 @@ class GrpcClientIT {
                 .run();
 
         assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(PersonServiceGrpc.PersonServiceBlockingStub.class))
+        assertThatCode(() -> ctx.getBean(PetServiceGrpc.PetServiceBlockingStub.class))
                 .doesNotThrowAnyException();
 
         ctx.close();
@@ -63,7 +63,7 @@ class GrpcClientIT {
                 .run();
 
         assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
-        assertThatCode(() -> ctx.getBean(PersonServiceGrpc.PersonServiceBlockingStub.class))
+        assertThatCode(() -> ctx.getBean(PetServiceGrpc.PetServiceBlockingStub.class))
                 .isInstanceOf(NoSuchBeanDefinitionException.class);
 
         ctx.close();
