@@ -28,6 +28,10 @@ public class GrpcServerProperties {
      */
     private long shutdownTimeout = 5000L;
     /**
+     * Whether to start a gRPC server when no service found, default {@code true}.
+     */
+    private boolean enableEmptyServer = true;
+    /**
      * Debug configuration.
      */
     private Debug debug = new Debug();

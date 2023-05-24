@@ -25,7 +25,7 @@ class GrpcServerIT {
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class).run();
 
         assertThatCode(() -> ctx.getBean(GrpcServerProperties.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(GrpcServer.class)).doesNotThrowAnyException();
+        assertThatCode(() -> ctx.getBean(DefaultGrpcServer.class)).doesNotThrowAnyException();
         assertThatCode(() -> ctx.getBean(ProtoReflectionService.class))
                 .isInstanceOf(NoSuchBeanDefinitionException.class);
         assertThatCode(() -> ctx.getBean(DefaultExceptionHandler.class))
@@ -41,7 +41,7 @@ class GrpcServerIT {
                 .run();
 
         assertThatCode(() -> ctx.getBean(GrpcServerProperties.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
-        assertThatCode(() -> ctx.getBean(GrpcServer.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
+        assertThatCode(() -> ctx.getBean(DefaultGrpcServer.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
 
         ctx.close();
     }
@@ -74,7 +74,7 @@ class GrpcServerIT {
                 .properties(GrpcServerProperties.InProcess.PREFIX + ".name=" + UUID.randomUUID())
                 .run();
 
-        Server server = (Server) ReflectionTestUtils.getField(ctx.getBean(GrpcServer.class), "server");
+        Server server = (Server) ReflectionTestUtils.getField(ctx.getBean(DefaultGrpcServer.class), "server");
 
         assertThat(server).isNotNull();
         assertThat(server.getPort()).isEqualTo(-1);
@@ -88,7 +88,7 @@ class GrpcServerIT {
                 .properties(GrpcServerProperties.PREFIX + ".port=0")
                 .run();
 
-        Server server = (Server) ReflectionTestUtils.getField(ctx.getBean(GrpcServer.class), "server");
+        Server server = (Server) ReflectionTestUtils.getField(ctx.getBean(DefaultGrpcServer.class), "server");
 
         assertThat(server).isNotNull();
         assertThat(server.getPort()).isNotEqualTo(9090);

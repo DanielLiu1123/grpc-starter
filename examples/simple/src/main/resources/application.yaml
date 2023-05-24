@@ -2,6 +2,7 @@ grpc:
   server:
     debug:
       enabled: true
+    enable-empty-server: true
   client:
     channels:
       - authority: localhost:${grpc.server.port:9090}

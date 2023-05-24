@@ -23,7 +23,7 @@ public class HealthCheck {
 
     @Bean
     @ConditionalOnMissingBean
-    public HealthCheckService grpcHealthCheckService(ObjectProvider<HealthChecker> healthCheckers) {
+    public HealthGrpc.HealthImplBase grpcHealthCheckService(ObjectProvider<HealthChecker> healthCheckers) {
         return new HealthCheckService(healthCheckers);
     }
 

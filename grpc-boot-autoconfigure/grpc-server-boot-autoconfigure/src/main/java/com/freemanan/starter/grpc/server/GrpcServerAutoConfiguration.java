@@ -1,5 +1,7 @@
 package com.freemanan.starter.grpc.server;
 
+import static com.freemanan.starter.grpc.server.Util.allInternalServices;
+
 import com.freemanan.starter.grpc.server.feature.debug.Debug;
 import com.freemanan.starter.grpc.server.feature.exceptionhandling.ExceptionHandling;
 import com.freemanan.starter.grpc.server.feature.healthcheck.HealthCheck;
@@ -27,7 +29,9 @@ public class GrpcServerAutoConfiguration {
             ObjectProvider<BindableService> services,
             ObjectProvider<ServerInterceptor> interceptors,
             ObjectProvider<GrpcServerCustomizer> customizers) {
-        return new GrpcServer(properties, services, interceptors, customizers);
+        return properties.isEnableEmptyServer() || !allInternalServices(services)
+                ? new DefaultGrpcServer(properties, services, interceptors, customizers)
+                : new DummyGrpcServer();
     }
 
     @Configuration(proxyBeanMethods = false)
