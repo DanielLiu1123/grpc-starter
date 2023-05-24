@@ -20,7 +20,7 @@ public class GrpcServerProperties {
      */
     private boolean enabled = true;
     /**
-     * gRPC server port, default {@code 9090}, if {@code 0} will use a random port.
+     * gRPC server port, default {@code 9090}, {@code 0} or negative number will use random port.
      */
     private int port = 9090;
     /**
