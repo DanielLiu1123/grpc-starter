@@ -1,18 +1,20 @@
-package com.freemanan.starter.grpc.extensions.transcoderhttp;
+package com.freemanan.starter.grpc.extensions.transcoderjson;
 
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.REACTIVE;
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.SERVLET;
 
-import com.freemanan.starter.grpc.extensions.transcoderhttp.processor.DefaultHeaderTransformProcessor;
-import com.freemanan.starter.grpc.extensions.transcoderhttp.processor.HeaderTransformProcessor;
-import com.freemanan.starter.grpc.extensions.transcoderhttp.web.WebMvcGrpcServiceHandlerMapping;
-import com.freemanan.starter.grpc.extensions.transcoderhttp.web.WebMvcProtobufHandlerAdaptor;
-import com.freemanan.starter.grpc.extensions.transcoderhttp.webflux.GrpcHandlerResultHandler;
-import com.freemanan.starter.grpc.extensions.transcoderhttp.webflux.WebFluxGrpcServiceHandlerMapping;
-import com.freemanan.starter.grpc.extensions.transcoderhttp.webflux.WebFluxProtobufHandlerAdaptor;
+import com.freemanan.starter.grpc.extensions.transcoderjson.processor.DefaultHeaderTransformProcessor;
+import com.freemanan.starter.grpc.extensions.transcoderjson.processor.HeaderTransformProcessor;
+import com.freemanan.starter.grpc.extensions.transcoderjson.web.WebMvcGrpcServiceHandlerMapping;
+import com.freemanan.starter.grpc.extensions.transcoderjson.web.WebMvcProtobufHandlerAdaptor;
+import com.freemanan.starter.grpc.extensions.transcoderjson.webflux.GrpcHandlerResultHandler;
+import com.freemanan.starter.grpc.extensions.transcoderjson.webflux.WebFluxGrpcServiceHandlerMapping;
+import com.freemanan.starter.grpc.extensions.transcoderjson.webflux.WebFluxProtobufHandlerAdaptor;
 import io.grpc.BindableService;
+import io.grpc.Metadata;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -21,6 +23,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 
@@ -28,9 +31,10 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
  * @author Freeman
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(prefix = TranscoderHttpProperties.PREFIX, name = "enabled", matchIfMissing = true)
-@EnableConfigurationProperties(TranscoderHttpProperties.class)
-public class TranscoderHttpAutoConfiguration {
+@ConditionalOnClass({Metadata.class, HttpHeaders.class})
+@ConditionalOnProperty(prefix = TranscoderJsonProperties.PREFIX, name = "enabled", matchIfMissing = true)
+@EnableConfigurationProperties(TranscoderJsonProperties.class)
+public class TranscoderJsonAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean

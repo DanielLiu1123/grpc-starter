@@ -1,5 +1,6 @@
 dependencies {
     api(project(":grpc-starters:grpc-starter-validation"))
+    api("io.grpc:grpc-testing-proto")
 }
 
 apply from: "$rootDir/deploy.gradle"

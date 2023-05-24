@@ -1,6 +1,6 @@
-package com.freemanan.starter.grpc.extensions.transcoderhttp.web;
+package com.freemanan.starter.grpc.extensions.transcoderjson.web;
 
-import com.freemanan.starter.grpc.extensions.transcoderhttp.util.Util;
+import com.freemanan.starter.grpc.extensions.transcoderjson.util.Util;
 import io.grpc.BindableService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;

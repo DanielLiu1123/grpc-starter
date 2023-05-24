@@ -1,10 +1,10 @@
-package com.freemanan.starter.grpc.extensions.transcoderhttp.web;
+package com.freemanan.starter.grpc.extensions.transcoderjson.web;
 
-import static com.freemanan.starter.grpc.extensions.transcoderhttp.util.Util.isGrpcHandleMethod;
+import static com.freemanan.starter.grpc.extensions.transcoderjson.util.Util.isGrpcHandleMethod;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-import com.freemanan.starter.grpc.extensions.transcoderhttp.AbstractHandlerAdaptor;
-import com.freemanan.starter.grpc.extensions.transcoderhttp.processor.HeaderTransformProcessor;
+import com.freemanan.starter.grpc.extensions.transcoderjson.AbstractHandlerAdaptor;
+import com.freemanan.starter.grpc.extensions.transcoderjson.processor.HeaderTransformProcessor;
 import com.google.protobuf.Message;
 import io.grpc.Metadata;
 import io.grpc.StatusRuntimeException;

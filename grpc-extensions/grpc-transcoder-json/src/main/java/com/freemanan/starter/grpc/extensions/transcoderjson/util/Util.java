@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.extensions.transcoderhttp.util;
+package com.freemanan.starter.grpc.extensions.transcoderjson.util;
 
 import static io.grpc.MethodDescriptor.MethodType.UNARY;
 

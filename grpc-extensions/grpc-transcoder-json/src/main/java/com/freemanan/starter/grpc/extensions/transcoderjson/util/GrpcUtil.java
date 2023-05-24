@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.extensions.transcoderhttp.util;
+package com.freemanan.starter.grpc.extensions.transcoderjson.util;
 
 import io.grpc.Status;
 import lombok.experimental.UtilityClass;
@@ -38,7 +38,7 @@ public class GrpcUtil {
             case RESOURCE_EXHAUSTED:
                 return HttpStatus.TOO_MANY_REQUESTS;
             case FAILED_PRECONDITION:
-                return HttpStatus.BAD_REQUEST; // TODO(Freeman): change to 412?
+                return HttpStatus.PRECONDITION_FAILED;
             case ABORTED:
                 return HttpStatus.CONFLICT;
             case OUT_OF_RANGE:
@@ -57,6 +57,4 @@ public class GrpcUtil {
                 return HttpStatus.INTERNAL_SERVER_ERROR;
         }
     }
-
-    //    public static Method
 }

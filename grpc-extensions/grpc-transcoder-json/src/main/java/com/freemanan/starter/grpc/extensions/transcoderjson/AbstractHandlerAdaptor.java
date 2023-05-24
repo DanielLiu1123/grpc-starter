@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.extensions.transcoderhttp;
+package com.freemanan.starter.grpc.extensions.transcoderjson;
 
 import com.freemanan.starter.grpc.server.GrpcServerProperties;
 import com.freemanan.starter.grpc.server.GrpcServerStartedEvent;
@@ -47,7 +47,7 @@ public abstract class AbstractHandlerAdaptor
 
     private final Map<Class<?>, Message> messageClassToDefaultInstance = new ConcurrentHashMap<>();
 
-    protected static final Method withInterceptorsMethod;
+    private static final Method withInterceptorsMethod;
     private static final JsonFormat.Parser parser = JsonFormat.parser().ignoringUnknownFields();
 
     static {

@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.extensions.transcoderhttp.processor;
+package com.freemanan.starter.grpc.extensions.transcoderjson.processor;
 
 import io.grpc.Metadata;
 import io.grpc.internal.GrpcUtil;

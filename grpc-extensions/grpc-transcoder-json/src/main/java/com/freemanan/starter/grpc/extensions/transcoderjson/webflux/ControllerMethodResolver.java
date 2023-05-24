@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.freemanan.starter.grpc.extensions.transcoderhttp.webflux;
+package com.freemanan.starter.grpc.extensions.transcoderjson.webflux;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

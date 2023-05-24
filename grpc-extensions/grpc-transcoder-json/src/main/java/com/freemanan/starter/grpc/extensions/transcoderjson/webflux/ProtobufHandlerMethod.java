@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.extensions.transcoderhttp.webflux;
+package com.freemanan.starter.grpc.extensions.transcoderjson.webflux;
 
 import com.google.protobuf.Message;
 import java.lang.reflect.ParameterizedType;

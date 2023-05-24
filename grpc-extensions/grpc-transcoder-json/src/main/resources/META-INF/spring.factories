@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.freemanan.starter.grpc.extensions.transcoderhttp.TranscoderHttpAutoConfiguration
+  com.freemanan.starter.grpc.extensions.transcoderjson.TranscoderJsonAutoConfiguration

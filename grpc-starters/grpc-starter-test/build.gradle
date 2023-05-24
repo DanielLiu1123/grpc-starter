@@ -1,5 +1,6 @@
 dependencies {
     api(project(":grpc-extensions:grpc-test"))
+    api(project(":examples:grpc-sample-api"))
 }
 
 apply from: "${rootDir}/deploy.gradle"

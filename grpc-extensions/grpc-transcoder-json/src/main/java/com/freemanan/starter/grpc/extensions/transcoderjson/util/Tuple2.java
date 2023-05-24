@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.extensions.transcoderhttp.util;
+package com.freemanan.starter.grpc.extensions.transcoderjson.util;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

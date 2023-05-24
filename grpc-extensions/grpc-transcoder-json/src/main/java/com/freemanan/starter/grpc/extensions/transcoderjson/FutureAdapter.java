@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.extensions.transcoderhttp;
+package com.freemanan.starter.grpc.extensions.transcoderjson;
 
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 

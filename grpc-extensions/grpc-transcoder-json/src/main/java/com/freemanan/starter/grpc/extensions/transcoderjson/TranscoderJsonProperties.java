@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.extensions.transcoderhttp;
+package com.freemanan.starter.grpc.extensions.transcoderjson;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -7,9 +7,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author Freeman
  */
 @Data
-@ConfigurationProperties(TranscoderHttpProperties.PREFIX)
-public class TranscoderHttpProperties {
-    public static final String PREFIX = "grpc.transcoder-http";
+@ConfigurationProperties(TranscoderJsonProperties.PREFIX)
+public class TranscoderJsonProperties {
+    public static final String PREFIX = "grpc.transcoder-json";
 
     /**
      * Whether to enable transcoder-http auto-configuration, default {@code true}.

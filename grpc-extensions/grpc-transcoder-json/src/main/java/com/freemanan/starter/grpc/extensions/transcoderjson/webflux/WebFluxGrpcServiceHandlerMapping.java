@@ -1,6 +1,6 @@
-package com.freemanan.starter.grpc.extensions.transcoderhttp.webflux;
+package com.freemanan.starter.grpc.extensions.transcoderjson.webflux;
 
-import com.freemanan.starter.grpc.extensions.transcoderhttp.util.Util;
+import com.freemanan.starter.grpc.extensions.transcoderjson.util.Util;
 import io.grpc.BindableService;
 import java.util.Map;
 import org.springframework.beans.factory.ObjectProvider;
