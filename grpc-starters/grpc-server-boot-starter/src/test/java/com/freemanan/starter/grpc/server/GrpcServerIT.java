@@ -97,6 +97,30 @@ class GrpcServerIT {
         ctx.close();
     }
 
+    @Test
+    void testEmptyServerEnabled() {
+        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class).run();
+
+        GrpcServer server = ctx.getBean(GrpcServer.class);
+
+        assertThat(server).isInstanceOf(DefaultGrpcServer.class);
+
+        ctx.close();
+    }
+
+    @Test
+    void testEmptyServerDisabled() {
+        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+                .properties(GrpcServerProperties.PREFIX + ".enable-empty-server=false")
+                .run();
+
+        GrpcServer server = ctx.getBean(GrpcServer.class);
+
+        assertThat(server).isInstanceOf(DummyGrpcServer.class);
+
+        ctx.close();
+    }
+
     @Configuration(proxyBeanMethods = false)
     @EnableAutoConfiguration
     static class Cfg {}
