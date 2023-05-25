@@ -1,8 +1,9 @@
 dependencies {
-    api(project(":grpc-starters:grpc-server-boot-starter"))
+    api(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
     api("com.google.protobuf:protobuf-java-util")
-    optionalSupportApi("org.springframework.boot:spring-boot-starter-web")
-    optionalSupportApi("org.springframework.boot:spring-boot-starter-webflux")
+
+    compileOnly("org.springframework.boot:spring-boot-starter-web")
+    compileOnly("org.springframework.boot:spring-boot-starter-webflux")
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

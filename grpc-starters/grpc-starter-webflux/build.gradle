@@ -1,9 +1,7 @@
 dependencies {
     // Do not use shaded netty when using webflux,
     // because they both use netty and it will increase the size of the package (has two versions of netty).
-    api(project(":grpc-extensions:grpc-transcoder-json")) {
-        exclude(group: "io.grpc", module: "grpc-netty-shaded")
-    }
+    api(project(":grpc-extensions:grpc-transcoder-json"))
     api("io.grpc:grpc-netty") {
         // using the netty version of spring-boot-starter-webflux
         exclude(group: "io.netty")

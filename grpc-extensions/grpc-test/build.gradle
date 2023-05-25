@@ -1,7 +1,10 @@
 dependencies {
     api("org.springframework.boot:spring-boot-starter-test")
-    optionalSupportApi(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
-    optionalSupportApi(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+
+    compileOnly(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
+    compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+
+    testImplementation(project(":grpc-starters:grpc-boot-starter"))
 }
 
 apply from: "$rootDir/deploy.gradle"

@@ -31,13 +31,14 @@ public class GrpcValidationAutoConfiguration {
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(ValidatorIndex.class)
     static class Pgv {
+
         @Configuration(proxyBeanMethods = false)
         @ConditionalOnClass({ValidatingClientInterceptor.class, GrpcClientProperties.class})
+        @ConditionOnGrpcClientEnabled
         @ConditionalOnProperty(prefix = GrpcValidationProperties.Client.PREFIX, name = "enabled", matchIfMissing = true)
         static class Client {
 
             @Bean
-            @ConditionOnGrpcClientEnabled
             @ConditionalOnMissingBean
             public ValidatingClientInterceptor grpcValidatingClientInterceptor(GrpcValidationProperties properties) {
                 return new OrderedValidatingClientInterceptor(
@@ -47,11 +48,11 @@ public class GrpcValidationAutoConfiguration {
 
         @Configuration(proxyBeanMethods = false)
         @ConditionalOnClass({ValidatingServerInterceptor.class, GrpcServerProperties.class})
+        @ConditionOnGrpcServerEnabled
         @ConditionalOnProperty(prefix = GrpcValidationProperties.Server.PREFIX, name = "enabled", matchIfMissing = true)
         static class Server {
 
             @Bean
-            @ConditionOnGrpcServerEnabled
             @ConditionalOnMissingBean
             public ValidatingServerInterceptor grpcValidatingServerInterceptor(GrpcValidationProperties properties) {
                 return new OrderedValidatingServerInterceptor(

@@ -1,12 +1,12 @@
 dependencies {
-    optionalSupportApi(project(":grpc-starters:grpc-client-boot-starter"))
-    optionalSupportApi(project(":grpc-starters:grpc-server-boot-starter"))
+    compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+    compileOnly(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
 
     api("io.grpc:grpc-stub")
     api("io.grpc:grpc-protobuf")
     api("javax.annotation:javax.annotation-api:${javaxValidationApiVersion}") // necessary for Java 9+, @javax.annotation.Generated
 
-    optionalSupportApi("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
+    compileOnly("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

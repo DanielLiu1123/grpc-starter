@@ -38,6 +38,9 @@ dependencies {
 
         // sample api
         api(project(":examples:grpc-sample-api"))
+
+        // third party
+        api("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
     }
 
     api(platform("io.grpc:grpc-bom:${grpcVersion}"))

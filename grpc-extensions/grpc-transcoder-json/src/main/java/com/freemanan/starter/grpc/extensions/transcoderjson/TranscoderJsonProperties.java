@@ -12,7 +12,7 @@ public class TranscoderJsonProperties {
     public static final String PREFIX = "grpc.transcoder-json";
 
     /**
-     * Whether to enable transcoder-http auto-configuration, default {@code true}.
+     * Whether to enable transcoder-json auto-configuration, default {@code true}.
      */
     private boolean enabled = true;
 }
