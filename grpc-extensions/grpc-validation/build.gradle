@@ -11,6 +11,11 @@ dependencies {
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+    testImplementation("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
+    testImplementation(project(":grpc-starters:grpc-boot-starter"))
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
 }
 
 apply from: "${rootDir}/deploy.gradle"
+apply from: "${rootDir}/protobuf.gradle"
