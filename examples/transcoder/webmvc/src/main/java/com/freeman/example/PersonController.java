@@ -6,8 +6,6 @@ import com.freemanan.sample.pet.v1.PetServiceGrpc;
 import com.freemanan.starter.grpc.server.GrpcService;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
-import java.util.Map;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,15 +36,5 @@ public class PersonController extends PetServiceGrpc.PetServiceImplBase {
         StringValue name = StringValue.of(request.getValue());
         responseObserver.onNext(name);
         responseObserver.onCompleted();
-    }
-
-    @GetMapping("/hello")
-    public String hello() {
-        return "hello";
-    }
-
-    @GetMapping("/hello2")
-    public Map<String, Object> hello2() {
-        return Map.of("hello", "world");
     }
 }
