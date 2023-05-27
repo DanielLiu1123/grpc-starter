@@ -30,114 +30,67 @@ capabilities. _Make gRPC integration with Spring Boot feel seamless and native._
 ## Quick Start
 
 ```groovy
-// client + server
-implementation 'com.freemanan:grpc-boot-starter:3.0.0'
+implementation(platform("com.freemanan:grpc-starter-dependencies:3.0.0"))
+implementation("com.freemanan:grpc-boot-starter")
+
+// use gRPC simple proto for the example
+implementation("io.grpc:grpc-testing-proto")
 ```
 
-1. Proto definition
+- Server implementation
 
-   <details>
-     <summary>foo.proto</summary>
+```java
 
-      ```protobuf
-      syntax = "proto3";
-      
-      package fm.foo.v1;
-      
-      option java_package = "com.freemanan.foo.v1.api";
-      option java_multiple_files = true;
-      
-      message Foo {
-        string id = 1;
-        string name = 2;
-      }
-      
-      service FooService {
-        rpc Create (Foo) returns (Foo) {}
-      }
-      ```
-   </details>
+@Controller
+public class SimpleServiceController extends SimpleServiceGrpc.SimpleServiceImplBase {
 
-2. Server implementation
+    @Override
+    public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> responseObserver) {
+        SimpleResponse response = SimpleResponse.newBuilder()
+                .setResponseMessage("Hi, I got your message: " + request.getRequestMessage())
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+}
+```
 
-   <details>
-     <summary>FooServiceImpl.java</summary>
+- gRPC stubs injection
 
-      ```java
-      
-      @Controller // register to Spring context, support any @Component based annotation
-      public class FooServiceImpl extends FooServiceGrpc.FooServiceImplBase {
-      
-          @Autowired
-          private FooRepository fooRepository;
-      
-          @Override
-          public void create(Foo request, StreamObserver<Foo> responseObserver) {
-              Foo foo = fooRepository.save(request);
-              responseObserver.onNext(foo);
-              responseObserver.onCompleted();
-          }
-      }
-      ```
-   </details>
+1. Use `@EnableGrpcClients` to specify which gRPC stubs to scan
 
-3. Using gRPC stubs
-
-    1. Use `@EnableGrpcClients` to specify which gRPC stubs to scan
-
-       <details>
-         <summary>SimpleApp.java</summary>
-
-        ```java
-        @SpringBootApplication
-        @EnableGrpcClients(clients = FooServiceBlockingStub.class)
-        public class SimpleApp {
-            public static void main(String[] args) {
-                SpringApplication.run(SimpleApp.class, args);
-            }
+    ```java
+    @SpringBootApplication
+    @EnableGrpcClients("io.grpc")
+    public class SimpleApp {
+        public static void main(String[] args) {
+            SpringApplication.run(SimpleApp.class, args);
         }
-        ```
-       </details>
+    }
+    ```
 
-       > The usage of `@EnableGrpcClients` is very similar to Spring Cloud Openfeign `@EnableFeignClients`, except it is
-       used to scan gRPC stubs.
+   > The usage of `@EnableGrpcClients` is very similar to Spring Cloud Openfeign `@EnableFeignClients`, except it is
+   used to scan gRPC stubs.
 
-    2. Configure the address of the stub
+2. Configure the authority of the stub
 
-       <details>
-         <summary>application.yml</summary>
+    ```yaml
+    # application.yml
+    grpc:
+      client:
+        authority: localhost:9090
+    ```
 
-        ```yaml
-        grpc:
-          client:
-            authority: localhost:9090
-        ```
-       </details>
+3. Inject using `@Autowired`
 
-    3. Inject using `@Autowired`
-
-       <details>
-         <summary>SimpleApp.java</summary>
-
-        ```java
-        @SpringBootApplication
-        @EnableGrpcClients(clients = FooServiceBlockingStub.class)
-        public class SimpleApp implements ApplicationRunner {
-            public static void main(String[] args) {
-                SpringApplication.run(SimpleApp.class, args);
-            }
-     
-            @Autowired
-            FooServiceBlockingStub fooBlockingStub;
-     
-            @Override
-            public void run(ApplicationArguments args) {
-                Foo foo = Foo.newBuilder().setName("foo").build();
-                Foo result = fooBlockingStub.create(foo);
-            }
-        }
-        ```
-       </details>
+    ```java
+    
+    @Service
+    public class SimpleService {
+        @Autowired
+        SimpleServiceGrpc.SimpleServiceBlockingStub simpleServiceBlockingStub;
+    }
+    ```
 
 You can refer to the [example](examples/simple) project.
 
@@ -156,7 +109,7 @@ The following versions are maintained:
 
 - 2.x
 
-  The minor maintenance release, based on Spring Boot 2, baseline is JDK 8, corresponding branch
+  The main maintenance release, based on Spring Boot 2, baseline is JDK 8, corresponding branch
   is [2.x](https://github.com/DanielLiu1123/grpc-starter/tree/2.x)
 
   | Spring Boot | grpc-boot-starter |
