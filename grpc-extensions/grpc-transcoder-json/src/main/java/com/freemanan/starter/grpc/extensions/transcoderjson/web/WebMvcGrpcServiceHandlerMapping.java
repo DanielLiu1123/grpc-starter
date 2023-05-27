@@ -2,8 +2,8 @@ package com.freemanan.starter.grpc.extensions.transcoderjson.web;
 
 import com.freemanan.starter.grpc.extensions.transcoderjson.util.Util;
 import io.grpc.BindableService;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -188,7 +188,7 @@ class TranscoderJsonIT {
         public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
                 ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
             ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT> c =
-                    new ForwardingServerCall.SimpleForwardingServerCall<>(call) {
+                    new ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
                         @Override
                         public void sendHeaders(Metadata headers) {
                             headers.put(Metadata.Key.of("request-id", Metadata.ASCII_STRING_MARSHALLER), "001");

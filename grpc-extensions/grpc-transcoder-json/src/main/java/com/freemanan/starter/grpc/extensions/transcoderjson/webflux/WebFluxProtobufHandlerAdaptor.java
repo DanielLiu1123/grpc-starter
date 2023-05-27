@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -24,7 +25,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
-import org.springframework.web.reactive.DispatchExceptionHandler;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
@@ -36,8 +36,7 @@ import reactor.core.publisher.Mono;
 /**
  * @author Freeman
  */
-public class WebFluxProtobufHandlerAdaptor extends AbstractHandlerAdaptor
-        implements HandlerAdapter, DispatchExceptionHandler {
+public class WebFluxProtobufHandlerAdaptor extends AbstractHandlerAdaptor implements HandlerAdapter {
     private static final Logger log = LoggerFactory.getLogger(WebFluxProtobufHandlerAdaptor.class);
 
     private static final String NEW_FUTURE_STUB = "newFutureStub";
@@ -66,8 +65,8 @@ public class WebFluxProtobufHandlerAdaptor extends AbstractHandlerAdaptor
         Class<?> messageType = method.getParameterTypes()[0];
         Class<?> beanClass = hm.getBeanType();
 
-        DispatchExceptionHandler exceptionHandler =
-                (exchange2, ex) -> handleException(exchange, ex, (HandlerMethod) handler, new BindingContext());
+        Function<Throwable, Mono<HandlerResult>> exceptionHandler =
+                ex -> handleException(exchange, ex, hm, new BindingContext());
 
         AtomicReference<Metadata> responseHeader = new AtomicReference<>();
         AtomicReference<Metadata> responseTrailer = new AtomicReference<>();
@@ -103,7 +102,7 @@ public class WebFluxProtobufHandlerAdaptor extends AbstractHandlerAdaptor
                 })
                 .map(message -> new HandlerResult(hm, message, hm.getReturnType()))
                 .doOnNext(handlerResult -> handlerResult.setExceptionHandler(exceptionHandler))
-                .onErrorResume(ex -> exceptionHandler.handleError(exchange, ex));
+                .onErrorResume(exceptionHandler);
     }
 
     @SuppressWarnings("unchecked")
@@ -171,10 +170,5 @@ public class WebFluxProtobufHandlerAdaptor extends AbstractHandlerAdaptor
     @Override
     public String getNewStubMethodName() {
         return NEW_FUTURE_STUB;
-    }
-
-    @Override
-    public Mono<HandlerResult> handleError(ServerWebExchange exchange, Throwable ex) {
-        return handleException(exchange, ex, null, null);
     }
 }

@@ -18,7 +18,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.server.NotAcceptableStatusException;
@@ -82,8 +81,9 @@ public class Util {
 
     public static List<MediaType> getAccept(HttpHeaders headers) {
         try {
-            List<MediaType> mediaTypes = headers.getAccept();
-            MimeTypeUtils.sortBySpecificity(mediaTypes);
+            List<MediaType> mediaTypes = headers.getAccept().stream()
+                    .sorted(MediaType.SPECIFICITY_COMPARATOR)
+                    .collect(Collectors.toList());
             return !CollectionUtils.isEmpty(mediaTypes) ? mediaTypes : Collections.singletonList(MediaType.ALL);
         } catch (InvalidMediaTypeException ex) {
             String value = headers.getFirst(HttpHeaders.ACCEPT);

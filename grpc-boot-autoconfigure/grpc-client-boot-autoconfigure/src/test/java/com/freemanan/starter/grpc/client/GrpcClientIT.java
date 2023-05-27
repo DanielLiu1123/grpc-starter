@@ -36,8 +36,7 @@ class GrpcClientIT {
         assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();
         assertThatCode(() -> ctx.getBean(PetServiceGrpc.PetServiceBlockingStub.class))
                 .isInstanceOf(BeanCreationException.class)
-                .rootCause()
-                .hasMessageStartingWith("Not configure authority for stub");
+                .hasMessageContaining("Not configure authority for stub");
 
         ctx.close();
     }
