@@ -66,9 +66,9 @@ public class GrpcHandlerResultHandler implements HandlerResultHandler, Ordered {
     }
 
     /**
-     * {@link ResponseBodyResultHandler} order is 100
+     * {@link ResponseBodyResultHandler} order is 100.
      *
-     * @return
+     * @see ResponseBodyResultHandler
      */
     @Override
     public int getOrder() {
