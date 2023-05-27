@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.codec.HttpMessageReader;
@@ -32,7 +31,6 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -68,22 +66,17 @@ public class WebFluxProtobufHandlerAdaptor extends AbstractHandlerAdaptor
         Class<?> messageType = method.getParameterTypes()[0];
         Class<?> beanClass = hm.getBeanType();
 
-        Object futureStub = getStub(beanClass);
-
-        Flux<DataBuffer> requestBody = exchange.getRequest().getBody();
-
         DispatchExceptionHandler exceptionHandler =
                 (exchange2, ex) -> handleException(exchange, ex, (HandlerMethod) handler, new BindingContext());
 
         AtomicReference<Metadata> responseHeader = new AtomicReference<>();
         AtomicReference<Metadata> responseTrailer = new AtomicReference<>();
 
-        return DataBufferUtils.join(requestBody)
+        return DataBufferUtils.join(exchange.getRequest().getBody())
                 .map(dataBuffer -> convert2ProtobufMessage(messageType, dataBuffer.asInputStream()))
                 // invoke grpc method
                 .flatMap(msg -> {
-                    Object stub = futureStub;
-                    Method m = getInvokeMethod(stub, method, msg);
+                    Object stub = getStub(beanClass);
 
                     HttpHeaders headers = exchange.getRequest().getHeaders();
                     Metadata metadata = headerTransformProcessor.toRequestMetadata(headers);
@@ -95,6 +88,7 @@ public class WebFluxProtobufHandlerAdaptor extends AbstractHandlerAdaptor
                     stub = applyInterceptor4Stub(
                             MetadataUtils.newCaptureMetadataInterceptor(responseHeader, responseTrailer), stub);
 
+                    Method m = getInvokeMethod(stub, method, msg);
                     ListenableFuture<Message> resp = getFutureStubResponse(stub, msg, m);
                     return Mono.fromFuture(FutureAdapter.toCompletable(resp));
                 })
@@ -107,8 +101,7 @@ public class WebFluxProtobufHandlerAdaptor extends AbstractHandlerAdaptor
                                 v -> exchange.getResponse().getHeaders().add(k, v)));
                     }
                 })
-                .flatMap(message -> new ProtobufHandlerMethod((HandlerMethod) handler, message)
-                        .invoke(exchange, new BindingContext()))
+                .map(message -> new HandlerResult(hm, message, hm.getReturnType()))
                 .doOnNext(handlerResult -> handlerResult.setExceptionHandler(exceptionHandler))
                 .onErrorResume(ex -> exceptionHandler.handleError(exchange, ex));
     }

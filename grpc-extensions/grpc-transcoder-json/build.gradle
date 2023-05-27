@@ -8,6 +8,13 @@ dependencies {
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+    testCompileOnly("org.springframework.boot:spring-boot-starter-web")
+    testCompileOnly("org.springframework.boot:spring-boot-starter-webflux")
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
+    testImplementation(project(":grpc-starters:grpc-boot-starter"))
+    testImplementation("com.freemanan:classpath-replacer-junit5:${classpathReplacerVersion}")
 }
 
 apply from: "${rootDir}/deploy.gradle"
+apply from: "${rootDir}/protobuf.gradle"

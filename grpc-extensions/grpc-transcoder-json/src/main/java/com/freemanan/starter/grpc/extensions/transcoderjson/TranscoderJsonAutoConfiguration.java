@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 
 /**
  * @author Freeman
@@ -88,13 +87,8 @@ public class TranscoderJsonAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public GrpcHandlerResultHandler grpcHandlerResultHandler(
-                @Qualifier("webFluxAdapterRegistry") ReactiveAdapterRegistry reactiveAdapterRegistry,
-                ServerCodecConfigurer serverCodecConfigurer,
-                @Qualifier("webFluxContentTypeResolver") RequestedContentTypeResolver contentTypeResolver) {
-
-            return new GrpcHandlerResultHandler(
-                    serverCodecConfigurer.getWriters(), contentTypeResolver, reactiveAdapterRegistry);
+        public GrpcHandlerResultHandler grpcHandlerResultHandler() {
+            return new GrpcHandlerResultHandler();
         }
     }
 }

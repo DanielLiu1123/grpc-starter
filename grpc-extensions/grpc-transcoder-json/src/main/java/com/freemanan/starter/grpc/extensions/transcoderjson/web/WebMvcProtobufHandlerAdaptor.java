@@ -1,6 +1,11 @@
 package com.freemanan.starter.grpc.extensions.transcoderjson.web;
 
+import static com.freemanan.starter.grpc.extensions.transcoderjson.util.ProtoUtil.toJson;
+import static com.freemanan.starter.grpc.extensions.transcoderjson.util.Util.anyCompatible;
+import static com.freemanan.starter.grpc.extensions.transcoderjson.util.Util.getAccept;
 import static com.freemanan.starter.grpc.extensions.transcoderjson.util.Util.isGrpcHandleMethod;
+import static com.freemanan.starter.grpc.extensions.transcoderjson.util.Util.isJson;
+import static com.freemanan.starter.grpc.extensions.transcoderjson.util.Util.notAcceptable;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import com.freemanan.starter.grpc.extensions.transcoderjson.AbstractHandlerAdaptor;
@@ -13,10 +18,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.protobuf.ProtobufJsonFormatHttpMessageConverter;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.web.method.HandlerMethod;
@@ -31,8 +36,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 public class WebMvcProtobufHandlerAdaptor extends AbstractHandlerAdaptor implements HandlerAdapter {
 
     private static final String NEW_BLOCKING_STUB = "newBlockingStub";
-
-    private static final HttpMessageConverter<Message> converter = new ProtobufJsonFormatHttpMessageConverter();
 
     private final HeaderTransformProcessor headerTransformProcessor;
 
@@ -56,7 +59,8 @@ public class WebMvcProtobufHandlerAdaptor extends AbstractHandlerAdaptor impleme
         Message message = convert2ProtobufMessage(method.getParameterTypes()[0], request.getInputStream());
 
         // create metadata
-        Metadata metadata = buildMetadata(new ServletServerHttpRequest(request).getHeaders());
+        ServletServerHttpRequest req = new ServletServerHttpRequest(request);
+        Metadata metadata = headerTransformProcessor.toRequestMetadata(req.getHeaders());
 
         // get gRPC blocking stub to use
         Object stub = getStub(beanClass);
@@ -74,9 +78,9 @@ public class WebMvcProtobufHandlerAdaptor extends AbstractHandlerAdaptor impleme
         Method stubMethod = getInvokeMethod(stub, method, message);
 
         // call gRPC stub method
-        Object grpcResponse;
+        Message grpcResponse;
         try {
-            grpcResponse = stubMethod.invoke(stub, message);
+            grpcResponse = (Message) stubMethod.invoke(stub, message);
         } catch (InvocationTargetException ite) {
             Throwable te = ite.getTargetException();
             if (te instanceof StatusRuntimeException) {
@@ -92,16 +96,28 @@ public class WebMvcProtobufHandlerAdaptor extends AbstractHandlerAdaptor impleme
             headers.forEach((k, values) -> values.forEach(v -> response.addHeader(k, v)));
         }
 
-        // convert gRPC response message (Protobuf) to JSON
-        try (ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(response)) {
-            converter.write((Message) grpcResponse, APPLICATION_JSON, outputMessage);
+        try (ServletServerHttpResponse resp = new ServletServerHttpResponse(response)) {
+            // convert gRPC response message (Protobuf) to JSON
+            String json = toJson(grpcResponse);
+            if (isJson(json)) {
+                if (anyCompatible(getAccept(req.getHeaders()), APPLICATION_JSON)) {
+                    resp.getHeaders().setContentType(APPLICATION_JSON);
+                    resp.getBody().write(json.getBytes(StandardCharsets.UTF_8));
+                    resp.getBody().flush();
+                    return null;
+                }
+                throw notAcceptable();
+            }
+
+            MediaType mt = new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8);
+            if (anyCompatible(getAccept(req.getHeaders()), mt)) {
+                resp.getHeaders().setContentType(mt);
+                resp.getBody().write(json.getBytes(StandardCharsets.UTF_8));
+                resp.getBody().flush();
+                return null;
+            }
+            throw notAcceptable();
         }
-
-        return null;
-    }
-
-    private Metadata buildMetadata(HttpHeaders headers) {
-        return headerTransformProcessor.toRequestMetadata(headers);
     }
 
     /**

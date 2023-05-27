@@ -11,13 +11,13 @@ import org.springframework.http.HttpStatus;
 public class GrpcUtil {
 
     /**
-     * Convert grpc status to http status.
+     * Convert gRPC status to http status.
      *
      * @param grpcStatus grpc status
      * @return http status
      * @see <a href="https://chromium.googlesource.com/external/github.com/grpc/grpc/+/refs/tags/v1.21.4-pre1/doc/statuscodes.md">statuscodes</a>
      */
-    public static HttpStatus toHttpCode(Status grpcStatus) {
+    public static HttpStatus toHttpStatus(Status grpcStatus) {
         switch (grpcStatus.getCode()) {
             case OK:
                 return HttpStatus.OK;

@@ -34,10 +34,11 @@ public abstract class AbstractHandlerAdaptor
         implements ApplicationListener<GrpcServerStartedEvent>, BeanFactoryAware, Ordered {
 
     public static final int ORDER = 0;
+    private static final String GET_DEFAULT_INSTANCE = "getDefaultInstance";
 
     private ManagedChannel channel;
 
-    private BeanFactory beanFactory;
+    protected BeanFactory beanFactory;
 
     private final Map<Class<?>, Object> beanClassToStub = new ConcurrentHashMap<>();
     /**
@@ -75,6 +76,15 @@ public abstract class AbstractHandlerAdaptor
 
         builder.usePlaintext();
 
+        setChannel(builder);
+    }
+
+    /**
+     * Give a chance to customize the channel.
+     *
+     * @param builder ManagedChannelBuilder
+     */
+    protected void setChannel(ManagedChannelBuilder<?> builder) {
         this.channel = builder.build();
     }
 
@@ -102,7 +112,7 @@ public abstract class AbstractHandlerAdaptor
 
     protected Object applyInterceptor4Stub(ClientInterceptor clientInterceptor, Object stub) {
         try {
-            return withInterceptorsMethod.invoke(stub, new Object[] {new ClientInterceptor[] {clientInterceptor}});
+            return withInterceptorsMethod.invoke(stub, (Object) new ClientInterceptor[] {clientInterceptor});
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             throw new IllegalStateException(e);
         }
@@ -132,14 +142,14 @@ public abstract class AbstractHandlerAdaptor
     protected Message convert2ProtobufMessage(Class<?> messageClass, InputStream is) {
         Message defaultInstance = messageClassToDefaultInstance.computeIfAbsent(messageClass, k -> {
             try {
-                return ((Message) messageClass.getMethod("getDefaultInstance").invoke(null));
+                return ((Message) messageClass.getMethod(GET_DEFAULT_INSTANCE).invoke(null));
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 throw new IllegalStateException(e);
             }
         });
+
         Message.Builder builder = defaultInstance.toBuilder();
-        try {
-            InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
+        try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
             parser.merge(reader, builder);
             return builder.build();
         } catch (IOException e) {

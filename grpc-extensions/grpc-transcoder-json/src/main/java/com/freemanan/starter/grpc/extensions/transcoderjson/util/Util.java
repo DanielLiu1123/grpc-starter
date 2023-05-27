@@ -7,13 +7,21 @@ import io.grpc.BindableService;
 import io.grpc.ServerMethodDefinition;
 import io.grpc.stub.StreamObserver;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.InvalidMediaTypeException;
+import org.springframework.http.MediaType;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.server.NotAcceptableStatusException;
 
 /**
  * @author Freeman
@@ -62,5 +70,38 @@ public class Util {
 
     public static boolean isGrpcHandleMethod(Object handler) {
         return handler instanceof HandlerMethod && isUnaryGrpcMethod(((HandlerMethod) handler).getMethod());
+    }
+
+    /**
+     * @param json json string
+     * @return true if json string is a json object or json array
+     */
+    public static boolean isJson(String json) {
+        return (json.startsWith("{") && json.endsWith("}")) || (json.startsWith("[") && json.endsWith("]"));
+    }
+
+    public static List<MediaType> getAccept(HttpHeaders headers) {
+        try {
+            List<MediaType> mediaTypes = headers.getAccept();
+            MimeTypeUtils.sortBySpecificity(mediaTypes);
+            return !CollectionUtils.isEmpty(mediaTypes) ? mediaTypes : Collections.singletonList(MediaType.ALL);
+        } catch (InvalidMediaTypeException ex) {
+            String value = headers.getFirst(HttpHeaders.ACCEPT);
+            throw new NotAcceptableStatusException(
+                    "Could not parse 'Accept' header [" + value + "]: " + ex.getMessage());
+        }
+    }
+
+    public static boolean anyCompatible(List<MediaType> mediaTypes, MediaType otherMediaType) {
+        for (MediaType mediaType : mediaTypes) {
+            if (mediaType.isCompatibleWith(otherMediaType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static NotAcceptableStatusException notAcceptable() {
+        return new NotAcceptableStatusException("Could not find acceptable representation");
     }
 }

@@ -4,6 +4,9 @@ plugins {
 
 dependencies {
     implementation(project(":examples:grpc-sample-api"))
+    implementation(project(":grpc-starters:grpc-server-boot-starter")){
+        exclude(group: 'io.grpc', module: "grpc-netty-shaded")
+    }
     implementation(project(":grpc-starters:grpc-starter-webflux"))
 
     compileOnly("org.projectlombok:lombok")

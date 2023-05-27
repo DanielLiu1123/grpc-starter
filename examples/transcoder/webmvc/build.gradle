@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation(project(":examples:grpc-sample-api"))
+    implementation(project(":grpc-starters:grpc-server-boot-starter"))
     implementation(project(":grpc-starters:grpc-starter-web"))
 
     compileOnly("org.projectlombok:lombok")
