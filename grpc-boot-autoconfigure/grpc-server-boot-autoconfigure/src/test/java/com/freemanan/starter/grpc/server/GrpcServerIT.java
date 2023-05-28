@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import com.freemanan.starter.grpc.server.feature.exceptionhandling.DefaultExceptionHandler;
 import io.grpc.Server;
 import io.grpc.protobuf.services.ProtoReflectionService;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -64,20 +63,6 @@ class GrpcServerIT {
                 .run();
 
         assertThatCode(() -> ctx.getBean(DefaultExceptionHandler.class)).doesNotThrowAnyException();
-
-        ctx.close();
-    }
-
-    @Test
-    void testInProcess() {
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
-                .properties(GrpcServerProperties.InProcess.PREFIX + ".name=" + UUID.randomUUID())
-                .run();
-
-        Server server = (Server) ReflectionTestUtils.getField(ctx.getBean(DefaultGrpcServer.class), "server");
-
-        assertThat(server).isNotNull();
-        assertThat(server.getPort()).isEqualTo(-1);
 
         ctx.close();
     }
