@@ -1,7 +1,8 @@
 # gRPC Starter
 
 [![Build](https://img.shields.io/github/actions/workflow/status/DanielLiu1123/grpc-starter/build.yml?branch=main)](https://github.com/DanielLiu1123/grpc-starter/actions)
-[![Maven Central](https://img.shields.io/maven-central/v/com.freemanan/grpc-starter-dependencies)](https://search.maven.org/artifact/com.freemanan/grpc-starter-dependencies)
+[![Maven Central](https://img.shields.io/maven-central/v/com.freemanan/grpc-starter-dependencies?versionPrefix=3.)](https://central.sonatype.com/artifact/com.freemanan/grpc-starter-dependencies)
+[![Maven Central](https://img.shields.io/maven-central/v/com.freemanan/grpc-starter-dependencies?versionPrefix=2.)](https://central.sonatype.com/artifact/com.freemanan/grpc-starter-dependencies)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 [Documentation](https://danielliu1123.github.io/grpc-starter)
@@ -9,7 +10,7 @@
 ## Overview
 
 This project provides Spring Boot starters for gRPC ecosystem, which provides autoconfigure and highly extendable
-capabilities. _Make gRPC integration with Spring Boot feel seamless and native._
+capabilities. _**Make gRPC integration with Spring Boot feel seamless and native.**_
 
 ## Features
 
@@ -37,7 +38,7 @@ implementation("com.freemanan:grpc-boot-starter")
 implementation("io.grpc:grpc-testing-proto")
 ```
 
-- Server implementation
+### Server implementation
 
 ```java
 
@@ -55,7 +56,7 @@ public class SimpleServiceController extends SimpleServiceGrpc.SimpleServiceImpl
 }
 ```
 
-- gRPC stubs injection
+### gRPC stubs injection
 
 1. Use `@EnableGrpcClients` to specify which gRPC stubs to scan
 
@@ -100,7 +101,7 @@ Mainly maintain the following versions:
 
 - 3.x
 
-  Based on Spring Boot 3, the baseline is JDK 17, corresponding branch
+  Based on Spring Boot 3, baseline is JDK 17, corresponding branch
   is [main](https://github.com/DanielLiu1123/grpc-starter/)
 
   | Spring Boot | grpc-boot-starter |
@@ -109,7 +110,7 @@ Mainly maintain the following versions:
 
 - 2.x
 
-  The main maintenance version, based on Spring Boot 2, baseline is JDK 8, corresponding branch
+  Based on Spring Boot 2, baseline is JDK 8, corresponding branch
   is [2.x](https://github.com/DanielLiu1123/grpc-starter/tree/2.x)
 
   | Spring Boot | grpc-boot-starter |
