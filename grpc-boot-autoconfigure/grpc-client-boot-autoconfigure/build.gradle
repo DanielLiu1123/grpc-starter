@@ -9,7 +9,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-    testRuntimeOnly("io.grpc:grpc-netty-shaded")
+    testImplementation(project(":grpc-starters:grpc-server-boot-starter"))
     testImplementation(project(":grpc-starters:grpc-starter-test"))
 }
 
