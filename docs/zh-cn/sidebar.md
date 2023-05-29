@@ -6,7 +6,7 @@
     - [入门指南](zh-cn/server/onboarding.md)
     - [健康检查](zh-cn/server/health-check.md)
     - [异常处理](zh-cn/server/exception-handling.md)
-    - [自定义 gRPC server 配置](zh-cn/server/customize-server-config.md)
+    - [自定义 server 配置](zh-cn/server/customize-server-config.md)
     - [优雅关闭](zh-cn/server/graceful-shutdown.md)
     - [Debug 模式](zh-cn/server/debug-mode.md)
     - [In-process server](zh-cn/server/in-process-server.md)
@@ -14,7 +14,8 @@
 
 - 客户端
     - [入门指南](zh-cn/client/onboarding.md)
-    - [自定义 gRPC channel 配置](zh-cn/client/customize-client-config.md)
+    - [自定义 client 配置](zh-cn/client/customize-client-config.md)
+    - [In-process channel](zh-cn/client/in-process-channel.md)
     - [配置项](zh-cn/client/configuration.md)
 
 - 扩展
