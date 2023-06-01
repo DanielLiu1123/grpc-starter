@@ -74,8 +74,10 @@ class GrpcClientCreator {
             Metadata.Key<String> key = Metadata.Key.of(m.getKey(), Metadata.ASCII_STRING_MARSHALLER);
             m.getValues().forEach(v -> metadata.put(key, v));
         });
-        ClientInterceptor metadataInterceptor = MetadataUtils.newAttachHeadersInterceptor(metadata);
-        builder.intercept(metadataInterceptor);
+        if (!metadata.keys().isEmpty()) {
+            ClientInterceptor metadataInterceptor = MetadataUtils.newAttachHeadersInterceptor(metadata);
+            builder.intercept(metadataInterceptor);
+        }
 
         // set interceptors, gRPC invoke interceptors in reverse order
         beanFactory.getBeanProvider(ClientInterceptor.class).stream()
