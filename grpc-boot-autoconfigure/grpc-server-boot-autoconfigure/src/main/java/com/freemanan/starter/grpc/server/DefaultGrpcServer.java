@@ -83,7 +83,9 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
         try {
             server.start();
             isRunning.set(true);
-            log.info("gRPC server started on port: {} ({})", server.getPort(), GrpcUtil.getGrpcBuildVersion());
+            if (log.isInfoEnabled()) {
+                log.info("gRPC server started on port: {} ({})", server.getPort(), GrpcUtil.getGrpcBuildVersion());
+            }
 
             publisher.publishEvent(new GrpcServerStartedEvent(server));
             waitUntilShutdown();
@@ -99,6 +101,8 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
             gracefulShutdown(server, Duration.ofMillis(properties.getShutdownTimeout()));
             isRunning.set(false);
             latch.countDown();
+
+            publisher.publishEvent(new GrpcServerTerminatedEvent(server));
         }
     }
 
@@ -144,6 +148,8 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
         if (!server.isTerminated()) {
             server.shutdownNow();
         }
-        log.info("gRPC server graceful shutdown in {} ms", System.currentTimeMillis() - start);
+        if (log.isInfoEnabled()) {
+            log.info("gRPC server graceful shutdown in {} ms", System.currentTimeMillis() - start);
+        }
     }
 }

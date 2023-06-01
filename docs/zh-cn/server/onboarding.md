@@ -64,6 +64,8 @@ class GrpcServerStartedEventListener implements ApplicationListener<GrpcServerSt
 }
 ```
 
+在 gRPC server 关闭后，会触发 `GrpcServerTerminatedEvent`，可以用相同的方式来监听该事件。
+
 ## 最大 Message 配置
 
 默认情况下，gRPC server 最大消息为 4MB，可以通过以下配置来修改。
