@@ -90,7 +90,7 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
             publisher.publishEvent(new GrpcServerStartedEvent(server));
             waitUntilShutdown();
         } catch (IOException e) {
-            gracefulShutdown(server, Duration.ofMillis(properties.getShutdownTimeout()));
+            gracefulShutdown();
             throw new IllegalStateException(e);
         }
     }
@@ -98,11 +98,9 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
     @Override
     public void stop() {
         if (isRunning.get()) {
-            gracefulShutdown(server, Duration.ofMillis(properties.getShutdownTimeout()));
+            gracefulShutdown();
             isRunning.set(false);
             latch.countDown();
-
-            publisher.publishEvent(new GrpcServerTerminatedEvent(server));
         }
     }
 
@@ -131,9 +129,15 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
                 .start();
     }
 
-    private static void gracefulShutdown(Server server, Duration timeout) {
+    private void gracefulShutdown() {
         long start = System.currentTimeMillis();
+
+        Duration timeout = Duration.ofMillis(properties.getShutdownTimeout());
         server.shutdown();
+
+        // publish shutdown event, user can listen the event to close the StreamObserver manually
+        publisher.publishEvent(new GrpcServerShutdownEvent(server));
+
         try {
             long time = timeout.toMillis();
             if (time > 0L) {
@@ -148,6 +152,9 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
         if (!server.isTerminated()) {
             server.shutdownNow();
         }
+
+        publisher.publishEvent(new GrpcServerTerminatedEvent(server));
+
         if (log.isInfoEnabled()) {
             log.info("gRPC server graceful shutdown in {} ms", System.currentTimeMillis() - start);
         }

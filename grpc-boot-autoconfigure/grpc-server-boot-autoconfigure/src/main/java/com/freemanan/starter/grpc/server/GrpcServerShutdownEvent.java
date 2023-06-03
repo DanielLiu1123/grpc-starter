@@ -4,13 +4,13 @@ import io.grpc.Server;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * Grpc server terminated event, triggered when the gRPC server is terminated.
+ * Grpc server shutdown event, triggered when the gRPC server starts shutdown.
  *
  * @author Freeman
  */
-public class GrpcServerTerminatedEvent extends ApplicationEvent {
+public class GrpcServerShutdownEvent extends ApplicationEvent {
 
-    public GrpcServerTerminatedEvent(Server source) {
+    public GrpcServerShutdownEvent(Server source) {
         super(source);
     }
 
