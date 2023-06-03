@@ -20,7 +20,7 @@
 
 - 扩展
     - [Protobuf 校验](zh-cn/extension/protobuf-validation.md)
-    - [JSON transcoder](zh-cn/extension/transcoder-http.md)
+    - [JSON transcoder](zh-cn/extension/json-transcoder.md)
     - [Test](zh-cn/extension/test.md)
 
 - 其他

@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author Freeman
  */
-@SpringBootTest(classes = LocalGrpcPortTest.Cfg.class)
+@SpringBootTest(classes = LocalGrpcPortTest.Cfg.class, properties = "grpc.server.port=9091")
 class LocalGrpcPortTest {
 
     @LocalGrpcPort
@@ -24,7 +24,7 @@ class LocalGrpcPortTest {
     ApplicationContext ctx;
 
     @Test
-    void testLocalGrpcPort() {
+    void testAlwaysUsingRandomPort() {
         assertThat(port).isEqualTo(-1);
         int p = ctx.getBean(Cfg.class).port;
         assertThat(p).isEqualTo(-1);

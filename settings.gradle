@@ -1,13 +1,16 @@
 rootProject.name = 'grpc-starter'
 
-// autoconfigure
+// core autoconfigure
 include(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure")
 include(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure")
 
 // extensions
+include(":grpc-extensions:grpc-json-transcoder")
 include(":grpc-extensions:grpc-test")
-include(":grpc-extensions:grpc-transcoder-json")
 include(":grpc-extensions:grpc-validation")
+
+// bom
+include(":grpc-starter-dependencies")
 
 // starters
 include(":grpc-starters:grpc-boot-starter")
@@ -18,13 +21,10 @@ include(":grpc-starters:grpc-starter-validation")
 include(":grpc-starters:grpc-starter-web")
 include(":grpc-starters:grpc-starter-webflux")
 
-// bom
-include(":grpc-starter-dependencies")
-
 // examples
 include(":examples:grpc-sample-api")
+include(":examples:json-transcoder:webflux")
+include(":examples:json-transcoder:webmvc")
 include(":examples:simple")
 include(":examples:user:user-api")
 include(":examples:user:user-server")
-include(":examples:json-transcoder:webmvc")
-include(":examples:json-transcoder:webflux")
