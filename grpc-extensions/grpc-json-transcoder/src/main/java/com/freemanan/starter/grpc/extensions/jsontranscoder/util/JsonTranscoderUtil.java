@@ -26,7 +26,7 @@ import org.springframework.web.server.NotAcceptableStatusException;
  * @author Freeman
  */
 @UtilityClass
-public class Util {
+public class JsonTranscoderUtil {
 
     public static boolean isUnaryGrpcMethod(Method method) {
         return method.getParameterCount() == 2
@@ -101,7 +101,7 @@ public class Util {
         return false;
     }
 
-    public static NotAcceptableStatusException notAcceptable() {
+    public static NotAcceptableStatusException notAcceptableException() {
         return new NotAcceptableStatusException("Could not find acceptable representation");
     }
 }

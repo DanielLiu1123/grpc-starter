@@ -44,18 +44,6 @@ public class ProtoUtil {
         return false;
     }
 
-    public static boolean isWrapperType(Class<?> clz) {
-        return BoolValue.class.isAssignableFrom(clz)
-                || Int32Value.class.isAssignableFrom(clz)
-                || Int64Value.class.isAssignableFrom(clz)
-                || UInt32Value.class.isAssignableFrom(clz)
-                || UInt64Value.class.isAssignableFrom(clz)
-                || FloatValue.class.isAssignableFrom(clz)
-                || DoubleValue.class.isAssignableFrom(clz)
-                || StringValue.class.isAssignableFrom(clz)
-                || BytesValue.class.isAssignableFrom(clz);
-    }
-
     /**
      * Convert protobuf message to JSON string.
      *
@@ -71,5 +59,17 @@ public class ProtoUtil {
         } catch (InvalidProtocolBufferException e) {
             throw new IllegalStateException("Can't convert message to JSON", e);
         }
+    }
+
+    private static boolean isWrapperType(Class<?> clz) {
+        return BoolValue.class.isAssignableFrom(clz)
+                || Int32Value.class.isAssignableFrom(clz)
+                || Int64Value.class.isAssignableFrom(clz)
+                || UInt32Value.class.isAssignableFrom(clz)
+                || UInt64Value.class.isAssignableFrom(clz)
+                || FloatValue.class.isAssignableFrom(clz)
+                || DoubleValue.class.isAssignableFrom(clz)
+                || StringValue.class.isAssignableFrom(clz)
+                || BytesValue.class.isAssignableFrom(clz);
     }
 }

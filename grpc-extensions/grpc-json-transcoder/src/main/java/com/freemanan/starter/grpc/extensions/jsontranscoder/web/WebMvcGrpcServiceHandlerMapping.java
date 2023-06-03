@@ -1,6 +1,6 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder.web;
 
-import com.freemanan.starter.grpc.extensions.jsontranscoder.util.Util;
+import com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil;
 import io.grpc.BindableService;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +30,7 @@ public class WebMvcGrpcServiceHandlerMapping extends AbstractHandlerMapping {
     private final Map<String, HandlerMethod> pathToMethod;
 
     public WebMvcGrpcServiceHandlerMapping(ObjectProvider<BindableService> grpcServiceProvider) {
-        this.pathToMethod = Util.getPathToMethod(grpcServiceProvider);
+        this.pathToMethod = JsonTranscoderUtil.getPathToMethod(grpcServiceProvider);
     }
 
     @Override

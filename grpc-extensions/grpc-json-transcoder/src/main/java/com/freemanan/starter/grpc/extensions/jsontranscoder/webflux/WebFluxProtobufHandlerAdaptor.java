@@ -1,10 +1,10 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder.webflux;
 
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.Util.isGrpcHandleMethod;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil.isGrpcHandleMethod;
 
 import com.freemanan.starter.grpc.extensions.jsontranscoder.AbstractHandlerAdaptor;
 import com.freemanan.starter.grpc.extensions.jsontranscoder.FutureAdapter;
-import com.freemanan.starter.grpc.extensions.jsontranscoder.processor.GrpcHeaderConverter;
+import com.freemanan.starter.grpc.extensions.jsontranscoder.GrpcHeaderConverter;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.Message;
 import io.grpc.Metadata;

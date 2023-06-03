@@ -1,9 +1,9 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder.webflux;
 
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil.isJson;
 import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.ProtoUtil.toJson;
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.Util.isJson;
 
-import com.freemanan.starter.grpc.extensions.jsontranscoder.util.Util;
+import com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil;
 import com.google.protobuf.Message;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -33,7 +33,7 @@ public class GrpcHandlerResultHandler implements HandlerResultHandler, Ordered {
     @Override
     public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
         Message message = (Message) result.getReturnValue();
-        Supplier<Throwable> errorSupplier = Util::notAcceptable;
+        Supplier<Throwable> errorSupplier = JsonTranscoderUtil::notAcceptableException;
         String json = toJson(message);
         if (isJson(json)) {
             if (anyCompatible(exchange, MediaType.APPLICATION_JSON)) {
@@ -56,7 +56,8 @@ public class GrpcHandlerResultHandler implements HandlerResultHandler, Ordered {
     }
 
     private static boolean anyCompatible(ServerWebExchange exchange, MediaType otherMediaType) {
-        List<MediaType> mediaTypes = Util.getAccept(exchange.getRequest().getHeaders());
+        List<MediaType> mediaTypes =
+                JsonTranscoderUtil.getAccept(exchange.getRequest().getHeaders());
         for (MediaType mediaType : mediaTypes) {
             if (mediaType.isCompatibleWith(otherMediaType)) {
                 return true;
