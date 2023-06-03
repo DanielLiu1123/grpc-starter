@@ -1,6 +1,6 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder.webflux;
 
-import com.freemanan.starter.grpc.extensions.jsontranscoder.util.Util;
+import com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil;
 import io.grpc.BindableService;
 import java.util.Map;
 import org.springframework.beans.factory.ObjectProvider;
@@ -32,7 +32,7 @@ public class WebFluxGrpcServiceHandlerMapping extends AbstractHandlerMapping {
     private final Map<String, HandlerMethod> pathToMethod;
 
     public WebFluxGrpcServiceHandlerMapping(ObjectProvider<BindableService> grpcServiceProvider) {
-        this.pathToMethod = Util.getPathToMethod(grpcServiceProvider);
+        this.pathToMethod = JsonTranscoderUtil.getPathToMethod(grpcServiceProvider);
     }
 
     @Override

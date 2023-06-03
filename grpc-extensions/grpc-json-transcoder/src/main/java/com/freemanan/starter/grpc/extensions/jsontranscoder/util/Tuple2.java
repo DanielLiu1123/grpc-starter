@@ -2,14 +2,12 @@ package com.freemanan.starter.grpc.extensions.jsontranscoder.util;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 /**
  * @author Freeman
  */
 @Getter
-@Setter
 @EqualsAndHashCode
 @ToString
 public class Tuple2<A, B> {

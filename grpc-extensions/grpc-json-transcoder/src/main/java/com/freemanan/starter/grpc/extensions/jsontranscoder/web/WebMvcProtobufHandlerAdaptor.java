@@ -1,15 +1,15 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder.web;
 
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil.anyCompatible;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil.getAccept;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil.isGrpcHandleMethod;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil.isJson;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil.notAcceptableException;
 import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.ProtoUtil.toJson;
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.Util.anyCompatible;
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.Util.getAccept;
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.Util.isGrpcHandleMethod;
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.Util.isJson;
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.Util.notAcceptable;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import com.freemanan.starter.grpc.extensions.jsontranscoder.AbstractHandlerAdaptor;
-import com.freemanan.starter.grpc.extensions.jsontranscoder.processor.GrpcHeaderConverter;
+import com.freemanan.starter.grpc.extensions.jsontranscoder.GrpcHeaderConverter;
 import com.google.protobuf.Message;
 import io.grpc.Metadata;
 import io.grpc.StatusRuntimeException;
@@ -106,7 +106,7 @@ public class WebMvcProtobufHandlerAdaptor extends AbstractHandlerAdaptor impleme
                     resp.getBody().flush();
                     return null;
                 }
-                throw notAcceptable();
+                throw notAcceptableException();
             }
 
             MediaType mt = new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8);
@@ -116,7 +116,7 @@ public class WebMvcProtobufHandlerAdaptor extends AbstractHandlerAdaptor impleme
                 resp.getBody().flush();
                 return null;
             }
-            throw notAcceptable();
+            throw notAcceptableException();
         }
     }
 

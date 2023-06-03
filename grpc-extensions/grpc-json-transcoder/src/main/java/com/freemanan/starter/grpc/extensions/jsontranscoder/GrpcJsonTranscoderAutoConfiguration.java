@@ -3,8 +3,6 @@ package com.freemanan.starter.grpc.extensions.jsontranscoder;
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.REACTIVE;
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.SERVLET;
 
-import com.freemanan.starter.grpc.extensions.jsontranscoder.processor.DefaultGrpcHeaderConverter;
-import com.freemanan.starter.grpc.extensions.jsontranscoder.processor.GrpcHeaderConverter;
 import com.freemanan.starter.grpc.extensions.jsontranscoder.web.WebMvcGrpcServiceHandlerMapping;
 import com.freemanan.starter.grpc.extensions.jsontranscoder.web.WebMvcProtobufHandlerAdaptor;
 import com.freemanan.starter.grpc.extensions.jsontranscoder.webflux.GrpcHandlerResultHandler;
