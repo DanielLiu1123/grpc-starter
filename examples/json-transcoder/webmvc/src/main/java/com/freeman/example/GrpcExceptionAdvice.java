@@ -1,6 +1,6 @@
 package com.freeman.example;
 
-import com.freemanan.starter.grpc.extensions.transcoderjson.util.GrpcUtil;
+import com.freemanan.starter.grpc.extensions.jsontranscoder.util.GrpcUtil;
 import io.grpc.StatusRuntimeException;
 import lombok.AllArgsConstructor;
 import lombok.Data;

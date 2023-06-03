@@ -24,7 +24,7 @@ dependencies {
 
         // extensions
         api(project(":grpc-extensions:grpc-test"))
-        api(project(":grpc-extensions:grpc-transcoder-json"))
+        api(project(":grpc-extensions:grpc-json-transcoder"))
         api(project(":grpc-extensions:grpc-validation"))
 
         // starters

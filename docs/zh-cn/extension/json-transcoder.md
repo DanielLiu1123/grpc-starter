@@ -1,6 +1,6 @@
 ## Overview
 
-将 gRPC 服务转换为 HTTP/JSON 服务，**_只需要写一套 gRPC 实现，就可以同时支持 gRPC 和 HTTP/JSON 两种调用方式_**。
+JSON transcoder 扩展将 gRPC 服务转换为 HTTP/JSON 服务，**_只需要写一套 gRPC 实现，就可以同时支持 gRPC 和 HTTP/JSON 两种调用方式_**。
 
 ## 使用步骤
 
@@ -72,7 +72,7 @@ public class SimpleServiceImpl extends SimpleServiceGrpc.SimpleServiceImplBase {
 curl -X POST -d '{"requestMessage": "lol"}' localhost:8080/simple
 ```
 
-可以使用 `@PostMapping`、`@PutMapping`、`@DeleteMapping` 等注解，**但是不支持 `@GetMapping`**，因为 GET 请求没有 body。
+可以使用 `@PostMapping`、`@PutMapping`、`@DeleteMapping` 等注解，但是**不支持** `@GetMapping`，因为 GET 请求没有 body。
 
 > 在使用 JSON transcoder 功能时，gRPC service bean **必须**使用基于 `@Controller`
 > 的注解来标记，比如 `@GrpcService`、`@Controller`、`@RestController` 等。
@@ -103,6 +103,22 @@ public class GrpcExceptionAdvice {
     }
 }
 ```
+
+## Header 转换
+
+默认情况下，HTTP 请求的 header 会转换为 gRPC 请求的 metadata，gRPC 响应的 metadata 会转换为 HTTP 响应的 header。
+
+在 HTTP 请求的 header 会转换为 gRPC 请求的 metadata 时：
+
+- 过滤除了 Cookie 之外的所有标准 HTTP headers
+- 保留所有自定义 HTTP headers
+
+在 gRPC 响应的 metadata 会转换为 HTTP 响应的 header 时：
+
+- 过滤所有以 `grpc-` 开头的 metadata
+- 保留所有自定义 metadata
+
+可以通过实现 `GrpcHeaderConverter` 接口来自定义 header 转换逻辑，默认实现为 `DefaultGrpcHeaderConverter`。
 
 ## 使用 WebFlux
 
