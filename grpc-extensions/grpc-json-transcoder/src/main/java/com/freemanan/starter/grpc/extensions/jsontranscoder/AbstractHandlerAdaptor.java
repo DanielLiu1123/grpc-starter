@@ -19,19 +19,24 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * @author Freeman
  */
 public abstract class AbstractHandlerAdaptor
         implements ApplicationListener<GrpcServerStartedEvent>, BeanFactoryAware, Ordered {
+    private static final Logger log = LoggerFactory.getLogger(AbstractHandlerAdaptor.class);
 
     public static final int ORDER = 0;
     private static final String GET_DEFAULT_INSTANCE = "getDefaultInstance";
@@ -89,7 +94,10 @@ public abstract class AbstractHandlerAdaptor
             try {
                 return ((Message) messageClass.getMethod(GET_DEFAULT_INSTANCE).invoke(null));
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                throw new IllegalStateException(e);
+                if (log.isWarnEnabled()) {
+                    log.warn("Failed to invoke method '{}' of class {}", GET_DEFAULT_INSTANCE, messageClass, e);
+                }
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
             }
         });
 
@@ -98,7 +106,10 @@ public abstract class AbstractHandlerAdaptor
             parser.merge(reader, builder);
             return builder.build();
         } catch (IOException e) {
-            throw new IllegalStateException(e);
+            if (log.isWarnEnabled()) {
+                log.warn("Failed to parse JSON to Message {}", messageClass, e);
+            }
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
 

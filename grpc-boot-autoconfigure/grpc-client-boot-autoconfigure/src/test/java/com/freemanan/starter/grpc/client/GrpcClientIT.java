@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.freemanan.sample.pet.v1.PetServiceGrpc;
 import com.freemanan.starter.grpc.server.GrpcServerProperties;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -19,8 +20,9 @@ class GrpcClientIT {
 
     @Test
     void testGrpcStubAutowired_whenNotConfigureBasePackages() {
+        String name = UUID.randomUUID().toString();
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
-                .properties(GrpcServerProperties.PREFIX + ".port=0")
+                .properties(GrpcServerProperties.InProcess.PREFIX + ".name=" + name)
                 .run();
 
         assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();
@@ -32,8 +34,9 @@ class GrpcClientIT {
 
     @Test
     void testGrpcStubAutowired_whenNotConfigureAuthority() {
+        String name = UUID.randomUUID().toString();
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
-                .properties(GrpcServerProperties.PREFIX + ".port=0")
+                .properties(GrpcServerProperties.InProcess.PREFIX + ".name=" + name)
                 .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=com")
                 .run();
 
@@ -48,10 +51,11 @@ class GrpcClientIT {
 
     @Test
     void testGrpcStubAutowired_whenOK() {
+        String name = UUID.randomUUID().toString();
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
-                .properties(GrpcServerProperties.PREFIX + ".port=0")
+                .properties(GrpcServerProperties.InProcess.PREFIX + ".name=" + name)
+                .properties(GrpcClientProperties.InProcess.PREFIX + ".name=" + name)
                 .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=com")
-                .properties(GrpcClientProperties.PREFIX + ".authority=localhost:8080")
                 .run();
 
         assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();

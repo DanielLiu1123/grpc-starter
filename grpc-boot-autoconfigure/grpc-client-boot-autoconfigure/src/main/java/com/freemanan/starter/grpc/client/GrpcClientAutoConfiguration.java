@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 @ConditionOnGrpcClientEnabled
 @EnableConfigurationProperties(GrpcClientProperties.class)
-public class GrpcClientAutoConfiguration implements SmartInitializingSingleton {
+public class GrpcClientAutoConfiguration implements SmartInitializingSingleton, DisposableBean {
     private static final Logger log = LoggerFactory.getLogger(GrpcClientAutoConfiguration.class);
 
     private final GrpcClientProperties properties;
@@ -67,5 +68,10 @@ public class GrpcClientAutoConfiguration implements SmartInitializingSingleton {
                 }
             }
         }
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        Cache.shutdownChannels();
     }
 }

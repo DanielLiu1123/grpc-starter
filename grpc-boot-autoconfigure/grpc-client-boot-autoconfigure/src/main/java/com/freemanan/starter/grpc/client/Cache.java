@@ -1,5 +1,7 @@
 package com.freemanan.starter.grpc.client;
 
+import io.grpc.ManagedChannel;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +22,8 @@ class Cache {
      */
     private static final ConcurrentMap<String, List<Class<?>>> serviceToStubClasses = new ConcurrentHashMap<>();
 
+    private static final Set<ManagedChannel> channels = ConcurrentHashMap.newKeySet();
+
     public static Set<Class<?>> getStubClasses() {
         return serviceToStubClasses.values().stream().flatMap(List::stream).collect(Collectors.toSet());
     }
@@ -31,5 +35,13 @@ class Cache {
     public static void addStubClass(Class<?> stubClass) {
         String service = Util.serviceName(stubClass);
         serviceToStubClasses.computeIfAbsent(service, k -> new ArrayList<>()).add(stubClass);
+    }
+
+    public static void addChannel(ManagedChannel channel) {
+        channels.add(channel);
+    }
+
+    public static void shutdownChannels() {
+        channels.forEach(c -> Util.shutdownChannel(c, Duration.ofSeconds(5)));
     }
 }

@@ -64,7 +64,7 @@ class GrpcServerStartedEventListener implements ApplicationListener<GrpcServerSt
 }
 ```
 
-在 gRPC server shutdown 之后，server 状态为 terminated 之前，会触发 `GrpcServerShutdownEvent`。
+在 gRPC server shutdown 之后，server 状态变为 terminated 之前，会触发 `GrpcServerShutdownEvent`。
 
 在 gRPC server 状态变为 terminated 之后，会触发 `GrpcServerTerminatedEvent`。
 
