@@ -1,5 +1,6 @@
 package com.freemanan.example;
 
+import com.freemanan.foo.v1.api.FooServiceGrpc;
 import com.freemanan.starter.grpc.client.EnableGrpcClients;
 import io.grpc.health.v1.HealthCheckRequest;
 import io.grpc.health.v1.HealthGrpc;
@@ -32,6 +33,9 @@ public class SimpleApp implements ApplicationRunner {
 
     @Autowired
     ServerReflectionGrpc.ServerReflectionStub reflectionStub;
+
+    @Autowired
+    FooServiceGrpc.FooServiceBlockingStub fooStub;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {

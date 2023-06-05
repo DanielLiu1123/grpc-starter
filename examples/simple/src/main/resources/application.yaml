@@ -10,5 +10,5 @@ grpc:
         stubs:
           - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceBlockingStub
           - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceStub
-          - io.grpc.health.v1.HealthGrpc.HealthBlockingStub
-          - io.grpc.reflection.v1alpha.ServerReflectionGrpc.ServerReflectionStub
+        services:
+          - grpc.**

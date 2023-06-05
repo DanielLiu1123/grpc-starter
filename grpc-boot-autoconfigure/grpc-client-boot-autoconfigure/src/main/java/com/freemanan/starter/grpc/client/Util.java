@@ -3,7 +3,6 @@ package com.freemanan.starter.grpc.client;
 import io.grpc.ManagedChannel;
 import java.lang.reflect.Field;
 import java.time.Duration;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.experimental.UtilityClass;
@@ -11,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.env.Environment;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -27,6 +27,8 @@ class Util {
      * Service name field name for gRPC service.
      */
     public static final String SERVICE_NAME = "SERVICE_NAME";
+
+    private static final AntPathMatcher matcher = new AntPathMatcher(".");
 
     public static Optional<GrpcClientProperties.Channel> findMatchedConfig(
             Class<?> clz, GrpcClientProperties properties) {
@@ -46,7 +48,11 @@ class Util {
             return true;
         }
         String service = serviceName(stubClass);
-        return channelConfig.getServices().stream().anyMatch(svc -> Objects.equals(svc, service));
+        return channelConfig.getServices().stream().anyMatch(svcPattern -> matchPattern(svcPattern, service));
+    }
+
+    static boolean matchPattern(String pattern, String service) {
+        return matcher.match(pattern, service);
     }
 
     public static String serviceName(Class<?> stubClass) {

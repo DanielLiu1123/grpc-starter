@@ -57,14 +57,14 @@ public class GrpcClientAutoConfiguration implements SmartInitializingSingleton, 
             GrpcClientProperties.Channel chan = channels.get(i);
             List<String> chanServices = chan.getServices();
             for (int j = 0; j < chanServices.size(); j++) {
-                String service = chanServices.get(j);
-                if (!services.contains(service)) {
+                String servicePattern = chanServices.get(j);
+                if (services.stream().noneMatch(svc -> Util.matchPattern(servicePattern, svc))) {
                     log.warn(
                             "Configuration item '{}.channels[{}].services[{}]: {}' doesn't take effect, please remove it.",
                             GrpcClientProperties.PREFIX,
                             i,
                             j,
-                            service);
+                            servicePattern);
                 }
             }
             List<Class<? extends AbstractStub>> stubs = chan.getStubs();

@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.unit.DataSize;
 
 /**
@@ -82,7 +83,7 @@ public class GrpcClientProperties implements InitializingBean {
     public static class Channel {
         // TODO(Freeman): channel graceful shutdown?
         /**
-         * Authority for this channel.
+         * Authority for this channel, use {@link GrpcClientProperties#authority} if not set.
          */
         private String authority;
         /**
@@ -108,7 +109,11 @@ public class GrpcClientProperties implements InitializingBean {
         /**
          * gRPC service names to apply this channel.
          *
-         * <p> TODO(Freeman): support wildcard, e.g. {@code pet.v*.*Service}
+         * <p> Support {@link AntPathMatcher} style pattern.
+         *
+         * <p> e.g. {@code pet.v*.*Service}, {@code pet.**}
+         *
+         * @see AntPathMatcher
          */
         private List<String> services = new ArrayList<>();
         /**

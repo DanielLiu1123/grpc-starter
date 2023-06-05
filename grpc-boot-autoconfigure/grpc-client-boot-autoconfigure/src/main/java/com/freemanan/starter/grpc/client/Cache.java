@@ -34,6 +34,9 @@ class Cache {
         return serviceToStubClasses.values().stream().flatMap(List::stream).collect(Collectors.toSet());
     }
 
+    /**
+     * @return all service names that already created stub beans.
+     */
     public static Set<String> getServices() {
         return Collections.unmodifiableSet(serviceToStubClasses.keySet());
     }
