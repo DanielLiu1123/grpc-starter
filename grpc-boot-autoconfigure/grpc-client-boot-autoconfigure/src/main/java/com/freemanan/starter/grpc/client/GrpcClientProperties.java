@@ -63,6 +63,10 @@ public class GrpcClientProperties implements InitializingBean {
      */
     private InProcess inProcess;
     /**
+     * Channel shutdown timeout in milliseconds, default value is {@code 5000}.
+     */
+    private Long shutdownTimeout = 5000L;
+    /**
      * Channels configuration.
      */
     private List<Channel> channels = new ArrayList<>();
@@ -90,6 +94,10 @@ public class GrpcClientProperties implements InitializingBean {
          */
         private DataSize maxMetadataSize;
         /**
+         * Channel shutdown timeout in milliseconds, use {@link GrpcClientProperties#shutdownTimeout} if not set.
+         */
+        private Long shutdownTimeout;
+        /**
          * Metadata to be added to the requests for this channel, will be merged with {@link GrpcClientProperties#metadata}.
          */
         private List<Metadata> metadata = new ArrayList<>();
@@ -99,6 +107,8 @@ public class GrpcClientProperties implements InitializingBean {
         private InProcess inProcess;
         /**
          * gRPC service names to apply this channel.
+         *
+         * <p> TODO(Freeman): support wildcard, e.g. {@code pet.v*.*Service}
          */
         private List<String> services = new ArrayList<>();
         /**
@@ -151,6 +161,9 @@ public class GrpcClientProperties implements InitializingBean {
             if (stub.getMaxMetadataSize() == null) {
                 stub.setMaxMetadataSize(maxMetadataSize);
             }
+            if (stub.getShutdownTimeout() == null) {
+                stub.setShutdownTimeout(shutdownTimeout);
+            }
             if (stub.getInProcess() == null) {
                 stub.setInProcess(inProcess);
             }
@@ -168,6 +181,7 @@ public class GrpcClientProperties implements InitializingBean {
     }
 
     Channel defaultChannel() {
-        return new Channel(authority, maxMessageSize, maxMetadataSize, metadata, inProcess, null, null);
+        return new Channel(
+                authority, maxMessageSize, maxMetadataSize, shutdownTimeout, metadata, inProcess, null, null);
     }
 }

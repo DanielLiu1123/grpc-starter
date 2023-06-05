@@ -73,10 +73,10 @@ class Util {
         try {
             channel.shutdown();
             if (!channel.awaitTermination(ms, TimeUnit.MILLISECONDS)) {
-                log.warn("Timed out gracefully shutting down channel: {}. ", channel);
+                log.warn("Graceful shutdown timed out: {}ms, channel: {}", ms, channel);
             }
         } catch (InterruptedException e) {
-            log.warn("Interrupted gracefully shutting down channel: {}. ", channel);
+            log.warn("Interrupted gracefully shutting down channel: {}", channel);
             Thread.currentThread().interrupt();
         }
 

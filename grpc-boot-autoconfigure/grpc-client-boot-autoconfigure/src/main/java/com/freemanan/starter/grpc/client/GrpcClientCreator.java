@@ -46,7 +46,7 @@ class GrpcClientCreator {
                 ReflectionUtils.findMethod(stubClass.getEnclosingClass(), getStubMethodName(stubClass), Channel.class);
         Assert.notNull(stubMethod, "stubMethod must not be null");
         ManagedChannel chan = buildChannel();
-        Cache.addChannel(chan);
+        Cache.addChannel(new Chan(channelConfig, chan));
         T stub = (T) ReflectionUtils.invokeMethod(stubMethod, null, chan);
         Cache.addStubClass(stubClass);
         return stub;

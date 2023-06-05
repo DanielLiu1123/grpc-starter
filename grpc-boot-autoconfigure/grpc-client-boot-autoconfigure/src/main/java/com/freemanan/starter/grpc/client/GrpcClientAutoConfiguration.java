@@ -1,5 +1,6 @@
 package com.freemanan.starter.grpc.client;
 
+import com.freemanan.starter.grpc.server.GrpcServerShutdownEvent;
 import io.grpc.stub.AbstractStub;
 import java.util.List;
 import java.util.Set;
@@ -7,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +31,16 @@ public class GrpcClientAutoConfiguration implements SmartInitializingSingleton, 
     @Bean
     public static GrpcStubBeanDefinitionRegistry genGrpcBeanDefinitionRegistry() {
         return new GrpcStubBeanDefinitionRegistry();
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(GrpcServerShutdownEvent.class)
+    static class ChannelCloserConfiguration {
+
+        @Bean
+        public static ShutdownEventBasedChannelCloser shutdownEventBasedChannelCloser() {
+            return new ShutdownEventBasedChannelCloser();
+        }
     }
 
     @Override
@@ -72,6 +84,8 @@ public class GrpcClientAutoConfiguration implements SmartInitializingSingleton, 
 
     @Override
     public void destroy() throws Exception {
+        // In the case where the gRPC server starter is not on the classpath,
+        // we need to perform a fallback operation.
         Cache.shutdownChannels();
     }
 }
