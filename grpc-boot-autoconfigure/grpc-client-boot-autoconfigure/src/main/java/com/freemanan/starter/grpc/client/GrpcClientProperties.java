@@ -81,7 +81,6 @@ public class GrpcClientProperties implements InitializingBean {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Channel {
-        // TODO(Freeman): channel graceful shutdown?
         /**
          * Authority for this channel, use {@link GrpcClientProperties#authority} if not set.
          */

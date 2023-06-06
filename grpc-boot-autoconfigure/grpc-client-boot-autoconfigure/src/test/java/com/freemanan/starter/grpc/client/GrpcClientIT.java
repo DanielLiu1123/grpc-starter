@@ -3,7 +3,9 @@ package com.freemanan.starter.grpc.client;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.freemanan.sample.pet.v1.PetServiceGrpc;
+import com.freemanan.starter.grpc.extensions.test.NetUtil;
 import com.freemanan.starter.grpc.server.GrpcServerProperties;
+import io.grpc.health.v1.HealthGrpc;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanCreationException;
@@ -75,6 +77,21 @@ class GrpcClientIT {
         assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
         assertThatCode(() -> ctx.getBean(PetServiceGrpc.PetServiceBlockingStub.class))
                 .isInstanceOf(NoSuchBeanDefinitionException.class);
+
+        ctx.close();
+    }
+
+    @Test
+    void testGrpcStubAutowired_whenWildcardServices() {
+        int port = NetUtil.getRandomPort();
+        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+                .properties(GrpcServerProperties.PREFIX + ".port=" + port)
+                .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=io.grpc")
+                .properties(GrpcClientProperties.PREFIX + ".channels[0].authority=localhost:" + port)
+                .properties(GrpcClientProperties.PREFIX + ".channels[0].services[0]=grpc.**")
+                .run();
+
+        assertThatCode(() -> ctx.getBean(HealthGrpc.HealthBlockingStub.class)).doesNotThrowAnyException();
 
         ctx.close();
     }

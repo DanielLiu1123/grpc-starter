@@ -26,4 +26,9 @@ public class DummyGrpcServer implements GrpcServer {
     public boolean isAutoStartup() {
         return false;
     }
+
+    @Override
+    public int getPort() {
+        return 0;
+    }
 }

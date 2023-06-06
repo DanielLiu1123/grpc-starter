@@ -88,11 +88,17 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
             }
 
             publisher.publishEvent(new GrpcServerStartedEvent(server));
+
             waitUntilShutdown();
         } catch (IOException e) {
             gracefulShutdown();
             throw new IllegalStateException(e);
         }
+    }
+
+    @Override
+    public int getPort() {
+        return server.getPort();
     }
 
     @Override
