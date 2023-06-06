@@ -1,5 +1,7 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder;
 
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.Deps.WEB_FLUX_STARTER;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.Deps.WEB_MVC_STARTER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.freemanan.cr.core.anno.Action;
@@ -29,6 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
  * @author Freeman
@@ -36,7 +39,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 class JsonTranscoderIT {
 
     @Test
-    @ClasspathReplacer(@Action(Deps.WEB_FLUX_STARTER))
+    @ClasspathReplacer(@Action(WEB_FLUX_STARTER))
     void testWebFluxTranscoderJson() {
         int port = U.randomPort();
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
@@ -71,7 +74,7 @@ class JsonTranscoderIT {
     }
 
     @Test
-    @ClasspathReplacer(@Action(Deps.WEB_FLUX_STARTER))
+    @ClasspathReplacer(@Action(WEB_FLUX_STARTER))
     void testWebFluxTranscoderJson_whenSimpleValue() {
         int port = U.randomPort();
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
@@ -98,7 +101,31 @@ class JsonTranscoderIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"value\":\"Freeman\"}")
                 .exchange();
+        resp.expectStatus().is4xxClientError();
+
+        ctx.close();
+    }
+
+    //    @Test
+    @ClasspathReplacer(@Action(WEB_FLUX_STARTER))
+    void testWebFluxExceptionHandling() {
+        int port = U.randomPort();
+        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+                .properties("server.port=" + port)
+                .run();
+
+        WebTestClient client = U.webclient(port);
+
+        // test native path
+        WebTestClient.ResponseSpec resp = client.post()
+                .uri("/sample.pet.v1.PetService/GetPet")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("{\"name\":\"error\"}")
+                .exchange();
         resp.expectStatus().is5xxServerError();
+        resp.expectHeader().contentType(MediaType.APPLICATION_JSON);
+        resp.expectHeader().doesNotExist("request-id");
+        resp.expectBody().json("{\"code\":2,\"data\":null,\"message\":\"UNKNOWN\"}");
 
         ctx.close();
     }
@@ -108,7 +135,7 @@ class JsonTranscoderIT {
     // ===========================
 
     @Test
-    @ClasspathReplacer(@Action(Deps.WEB_MVC_STARTER))
+    @ClasspathReplacer(@Action(WEB_MVC_STARTER))
     void testWebMvcTranscoderJson() {
         int port = U.randomPort();
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
@@ -162,7 +189,18 @@ class JsonTranscoderIT {
                 HttpMethod.POST,
                 new HttpEntity<>("{\"value\":\"Freeman\"}"),
                 String.class);
-        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
+        // test exception handling
+        //        resp = client.exchange(
+        //                "http://localhost:" + port + "/sample.pet.v1.PetService/GetPet",
+        //                HttpMethod.POST,
+        //                new HttpEntity<>("{\"name\":\"error\"}"),
+        //                String.class);
+        //        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        //        assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+        //        assertThat(resp.getHeaders()).doesNotContainKey("request-id");
+        //        assertThat(resp.getBody()).isEqualTo("{\"code\":2,\"data\":null,\"message\":\"UNKNOWN\"}");
 
         ctx.close();
     }
@@ -170,10 +208,14 @@ class JsonTranscoderIT {
     @Configuration(proxyBeanMethods = false)
     @EnableAutoConfiguration
     @GrpcService
+    @RestControllerAdvice
     static class Cfg extends PetServiceGrpc.PetServiceImplBase implements ServerInterceptor {
         @Override
         @PostMapping("/v1/pets/get")
         public void getPet(GetPetRequest request, StreamObserver<Pet> ro) {
+            if (request.getName().startsWith("err")) {
+                throw new IllegalArgumentException("invalid name: " + request.getName());
+            }
             ro.onNext(Pet.newBuilder().setName(request.getName()).setAge(1).build());
             ro.onCompleted();
         }
@@ -197,5 +239,18 @@ class JsonTranscoderIT {
                     };
             return next.startCall(c, headers);
         }
+
+        /**
+         * TODO(Freeman): why use './gradlew build' will occur ClassNotFound exception (org.springframework.http.HttpStatus)?
+         *  but use IDEA run test is ok.
+         */
+        //        @ExceptionHandler
+        //        public ResponseEntity<Map<String, Object>> handle(StatusRuntimeException e) {
+        //            Map<String, Object> map = new HashMap<>();
+        //            map.put("code", e.getStatus().getCode().value());
+        //            map.put("message", e.getMessage());
+        //            map.put("data", null);
+        //            return ResponseEntity.status(GrpcUtil.toHttpStatus(e.getStatus())).body(map);
+        //        }
     }
 }

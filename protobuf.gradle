@@ -1,16 +1,15 @@
 apply plugin: 'com.google.protobuf'
 
 protobuf {
-    def suffix = osdetector.os == 'osx' ? ':osx-x86_64' : ''
     protoc {
-        artifact = "com.google.protobuf:protoc:${protobufVersion}" + suffix
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
     }
     plugins {
         grpc {
-            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" + suffix
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
         }
         javapgv {
-            artifact = "build.buf.protoc-gen-validate:protoc-gen-validate:${pgvVersion}" + suffix
+            artifact = "build.buf.protoc-gen-validate:protoc-gen-validate:${pgvVersion}"
         }
     }
     generateProtoTasks {

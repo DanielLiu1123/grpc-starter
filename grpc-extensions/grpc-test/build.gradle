@@ -4,6 +4,9 @@ dependencies {
     compileOnly(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
     compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
 
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+
     testImplementation(project(":grpc-starters:grpc-boot-starter"))
 }
 

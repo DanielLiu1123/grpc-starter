@@ -3,9 +3,13 @@ grpc:
     debug:
       enabled: true
     enable-empty-server: true
+    shutdown-timeout: 1000
   client:
+    shutdown-timeout: 1000
     channels:
       - authority: localhost:${grpc.server.port:9090}
         stubs:
           - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceBlockingStub
           - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceStub
+        services:
+          - grpc.**

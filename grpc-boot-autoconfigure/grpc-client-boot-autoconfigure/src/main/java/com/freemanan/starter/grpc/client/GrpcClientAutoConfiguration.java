@@ -1,11 +1,14 @@
 package com.freemanan.starter.grpc.client;
 
+import com.freemanan.starter.grpc.server.GrpcServerShutdownEvent;
 import io.grpc.stub.AbstractStub;
 import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 @ConditionOnGrpcClientEnabled
 @EnableConfigurationProperties(GrpcClientProperties.class)
-public class GrpcClientAutoConfiguration implements SmartInitializingSingleton {
+public class GrpcClientAutoConfiguration implements SmartInitializingSingleton, DisposableBean {
     private static final Logger log = LoggerFactory.getLogger(GrpcClientAutoConfiguration.class);
 
     private final GrpcClientProperties properties;
@@ -28,6 +31,16 @@ public class GrpcClientAutoConfiguration implements SmartInitializingSingleton {
     @Bean
     public static GrpcStubBeanDefinitionRegistry genGrpcBeanDefinitionRegistry() {
         return new GrpcStubBeanDefinitionRegistry();
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(GrpcServerShutdownEvent.class)
+    static class ChannelCloserConfiguration {
+
+        @Bean
+        public static ShutdownEventBasedChannelCloser shutdownEventBasedChannelCloser() {
+            return new ShutdownEventBasedChannelCloser();
+        }
     }
 
     @Override
@@ -44,14 +57,14 @@ public class GrpcClientAutoConfiguration implements SmartInitializingSingleton {
             GrpcClientProperties.Channel chan = channels.get(i);
             List<String> chanServices = chan.getServices();
             for (int j = 0; j < chanServices.size(); j++) {
-                String service = chanServices.get(j);
-                if (!services.contains(service)) {
+                String servicePattern = chanServices.get(j);
+                if (services.stream().noneMatch(svc -> Util.matchPattern(servicePattern, svc))) {
                     log.warn(
                             "Configuration item '{}.channels[{}].services[{}]: {}' doesn't take effect, please remove it.",
                             GrpcClientProperties.PREFIX,
                             i,
                             j,
-                            service);
+                            servicePattern);
                 }
             }
             List<Class<? extends AbstractStub>> stubs = chan.getStubs();
@@ -67,5 +80,12 @@ public class GrpcClientAutoConfiguration implements SmartInitializingSingleton {
                 }
             }
         }
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        // In the case where the gRPC server starter is not on the classpath,
+        // we need to perform a fallback operation.
+        Cache.shutdownChannels();
     }
 }

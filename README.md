@@ -27,9 +27,9 @@ _**Make the integration of gRPC with Spring Boot feel seamless and native.**_
 
 ***Extensions:***
 
-- [x] **JSON transcoder, one set of code supports both gRPC and HTTP/JSON.**
-- [x] **Protobuf validation, implemented by [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).**
-- [x] Testing support.
+- **JSON transcoder, one set of code supports both gRPC and HTTP/JSON.**
+- **Protobuf validation, implemented by [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).**
+- Testing support.
 
 ## Quick Start
 
