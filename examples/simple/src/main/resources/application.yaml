@@ -3,6 +3,7 @@ grpc:
     debug:
       enabled: true
     enable-empty-server: true
+    shutdown-timeout: 1000
   client:
     shutdown-timeout: 1000
     channels:

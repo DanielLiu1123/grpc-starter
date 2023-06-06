@@ -136,14 +136,15 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
     }
 
     private void gracefulShutdown() {
-        long start = System.currentTimeMillis();
-
         Duration timeout = Duration.ofMillis(properties.getShutdownTimeout());
+
+        // stop accepting new calls
         server.shutdown();
 
-        // publish shutdown event, user can listen the event to close the StreamObserver manually
+        // publish shutdown event, user can listen the event to complete the StreamObserver manually
         publisher.publishEvent(new GrpcServerShutdownEvent(server));
 
+        long start = System.currentTimeMillis();
         try {
             long time = timeout.toMillis();
             if (time > 0L) {
