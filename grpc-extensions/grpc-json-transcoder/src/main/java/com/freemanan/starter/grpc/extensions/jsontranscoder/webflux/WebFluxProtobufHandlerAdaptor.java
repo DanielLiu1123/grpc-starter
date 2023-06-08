@@ -82,7 +82,9 @@ public class WebFluxProtobufHandlerAdaptor extends AbstractHandlerAdaptor implem
                 .flatMap(msg -> {
                     Object stub = getStub(beanClass);
 
-                    HttpHeaders headers = exchange.getRequest().getHeaders();
+                    // make sure headers are modifiable
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.putAll(exchange.getRequest().getHeaders());
                     Metadata metadata = grpcHeaderConverter.toRequestMetadata(headers);
 
                     // apply metadata to stub

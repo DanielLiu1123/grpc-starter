@@ -8,8 +8,10 @@ grpc:
     shutdown-timeout: 1000
     channels:
       - authority: localhost:${grpc.server.port:9090}
-        stubs:
+        classes:
           - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceBlockingStub
-          - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceStub
+        stubs:
+          - io.grpc.**.Health*Stub
         services:
-          - grpc.**
+          - grpc.reflection.*.ServerReflection
+          - grpc.testing.SimpleService

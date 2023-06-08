@@ -2,6 +2,7 @@ package com.freemanan.starter.grpc.client;
 
 import static java.util.stream.Collectors.toMap;
 
+import io.grpc.health.v1.HealthGrpc;
 import io.grpc.internal.GrpcUtil;
 import io.grpc.stub.AbstractStub;
 import java.util.ArrayList;
@@ -82,6 +83,10 @@ public class GrpcClientProperties implements InitializingBean {
     @AllArgsConstructor
     public static class Channel {
         /**
+         * Channel name, optional.
+         */
+        private String name;
+        /**
          * Authority for this channel, use {@link GrpcClientProperties#authority} if not set.
          */
         private String authority;
@@ -106,23 +111,49 @@ public class GrpcClientProperties implements InitializingBean {
          */
         private InProcess inProcess;
         /**
+         * gRPC stub classes to apply this channel.
+         *
+         * <p> This is a more IDE-friendly alternative to {@link #services}/{@link #stubs}, using classes first if both set.
+         *
+         * <p> The priority is classes > {@link #stubs} > {@link #services}.
+         */
+        @SuppressWarnings("rawtypes")
+        private List<Class<? extends AbstractStub>> classes = new ArrayList<>();
+        /**
+         * gRPC stubs to apply this channel.
+         *
+         * <p> Support Ant-style pattern.
+         *
+         * <p> e.g. {@link HealthGrpc.HealthBlockingStub} can be identified by
+         * <ul>
+         *     <li> {@code io.grpc.health.v1.HealthGrpc.HealthBlockingStub} (Class canonical name) </li>
+         *     <li> {@code io.grpc.health.v1.HealthGrpc$HealthBlockingStub} (Class name) </li>
+         *     <li> {@code io.grpc.**.*BlockingStub} (<a href="https://stackoverflow.com/questions/2952196/ant-path-style-patterns">Ant style pattern</a>) </li>
+         * </ul>
+         *
+         * <p> This is a more flexible alternative to {@link #classes}, using {@link #classes} first if both set.
+         *
+         * <p> The priority is {@link #classes} > stubs > {@link #services}.
+         */
+        private List<String> stubs = new ArrayList<>();
+        /**
          * gRPC service names to apply this channel.
          *
-         * <p> Support {@link AntPathMatcher} style pattern.
+         * <p> Support Ant-style pattern.
          *
-         * <p> e.g. {@code pet.v*.*Service}, {@code pet.**}
+         * <p> e.g. {@link HealthGrpc.HealthBlockingStub} can be identified by
+         * <ul>
+         *     <li> {@code grpc.health.v1.Health} (SERVICE_NAME field in {@link HealthGrpc}) </li>
+         *     <li> {@code grpc.health.v*.**} (<a href="https://stackoverflow.com/questions/2952196/ant-path-style-patterns">Ant style pattern</a>) </li>
+         * </ul>
+         *
+         * <p> This is a more flexible alternative to {@link #classes}, using {@link #classes} first if both set.
+         *
+         * <p> The priority is {@link #classes} > {@link #stubs} > services.
          *
          * @see AntPathMatcher
          */
         private List<String> services = new ArrayList<>();
-        /**
-         * gRPC stub classes to apply this channel.
-         *
-         * <p> This is a more IDE friendly way to identify gRPC stubs.
-         * <p> Properties {@link #services} and stubs are used to identify gRPC stubs, use stubs first if both set.
-         */
-        @SuppressWarnings("rawtypes")
-        private List<Class<? extends AbstractStub>> stubs = new ArrayList<>();
     }
 
     @Data
@@ -186,6 +217,15 @@ public class GrpcClientProperties implements InitializingBean {
 
     Channel defaultChannel() {
         return new Channel(
-                authority, maxMessageSize, maxMetadataSize, shutdownTimeout, metadata, inProcess, null, null);
+                "__default__",
+                authority,
+                maxMessageSize,
+                maxMetadataSize,
+                shutdownTimeout,
+                metadata,
+                inProcess,
+                null,
+                null,
+                null);
     }
 }

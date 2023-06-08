@@ -55,6 +55,7 @@ class GrpcClientCreator {
     private ManagedChannel buildChannel() {
         ManagedChannelBuilder<?> builder;
         if (channelConfig.getInProcess() == null) {
+            // TODO(Freeman): use FailureAnalyzer instead of assert ?
             Assert.hasText(channelConfig.getAuthority(), "Not configure authority for stub: " + stubClass.getName());
             builder = ManagedChannelBuilder.forTarget(channelConfig.getAuthority());
         } else {
