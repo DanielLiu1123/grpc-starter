@@ -8,6 +8,7 @@ import io.grpc.reflection.v1alpha.ServerReflectionGrpc;
 import io.grpc.reflection.v1alpha.ServerReflectionRequest;
 import io.grpc.reflection.v1alpha.ServerReflectionResponse;
 import io.grpc.stub.StreamObserver;
+import io.grpc.testing.protobuf.SimpleServiceGrpc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,10 @@ public class SimpleApp implements ApplicationRunner {
     }
 
     @Autowired
-    HealthGrpc.HealthBlockingStub healthStub;
+    HealthGrpc.HealthBlockingStub healthBlockingStub;
+
+    @Autowired
+    HealthGrpc.HealthStub healthStub;
 
     @Autowired
     ServerReflectionGrpc.ServerReflectionStub reflectionStub;
@@ -37,9 +41,14 @@ public class SimpleApp implements ApplicationRunner {
     @Autowired
     FooServiceGrpc.FooServiceBlockingStub fooStub;
 
+    @Autowired
+    SimpleServiceGrpc.SimpleServiceBlockingStub simpleStub;
+
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-        log.info(healthStub.check(HealthCheckRequest.newBuilder().build()).toString());
+    public void run(ApplicationArguments args) {
+        log.info(healthBlockingStub
+                .check(HealthCheckRequest.newBuilder().build())
+                .toString());
         StreamObserver<ServerReflectionRequest> so =
                 reflectionStub.serverReflectionInfo(new StreamObserver<ServerReflectionResponse>() {
                     @Override

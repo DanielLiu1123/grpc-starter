@@ -28,11 +28,10 @@ public class DefaultGrpcHeaderConverter implements GrpcHeaderConverter {
     @Override
     public Metadata toRequestMetadata(HttpHeaders headers) {
         // remove http internal headers
-        HttpHeaders headersToUse = copy(headers);
-        headers.keySet().stream().filter(removeHeaderPredicate()).forEach(headersToUse::remove);
+        new HashSet<>(headers.keySet()).stream().filter(removeHeaderPredicate()).forEach(headers::remove);
 
         Metadata metadata = new Metadata();
-        headersToUse.forEach((k, values) -> {
+        headers.forEach((k, values) -> {
             Metadata.Key<String> key = Metadata.Key.of(k, Metadata.ASCII_STRING_MARSHALLER);
             values.forEach(v -> metadata.put(key, v));
         });
@@ -54,12 +53,6 @@ public class DefaultGrpcHeaderConverter implements GrpcHeaderConverter {
         headers.keys().forEach(key -> Optional.ofNullable(
                         headers.getAll(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER)))
                 .ifPresent(values -> values.forEach(value -> result.add(key, value))));
-        return result;
-    }
-
-    private static HttpHeaders copy(HttpHeaders headers) {
-        HttpHeaders result = new HttpHeaders();
-        result.putAll(headers);
         return result;
     }
 

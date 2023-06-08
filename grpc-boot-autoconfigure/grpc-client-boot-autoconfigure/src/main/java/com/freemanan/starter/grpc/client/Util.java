@@ -32,26 +32,46 @@ class Util {
 
     public static Optional<GrpcClientProperties.Channel> findMatchedConfig(
             Class<?> clz, GrpcClientProperties properties) {
-        // find from stub class first
-        Optional<GrpcClientProperties.Channel> found = properties.getChannels().stream()
-                .filter(chan -> chan.getStubs().stream().anyMatch(ch -> ch == clz))
+        // find from classes first
+        Optional<GrpcClientProperties.Channel> foundClassConfig = properties.getChannels().stream()
+                .filter(ch -> matchAnyClassesConfig(clz, ch))
                 .findFirst();
-        if (found.isPresent()) {
-            return found;
+        if (foundClassConfig.isPresent()) {
+            return foundClassConfig;
         }
-        // not class match, try to find from service name
-        return properties.getChannels().stream().filter(it -> match(clz, it)).findFirst();
+
+        // then, find from stubs
+        Optional<GrpcClientProperties.Channel> foundStubConfig = properties.getChannels().stream()
+                .filter(ch -> matchAnyStubsConfig(clz, ch))
+                .findFirst();
+        if (foundStubConfig.isPresent()) {
+            return foundStubConfig;
+        }
+
+        // finally, find from services
+        return properties.getChannels().stream()
+                .filter(it -> matchAnyServicesConfig(clz, it))
+                .findFirst();
     }
 
-    static boolean match(Class<?> stubClass, GrpcClientProperties.Channel channelConfig) {
-        if (channelConfig.getStubs().stream().anyMatch(ch -> ch == stubClass)) {
-            return true;
-        }
+    private static boolean matchAnyServicesConfig(Class<?> stubClass, GrpcClientProperties.Channel channelConfig) {
         String service = serviceName(stubClass);
         return channelConfig.getServices().stream().anyMatch(svcPattern -> matchPattern(svcPattern, service));
     }
 
-    static boolean matchPattern(String pattern, String service) {
+    private static boolean matchAnyStubsConfig(Class<?> stubClass, GrpcClientProperties.Channel channelConfig) {
+        return channelConfig.getStubs().stream().anyMatch(stub -> matchStubConfig(stub, stubClass));
+    }
+
+    private static boolean matchAnyClassesConfig(Class<?> stubClass, GrpcClientProperties.Channel channelConfig) {
+        return channelConfig.getClasses().stream().anyMatch(ch -> ch == stubClass);
+    }
+
+    public static boolean matchStubConfig(String stub, Class<?> stubClass) {
+        return matchPattern(stub, stubClass.getCanonicalName()) || matchPattern(stub, stubClass.getName());
+    }
+
+    public static boolean matchPattern(String pattern, String service) {
         return matcher.match(pattern, service);
     }
 

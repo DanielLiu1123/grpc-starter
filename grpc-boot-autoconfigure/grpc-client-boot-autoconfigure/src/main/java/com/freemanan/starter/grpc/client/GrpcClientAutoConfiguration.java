@@ -1,5 +1,8 @@
 package com.freemanan.starter.grpc.client;
 
+import static com.freemanan.starter.grpc.client.Util.matchPattern;
+import static com.freemanan.starter.grpc.client.Util.matchStubConfig;
+
 import com.freemanan.starter.grpc.server.GrpcServerShutdownEvent;
 import io.grpc.stub.AbstractStub;
 import java.util.List;
@@ -48,44 +51,71 @@ public class GrpcClientAutoConfiguration implements SmartInitializingSingleton, 
         warningUnusedConfigurations();
     }
 
-    @SuppressWarnings("rawtypes")
+    @Override
+    public void destroy() {
+        // In the case where the gRPC server starter is not on the classpath,
+        // we need to perform a fallback operation.
+        Cache.shutdownChannels();
+    }
+
     private void warningUnusedConfigurations() {
         Set<Class<?>> stubClasses = Cache.getStubClasses();
         Set<String> services = Cache.getServices();
         List<GrpcClientProperties.Channel> channels = properties.getChannels();
         for (int i = 0; i < channels.size(); i++) {
             GrpcClientProperties.Channel chan = channels.get(i);
-            List<String> chanServices = chan.getServices();
-            for (int j = 0; j < chanServices.size(); j++) {
-                String servicePattern = chanServices.get(j);
-                if (services.stream().noneMatch(svc -> Util.matchPattern(servicePattern, svc))) {
-                    log.warn(
-                            "Configuration item '{}.channels[{}].services[{}]: {}' doesn't take effect, please remove it.",
-                            GrpcClientProperties.PREFIX,
-                            i,
-                            j,
-                            servicePattern);
-                }
-            }
-            List<Class<? extends AbstractStub>> stubs = chan.getStubs();
-            for (int j = 0; j < stubs.size(); j++) {
-                Class<?> stubClass = stubs.get(j);
-                if (!stubClasses.contains(stubClass)) {
-                    log.warn(
-                            "Configuration item '{}.channels[{}].stubs[{}]: {}' doesn't take effect, please remove it.",
-                            GrpcClientProperties.PREFIX,
-                            i,
-                            j,
-                            stubClass.getCanonicalName());
-                }
+
+            checkClassesConfiguration(stubClasses, i, chan);
+
+            checkStubsConfiguration(stubClasses, i, chan);
+
+            checkServicesConfiguration(services, i, chan);
+        }
+    }
+
+    private static void checkServicesConfiguration(Set<String> services, int i, GrpcClientProperties.Channel chan) {
+        List<String> chanServices = chan.getServices();
+        for (int j = 0; j < chanServices.size(); j++) {
+            String servicePattern = chanServices.get(j);
+            if (services.stream().noneMatch(svc -> matchPattern(servicePattern, svc))) {
+                log.warn(
+                        "Configuration item '{}.channels[{}].services[{}]: {}' doesn't take effect, please remove it.",
+                        GrpcClientProperties.PREFIX,
+                        i,
+                        j,
+                        servicePattern);
             }
         }
     }
 
-    @Override
-    public void destroy() throws Exception {
-        // In the case where the gRPC server starter is not on the classpath,
-        // we need to perform a fallback operation.
-        Cache.shutdownChannels();
+    private static void checkStubsConfiguration(Set<Class<?>> stubClasses, int i, GrpcClientProperties.Channel chan) {
+        List<String> stubs = chan.getStubs();
+        for (int j = 0; j < stubs.size(); j++) {
+            String stub = stubs.get(j);
+            if (stubClasses.stream().noneMatch(stubClass -> matchStubConfig(stub, stubClass))) {
+                log.warn(
+                        "Configuration item '{}.channels[{}].stubs[{}]: {}' doesn't take effect, please remove it.",
+                        GrpcClientProperties.PREFIX,
+                        i,
+                        j,
+                        stub);
+            }
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static void checkClassesConfiguration(Set<Class<?>> stubClasses, int i, GrpcClientProperties.Channel chan) {
+        List<Class<? extends AbstractStub>> classes = chan.getClasses();
+        for (int j = 0; j < classes.size(); j++) {
+            Class<?> stubClass = classes.get(j);
+            if (!stubClasses.contains(stubClass)) {
+                log.warn(
+                        "Configuration item '{}.channels[{}].classes[{}]: {}' doesn't take effect, please remove it.",
+                        GrpcClientProperties.PREFIX,
+                        i,
+                        j,
+                        stubClass.getCanonicalName());
+            }
+        }
     }
 }

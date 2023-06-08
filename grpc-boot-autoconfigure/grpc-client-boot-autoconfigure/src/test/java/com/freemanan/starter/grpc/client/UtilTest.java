@@ -33,6 +33,4 @@ class UtilTest {
 
         assertThat(matchPattern("pet.v1", "pet.v1.PetService")).isFalse();
     }
-
-    // TODO(Freeman): add services pattern tests!!!
 }

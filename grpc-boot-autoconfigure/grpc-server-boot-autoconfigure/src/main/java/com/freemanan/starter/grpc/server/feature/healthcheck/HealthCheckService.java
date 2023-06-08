@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
+ * TODO(Freeman): need refactor, see HealthServiceImpl
+ *
  * @author Freeman
  */
 public class HealthCheckService extends HealthGrpc.HealthImplBase {
