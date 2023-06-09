@@ -57,8 +57,7 @@ public class SimpleApp implements ApplicationRunner {
                     }
 
                     @Override
-                    public void onError(Throwable t) {
-                    }
+                    public void onError(Throwable t) {}
 
                     @Override
                     public void onCompleted() {
