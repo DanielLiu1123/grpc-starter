@@ -2,7 +2,6 @@ package com.freemanan.example;
 
 import com.freemanan.foo.v1.api.FooServiceGrpc;
 import com.freemanan.starter.grpc.client.EnableGrpcClients;
-import io.grpc.channelz.v1.ChannelzGrpc;
 import io.grpc.health.v1.HealthCheckRequest;
 import io.grpc.health.v1.HealthGrpc;
 import io.grpc.reflection.v1alpha.ServerReflectionGrpc;
@@ -34,9 +33,6 @@ public class SimpleApp implements ApplicationRunner {
     HealthGrpc.HealthBlockingStub healthBlockingStub;
 
     @Autowired
-    private ChannelzGrpc.ChannelzBlockingStub channelzBlockingStub;
-
-    @Autowired
     HealthGrpc.HealthStub healthStub;
 
     @Autowired
@@ -61,7 +57,8 @@ public class SimpleApp implements ApplicationRunner {
                     }
 
                     @Override
-                    public void onError(Throwable t) {}
+                    public void onError(Throwable t) {
+                    }
 
                     @Override
                     public void onCompleted() {
