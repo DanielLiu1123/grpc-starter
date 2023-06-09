@@ -53,9 +53,7 @@ public class GrpcClientAutoConfiguration implements SmartInitializingSingleton, 
 
     @Override
     public void destroy() {
-        // In the case where the gRPC server starter is not on the classpath,
-        // we need to perform a fallback operation.
-        Cache.shutdownChannels();
+        Cache.clear();
     }
 
     private void warningUnusedConfigurations() {

@@ -6,8 +6,8 @@ grpc:
     max-message-size: 16MB         # max message size
     max-metadata-size: 16KB        # max metadata size
     shutdown-timeout: 5000         # graceful shutdown timeout, 0 means no timeout
-    debug:
-      enabled: true                # whether to enable debug mode (register reflection service)
+    reflection:
+      enabled: true                # whether to register reflection service
     health-check:
       enabled: true                # whether to enable health check
       datasource:

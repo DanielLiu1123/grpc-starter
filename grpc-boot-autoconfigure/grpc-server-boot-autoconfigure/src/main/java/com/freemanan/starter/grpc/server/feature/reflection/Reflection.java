@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.server.feature.debug;
+package com.freemanan.starter.grpc.server.feature.reflection;
 
 import com.freemanan.starter.grpc.server.GrpcServerProperties;
 import io.grpc.protobuf.services.ProtoReflectionService;
@@ -13,9 +13,9 @@ import org.springframework.context.annotation.Configuration;
  * @author Freeman
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(ProtoReflectionService.class)
-@ConditionalOnProperty(prefix = GrpcServerProperties.Debug.PREFIX, name = "enabled")
-public class Debug {
+@ConditionalOnClass(ServerReflectionGrpc.ServerReflectionImplBase.class)
+@ConditionalOnProperty(prefix = GrpcServerProperties.Reflection.PREFIX, name = "enabled")
+public class Reflection {
 
     @Bean
     @ConditionalOnMissingBean

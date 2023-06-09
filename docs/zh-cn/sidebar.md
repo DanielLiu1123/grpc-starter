@@ -8,7 +8,7 @@
     - [异常处理](zh-cn/server/exception-handling.md)
     - [自定义 server 配置](zh-cn/server/customize-server-config.md)
     - [优雅关闭](zh-cn/server/graceful-shutdown.md)
-    - [Debug 模式](zh-cn/server/debug-mode.md)
+    - [Reflection Service](zh-cn/server/reflection-service.md)
     - [In-process server](zh-cn/server/in-process-server.md)
     - [配置项](zh-cn/server/configuration.md)
 

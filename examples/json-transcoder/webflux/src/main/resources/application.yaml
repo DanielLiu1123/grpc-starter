@@ -1,6 +1,6 @@
 grpc:
   server:
-    debug:
+    reflection:
       enabled: true
     exception-handling:
       use-default: false

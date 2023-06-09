@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.freemanan.starter.grpc.server.feature.exceptionhandling.DefaultExceptionHandler;
-import io.grpc.Server;
 import io.grpc.protobuf.services.ProtoReflectionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -12,7 +11,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * @author Freeman
@@ -46,9 +44,9 @@ class GrpcServerIT {
     }
 
     @Test
-    void testDebugEnabled() {
+    void testReflectionEnabled() {
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
-                .properties(GrpcServerProperties.PREFIX + ".debug.enabled=true")
+                .properties(GrpcServerProperties.PREFIX + ".reflection.enabled=true")
                 .run();
 
         assertThatCode(() -> ctx.getBean(ProtoReflectionService.class)).doesNotThrowAnyException();
@@ -73,11 +71,9 @@ class GrpcServerIT {
                 .properties(GrpcServerProperties.PREFIX + ".port=0")
                 .run();
 
-        Server server = (Server) ReflectionTestUtils.getField(ctx.getBean(DefaultGrpcServer.class), "server");
+        int port = ctx.getBean(GrpcServer.class).getPort();
 
-        assertThat(server).isNotNull();
-        assertThat(server.getPort()).isNotEqualTo(9090);
-        assertThat(server.getPort()).isNotEqualTo(-1);
+        assertThat(port).isNotEqualTo(9090).isNotEqualTo(-1);
 
         ctx.close();
     }
