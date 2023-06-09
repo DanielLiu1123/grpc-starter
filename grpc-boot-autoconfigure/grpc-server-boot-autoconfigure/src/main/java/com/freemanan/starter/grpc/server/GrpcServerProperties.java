@@ -32,13 +32,13 @@ public class GrpcServerProperties {
      */
     private boolean enableEmptyServer = true;
     /**
-     * Debug configuration.
+     * Reflection configuration.
      */
-    private Debug debug = new Debug();
+    private Reflection reflection = new Reflection();
     /**
-     * Health check configuration.
+     * Health configuration.
      */
-    private HealthCheck healthCheck = new HealthCheck();
+    private Health health = new Health();
     /**
      * Exception handling configuration.
      */
@@ -57,18 +57,18 @@ public class GrpcServerProperties {
     private InProcess inProcess;
 
     @Data
-    public static class Debug {
-        public static final String PREFIX = GrpcServerProperties.PREFIX + ".debug";
+    public static class Reflection {
+        public static final String PREFIX = GrpcServerProperties.PREFIX + ".reflection";
 
         /**
-         * Whether to enable debug mode (register reflection service), default {@code false}.
+         * Whether to register reflection service, default {@code false}.
          */
         private boolean enabled = false;
     }
 
     @Data
-    public static class HealthCheck {
-        public static final String PREFIX = GrpcServerProperties.PREFIX + ".health-check";
+    public static class Health {
+        public static final String PREFIX = GrpcServerProperties.PREFIX + ".health";
 
         /**
          * Whether to enable health check, default {@code false}
@@ -87,7 +87,7 @@ public class GrpcServerProperties {
 
         @Data
         public static class DataSource {
-            public static final String PREFIX = HealthCheck.PREFIX + ".datasource";
+            public static final String PREFIX = Health.PREFIX + ".datasource";
 
             /**
              * Whether to enable datasource health check, default {@code true}.
@@ -105,7 +105,7 @@ public class GrpcServerProperties {
 
         @Data
         public static class Redis {
-            public static final String PREFIX = HealthCheck.PREFIX + ".redis";
+            public static final String PREFIX = Health.PREFIX + ".redis";
 
             /**
              * Whether to enable redis health check, default {@code true}.

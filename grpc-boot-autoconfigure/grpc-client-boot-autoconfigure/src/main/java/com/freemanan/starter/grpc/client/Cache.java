@@ -65,4 +65,9 @@ class Cache {
         }
         channels.clear();
     }
+
+    public static void clear() {
+        serviceToStubClasses.clear();
+        shutdownChannels();
+    }
 }

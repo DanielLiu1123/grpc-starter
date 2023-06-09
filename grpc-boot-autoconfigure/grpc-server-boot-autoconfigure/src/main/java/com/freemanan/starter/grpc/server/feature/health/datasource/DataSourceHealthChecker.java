@@ -1,7 +1,7 @@
-package com.freemanan.starter.grpc.server.feature.healthcheck.datasource;
+package com.freemanan.starter.grpc.server.feature.health.datasource;
 
 import com.freemanan.starter.grpc.server.GrpcServerProperties;
-import com.freemanan.starter.grpc.server.feature.healthcheck.HealthChecker;
+import com.freemanan.starter.grpc.server.feature.health.HealthChecker;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.List;
@@ -23,10 +23,15 @@ public class DataSourceHealthChecker implements HealthChecker, BeanFactoryAware,
     private BeanFactory beanFactory;
     private List<DataSource> dataSources;
 
-    private final GrpcServerProperties.HealthCheck.DataSource config;
+    private final GrpcServerProperties.Health.DataSource config;
 
-    public DataSourceHealthChecker(GrpcServerProperties.HealthCheck.DataSource config) {
+    public DataSourceHealthChecker(GrpcServerProperties.Health.DataSource config) {
         this.config = config;
+    }
+
+    @Override
+    public String service() {
+        return "datasource";
     }
 
     @Override

@@ -1,6 +1,6 @@
 grpc:
   server:
-    debug:
+    reflection:
       enabled: true
     enable-empty-server: true
     shutdown-timeout: 1000

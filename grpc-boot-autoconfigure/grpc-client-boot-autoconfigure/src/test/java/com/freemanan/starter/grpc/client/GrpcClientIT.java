@@ -3,11 +3,12 @@ package com.freemanan.starter.grpc.client;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.freemanan.sample.pet.v1.PetServiceGrpc;
-import com.freemanan.starter.grpc.extensions.test.NetUtil;
 import com.freemanan.starter.grpc.server.GrpcServerProperties;
 import io.grpc.health.v1.HealthGrpc;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -45,7 +46,7 @@ class GrpcClientIT {
         assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();
         assertThatCode(() -> ctx.getBean(PetServiceGrpc.PetServiceBlockingStub.class))
                 .isInstanceOf(BeanCreationException.class)
-                .hasMessageContaining("Not configure authority for stub");
+                .hasMessageContaining("gRPC channel authority is not configured for stub");
 
         ctx.close();
     }
@@ -81,16 +82,59 @@ class GrpcClientIT {
     }
 
     @Test
-    void testGrpcStubAutowired_whenWildcardServices() {
-        int port = NetUtil.getRandomPort();
+    void testClassesConfiguration() {
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
-                .properties(GrpcServerProperties.PREFIX + ".port=" + port)
+                .properties(GrpcServerProperties.PREFIX + ".enabled=false")
                 .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=io.grpc")
-                .properties(GrpcClientProperties.PREFIX + ".channels[0].authority=localhost:" + port)
-                .properties(GrpcClientProperties.PREFIX + ".channels[0].services[0]=grpc.**")
+                .properties(GrpcClientProperties.PREFIX + ".channels[0].authority=localhost:9090")
+                .properties(GrpcClientProperties.PREFIX + ".channels[0].classes[0]="
+                        + HealthGrpc.HealthBlockingStub.class.getCanonicalName())
+                .properties(GrpcClientProperties.PREFIX + ".channels[0].classes[1]="
+                        + HealthGrpc.HealthFutureStub.class.getCanonicalName())
                 .run();
 
         assertThatCode(() -> ctx.getBean(HealthGrpc.HealthBlockingStub.class)).doesNotThrowAnyException();
+        assertThatCode(() -> ctx.getBean(HealthGrpc.HealthFutureStub.class)).doesNotThrowAnyException();
+        assertThatCode(() -> ctx.getBean(HealthGrpc.HealthStub.class)).isInstanceOf(BeanCreationException.class);
+
+        ctx.close();
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                "io.grpc.health.v1.HealthGrpc.HealthBlockingStub",
+                "io.grpc.health.v1.HealthGrpc$HealthBlockingStub",
+                "io.grpc.**",
+                "io.grpc.health.v*.HealthGrpc.Health*Stub",
+                "**"
+            })
+    void testStubsConfiguration(String stub) {
+        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+                .properties(GrpcServerProperties.PREFIX + ".enabled=false")
+                .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=io.grpc")
+                .properties(GrpcClientProperties.PREFIX + ".channels[0].authority=localhost:9090")
+                .properties(GrpcClientProperties.PREFIX + ".channels[0].stubs[0]=" + stub)
+                .run();
+
+        assertThatCode(() -> ctx.getBean(HealthGrpc.HealthBlockingStub.class)).doesNotThrowAnyException();
+
+        ctx.close();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"grpc.**", "**.health.**", "**"})
+    void testServicesConfiguration(String service) {
+        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+                .properties(GrpcServerProperties.PREFIX + ".enabled=false")
+                .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=io.grpc")
+                .properties(GrpcClientProperties.PREFIX + ".channels[0].authority=localhost:9090")
+                .properties(GrpcClientProperties.PREFIX + ".channels[0].services[0]=" + service)
+                .run();
+
+        assertThatCode(() -> ctx.getBean(HealthGrpc.HealthBlockingStub.class)).doesNotThrowAnyException();
+        assertThatCode(() -> ctx.getBean(HealthGrpc.HealthStub.class)).doesNotThrowAnyException();
+        assertThatCode(() -> ctx.getBean(HealthGrpc.HealthFutureStub.class)).doesNotThrowAnyException();
 
         ctx.close();
     }

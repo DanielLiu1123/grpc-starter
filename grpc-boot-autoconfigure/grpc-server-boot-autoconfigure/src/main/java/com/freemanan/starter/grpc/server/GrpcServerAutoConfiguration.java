@@ -2,9 +2,9 @@ package com.freemanan.starter.grpc.server;
 
 import static com.freemanan.starter.grpc.server.Util.allInternalServices;
 
-import com.freemanan.starter.grpc.server.feature.debug.Debug;
 import com.freemanan.starter.grpc.server.feature.exceptionhandling.ExceptionHandling;
-import com.freemanan.starter.grpc.server.feature.healthcheck.HealthCheck;
+import com.freemanan.starter.grpc.server.feature.health.Health;
+import com.freemanan.starter.grpc.server.feature.reflection.Reflection;
 import io.grpc.BindableService;
 import io.grpc.ServerInterceptor;
 import org.springframework.beans.factory.ObjectProvider;
@@ -35,6 +35,6 @@ public class GrpcServerAutoConfiguration {
     }
 
     @Configuration(proxyBeanMethods = false)
-    @Import({Debug.class, HealthCheck.class, ExceptionHandling.class})
+    @Import({Reflection.class, Health.class, ExceptionHandling.class})
     static class Features {}
 }

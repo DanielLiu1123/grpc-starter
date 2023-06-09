@@ -1,5 +1,6 @@
 package com.freemanan.starter.grpc.client;
 
+import com.freemanan.starter.grpc.client.exception.MissingChannelConfigurationException;
 import io.grpc.Channel;
 import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Freeman
@@ -55,8 +57,9 @@ class GrpcClientCreator {
     private ManagedChannel buildChannel() {
         ManagedChannelBuilder<?> builder;
         if (channelConfig.getInProcess() == null) {
-            // TODO(Freeman): use FailureAnalyzer instead of assert ?
-            Assert.hasText(channelConfig.getAuthority(), "Not configure authority for stub: " + stubClass.getName());
+            if (!StringUtils.hasText(channelConfig.getAuthority())) {
+                throw new MissingChannelConfigurationException(stubClass);
+            }
             builder = ManagedChannelBuilder.forTarget(channelConfig.getAuthority());
         } else {
             Assert.hasText(

@@ -7,7 +7,7 @@
     - [Exception Handling](en-us/server/exception-handling.md)
     - [Customize Server Configuration](en-us/server/customize-server-config.md)
     - [Graceful Shutdown](en-us/server/graceful-shutdown.md)
-    - [Debug Mode](en-us/server/debug-mode.md)
+    - [Reflection Service](en-us/server/reflection-service.md)
     - [Testing gRPC Services](en-us/server/testing.md)
     - [Configurations](en-us/server/configuration.md)
 
