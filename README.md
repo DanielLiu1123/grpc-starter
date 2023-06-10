@@ -34,7 +34,7 @@ _**Make the integration of gRPC with Spring Boot feel seamless and native.**_
 ## Quick Start
 
 ```groovy
-implementation(platform("com.freemanan:grpc-starter-dependencies:3.1.0-RC1"))
+implementation(platform("com.freemanan:grpc-starter-dependencies:3.1.0-RC2"))
 implementation("com.freemanan:grpc-boot-starter")
 
 // use gRPC simple proto for the example
@@ -109,7 +109,7 @@ Mainly maintain the following versions:
 
   | Spring Boot | grpc-boot-starter |
   |-------------|-------------------|
-  | 3.x         | 3.1.0-RC1         |
+  | 3.x         | 3.1.0-RC2         |
 
 - 2.x
 
@@ -118,7 +118,7 @@ Mainly maintain the following versions:
 
   | Spring Boot | grpc-boot-starter |
   |-------------|-------------------|
-  | 2.x         | 2.1.0-RC1         |
+  | 2.x         | 2.1.0-RC2         |
 
 ## License
 
