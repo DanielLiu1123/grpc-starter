@@ -1,8 +1,8 @@
-package com.freemanan.starter.grpc.server.feature.reflection;
+package com.freemanan.starter.grpc.server.feature.channelz;
 
 import com.freemanan.starter.grpc.server.GrpcServerProperties;
-import io.grpc.protobuf.services.ProtoReflectionService;
-import io.grpc.reflection.v1alpha.ServerReflectionGrpc;
+import io.grpc.channelz.v1.ChannelzGrpc;
+import io.grpc.protobuf.services.ChannelzService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -13,13 +13,13 @@ import org.springframework.context.annotation.Configuration;
  * @author Freeman
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(ServerReflectionGrpc.ServerReflectionImplBase.class)
-@ConditionalOnProperty(prefix = GrpcServerProperties.Reflection.PREFIX, name = "enabled")
-public class Reflection {
+@ConditionalOnClass(ChannelzGrpc.ChannelzImplBase.class)
+@ConditionalOnProperty(prefix = GrpcServerProperties.Channelz.PREFIX, name = "enabled")
+public class Channelz {
 
     @Bean
     @ConditionalOnMissingBean
-    public ServerReflectionGrpc.ServerReflectionImplBase grpcReflectionService() {
-        return ((ProtoReflectionService) ProtoReflectionService.newInstance());
+    public ChannelzGrpc.ChannelzImplBase grpcChannelzService(GrpcServerProperties properties) {
+        return ChannelzService.newInstance(properties.getChannelz().getMaxPageSize());
     }
 }

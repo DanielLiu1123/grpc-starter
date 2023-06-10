@@ -2,6 +2,7 @@ package com.freemanan.starter.grpc.server;
 
 import static com.freemanan.starter.grpc.server.Util.allInternalServices;
 
+import com.freemanan.starter.grpc.server.feature.channelz.Channelz;
 import com.freemanan.starter.grpc.server.feature.exceptionhandling.ExceptionHandling;
 import com.freemanan.starter.grpc.server.feature.health.Health;
 import com.freemanan.starter.grpc.server.feature.reflection.Reflection;
@@ -35,6 +36,6 @@ public class GrpcServerAutoConfiguration {
     }
 
     @Configuration(proxyBeanMethods = false)
-    @Import({Reflection.class, Health.class, ExceptionHandling.class})
+    @Import({Reflection.class, Health.class, Channelz.class, ExceptionHandling.class})
     static class Features {}
 }

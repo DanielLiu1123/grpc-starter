@@ -1,6 +1,7 @@
 package com.freemanan.starter.grpc.server;
 
 import io.grpc.internal.GrpcUtil;
+import io.grpc.protobuf.services.ChannelzService;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.unit.DataSize;
@@ -39,6 +40,10 @@ public class GrpcServerProperties {
      * Health configuration.
      */
     private Health health = new Health();
+    /**
+     * Channelz configuration.
+     */
+    private Channelz channelz = new Channelz();
     /**
      * Exception handling configuration.
      */
@@ -112,6 +117,20 @@ public class GrpcServerProperties {
              */
             private boolean enabled = true;
         }
+    }
+
+    @Data
+    public static class Channelz {
+        public static final String PREFIX = GrpcServerProperties.PREFIX + ".channelz";
+
+        /**
+         * Whether to register {@link ChannelzService}, default {@code false}.
+         */
+        private boolean enabled = false;
+        /**
+         * The maximum page size to return, default {@code 100}
+         */
+        private int maxPageSize = 100;
     }
 
     @Data

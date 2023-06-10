@@ -8,7 +8,7 @@ grpc:
     shutdown-timeout: 5000         # graceful shutdown timeout, 0 means no timeout
     reflection:
       enabled: true                # whether to register reflection service
-    health-check:
+    health:
       enabled: true                # whether to enable health check
       datasource:
         enabled: true              # whether to enable datasource health check

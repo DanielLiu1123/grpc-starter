@@ -4,6 +4,7 @@ import com.freemanan.starter.grpc.server.GrpcServerProperties;
 import com.freemanan.starter.grpc.server.feature.health.datasource.DataSourceHealthChecker;
 import com.freemanan.starter.grpc.server.feature.health.redis.RedisHealthChecker;
 import io.grpc.health.v1.HealthGrpc;
+import io.grpc.protobuf.services.HealthStatusManager;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -22,9 +23,21 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class Health {
 
     @Bean
+    public HealthStatusManager grpcHealthStatusManager() {
+        return new HealthStatusManager();
+    }
+
+    @Bean
     @ConditionalOnMissingBean
-    public HealthGrpc.HealthImplBase grpcHealthImpl(ObjectProvider<HealthChecker> healthCheckers) {
-        return new HealthImpl(healthCheckers);
+    public HealthGrpc.HealthImplBase grpcHealthService(HealthStatusManager healthManager) {
+        return (HealthGrpc.HealthImplBase) healthManager.getHealthService();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public HealthServerInterceptor grpcHealthServerInterceptor(
+            HealthStatusManager healthManager, ObjectProvider<HealthChecker> healthCheckers) {
+        return new HealthServerInterceptor(healthManager, healthCheckers);
     }
 
     @Configuration(proxyBeanMethods = false)

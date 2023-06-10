@@ -11,7 +11,7 @@ gRPC server starter 提供了健康检查的能力，已有的健康检查实现
   ```yaml
   grpc:
     server:
-      health-check:
+      health:
         datasource:
           enabled: true
           validate-query: SELECT 1
@@ -28,7 +28,7 @@ gRPC server starter 提供了健康检查的能力，已有的健康检查实现
   ```yaml
   grpc:
     server:
-      health-check:
+      health:
         redis:
           enabled: true
   ```
@@ -41,6 +41,12 @@ gRPC server starter 提供了健康检查的能力，已有的健康检查实现
 
 @Component
 public class DiskHealthChecker implements HealthChecker {
+    
+    @Override
+    public String service() {
+        return "disk";
+    }
+    
     @Override
     public boolean check() {
         // ...
@@ -58,7 +64,7 @@ public class DiskHealthChecker implements HealthChecker {
 ```yaml
 grpc:
   server:
-    health-check:
+    health:
       enabled: true
       datasource:
         enabled: true
