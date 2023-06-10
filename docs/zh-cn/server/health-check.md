@@ -41,6 +41,12 @@ gRPC server starter 提供了健康检查的能力，已有的健康检查实现
 
 @Component
 public class DiskHealthChecker implements HealthChecker {
+    
+    @Override
+    public String service() {
+        return "disk";
+    }
+    
     @Override
     public boolean check() {
         // ...
