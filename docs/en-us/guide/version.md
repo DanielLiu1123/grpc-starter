@@ -6,7 +6,7 @@ The project maintains the following versions:
 
   | Spring Boot | grpc-boot-starter |
   |-------------|-------------------|
-  | 3.x         | 3.1.0-RC1         |
+  | 3.x         | 3.1.0-RC2         |
 
 - 2.x
 
@@ -14,4 +14,4 @@ The project maintains the following versions:
 
   | Spring Boot | grpc-boot-starter |
   |-------------|-------------------|
-  | 2.x         | 2.1.0-RC1         |
+  | 2.x         | 2.1.0-RC2         |
