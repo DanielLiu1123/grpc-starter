@@ -4,6 +4,8 @@ grpc:
       enabled: true
     enable-empty-server: true
     shutdown-timeout: 1000
+    channelz:
+      enabled: true
   client:
     shutdown-timeout: 1000
     channels:
