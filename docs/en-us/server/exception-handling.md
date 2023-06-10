@@ -1,13 +1,17 @@
-The framework provides the ability to handle exceptions, but it does not implement any exception handling logic itself,
-and needs to be implemented by the user.
+## Basic Usage
 
-gRPC Starter provides a simple
-implementation [DefaultExceptionHandler](https://github.com/DanielLiu1123/grpc-starter/blob/main/grpc-boot-autoconfigure/grpc-server-boot-autoconfigure/src/main/java/com/freemanan/starter/grpc/server/extension/exceptionhandling/DefaultExceptionHandler.java),
-can be used as default exception handling, it can be enabled by `grpc.server.exception-handling.use-default=true`
-configuration, which is disabled by default.
+The framework provides the capability to handle exceptions, but it doesn't implement any exception handling logic
+itself. Users need to implement it themselves.
 
-You can easily implement exception handling logic, just implement the `ExceptionHandler` interface and register it as a
-Spring Bean:
+The gRPC server starter provides a simple implementation
+called [DefaultExceptionHandler](https://github.com/DanielLiu1123/grpc-starter/blob/main/grpc-boot-autoconfigure/grpc-server-boot-autoconfigure/src/main/java/com/freemanan/starter/grpc/server/feature/exceptionhandling/DefaultExceptionHandler.java)
+that can be used as the default exception handler. It can be enabled by
+configuring `grpc.server.exception-handling.use-default=true`, which is disabled by default.
+
+## Custom Exception Handling
+
+It's easy to extend custom exception handling logic by implementing the `ExceptionHandler` interface and registering it
+as a Spring Bean:
 
 ```java
 
@@ -25,14 +29,14 @@ public class InvalidArgumentExceptionHandler implements ExceptionHandler {
 
     @Override
     public int getOrder() {
-        return 0; // The smaller the order, the higher the priority (executed first)
+        return 0; // The smaller the value, the higher the priority (executed earlier)
     }
 }
 ```
 
-gRPC Starter also provides an `UnhandledExceptionProcessor` interface for handling exceptions that are not handled
-by `ExceptionHandler`, here you can implement some exception reporting logic, such as reporting unhandled exceptions
-to [Sentry](https://sentry.io/)：
+The gRPC Starter also provides an `UnhandledExceptionProcessor` interface to handle exceptions that are not handled by
+the `ExceptionHandler`. You can implement exception reporting logic, such as reporting unhandled exceptions
+to [Sentry](https://sentry.io/):
 
 ```java
 
@@ -43,4 +47,14 @@ public class SentryUnhandledExceptionProcessor implements UnhandledExceptionProc
         Sentry.captureException(t);
     }
 }
+```
+
+## Related Configuration
+
+```yaml
+grpc:
+  server:
+    exception-handling:
+      enabled: true
+      use-default: false
 ```

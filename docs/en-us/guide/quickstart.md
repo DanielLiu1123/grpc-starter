@@ -1,24 +1,23 @@
-#### Add dependencies
+#### Adding Dependencies
 
 <!-- tabs:start -->
 
-#### ** Gradle **
+#### **Gradle**
 
 ```groovy
-implementation platform('com.freemanan:grpc-starter-dependencies:3.0.0')
+implementation platform('com.freemanan:grpc-starter-dependencies:3.1.0-RC1')
 implementation 'com.freemanan:grpc-boot-starter'
 ```
 
-#### ** Maven **
+#### **Maven**
 
 ```xml
-
 <dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>com.freemanan</groupId>
       <artifactId>grpc-starter-dependencies</artifactId>
-      <version>3.0.0</version>
+      <version>3.1.0-RC1</version>
       <type>pom</type>
       <scope>import</scope>
     </dependency>
@@ -33,7 +32,7 @@ implementation 'com.freemanan:grpc-boot-starter'
 
 <!-- tabs:end -->
 
-#### Write proto definition
+#### Writing Proto Definitions
 
 ```protobuf
 // foo.proto
@@ -54,7 +53,7 @@ service FooService {
 }
 ```
 
-#### Server implementation
+#### Server Implementation
 
 ```java
 // FooServiceImpl.java
@@ -73,7 +72,7 @@ public class FooServiceImpl extends FooServiceGrpc.FooServiceImplBase {
 }
 ```
 
-#### Using gRPC stubs
+#### Using gRPC Stub
 
 - Use `@EnableGrpcClients` to specify which gRPC stubs to scan
 
@@ -88,6 +87,8 @@ public class FooServiceImpl extends FooServiceGrpc.FooServiceImplBase {
     }
     ```
 
+  > The usage of `@EnableGrpcClients` is similar to Spring Cloud OpenFeign's `@EnableFeignClients`, but it is used to scan gRPC stubs.
+
 - Configure the stub address
 
     ```yaml
@@ -96,7 +97,7 @@ public class FooServiceImpl extends FooServiceGrpc.FooServiceImplBase {
         authority: localhost:9090
     ```
 
-- Inject stubs using `@Autowired`
+- Inject the stub using `@Autowired`
 
     ```java
     // SimpleApp.java
@@ -118,4 +119,4 @@ public class FooServiceImpl extends FooServiceGrpc.FooServiceImplBase {
     }
     ```
 
-see [example](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/simple).
+For more details, please refer to the [example](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/simple).

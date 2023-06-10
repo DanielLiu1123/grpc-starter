@@ -1,23 +1,27 @@
 - User Guide
-    - [Quickstart](en-us/guide/quickstart.md)
-    - [Versions](en-us/guide/version.md) 
+  - [Quick Start](en-us/guide/quickstart.md)
+  - [Version Description](en-us/guide/version.md)
+
 - Server
-    - [Getting Started](en-us/server/onboarding.md)
-    - [Health Check](en-us/server/health-check.md)
-    - [Exception Handling](en-us/server/exception-handling.md)
-    - [Customize Server Configuration](en-us/server/customize-server-config.md)
-    - [Graceful Shutdown](en-us/server/graceful-shutdown.md)
-    - [Reflection Service](en-us/server/reflection-service.md)
-    - [Testing gRPC Services](en-us/server/testing.md)
-    - [Configurations](en-us/server/configuration.md)
+  - [Onboarding Guide](en-us/server/onboarding.md)
+  - [Health Check](en-us/server/health-check.md)
+  - [Exception Handling](en-us/server/exception-handling.md)
+  - [Customize Server Configuration](en-us/server/customize-server-config.md)
+  - [Graceful Shutdown](en-us/server/graceful-shutdown.md)
+  - [Reflection Service](en-us/server/reflection-service.md)
+  - [In-process Server](en-us/server/in-process-server.md)
+  - [Configuration Options](en-us/server/configuration.md)
 
 - Client
-    - [Getting Started](en-us/client/onboarding.md)
-    - [Customize Channel Configuration](en-us/client/customize-channel-config.md)
-    - [Configurations](en-us/client/configuration.md)
+  - [Onboarding Guide](en-us/client/onboarding.md)
+  - [Customize Client Configuration](en-us/client/customize-client-config.md)
+  - [In-process Channel](en-us/client/in-process-channel.md)
+  - [Configuration Options](en-us/client/configuration.md)
 
-- Extension
-    - [Protobuf Validation](en-us/extension/protobuf-validation.md)
+- Extensions
+  - [Protobuf Validation](en-us/extension/protobuf-validation.md)
+  - [JSON Transcoder](en-us/extension/json-transcoder.md)
+  - [Test](en-us/extension/test.md)
 
 - Other
-    - [Acknowledgement](en-us/other/acknowledgement.md)
+  - [Acknowledgement](en-us/other/acknowledgement.md)

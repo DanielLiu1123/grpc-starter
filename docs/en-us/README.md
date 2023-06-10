@@ -1,18 +1,27 @@
 Introduction
 ----
 
-This project mainly provides a series of Spring Boot starters for the gRPC ecosystem, providing autoconfigure and highly scalable capabilities, makes Spring Boot and gRPC have a better integration.
+This project provides a series of Spring Boot starters for the gRPC ecosystem, offering automatic configuration and
+highly extensible capabilities to enhance the integration between Spring Boot and gRPC.
 
-## Core features
+## Core Features
 
-* autoconfigure gRPC server
+* Automatic configuration of gRPC server
 
-* autoconfigure gRPC client
+    - Health checks
+    - Exception handling
 
-  - Without introducing additional annotations, you can directly use `@Autowired`, `@Resource` to inject gRPC client, fully complying with the lifecycle of Spring Bean.
+* Automatic configuration of gRPC client
+
+    - No additional annotations required, gRPC clients can be directly injected using `@Autowired`, `@Resource`, and
+      other Spring annotations, following the Spring Bean lifecycle.
 
 * Highly extensible capabilities
 
-## Contact us
+    - JSON transcoder: Allows using the same codebase for both gRPC and HTTP/JSON.
+    - Protobuf validation: Based on [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).
+    - Testing support: Extends `@SpringBootTest` for convenient unit and integration testing.
 
-<a href="mailto:freemanlau1228@gmail.com"> gmail </a>
+## Contact Author
+
+<a href="mailto:freemanlau1228@gmail.com"> Email </a>

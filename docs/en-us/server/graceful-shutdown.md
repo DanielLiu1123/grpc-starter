@@ -1,5 +1,17 @@
-The gRPC server adopts graceful shutdown (wait for the request to be processed before closing), you can configure the
-timeout time (in milliseconds) through `grpc.server.shutdown-timeout=10000`, the default is 5s; if the set value is less
-than or equal to 0, it means no timeout, that is, wait until the request processing is completed before closing.
+## Basic Usage
 
-> If the service has a stream interface, it may happen that the service cannot be closed, so it is a better choice to give a reasonable timeout.
+The gRPC server uses graceful shutdown by default (waits for requests to finish processing before closing). You can
+configure the timeout duration in milliseconds using `grpc.server.shutdown-timeout=10000`, which is set to 5 seconds by
+default. If the value is less than or equal to 0, it means there is no timeout, and the server will wait for requests to
+finish processing before shutting down.
+
+> If your service has streaming interfaces, it may result in the server not being able to shut down. Therefore,
+> providing a reasonable timeout is a good choice.
+
+## Related Configuration
+
+```yaml
+grpc:
+  server:
+    shutdown-timeout: 5000
+```

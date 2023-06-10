@@ -1,44 +1,58 @@
+## Overview
 
-[protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate) integration.
+The Validation extension module provides parameter validation functionality for gRPC servers and clients using [protobuf](https://developers.google.com/protocol-buffers) and implemented through [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).
 
-### Steps
+## Service Structure
 
-1. Add dependencies
+Assuming you are developing a user service, your project structure may look like this:
+
+```text
+user
+├── user-api
+├── user-server
+```
+
+- `user-api`: Contains the proto files defining the interface and data structures of the user service, which can be used by external dependencies.
+- `user-server`: Contains the server implementation of the API.
+
+## Usage Steps
+
+1. Add the dependency
 
     ```groovy
-    implementation 'com.freemanan:grpc-starter-validation:3.0.0'
+    implementation("com.freemanan:grpc-starter-validation")
     ```
 
-2. Write Protobuf file
+   > In most cases, you only need the API module to depend on the validation module.
 
-    ```protobuf
-    syntax = "proto3";
-    
-    package fm.foo.v1;
-    
-    import "validate/validate.proto";
-    
-    option java_multiple_files = true;
-    option java_package = "com.freemanan.foo.v1.api";
-    
-    message Foo {
-      string id = 1 [(validate.rules).string = {
-        min_len: 1,
-        max_len: 10
-      }];
-      string name = 2 [(validate.rules).string = {
-        pattern: "^[a-zA-Z0-9_]+$"
-      }];
-    }
+2. Write the proto file
+
+   ```protobuf
+   syntax = "proto3";
    
-    service FooService {
-      rpc Create(Foo) returns (Foo) {}
-    }
-    ```
+   package fm.user.v1;
+   
+   import "google/protobuf/timestamp.proto";
+   import "validate/validate.proto";
+   
+   option java_package = "com.freemanan.user.v1.api";
+   option java_multiple_files = true;
+   
+   message User {
+      string id = 1 [(validate.rules).string = {min_len: 1, max_len: 100}];
+      string name = 2;
+   }
+   
+   service UserService {
+      rpc Create(User) returns (User) {}
+   }
+   ```
 
-3. Generate code
+   For the usage of `proto-gen-validation`, you can refer to the [official documentation](https://github.com/bufbuild/protoc-gen-validate).
 
-   Configure the `com.google.protobuf` plugin to generate gRPC and validation related code:
+3. Generate the code
+
+   Configure the `com.google.protobuf` plugin to generate gRPC and validation-related code:
 
     ```groovy
     apply plugin: 'com.google.protobuf'
@@ -50,10 +64,10 @@
         }
         plugins {
             grpc {
-                artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" + suffix
+                artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" + suffix // Generate gRPC-related code
             }
             javapgv {
-                artifact = "build.buf.protoc-gen-validate:protoc-gen-validate:${pgvVersion}" + suffix
+                artifact = "build.buf.protoc-gen-validate:protoc-gen-validate:${pgvVersion}" + suffix // Generate pgv-related code
             }
         }
         generateProtoTasks {
@@ -65,18 +79,34 @@
     }
     ```
 
-   > Both client and server can use this extension.
+   For Maven configuration, you can refer to the documentation [here](https://github.com/bufbuild/protoc-gen-validate#java).
 
-### Configurations
+You can refer to the [user](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/user) example for more information.
+
+## Usage Instructions
+
+If the server/client depends on the API module with the `grpc-starter-validation` module, by default, both the server and client will automatically enable the validation feature. Before sending a request, the client will validate the request parameters, and upon receiving a request, the server will also validate the request parameters.
+
+If you want to disable the validation feature, you can configure it in the `application.yml` file:
 
 ```yaml
 grpc:
   validation:
-    enabled: true    # enable validation
+    enabled: false
+```
+
+The implementation of Validation is essentially a gRPC interceptor, so you can control the execution order of validation by configuring the order of the interceptor. By default, the order of the validation interceptor is 0. You can modify the order by configuring `grpc.validation.client.order` and `grpc.validation.server.order`.
+
+## Related Configuration
+
+```yaml
+grpc:
+  validation:
+    enabled: true    # Enable validation
     client:
-      enabled: true  # enable validation for client
-      order: 0       # order of validating client interceptor
+      enabled: true  # Enable validation for the client
+      order: 0       # Order of validating client interceptor
     server:
-      enabled: true  # enable validation for server
-      order: 0       # order of validating server interceptor
+      enabled: true  # Enable validation for the server
+      order: 0       # Order of validating server interceptor
 ```
