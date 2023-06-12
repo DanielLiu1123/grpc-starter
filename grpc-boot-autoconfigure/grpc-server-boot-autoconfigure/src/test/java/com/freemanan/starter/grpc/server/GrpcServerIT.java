@@ -98,6 +98,7 @@ class GrpcServerIT {
         GrpcServer server = ctx.getBean(GrpcServer.class);
 
         assertThat(server).isInstanceOf(DummyGrpcServer.class);
+        assertThat(server.getPort()).isEqualTo(-1);
 
         ctx.close();
     }
