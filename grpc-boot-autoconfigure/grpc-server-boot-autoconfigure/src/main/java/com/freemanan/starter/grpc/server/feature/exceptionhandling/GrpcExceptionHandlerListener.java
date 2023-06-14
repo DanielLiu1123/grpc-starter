@@ -14,21 +14,21 @@ import org.slf4j.LoggerFactory;
  * @param <I> input/request message type
  * @param <O> output/response message type
  */
-public class ExceptionHandlerListener<I, O> extends SimpleForwardingServerCallListener<I> {
-    private static final Logger log = LoggerFactory.getLogger(ExceptionHandlerListener.class);
+public class GrpcExceptionHandlerListener<I, O> extends SimpleForwardingServerCallListener<I> {
+    private static final Logger log = LoggerFactory.getLogger(GrpcExceptionHandlerListener.class);
     private final ServerCall<I, O> call;
-    private final List<ExceptionHandler> exceptionHandlers;
-    private final List<UnhandledExceptionProcessor> unhandledExceptionProcessors;
+    private final List<GrpcExceptionHandler> grpcExceptionHandlers;
+    private final List<GrpcUnhandledExceptionProcessor> grpcUnhandledExceptionProcessors;
 
-    protected ExceptionHandlerListener(
+    protected GrpcExceptionHandlerListener(
             ServerCall.Listener<I> delegate,
             ServerCall<I, O> call,
-            List<ExceptionHandler> exceptionHandlers,
-            List<UnhandledExceptionProcessor> unhandledExceptionProcessors) {
+            List<GrpcExceptionHandler> grpcExceptionHandlers,
+            List<GrpcUnhandledExceptionProcessor> grpcUnhandledExceptionProcessors) {
         super(delegate);
         this.call = call;
-        this.exceptionHandlers = exceptionHandlers;
-        this.unhandledExceptionProcessors = unhandledExceptionProcessors;
+        this.grpcExceptionHandlers = grpcExceptionHandlers;
+        this.grpcUnhandledExceptionProcessors = grpcUnhandledExceptionProcessors;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class ExceptionHandlerListener<I, O> extends SimpleForwardingServerCallLi
     }
 
     private boolean handle(Exception e) {
-        for (ExceptionHandler handler : exceptionHandlers) {
+        for (GrpcExceptionHandler handler : grpcExceptionHandlers) {
             if (handler.support(e)) {
                 StatusRuntimeException sre = handler.handle(e);
                 if (sre == null) {
@@ -80,7 +80,7 @@ public class ExceptionHandlerListener<I, O> extends SimpleForwardingServerCallLi
                 return true;
             }
         }
-        unhandledExceptionProcessors.forEach(processor -> processor.process(e));
+        grpcUnhandledExceptionProcessors.forEach(processor -> processor.process(e));
         return false;
     }
 }

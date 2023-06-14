@@ -3,7 +3,7 @@ package com.freemanan.starter.grpc.server;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import com.freemanan.starter.grpc.server.feature.exceptionhandling.DefaultExceptionHandler;
+import com.freemanan.starter.grpc.server.feature.exceptionhandling.DefaultGrpcExceptionHandler;
 import io.grpc.protobuf.services.ProtoReflectionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -25,7 +25,7 @@ class GrpcServerIT {
         assertThatCode(() -> ctx.getBean(DefaultGrpcServer.class)).doesNotThrowAnyException();
         assertThatCode(() -> ctx.getBean(ProtoReflectionService.class))
                 .isInstanceOf(NoSuchBeanDefinitionException.class);
-        assertThatCode(() -> ctx.getBean(DefaultExceptionHandler.class))
+        assertThatCode(() -> ctx.getBean(DefaultGrpcExceptionHandler.class))
                 .isInstanceOf(NoSuchBeanDefinitionException.class);
 
         ctx.close();
@@ -60,7 +60,7 @@ class GrpcServerIT {
                 .properties(GrpcServerProperties.ExceptionHandling.PREFIX + ".use-default=true")
                 .run();
 
-        assertThatCode(() -> ctx.getBean(DefaultExceptionHandler.class)).doesNotThrowAnyException();
+        assertThatCode(() -> ctx.getBean(DefaultGrpcExceptionHandler.class)).doesNotThrowAnyException();
 
         ctx.close();
     }

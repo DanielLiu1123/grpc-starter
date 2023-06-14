@@ -17,15 +17,15 @@ public class ExceptionHandling {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = GrpcServerProperties.ExceptionHandling.PREFIX, name = "use-default")
-    public DefaultExceptionHandler grpcDefaultExceptionHandler() {
-        return new DefaultExceptionHandler();
+    public DefaultGrpcExceptionHandler defaultGrpcExceptionHandler() {
+        return new DefaultGrpcExceptionHandler();
     }
 
     @Bean
     @ConditionalOnMissingBean
     public ExceptionHandlingServerInterceptor grpcExceptionHandlingServerInterceptor(
-            ObjectProvider<ExceptionHandler> exceptionHandlers,
-            ObjectProvider<UnhandledExceptionProcessor> unhandledExceptionProcessors) {
+            ObjectProvider<GrpcExceptionHandler> exceptionHandlers,
+            ObjectProvider<GrpcUnhandledExceptionProcessor> unhandledExceptionProcessors) {
         return new ExceptionHandlingServerInterceptor(exceptionHandlers, unhandledExceptionProcessors);
     }
 }

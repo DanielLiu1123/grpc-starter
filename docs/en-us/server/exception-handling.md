@@ -4,19 +4,19 @@ The framework provides the capability to handle exceptions, but it doesn't imple
 itself. Users need to implement it themselves.
 
 The gRPC server starter provides a simple implementation
-called [DefaultExceptionHandler](https://github.com/DanielLiu1123/grpc-starter/blob/main/grpc-boot-autoconfigure/grpc-server-boot-autoconfigure/src/main/java/com/freemanan/starter/grpc/server/feature/exceptionhandling/DefaultExceptionHandler.java)
+called [DefaultGrpcExceptionHandler](https://github.com/DanielLiu1123/grpc-starter/blob/main/grpc-boot-autoconfigure/grpc-server-boot-autoconfigure/src/main/java/com/freemanan/starter/grpc/server/feature/exceptionhandling/DefaultGrpcExceptionHandler.java)
 that can be used as the default exception handler. It can be enabled by
 configuring `grpc.server.exception-handling.use-default=true`, which is disabled by default.
 
 ## Custom Exception Handling
 
-It's easy to extend custom exception handling logic by implementing the `ExceptionHandler` interface and registering it
+It's easy to extend custom exception handling logic by implementing the `GrpcExceptionHandler` interface and registering it
 as a Spring Bean:
 
 ```java
 
 @Component
-public class InvalidArgumentExceptionHandler implements ExceptionHandler {
+public class InvalidArgumentGrpcExceptionHandler implements ExceptionHandler {
     @Override
     public boolean support(Throwable t) {
         return t instanceof IllegalArgumentException;
@@ -34,8 +34,8 @@ public class InvalidArgumentExceptionHandler implements ExceptionHandler {
 }
 ```
 
-The gRPC Starter also provides an `UnhandledExceptionProcessor` interface to handle exceptions that are not handled by
-the `ExceptionHandler`. You can implement exception reporting logic, such as reporting unhandled exceptions
+The gRPC Starter also provides an `GrpcUnhandledExceptionProcessor` interface to handle exceptions that are not handled by
+the `GrpcExceptionHandler`. You can implement exception reporting logic, such as reporting unhandled exceptions
 to [Sentry](https://sentry.io/):
 
 ```java

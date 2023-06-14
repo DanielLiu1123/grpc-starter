@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Freeman
  */
-public class DefaultExceptionHandler implements ExceptionHandler {
-    private static final Logger log = LoggerFactory.getLogger(DefaultExceptionHandler.class);
+public class DefaultGrpcExceptionHandler implements GrpcExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(DefaultGrpcExceptionHandler.class);
     public static final int ORDER = LOWEST_PRECEDENCE;
 
     @Override

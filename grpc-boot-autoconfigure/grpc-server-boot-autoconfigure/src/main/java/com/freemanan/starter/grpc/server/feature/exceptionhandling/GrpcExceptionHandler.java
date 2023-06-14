@@ -7,7 +7,7 @@ import org.springframework.core.Ordered;
 /**
  * @author Freeman
  */
-public interface ExceptionHandler extends Ordered {
+public interface GrpcExceptionHandler extends Ordered {
 
     /**
      * Whether this handler supports the given exception.
@@ -29,6 +29,6 @@ public interface ExceptionHandler extends Ordered {
 
     @Override
     default int getOrder() {
-        return 0;
+        return Ordered.LOWEST_PRECEDENCE;
     }
 }

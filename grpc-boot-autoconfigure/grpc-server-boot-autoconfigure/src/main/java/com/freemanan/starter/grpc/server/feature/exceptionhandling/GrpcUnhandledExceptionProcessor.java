@@ -7,7 +7,7 @@ package com.freemanan.starter.grpc.server.feature.exceptionhandling;
  *
  * @author Freeman
  */
-public interface UnhandledExceptionProcessor {
+public interface GrpcUnhandledExceptionProcessor {
 
     /**
      * Process unhandled exception.
