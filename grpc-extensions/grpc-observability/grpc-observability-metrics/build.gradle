@@ -1,0 +1,21 @@
+dependencies {
+    compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+    compileOnly(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
+
+    api("io.micrometer:micrometer-observation")
+    api("io.micrometer:micrometer-core")
+    api("io.micrometer:micrometer-registry-prometheus")
+//    api("io.micrometer:micrometer-tracing")
+
+    compileOnly("org.springframework.boot:spring-boot-starter-web")
+    compileOnly("org.springframework.boot:spring-boot-starter-webflux")
+
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
+    testImplementation(project(":grpc-starters:grpc-boot-starter"))
+}
+
+apply from: "${rootDir}/deploy.gradle"

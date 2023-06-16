@@ -6,6 +6,8 @@ include(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure")
 
 // extensions
 include(":grpc-extensions:grpc-json-transcoder")
+include(":grpc-extensions:grpc-observability:grpc-observability-metrics")
+include(":grpc-extensions:grpc-observability:grpc-observability-tracing")
 include(":grpc-extensions:grpc-test")
 include(":grpc-extensions:grpc-validation")
 
