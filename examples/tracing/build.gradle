@@ -1,0 +1,16 @@
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation(project(":examples:grpc-sample-api"))
+    implementation(project(":grpc-starters:grpc-boot-starter"))
+    implementation(project(":grpc-extensions:grpc-tracing"))
+
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-tracing-bridge-brave")
+    implementation("com.freemanan:httpexchange-spring-boot-starter:3.1.1-RC3")
+
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
+}

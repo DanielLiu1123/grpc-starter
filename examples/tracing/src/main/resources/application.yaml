@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: metrics-example-app
+
+grpc:
+  server:
+    reflection:
+      enabled: true
+  client:
+    authority: localhost:${grpc.server.port:9090}
+
+management:
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  tracing:
+    sampling:
+      probability: 1.0
+
+http-exchange:
+  channels:
+    - base-url: http://localhost:${server.port:8080}
+      clients:
+        - '**.api.*Api'
+debug: true

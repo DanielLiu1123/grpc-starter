@@ -1,2 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.freemanan.starter.grpc.extensions.observability.metrics.ObservabilityMetricsAutoConfiguration
