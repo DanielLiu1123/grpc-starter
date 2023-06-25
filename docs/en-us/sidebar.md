@@ -21,6 +21,8 @@
 - Extensions
   - [Protobuf Validation](en-us/extension/protobuf-validation.md)
   - [JSON Transcoder](en-us/extension/json-transcoder.md)
+  - [Metrics](en-us/extension/metrics.md)
+  - [Tracing](en-us/extension/tracing.md)
   - [Test](en-us/extension/test.md)
 
 - Other

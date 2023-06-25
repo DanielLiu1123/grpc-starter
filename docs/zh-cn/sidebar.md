@@ -21,6 +21,8 @@
 - 扩展
     - [Protobuf 校验](zh-cn/extension/protobuf-validation.md)
     - [JSON transcoder](zh-cn/extension/json-transcoder.md)
+    - [Metrics](zh-cn/extension/metrics.md)
+    - [Tracing](zh-cn/extension/tracing.md)
     - [Test](zh-cn/extension/test.md)
 
 - 其他
