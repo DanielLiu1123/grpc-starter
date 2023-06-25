@@ -1,0 +1,10 @@
+dependencies {
+    api(project(":grpc-extensions:grpc-metrics"))
+
+    optionalSupportApi("org.springframework.boot:spring-boot-starter-aop")
+
+    optionalSupportApi("io.micrometer:micrometer-registry-prometheus")
+    optionalSupportApi("io.micrometer:micrometer-registry-otlp")
+}
+
+apply from: "${rootDir}/deploy.gradle"

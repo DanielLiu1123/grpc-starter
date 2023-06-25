@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: metrics-example
+
+grpc:
+  server:
+    reflection:
+      enabled: true
+  client:
+    authority: localhost:${grpc.server.port:9090}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  metrics:
+    tags:
+      app: ${spring.application.name:UNKNOWN}
+debug: true

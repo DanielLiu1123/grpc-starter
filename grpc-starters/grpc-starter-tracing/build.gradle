@@ -1,0 +1,8 @@
+dependencies {
+    api(project(":grpc-extensions:grpc-tracing"))
+
+    optionalSupportApi("io.micrometer:micrometer-tracing-bridge-brave")
+    optionalSupportApi("io.micrometer:micrometer-tracing-bridge-otel")
+}
+
+apply from: "${rootDir}/deploy.gradle"
