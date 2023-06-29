@@ -22,6 +22,8 @@ class GrpcClientCreator {
     private static final String NEW_BLOCKING_STUB_METHOD = "newBlockingStub";
     private static final String NEW_FUTURE_STUB_METHOD = "newFutureStub";
     private static final String NEW_STUB_METHOD = "newStub";
+    private static final String BLOCKING_STUB = "BlockingStub";
+    private static final String FUTURE_STUB = "FutureStub";
 
     private final ConfigurableBeanFactory beanFactory;
     private final Class<?> stubClass;
@@ -103,9 +105,9 @@ class GrpcClientCreator {
     }
 
     private static String getStubMethodName(Class<?> stubClass) {
-        if (stubClass.getName().endsWith("BlockingStub")) {
+        if (stubClass.getName().endsWith(BLOCKING_STUB)) {
             return NEW_BLOCKING_STUB_METHOD;
-        } else if (stubClass.getName().endsWith("FutureStub")) {
+        } else if (stubClass.getName().endsWith(FUTURE_STUB)) {
             return NEW_FUTURE_STUB_METHOD;
         } else {
             return NEW_STUB_METHOD;

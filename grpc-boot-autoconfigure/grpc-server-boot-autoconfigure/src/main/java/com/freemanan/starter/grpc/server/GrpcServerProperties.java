@@ -141,12 +141,6 @@ public class GrpcServerProperties {
          * Whether to enable exception handling, default {@code true}
          */
         private boolean enabled = true;
-        /**
-         * Whether to enable default exception handler, default {@code false}
-         *
-         * <p> Default exception handler is {@link com.freemanan.starter.grpc.server.feature.exceptionhandling.DefaultExceptionHandler}.
-         */
-        private boolean useDefault = false;
     }
 
     @Data

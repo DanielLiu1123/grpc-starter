@@ -6,6 +6,7 @@ package com.freemanan.starter.grpc.server;
  * @author Freeman
  */
 public class DummyGrpcServer implements GrpcServer {
+    public static final int DUMMY_PORT = -1;
 
     @Override
     public void start() {
@@ -29,6 +30,6 @@ public class DummyGrpcServer implements GrpcServer {
 
     @Override
     public int getPort() {
-        return 0;
+        return DUMMY_PORT;
     }
 }

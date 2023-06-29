@@ -3,7 +3,6 @@ package com.freemanan.starter.grpc.server;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import com.freemanan.starter.grpc.server.feature.exceptionhandling.DefaultExceptionHandler;
 import io.grpc.protobuf.services.ProtoReflectionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -24,8 +23,6 @@ class GrpcServerIT {
         assertThatCode(() -> ctx.getBean(GrpcServerProperties.class)).doesNotThrowAnyException();
         assertThatCode(() -> ctx.getBean(DefaultGrpcServer.class)).doesNotThrowAnyException();
         assertThatCode(() -> ctx.getBean(ProtoReflectionService.class))
-                .isInstanceOf(NoSuchBeanDefinitionException.class);
-        assertThatCode(() -> ctx.getBean(DefaultExceptionHandler.class))
                 .isInstanceOf(NoSuchBeanDefinitionException.class);
 
         ctx.close();
@@ -50,17 +47,6 @@ class GrpcServerIT {
                 .run();
 
         assertThatCode(() -> ctx.getBean(ProtoReflectionService.class)).doesNotThrowAnyException();
-
-        ctx.close();
-    }
-
-    @Test
-    void testDefaultExceptionHandlingEnabled() {
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
-                .properties(GrpcServerProperties.ExceptionHandling.PREFIX + ".use-default=true")
-                .run();
-
-        assertThatCode(() -> ctx.getBean(DefaultExceptionHandler.class)).doesNotThrowAnyException();
 
         ctx.close();
     }
@@ -98,6 +84,7 @@ class GrpcServerIT {
         GrpcServer server = ctx.getBean(GrpcServer.class);
 
         assertThat(server).isInstanceOf(DummyGrpcServer.class);
+        assertThat(server.getPort()).isEqualTo(-1);
 
         ctx.close();
     }
