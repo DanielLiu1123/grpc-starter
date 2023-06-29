@@ -1,6 +1,5 @@
 package com.freemanan.starter.grpc.server;
 
-import com.freemanan.starter.grpc.server.feature.exceptionhandling.DefaultGrpcExceptionHandler;
 import io.grpc.internal.GrpcUtil;
 import io.grpc.protobuf.services.ChannelzService;
 import lombok.Data;
@@ -142,12 +141,6 @@ public class GrpcServerProperties {
          * Whether to enable exception handling, default {@code true}
          */
         private boolean enabled = true;
-        /**
-         * Whether to enable default exception handler, default {@code false}
-         *
-         * <p> Default exception handler is {@link DefaultGrpcExceptionHandler}.
-         */
-        private boolean useDefault = false;
     }
 
     @Data
