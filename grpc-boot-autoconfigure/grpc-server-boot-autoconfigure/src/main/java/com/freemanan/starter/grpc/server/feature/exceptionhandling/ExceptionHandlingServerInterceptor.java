@@ -15,13 +15,13 @@ import org.springframework.core.Ordered;
 public class ExceptionHandlingServerInterceptor implements ServerInterceptor, Ordered {
     public static final int ORDER = Ordered.LOWEST_PRECEDENCE - 1000;
 
-    private final List<GrpcExceptionHandler> grpcExceptionHandlers;
+    private final List<GrpcExceptionResolver> grpcExceptionResolvers;
     private final List<GrpcUnhandledExceptionProcessor> grpcUnhandledExceptionProcessors;
 
     public ExceptionHandlingServerInterceptor(
-            ObjectProvider<GrpcExceptionHandler> exceptionHandlers,
+            ObjectProvider<GrpcExceptionResolver> exceptionHandlers,
             ObjectProvider<GrpcUnhandledExceptionProcessor> unhandledExceptionProcessors) {
-        this.grpcExceptionHandlers = exceptionHandlers.orderedStream().collect(Collectors.toList());
+        this.grpcExceptionResolvers = exceptionHandlers.orderedStream().collect(Collectors.toList());
         this.grpcUnhandledExceptionProcessors =
                 unhandledExceptionProcessors.orderedStream().collect(Collectors.toList());
     }
@@ -30,7 +30,7 @@ public class ExceptionHandlingServerInterceptor implements ServerInterceptor, Or
     public <I, O> ServerCall.Listener<I> interceptCall(
             ServerCall<I, O> call, Metadata headers, ServerCallHandler<I, O> next) {
         return new GrpcExceptionHandlerListener<>(
-                next.startCall(call, headers), call, grpcExceptionHandlers, grpcUnhandledExceptionProcessors);
+                next.startCall(call, headers), call, headers, grpcExceptionResolvers, grpcUnhandledExceptionProcessors);
     }
 
     @Override

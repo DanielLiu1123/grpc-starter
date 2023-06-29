@@ -15,6 +15,7 @@ dependencies {
 
     testRuntimeOnly("io.grpc:grpc-netty-shaded")
     testImplementation(project(":grpc-starters:grpc-starter-test"))
+    testImplementation(project(":grpc-starters:grpc-client-boot-starter"))
 }
 
 apply from: "${rootDir}/deploy.gradle"
