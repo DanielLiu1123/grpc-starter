@@ -54,8 +54,8 @@ public class GrpcExceptionHandlerListener<I, O> extends SimpleForwardingServerCa
     }
 
     private boolean handle(Exception e) {
-        for (GrpcExceptionResolver handler : grpcExceptionResolvers) {
-            StatusRuntimeException sre = handler.resolve(e, call, headers);
+        for (GrpcExceptionResolver resolver : grpcExceptionResolvers) {
+            StatusRuntimeException sre = resolver.resolve(e, call, headers);
             if (sre != null) {
                 call.close(
                         sre.getStatus(), Optional.ofNullable(sre.getTrailers()).orElseGet(Metadata::new));
