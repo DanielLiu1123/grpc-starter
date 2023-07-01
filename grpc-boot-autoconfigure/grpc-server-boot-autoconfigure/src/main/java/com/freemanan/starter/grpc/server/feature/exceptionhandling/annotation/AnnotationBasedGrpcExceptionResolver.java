@@ -141,18 +141,20 @@ public class AnnotationBasedGrpcExceptionResolver
 
     @Nullable
     private Map.Entry<Throwable, GrpcExceptionHandlerMethod> findHandlerMethod(Throwable throwable) {
-        if (throwable == null) {
-            return null;
+        Throwable current = throwable;
+        while (current != null) {
+            final Throwable exceptionToUse = current;
+            GrpcExceptionHandlerMethod method = exceptionClassToMethod.keySet().stream()
+                    .filter(ex -> ex.isAssignableFrom(exceptionToUse.getClass()))
+                    .min(new ExceptionDepthComparator(exceptionToUse.getClass()))
+                    .map(exceptionClassToMethod::get)
+                    .orElse(null);
+            if (method != null) {
+                return new AbstractMap.SimpleEntry<>(exceptionToUse, method);
+            }
+            current = exceptionToUse.getCause();
         }
-        GrpcExceptionHandlerMethod method = exceptionClassToMethod.keySet().stream()
-                .filter(ex -> ex.isAssignableFrom(throwable.getClass()))
-                .min(new ExceptionDepthComparator(throwable.getClass()))
-                .map(exceptionClassToMethod::get)
-                .orElse(null);
-        if (method != null) {
-            return new AbstractMap.SimpleEntry<>(throwable, method);
-        }
-        return findHandlerMethod(throwable.getCause());
+        return null;
     }
 
     @Data
