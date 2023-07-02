@@ -17,6 +17,5 @@ grpc:
         enabled: true              # whether to enable redis health check
     exception-handling:
       enabled: true                # whether to enable exception handling
-      use-default: true            # whether to use default exception handler
     in-process:
       name: test                   # in-process server name
