@@ -35,6 +35,12 @@ public class GrpcServerAutoConfiguration {
                 : new DummyGrpcServer();
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public GrpcRequestContextServerInterceptor grpcRequestContextServerInterceptor() {
+        return new GrpcRequestContextServerInterceptor();
+    }
+
     @Configuration(proxyBeanMethods = false)
     @Import({Reflection.class, Health.class, Channelz.class, ExceptionHandling.class})
     static class Features {}
