@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -28,7 +27,6 @@ import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -54,7 +52,12 @@ public class AnnotationBasedGrpcExceptionResolver
         Throwable caughtException = entry.getKey();
         Object[] args = getArgs(method.getMethod(), caughtException, call, headers);
         Object res = ReflectionUtils.invokeMethod(method.getMethod(), method.getBean(), args);
-        Assert.notNull(res, "Return value of @GrpcExceptionHandler method must not be null");
+        if (res == null) {
+            log.warn(
+                    "Caught exception {} but @GrpcExceptionHandler method returned null, ignoring it",
+                    caughtException.getClass().getSimpleName());
+            return null;
+        }
         if (res instanceof StatusRuntimeException) {
             return (StatusRuntimeException) res;
         } else if (res instanceof StatusException) {
@@ -109,11 +112,7 @@ public class AnnotationBasedGrpcExceptionResolver
         List<GrpcExceptionHandlerMethod> methods = new ArrayList<>();
         ctx.getBeansWithAnnotation(GrpcAdvice.class).forEach((beanName, bean) -> {
             ReflectionUtils.doWithMethods(AopProxyUtils.ultimateTargetClass(bean), method -> {
-                com.freemanan.starter.grpc.server.feature.exceptionhandling.annotation.GrpcExceptionHandler anno =
-                        AnnotationUtils.findAnnotation(
-                                method,
-                                com.freemanan.starter.grpc.server.feature.exceptionhandling.annotation
-                                        .GrpcExceptionHandler.class);
+                GrpcExceptionHandler anno = AnnotationUtils.findAnnotation(method, GrpcExceptionHandler.class);
                 if (anno != null) {
                     ReflectionUtils.makeAccessible(method);
                     methods.add(new GrpcExceptionHandlerMethod(bean, method));
@@ -122,8 +121,8 @@ public class AnnotationBasedGrpcExceptionResolver
         });
         Map<Class<? extends Throwable>, GrpcExceptionHandlerMethod> classToMethod = methods.stream()
                 .flatMap(method -> Arrays.stream(method.getExceptions())
-                        .map(exceptionClass -> new HandlerMethod(method, exceptionClass)))
-                .collect(Collectors.toMap(HandlerMethod::getExceptionClass, HandlerMethod::getMethod, (o, n) -> {
+                        .map(exceptionClass -> new AbstractMap.SimpleEntry<>(exceptionClass, method)))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (o, n) -> {
                     if (Objects.equals(o.getBeanOrder(), n.getBeanOrder())) {
                         throw new IllegalStateException(
                                 "Duplicate exception handler method: " + o.getMethod() + ", " + n.getMethod());
@@ -143,23 +142,17 @@ public class AnnotationBasedGrpcExceptionResolver
     private Map.Entry<Throwable, GrpcExceptionHandlerMethod> findHandlerMethod(Throwable throwable) {
         Throwable current = throwable;
         while (current != null) {
-            final Throwable exceptionToUse = current;
+            final Class<? extends Throwable> clz = current.getClass();
             GrpcExceptionHandlerMethod method = exceptionClassToMethod.keySet().stream()
-                    .filter(ex -> ex.isAssignableFrom(exceptionToUse.getClass()))
-                    .min(new ExceptionDepthComparator(exceptionToUse.getClass()))
+                    .filter(ex -> ex.isAssignableFrom(clz))
+                    .min(new ExceptionDepthComparator(clz))
                     .map(exceptionClassToMethod::get)
                     .orElse(null);
             if (method != null) {
-                return new AbstractMap.SimpleEntry<>(exceptionToUse, method);
+                return new AbstractMap.SimpleEntry<>(current, method);
             }
-            current = exceptionToUse.getCause();
+            current = current.getCause();
         }
         return null;
-    }
-
-    @Data
-    private static final class HandlerMethod {
-        private final GrpcExceptionHandlerMethod method;
-        private final Class<? extends Throwable> exceptionClass;
     }
 }
