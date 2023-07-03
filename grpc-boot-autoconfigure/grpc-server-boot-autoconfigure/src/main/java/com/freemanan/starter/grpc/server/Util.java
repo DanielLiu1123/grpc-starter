@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Set;
 import lombok.experimental.UtilityClass;
 import org.springframework.aop.framework.AopProxyUtils;
-import org.springframework.beans.factory.ObjectProvider;
 
 /**
  * @author Freeman
@@ -30,7 +29,7 @@ class Util {
         return internalServiceClasses.stream().anyMatch(clazz -> clazz.isAssignableFrom(clz));
     }
 
-    public static boolean allInternalServices(ObjectProvider<BindableService> services) {
+    public static boolean allInternalServices(Set<BindableService> services) {
         return services.stream().map(AopProxyUtils::ultimateTargetClass).allMatch(Util::isInternalService);
     }
 }
