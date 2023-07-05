@@ -19,3 +19,6 @@ grpc:
       enabled: true                # whether to enable exception handling
     in-process:
       name: test                   # in-process server name
+    channelz:
+      enabled: true                # whether to enable channelz
+      max-page-size: 100           # max page size
