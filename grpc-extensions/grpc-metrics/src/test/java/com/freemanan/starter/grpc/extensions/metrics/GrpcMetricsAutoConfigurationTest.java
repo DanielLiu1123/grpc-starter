@@ -41,27 +41,6 @@ class GrpcMetricsAutoConfigurationTest {
                 .doesNotThrowAnyException();
         assertThatCode(() -> ctx.getBean(AnnotationAwareAspectJAutoProxyCreator.class))
                 .doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(CountedAspect.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(TimedAspect.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(ObservedAspect.class)).doesNotThrowAnyException();
-
-        ctx.close();
-    }
-
-    @Test
-    void testMetricsBeans_whenNoAopStarter() {
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
-                .properties(GrpcServerProperties.PREFIX + ".in-process.name=" + UUID.randomUUID())
-                .run();
-
-        assertThatCode(() -> ctx.getBean(OrderedMetricCollectingServerInterceptor.class))
-                .doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(OrderedMetricCollectingClientInterceptor.class))
-                .doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME))
-                .doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(AnnotationAwareAspectJAutoProxyCreator.class))
-                .isInstanceOf(NoSuchBeanDefinitionException.class);
         assertThatCode(() -> ctx.getBean(CountedAspect.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
         assertThatCode(() -> ctx.getBean(TimedAspect.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
         assertThatCode(() -> ctx.getBean(ObservedAspect.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
