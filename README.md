@@ -12,7 +12,7 @@
 This project provides Spring Boot starters for gRPC ecosystem, which provides autoconfigure and highly extendable
 capabilities.
 
-_**Make the integration of gRPC with Spring Boot feel seamless and native.**_
+**Make the integration of gRPC with Spring Boot feel seamless and native.**
 
 ## Features
 
@@ -20,85 +20,77 @@ _**Make the integration of gRPC with Spring Boot feel seamless and native.**_
 
 - Dependencies management for gRPC related libraries
 - gRPC server autoconfigure
-    - Exception handling
-    - Health check
+    - [Exception handling](https://danielliu1123.github.io/grpc-starter/#/en-us/server/exception-handling)
+    - [Health check](https://danielliu1123.github.io/grpc-starter/#/en-us/server/health-check)
 - gRPC client autoconfigure
-    - `@Autowired` support
+    - [`@Autowired` support](https://danielliu1123.github.io/grpc-starter/#/en-us/client/onboarding)
 
 ***Extensions:***
 
-- **JSON transcoder, one set of code supports both gRPC and HTTP/JSON.**
-- **Protobuf validation, implemented by [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).**
-- Metric, Spring Boot Actuator integration with gRPC service.
-- Tracing, Spring Boot Actuator integration with gRPC server and client.
-- Testing support.
+- [JSON transcoder](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/json-transcoder): one set of code supports both gRPC and HTTP/JSON.
+- [Protobuf validation](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/protobuf-validation): Protobuf message validation implemented by [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).
+- [Metric](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/metrics): Spring Boot Actuator integration with gRPC service.
+- [Tracing](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/tracing): Spring Boot Actuator integration with gRPC server and client.
+- [Testing](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/test): integration with `SpringBootTest`.
 
 ## Quick Start
 
-```groovy
-implementation(platform("com.freemanan:grpc-starter-dependencies:3.1.0"))
-implementation("com.freemanan:grpc-boot-starter")
+1. Add dependencies
 
-// use gRPC simple proto for the example
-implementation("io.grpc:grpc-testing-proto")
-```
+    ```groovy
+    implementation(platform("com.freemanan:grpc-starter-dependencies:3.1.0"))
+    implementation("com.freemanan:grpc-boot-starter")
+    
+    // use gRPC simple proto for the example
+    implementation("io.grpc:grpc-testing-proto")
+    ```
 
-### Server implementation
-
-```java
-
-@Controller
-public class SimpleServiceController extends SimpleServiceGrpc.SimpleServiceImplBase {
-
-    @Override
-    public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> responseObserver) {
-        SimpleResponse response = SimpleResponse.newBuilder()
-                .setResponseMessage("Hi, I got your message: " + request.getRequestMessage())
-                .build();
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
-    }
-}
-```
-
-### gRPC stubs injection
-
-1. Use `@EnableGrpcClients` to specify which gRPC stubs to scan
+2. Register gRPC service
 
     ```java
-    @SpringBootApplication
-    @EnableGrpcClients("io.grpc")
-    public class SimpleApp {
-        public static void main(String[] args) {
-            SpringApplication.run(SimpleApp.class, args);
+    
+    @Controller
+    public class SimpleServiceController extends SimpleServiceGrpc.SimpleServiceImplBase {
+    
+        @Override
+        public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> responseObserver) {
+            SimpleResponse response = SimpleResponse.newBuilder()
+                    .setResponseMessage("Hi, I got your message: " + request.getRequestMessage())
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
         }
     }
     ```
 
-   > The usage of `@EnableGrpcClients` is very similar to Spring Cloud Openfeign `@EnableFeignClients`, except it is
-   used to scan gRPC stubs.
+3. Using gRPC client
 
-2. Configure the authority of the stub
+   ```java
+   @SpringBootApplication
+   @EnableGrpcClients("io.grpc")
+   public class SimpleApp implements ApplicationRunner {
+   
+       public static void main(String[] args) {
+           new SpringApplicationBuilder(SimpleApp.class)
+                .properties("grpc.client.authority=localhost:9090")
+                .run(args);
+       }
+   
+       @Autowired
+       SimpleServiceGrpc.SimpleServiceBlockingStub simpleStub;
+   
+       @Override
+       public void run(ApplicationArguments args) {
+           SimpleRequest request = SimpleRequest.newBuilder()
+                  .setRequestMessage("grpc starter is awesome!")
+                  .build();
+           SimpleResponse response = simpleStub.unaryRpc(request);
+           System.out.println(response.getResponseMessage());
+       }
+   }
+   ```
 
-    ```yaml
-    # application.yml
-    grpc:
-      client:
-        authority: localhost:9090
-    ```
-
-3. Inject using `@Autowired`
-
-    ```java
-    
-    @Service
-    public class SimpleService {
-        @Autowired
-        SimpleServiceGrpc.SimpleServiceBlockingStub simpleServiceBlockingStub;
-    }
-    ```
-
-You can refer to the [example](examples/simple) project.
+See the [example](examples/simple) project。
 
 ## Version
 

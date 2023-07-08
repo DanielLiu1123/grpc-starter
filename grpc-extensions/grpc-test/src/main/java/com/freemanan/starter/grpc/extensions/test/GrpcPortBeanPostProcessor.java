@@ -17,7 +17,11 @@ import org.springframework.util.ReflectionUtils;
  */
 class GrpcPortBeanPostProcessor implements ApplicationListener<GrpcServerStartedEvent>, BeanPostProcessor {
 
+    /**
+     * key: bean instance, value: whether injected port
+     */
     private final Map<Object, Boolean> beans = new HashMap<>();
+
     private int port;
 
     @Override
