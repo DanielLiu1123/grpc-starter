@@ -110,23 +110,28 @@ public class AnnotationBasedGrpcExceptionResolver
     @Override
     public void afterSingletonsInstantiated() {
         List<GrpcExceptionHandlerMethod> methods = new ArrayList<>();
-        ctx.getBeansWithAnnotation(GrpcAdvice.class).forEach((beanName, bean) -> {
-            ReflectionUtils.doWithMethods(AopProxyUtils.ultimateTargetClass(bean), method -> {
-                GrpcExceptionHandler anno = AnnotationUtils.findAnnotation(method, GrpcExceptionHandler.class);
-                if (anno != null) {
-                    ReflectionUtils.makeAccessible(method);
-                    methods.add(new GrpcExceptionHandlerMethod(bean, method));
-                }
-            });
-        });
+        ctx.getBeansWithAnnotation(GrpcAdvice.class)
+                .forEach((beanName, bean) ->
+                        ReflectionUtils.doWithMethods(AopProxyUtils.ultimateTargetClass(bean), method -> {
+                            GrpcExceptionHandler anno =
+                                    AnnotationUtils.findAnnotation(method, GrpcExceptionHandler.class);
+                            if (anno != null) {
+                                ReflectionUtils.makeAccessible(method);
+                                methods.add(new GrpcExceptionHandlerMethod(bean, method));
+                            }
+                        }));
         Map<Class<? extends Throwable>, GrpcExceptionHandlerMethod> classToMethod = methods.stream()
                 .flatMap(method -> Arrays.stream(method.getExceptions())
                         .map(exceptionClass -> new AbstractMap.SimpleEntry<>(exceptionClass, method)))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (o, n) -> {
                     if (Objects.equals(o.getBeanOrder(), n.getBeanOrder())) {
-                        throw new IllegalStateException(
-                                "Duplicate exception handler method: " + o.getMethod() + ", " + n.getMethod());
+                        throw new IllegalStateException("Duplicate exception handler method: "
+                                + formatMethod(o.getMethod()) + ", " + formatMethod(n.getMethod()));
                     }
+                    log.warn(
+                            "Duplicate exception handler method: {}, {}. Using the one with higher priority",
+                            formatMethod(o.getMethod()),
+                            formatMethod(n.getMethod()));
                     if (o.getBeanOrder() == null) {
                         return n;
                     }
@@ -154,5 +159,9 @@ public class AnnotationBasedGrpcExceptionResolver
             current = current.getCause();
         }
         return null;
+    }
+
+    private static String formatMethod(Method method) {
+        return method.getDeclaringClass().getSimpleName() + "#" + method.getName();
     }
 }
