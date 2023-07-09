@@ -99,6 +99,10 @@ public class GrpcServerProperties {
              */
             private boolean enabled = true;
             /**
+             * The service name that will be used for datasource health check, default {@code datasource}.
+             */
+            private String service = "datasource";
+            /**
              * The SQL query that will be used to validate datasource connection, default {@code SELECT 1}.
              */
             private String validationQuery = "SELECT 1";
@@ -116,6 +120,10 @@ public class GrpcServerProperties {
              * Whether to enable redis health check, default {@code true}.
              */
             private boolean enabled = true;
+            /**
+             * The service name that will be used for redis health check, default {@code redis}.
+             */
+            private String service = "redis";
         }
     }
 

@@ -16,12 +16,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
  * @author Freeman
  */
 public class HealthServerInterceptor implements ServerInterceptor {
+    private static final Logger log = LoggerFactory.getLogger(HealthServerInterceptor.class);
 
     private final HealthStatusManager healthManager;
     private final Map<String, HealthChecker> serviceToChecker;
@@ -30,7 +33,17 @@ public class HealthServerInterceptor implements ServerInterceptor {
         this.healthManager = healthManager;
         this.serviceToChecker = checkers.orderedStream()
                 .collect(Collectors.toMap(
-                        HealthChecker::service, Function.identity(), (oldV, newV) -> oldV, LinkedHashMap::new));
+                        HealthChecker::service,
+                        Function.identity(),
+                        (o, n) -> {
+                            log.warn(
+                                    "Duplicate service name for health checker: {}, {}, use {}",
+                                    o.getClass().getSimpleName(),
+                                    n.getClass().getSimpleName(),
+                                    o.getClass().getSimpleName());
+                            return o;
+                        },
+                        LinkedHashMap::new));
     }
 
     @Override

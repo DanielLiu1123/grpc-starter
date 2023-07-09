@@ -31,7 +31,7 @@ public class DataSourceHealthChecker implements HealthChecker, BeanFactoryAware,
 
     @Override
     public String service() {
-        return "datasource";
+        return config.getService();
     }
 
     @Override
