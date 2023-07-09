@@ -23,6 +23,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class Health {
 
     @Bean
+    @ConditionalOnMissingBean
     public HealthStatusManager grpcHealthStatusManager() {
         return new HealthStatusManager();
     }
@@ -62,8 +63,8 @@ public class Health {
 
         @Bean
         @ConditionalOnMissingBean
-        public RedisHealthChecker grpcRedisHealthChecker() {
-            return new RedisHealthChecker();
+        public RedisHealthChecker grpcRedisHealthChecker(GrpcServerProperties properties) {
+            return new RedisHealthChecker(properties.getHealth().getRedis());
         }
     }
 }

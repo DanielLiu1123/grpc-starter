@@ -1,5 +1,6 @@
 package com.freemanan.starter.grpc.server.feature.health.redis;
 
+import com.freemanan.starter.grpc.server.GrpcServerProperties;
 import com.freemanan.starter.grpc.server.feature.health.HealthChecker;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,9 +22,15 @@ public class RedisHealthChecker implements HealthChecker, BeanFactoryAware, Smar
     private BeanFactory beanFactory;
     private List<RedisConnectionFactory> connectionFactories;
 
+    private final GrpcServerProperties.Health.Redis config;
+
+    public RedisHealthChecker(GrpcServerProperties.Health.Redis config) {
+        this.config = config;
+    }
+
     @Override
     public String service() {
-        return "redis";
+        return config.getService();
     }
 
     @Override

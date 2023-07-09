@@ -2,6 +2,7 @@ package com.freemanan.starter.grpc.server;
 
 import static io.grpc.health.v1.HealthCheckResponse.ServingStatus;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import com.freemanan.starter.grpc.server.feature.health.HealthChecker;
@@ -15,8 +16,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Freeman
  */
+@ExtendWith(OutputCaptureExtension.class)
 class HealthIT {
 
     @Test
@@ -66,12 +71,58 @@ class HealthIT {
         ctx.close();
     }
 
+    @Test
+    void testDuplicateService(CapturedOutput output) {
+        String name = UUID.randomUUID().toString();
+        assertThatCode(() -> new SpringApplicationBuilder(DuplicatedServiceCfg.class)
+                        .properties(GrpcServerProperties.InProcess.PREFIX + ".name=" + name)
+                        .run()
+                        .close())
+                .doesNotThrowAnyException();
+        assertThat(output).contains("Duplicate service name for health checker:");
+    }
+
     @Configuration(proxyBeanMethods = false)
     @EnableAutoConfiguration
     static class Cfg {
 
         @Bean
         HealthChecker fooHealthChecker() {
+            return new HealthChecker() {
+                @Override
+                public String service() {
+                    return "foo";
+                }
+
+                @Override
+                public boolean check() {
+                    return true;
+                }
+            };
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @EnableAutoConfiguration
+    static class DuplicatedServiceCfg {
+
+        @Bean
+        HealthChecker fooHealthChecker1() {
+            return new HealthChecker() {
+                @Override
+                public String service() {
+                    return "foo";
+                }
+
+                @Override
+                public boolean check() {
+                    return true;
+                }
+            };
+        }
+
+        @Bean
+        HealthChecker fooHealthChecker2() {
             return new HealthChecker() {
                 @Override
                 public String service() {
