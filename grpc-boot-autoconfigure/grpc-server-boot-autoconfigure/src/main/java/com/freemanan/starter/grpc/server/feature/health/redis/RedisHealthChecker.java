@@ -2,6 +2,7 @@ package com.freemanan.starter.grpc.server.feature.health.redis;
 
 import com.freemanan.starter.grpc.server.GrpcServerProperties;
 import com.freemanan.starter.grpc.server.feature.health.HealthChecker;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -20,8 +21,7 @@ public class RedisHealthChecker implements HealthChecker, BeanFactoryAware, Smar
     private static final Logger log = LoggerFactory.getLogger(RedisHealthChecker.class);
 
     private BeanFactory beanFactory;
-    private List<RedisConnectionFactory> connectionFactories;
-
+    private final List<RedisConnectionFactory> connectionFactories = new ArrayList<>();
     private final GrpcServerProperties.Health.Redis config;
 
     public RedisHealthChecker(GrpcServerProperties.Health.Redis config) {
@@ -54,9 +54,10 @@ public class RedisHealthChecker implements HealthChecker, BeanFactoryAware, Smar
     @Override
     public void afterSingletonsInstantiated() {
         // Do NOT inject RedisConnectionFactory here, we don't want to effect the order of auto-configurations
-        this.connectionFactories = beanFactory
+        List<RedisConnectionFactory> factories = beanFactory
                 .getBeanProvider(RedisConnectionFactory.class)
                 .orderedStream()
                 .collect(Collectors.toList());
+        this.connectionFactories.addAll(factories);
     }
 }

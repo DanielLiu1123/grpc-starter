@@ -4,6 +4,7 @@ import com.freemanan.starter.grpc.server.GrpcServerProperties;
 import com.freemanan.starter.grpc.server.feature.health.HealthChecker;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
@@ -21,8 +22,7 @@ public class DataSourceHealthChecker implements HealthChecker, BeanFactoryAware,
     private static final Logger log = LoggerFactory.getLogger(DataSourceHealthChecker.class);
 
     private BeanFactory beanFactory;
-    private List<DataSource> dataSources;
-
+    private final List<DataSource> dataSources = new ArrayList<>();
     private final GrpcServerProperties.Health.DataSource config;
 
     public DataSourceHealthChecker(GrpcServerProperties.Health.DataSource config) {
@@ -57,7 +57,8 @@ public class DataSourceHealthChecker implements HealthChecker, BeanFactoryAware,
     @Override
     public void afterSingletonsInstantiated() {
         // Do NOT inject DataSource here, we don't want to effect the order of auto-configurations
-        this.dataSources =
+        List<DataSource> sources =
                 beanFactory.getBeanProvider(DataSource.class).orderedStream().collect(Collectors.toList());
+        this.dataSources.addAll(sources);
     }
 }

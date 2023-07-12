@@ -26,6 +26,8 @@ import org.springframework.beans.factory.ObjectProvider;
 public class HealthServerInterceptor implements ServerInterceptor {
     private static final Logger log = LoggerFactory.getLogger(HealthServerInterceptor.class);
 
+    private static final String HEALTH_REQUEST_PREFIX = HealthGrpc.SERVICE_NAME + "/";
+
     private final HealthStatusManager healthManager;
     private final Map<String, HealthChecker> serviceToChecker;
 
@@ -67,9 +69,9 @@ public class HealthServerInterceptor implements ServerInterceptor {
         boolean allHealthy = true;
         for (Map.Entry<String, HealthChecker> en : serviceToChecker.entrySet()) {
             String service = en.getKey();
-            HealthChecker checker = en.getValue();
             if (Objects.equals(message.getService(), SERVICE_NAME_ALL_SERVICES)
                     || Objects.equals(message.getService(), service)) {
+                HealthChecker checker = en.getValue();
                 if (checker.check()) {
                     healthManager.setStatus(service, HealthCheckResponse.ServingStatus.SERVING);
                 } else {
@@ -84,6 +86,6 @@ public class HealthServerInterceptor implements ServerInterceptor {
     }
 
     protected static boolean isHealthCheckRequest(String fullMethodName) {
-        return fullMethodName != null && fullMethodName.startsWith(HealthGrpc.SERVICE_NAME + "/");
+        return fullMethodName != null && fullMethodName.startsWith(HEALTH_REQUEST_PREFIX);
     }
 }
