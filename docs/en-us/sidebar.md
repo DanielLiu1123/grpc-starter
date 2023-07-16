@@ -15,6 +15,7 @@
 - Client
   - [Onboarding Guide](en-us/client/onboarding.md)
   - [Customize Client Configuration](en-us/client/customize-client-config.md)
+  - [Dynamic Refreshing](en-us/client/dynamic-refresh.md)
   - [In-process Channel](en-us/client/in-process-channel.md)
   - [Configuration Options](en-us/client/configuration.md)
 
