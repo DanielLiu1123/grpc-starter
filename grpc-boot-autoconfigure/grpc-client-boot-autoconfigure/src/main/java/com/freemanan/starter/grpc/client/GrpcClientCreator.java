@@ -1,19 +1,19 @@
 package com.freemanan.starter.grpc.client;
 
-import com.freemanan.starter.grpc.client.exception.MissingChannelConfigurationException;
 import io.grpc.Channel;
-import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.Metadata;
-import io.grpc.inprocess.InProcessChannelBuilder;
-import io.grpc.stub.MetadataUtils;
 import java.lang.reflect.Method;
+import java.util.UUID;
+import org.springframework.aop.scope.ScopedProxyUtils;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Freeman
@@ -25,17 +25,17 @@ class GrpcClientCreator {
     private static final String BLOCKING_STUB = "BlockingStub";
     private static final String FUTURE_STUB = "FutureStub";
 
+    private static final boolean SPRING_CLOUD_CONTEXT_PRESENT =
+            ClassUtils.isPresent("org.springframework.cloud.context.scope.refresh.RefreshScope", null);
+
     private final ConfigurableBeanFactory beanFactory;
+    private final GrpcClientProperties properties;
     private final Class<?> stubClass;
-    private final GrpcClientProperties.Channel channelConfig;
 
     GrpcClientCreator(ConfigurableBeanFactory beanFactory, GrpcClientProperties properties, Class<?> stubClass) {
-        Assert.notNull(beanFactory, "beanFactory must not be null");
-        Assert.notNull(properties, "properties must not be null");
-        Assert.notNull(stubClass, "clientType must not be null");
         this.beanFactory = beanFactory;
+        this.properties = properties;
         this.stubClass = stubClass;
-        this.channelConfig = Util.findMatchedConfig(stubClass, properties).orElseGet(properties::defaultChannel);
     }
 
     /**
@@ -49,59 +49,27 @@ class GrpcClientCreator {
         Method stubMethod =
                 ReflectionUtils.findMethod(stubClass.getEnclosingClass(), getStubMethodName(stubClass), Channel.class);
         Assert.notNull(stubMethod, "stubMethod must not be null");
-        ManagedChannel chan = buildChannel();
-        Cache.addChannel(new Chan(channelConfig, chan));
-        T stub = (T) ReflectionUtils.invokeMethod(stubMethod, null, chan);
+
+        AbstractBeanDefinition abd = BeanDefinitionBuilder.genericBeanDefinition(
+                        ManagedChannel.class, () -> new GrpcChannelCreator(beanFactory, stubClass, properties).create())
+                .getBeanDefinition();
+        abd.setLazyInit(true);
+
+        String channelBeanName = UUID.randomUUID().toString();
+        BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+        if (SPRING_CLOUD_CONTEXT_PRESENT && properties.getRefresh().isEnabled()) {
+            abd.setScope("refresh");
+            BeanDefinitionHolder scopedProxy =
+                    ScopedProxyUtils.createScopedProxy(new BeanDefinitionHolder(abd, channelBeanName), registry, true);
+            BeanDefinitionReaderUtils.registerBeanDefinition(scopedProxy, registry);
+        } else {
+            BeanDefinitionReaderUtils.registerBeanDefinition(new BeanDefinitionHolder(abd, channelBeanName), registry);
+        }
+
+        ManagedChannel channel = beanFactory.getBean(channelBeanName, ManagedChannel.class);
+        T stub = (T) ReflectionUtils.invokeMethod(stubMethod, null, channel);
         Cache.addStubClass(stubClass);
         return stub;
-    }
-
-    private ManagedChannel buildChannel() {
-        ManagedChannelBuilder<?> builder;
-        if (channelConfig.getInProcess() == null) {
-            if (!StringUtils.hasText(channelConfig.getAuthority())) {
-                throw new MissingChannelConfigurationException(stubClass);
-            }
-            builder = ManagedChannelBuilder.forTarget(channelConfig.getAuthority());
-        } else {
-            Assert.hasText(
-                    channelConfig.getInProcess().getName(),
-                    "Not configure in-process name for stub: " + stubClass.getName());
-            builder = InProcessChannelBuilder.forName(
-                            channelConfig.getInProcess().getName())
-                    .directExecutor();
-        }
-
-        // set max message size and max metadata size
-        builder.maxInboundMessageSize((int) channelConfig.getMaxMessageSize().toBytes());
-        builder.maxInboundMetadataSize((int) channelConfig.getMaxMetadataSize().toBytes());
-
-        // add default metadata
-        Metadata metadata = new Metadata();
-        channelConfig.getMetadata().forEach(m -> {
-            Metadata.Key<String> key = Metadata.Key.of(m.getKey(), Metadata.ASCII_STRING_MARSHALLER);
-            m.getValues().forEach(v -> metadata.put(key, v));
-        });
-        if (!metadata.keys().isEmpty()) {
-            ClientInterceptor metadataInterceptor = MetadataUtils.newAttachHeadersInterceptor(metadata);
-            builder.intercept(metadataInterceptor);
-        }
-
-        // set interceptors, gRPC invoke interceptors in reverse order
-        beanFactory.getBeanProvider(ClientInterceptor.class).stream()
-                .sorted(AnnotationAwareOrderComparator.INSTANCE.reversed())
-                .forEach(builder::intercept);
-
-        // use plaintext
-        builder.usePlaintext();
-
-        // apply customizers
-        beanFactory
-                .getBeanProvider(GrpcChannelCustomizer.class)
-                .orderedStream()
-                .forEach(cc -> cc.customize(channelConfig, builder));
-
-        return builder.build();
     }
 
     private static String getStubMethodName(Class<?> stubClass) {

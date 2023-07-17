@@ -15,6 +15,7 @@
 - 客户端
     - [入门指南](zh-cn/client/onboarding.md)
     - [自定义 client 配置](zh-cn/client/customize-client-config.md)
+    - [动态刷新](zh-cn/client/dynamic-refresh.md)
     - [In-process channel](zh-cn/client/in-process-channel.md)
     - [配置项](zh-cn/client/configuration.md)
 

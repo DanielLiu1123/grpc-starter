@@ -72,6 +72,10 @@ public class GrpcClientProperties implements InitializingBean {
      * Channels configuration.
      */
     private List<Channel> channels = new ArrayList<>();
+    /**
+     * Refresh configuration.
+     */
+    private Refresh refresh = new Refresh();
 
     @Override
     public void afterPropertiesSet() {
@@ -180,6 +184,18 @@ public class GrpcClientProperties implements InitializingBean {
          * <p> If set, will create in-process channel by default, usually for testing.
          */
         private String name;
+    }
+
+    @Data
+    public static class Refresh {
+        public static final String PREFIX = GrpcClientProperties.PREFIX + ".refresh";
+
+        /**
+         * Whether to enable refresh grpc clients, default {@code false}.
+         *
+         * <p> NOTE: this feature needs {@code spring-cloud-context} dependency in the classpath.
+         */
+        private boolean enabled = false;
     }
 
     /**

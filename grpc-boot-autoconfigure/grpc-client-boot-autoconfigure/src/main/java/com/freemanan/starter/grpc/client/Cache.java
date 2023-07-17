@@ -3,11 +3,13 @@ package com.freemanan.starter.grpc.client;
 import static com.freemanan.starter.grpc.client.Util.serviceName;
 import static com.freemanan.starter.grpc.client.Util.shutdownChannel;
 
+import io.grpc.ManagedChannel;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -28,7 +30,8 @@ class Cache {
      */
     private static final ConcurrentMap<String, List<Class<?>>> serviceToStubClasses = new ConcurrentHashMap<>();
 
-    private static final Set<Chan> channels = Collections.synchronizedSet(new LinkedHashSet<>());
+    private static final Map<GrpcClientProperties.Channel, ManagedChannel> cfgToChannel =
+            Collections.synchronizedMap(new LinkedHashMap<>());
 
     public static Set<Class<?>> getStubClasses() {
         return serviceToStubClasses.values().stream().flatMap(List::stream).collect(Collectors.toSet());
@@ -46,24 +49,27 @@ class Cache {
         serviceToStubClasses.computeIfAbsent(service, k -> new ArrayList<>()).add(stubClass);
     }
 
-    public static void addChannel(Chan channel) {
-        channels.add(channel);
+    public static void addChannel(GrpcClientProperties.Channel channelConfig, ManagedChannel channel) {
+        // Do not close the channel if it already exists, it may be still in use
+        cfgToChannel.put(channelConfig, channel);
     }
 
     /**
      * Shutdown all channels, then clear the cache.
      */
     public static void shutdownChannels() {
-        if (channels.isEmpty()) {
+        if (cfgToChannel.isEmpty()) {
             return;
         }
         long start = System.currentTimeMillis();
-        channels.forEach(ch -> shutdownChannel(
-                ch.getChannel(), Duration.ofMillis(ch.getChannelConfig().getShutdownTimeout())));
+        cfgToChannel.forEach((cfg, channel) -> shutdownChannel(channel, Duration.ofMillis(cfg.getShutdownTimeout())));
         if (log.isInfoEnabled()) {
-            log.info("{} channels gracefully shutdown in {} ms", channels.size(), System.currentTimeMillis() - start);
+            log.info(
+                    "{} channels gracefully shutdown in {} ms",
+                    cfgToChannel.size(),
+                    System.currentTimeMillis() - start);
         }
-        channels.clear();
+        cfgToChannel.clear();
     }
 
     public static void clear() {
