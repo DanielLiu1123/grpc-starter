@@ -5,6 +5,8 @@ grpc:
     authority: localhost:9090      # global default authority
     max-message-size: 4MB          # global default max message size
     max-metadata-size: 8KB         # global default max metadata size
+    refresh:
+      enabled: true                # enable dynamic refresh grpc channel
     metadata:                      # global default metadata
       - key: foo1
         values: [bar1, bar2]
@@ -19,6 +21,8 @@ grpc:
           - fm.foo.v1.FooService
           - grpc.**
           - pet.v*.**.*Service
-        stubs:                     # stub classes to apply this channel, use this or services, not this first if both set
+        stubs:                     # stub classes to apply this channel, use this or services/classes, not this first if both set
           - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceBlockingStub
           - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceStub
+        classes:                   # classes to apply this channel, use this or services/stubs, not this first if both set
+          - io.grpc.health.v1.HealthGrpc.HealthBlockingStub

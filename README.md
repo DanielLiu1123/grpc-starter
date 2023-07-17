@@ -24,6 +24,7 @@ capabilities.
     - [Health check](https://danielliu1123.github.io/grpc-starter/#/en-us/server/health-check)
 - gRPC client autoconfigure
     - [`@Autowired` support](https://danielliu1123.github.io/grpc-starter/#/en-us/client/onboarding)
+    - [Dynamic refreshing](https://danielliu1123.github.io/grpc-starter/#/en-us/client/dynamic-refresh)
 
 ***Extensions:***
 
