@@ -26,6 +26,11 @@ public class GrpcValidationProperties {
      */
     private Server server = new Server();
 
+    /**
+     * Validation implementation, default is {@link Implementation#PGV}.
+     */
+    private Implementation implementation = Implementation.PGV;
+
     @Data
     public static class Client {
         public static final String PREFIX = GrpcValidationProperties.PREFIX + ".client";
@@ -52,5 +57,16 @@ public class GrpcValidationProperties {
          * Validating interceptor order, default is {@code 0}.
          */
         private int order = 0;
+    }
+
+    public enum Implementation {
+        /**
+         * Validation implementation based on <a href="https://github.com/bufbuild/protoc-gen-validate">protoc-gen-validate</a>.
+         */
+        PGV,
+        /**
+         * Validation implementation based on <a href="https://github.com/bufbuild/protovalidate-java">protovalidate</a>.
+         */
+        PROTO_VALIDATE
     }
 }

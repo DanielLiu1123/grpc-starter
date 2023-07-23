@@ -1,5 +1,6 @@
 package com.freemanan.starter.grpc.extensions.validation;
 
+import build.buf.protovalidate.Validator;
 import com.freemanan.starter.grpc.client.ConditionOnGrpcClientEnabled;
 import com.freemanan.starter.grpc.client.GrpcClientProperties;
 import com.freemanan.starter.grpc.server.ConditionOnGrpcServerEnabled;
@@ -30,6 +31,7 @@ public class GrpcValidationAutoConfiguration {
      */
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(ValidatorIndex.class)
+    @ConditionalOnProperty(prefix = GrpcValidationProperties.PREFIX, name = "implementation", havingValue = "PGV", matchIfMissing = true)
     static class Pgv {
 
         @Configuration(proxyBeanMethods = false)
@@ -59,5 +61,17 @@ public class GrpcValidationAutoConfiguration {
                         new ReflectiveValidatorIndex(), properties.getServer().getOrder());
             }
         }
+    }
+
+    /**
+     * Validation implementation based on protovalidate.
+     *
+     * @see <a href="https://github.com/bufbuild/protovalidate-java">protovalidate</a>
+     */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(Validator.class)
+    @ConditionalOnProperty(prefix = GrpcValidationProperties.PREFIX, name = "implementation", havingValue = "PROTO_VALIDATE")
+    static class ProtoValidate {
+
     }
 }
