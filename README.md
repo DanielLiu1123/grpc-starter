@@ -39,7 +39,7 @@ capabilities.
 1. Add dependencies
 
     ```groovy
-    implementation(platform("com.freemanan:grpc-starter-dependencies:3.1.1"))
+    implementation(platform("com.freemanan:grpc-starter-dependencies:3.1.2"))
     implementation("com.freemanan:grpc-boot-starter")
     
     // use gRPC simple proto for the example
@@ -104,7 +104,7 @@ Mainly maintain the following versions:
 
   | Spring Boot | grpc-boot-starter |
   |-------------|-------------------|
-  | 3.x         | 3.1.1             |
+  | 3.x         | 3.1.2             |
 
 - 2.x
 
