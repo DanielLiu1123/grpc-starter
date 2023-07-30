@@ -48,6 +48,10 @@ public class GrpcTestEnvironmentPostProcessor implements EnvironmentPostProcesso
                 .bind(GrpcTestProperties.PREFIX, GrpcTestProperties.class)
                 .orElseGet(GrpcTestProperties::new);
 
+        if (!properties.getServer().isEnabled()) {
+            return;
+        }
+
         GrpcTestProperties.Server.Port port = properties.getServer().getPort();
 
         Map<String, Object> configMap = new HashMap<>();
