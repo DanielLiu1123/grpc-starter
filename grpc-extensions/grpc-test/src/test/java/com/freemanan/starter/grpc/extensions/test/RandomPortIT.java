@@ -23,7 +23,7 @@ class RandomPortIT {
     int port;
 
     @Test
-    void testAlwaysUsingRandomPort() {
+    void testRandomPort() {
         assertThat(port).isNotEqualTo(-1).isNotEqualTo(9090);
     }
 

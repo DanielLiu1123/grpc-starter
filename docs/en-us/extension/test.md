@@ -35,6 +35,30 @@ class LocalGrpcPortTest {
 }
 ```
 
-If `grpc-client-boot-starter` is also on the classpath, communication will default to
-the [`in-process`](https://stackoverflow.com/questions/71059894/does-grpc-have-a-channel-that-can-be-used-for-testing)
-mode.
+You can specify the server port type on the `grpc.test.server.port` configuration.
+
+- `IN_PROCESS`: This is the default value. If `grpc-client-boot-starter` is not on the classpath, it will fall back to `RANDOM_PORT`.
+- `RANDOM_PORT`: Use a random available port.
+- `DEFINED_PORT`: Use the defined port, which is the value of `grpc.server.port`.
+
+Here's an example using `DEFINED_PORT`:
+
+```java
+@SpringBootTest(
+        classes = DefinedPortIT.Cfg.class,
+        properties = {"grpc.server.port=50054", "grpc.test.server.port=DEFINED_PORT"})
+class DefinedPortIT {
+
+    @LocalGrpcPort
+    int port;
+
+    @Test
+    void testAlwaysUsingRandomPort() {
+        assertThat(port).isEqualTo(50054);
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @EnableAutoConfiguration
+    static class Cfg {}
+}
+```

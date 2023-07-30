@@ -21,7 +21,7 @@ class DefinedPortIT {
     int port;
 
     @Test
-    void testAlwaysUsingRandomPort() {
+    void testDefinedPort() {
         assertThat(port).isEqualTo(50054);
     }
 
