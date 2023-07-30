@@ -4,6 +4,8 @@ dependencies {
     compileOnly(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
     compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
 
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
