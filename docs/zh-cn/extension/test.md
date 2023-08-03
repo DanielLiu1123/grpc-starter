@@ -33,4 +33,30 @@ class LocalGrpcPortTest {
 }
 ```
 
-如果 `grpc-client-boot-starter` 也在类路径中，那么默认会使用 [`in-process`](https://stackoverflow.com/questions/71059894/does-grpc-have-a-channel-that-can-be-used-for-testing) 方式进行通信。
+可以通过配置 `grpc.test.server.port` 来指定 server 端口。
+
+- `IN_PROCESS`: 这是默认值，如果 `grpc-client-boot-starter` 不在类路径中，那么会 fall back 到 `RANDOM_PORT`。
+- `RANDOM_PORT`: 使用随机端口。
+- `DEFINED_PORT`: 使用定义的端口，即 `grpc.server.port` 的值。
+
+下面是一个使用 `DEFINED_PORT` 的例子：
+
+```java
+@SpringBootTest(
+        classes = DefinedPortIT.Cfg.class,
+        properties = {"grpc.server.port=50054", "grpc.test.server.port=DEFINED_PORT"})
+class DefinedPortIT {
+
+    @LocalGrpcPort
+    int port;
+
+    @Test
+    void testAlwaysUsingRandomPort() {
+        assertThat(port).isEqualTo(50054);
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @EnableAutoConfiguration
+    static class Cfg {}
+}
+```

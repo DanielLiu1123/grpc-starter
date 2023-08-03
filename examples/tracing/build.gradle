@@ -10,7 +10,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.micrometer:micrometer-tracing-bridge-brave")
-    implementation("com.freemanan:httpexchange-spring-boot-starter:3.1.1-RC3")
+    implementation("com.freemanan:httpexchange-spring-boot-starter:3.1.2")
 
     testImplementation(project(":grpc-starters:grpc-starter-test"))
 }

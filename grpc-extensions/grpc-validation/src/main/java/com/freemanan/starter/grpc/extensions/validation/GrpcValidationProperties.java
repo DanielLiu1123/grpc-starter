@@ -29,7 +29,7 @@ public class GrpcValidationProperties {
     /**
      * Validation implementation, default is {@link Implementation#PGV}.
      */
-    private Implementation implementation = Implementation.PGV;
+    private Implementation implementation = Implementation.AUTO;
 
     @Data
     public static class Client {
@@ -61,12 +61,22 @@ public class GrpcValidationProperties {
 
     public enum Implementation {
         /**
-         * Validation implementation based on <a href="https://github.com/bufbuild/protoc-gen-validate">protoc-gen-validate</a>.
+         * Auto-detect validation implementation.
+         *
+         * <p> The priority is as follows:
+         * <ol>
+         *     <li>{@link Implementation#PROTO_VALIDATE}</li>
+         *     <li>{@link Implementation#PGV}</li>
+         * </ol>
          */
-        PGV,
+        AUTO,
         /**
          * Validation implementation based on <a href="https://github.com/bufbuild/protovalidate-java">protovalidate</a>.
          */
-        PROTO_VALIDATE
+        PROTO_VALIDATE,
+        /**
+         * Validation implementation based on <a href="https://github.com/bufbuild/protoc-gen-validate">protoc-gen-validate</a>.
+         */
+        PGV
     }
 }

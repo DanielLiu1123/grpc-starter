@@ -1,0 +1,14 @@
+dependencyManagement {
+    imports {
+        mavenBom("org.projectnessie.cel:cel-bom:${celVersion}")
+    }
+}
+
+dependencies {
+    api(project(":grpc-extensions:grpc-validation"))
+
+    api("build.buf:protovalidate:${protovalidateVersion}")
+    compileOnly("org.projectnessie.cel:cel-core")
+}
+
+apply from: "${rootDir}/deploy.gradle"

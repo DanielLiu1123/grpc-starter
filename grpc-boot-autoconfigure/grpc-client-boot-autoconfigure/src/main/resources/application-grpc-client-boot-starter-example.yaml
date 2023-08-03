@@ -26,3 +26,7 @@ grpc:
           - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceStub
         classes:                   # classes to apply this channel, use this or services/stubs, not this first if both set
           - io.grpc.health.v1.HealthGrpc.HealthBlockingStub
+      - in-process:
+          name: whatever           # in-process channel name
+        classes:
+          - io.grpc.reflection.v1alpha.ServerReflectionGrpc.ServerReflectionStub

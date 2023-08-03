@@ -3,6 +3,7 @@ dependencies {
     runtimeOnly("io.grpc:grpc-netty-shaded")
 
     optionalSupportApi("io.grpc:grpc-netty")
+    optionalSupportApi("org.springframework.cloud:spring-cloud-context")
 }
 
 apply from: "${rootDir}/deploy.gradle"
