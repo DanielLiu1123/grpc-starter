@@ -1,8 +1,8 @@
-dependencyManagement {
-    imports {
-        mavenBom("org.projectnessie.cel:cel-bom:${celVersion}")
-    }
-}
+//dependencyManagement {
+//    imports {
+//        mavenBom("org.projectnessie.cel:cel-bom:${celVersion}")
+//    }
+//}
 
 dependencies {
     compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
@@ -14,7 +14,7 @@ dependencies {
 
     compileOnly("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
     compileOnly("build.buf:protovalidate:${protovalidateVersion}")
-    compileOnly("org.projectnessie.cel:cel-core")
+//    compileOnly("org.projectnessie.cel:cel-core")
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

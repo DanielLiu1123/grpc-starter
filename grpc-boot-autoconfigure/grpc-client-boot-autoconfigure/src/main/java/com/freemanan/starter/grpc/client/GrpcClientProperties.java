@@ -57,7 +57,7 @@ public class GrpcClientProperties implements InitializingBean {
      */
     private DataSize maxMetadataSize = DataSize.ofBytes(GrpcUtil.DEFAULT_MAX_HEADER_LIST_SIZE);
     /**
-     * Default metadata, will be added to all the gRPC requests.
+     * Default metadata will be added to all the gRPC requests.
      */
     private List<Metadata> metadata = new ArrayList<>();
     /**
@@ -126,7 +126,7 @@ public class GrpcClientProperties implements InitializingBean {
         /**
          * gRPC stubs to apply this channel.
          *
-         * <p> Support Ant-style pattern.
+         * <p> Support Ant-style patterns.
          *
          * <p> e.g. {@link HealthGrpc.HealthBlockingStub} can be identified by
          * <ul>
@@ -143,7 +143,7 @@ public class GrpcClientProperties implements InitializingBean {
         /**
          * gRPC service names to apply this channel.
          *
-         * <p> Support Ant-style pattern.
+         * <p> Support Ant-style patterns.
          *
          * <p> e.g. {@link HealthGrpc.HealthBlockingStub} can be identified by
          * <ul>
@@ -181,7 +181,7 @@ public class GrpcClientProperties implements InitializingBean {
         /**
          * In-process client name.
          *
-         * <p> If set, will create in-process channel by default, usually for testing.
+         * <p> If set, will create in-process channels by default, usually for testing.
          */
         private String name;
     }

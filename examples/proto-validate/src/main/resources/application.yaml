@@ -1,0 +1,9 @@
+grpc:
+  server:
+    reflection:
+      enabled: true
+  client:
+    channels:
+      - authority: localhost:9090
+        classes:
+          - io.grpc.testing.protobuf.SimpleServiceGrpc.SimpleServiceBlockingStub

@@ -27,9 +27,9 @@ public class GrpcValidationProperties {
     private Server server = new Server();
 
     /**
-     * Validation implementation, default is {@link Implementation#PGV}.
+     * Validation implementation, default is {@link Type#PGV}.
      */
-    private Implementation implementation = Implementation.AUTO;
+    private Type type;
 
     @Data
     public static class Client {
@@ -59,15 +59,9 @@ public class GrpcValidationProperties {
         private int order = 0;
     }
 
-    public enum Implementation {
+    public enum Type {
         /**
          * Auto-detect validation implementation.
-         *
-         * <p> The priority is as follows:
-         * <ol>
-         *     <li>{@link Implementation#PROTO_VALIDATE}</li>
-         *     <li>{@link Implementation#PGV}</li>
-         * </ol>
          */
         AUTO,
         /**
