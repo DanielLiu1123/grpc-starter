@@ -38,6 +38,7 @@ public class AnnotationBasedGrpcExceptionResolver
 
     public static final int ORDER = 0;
 
+    // TODO(Freeman): refactor this to process advice beans by order
     private final Map<Class<? extends Throwable>, GrpcExceptionHandlerMethod> exceptionClassToMethod = new HashMap<>();
 
     private ApplicationContext ctx;
@@ -128,17 +129,20 @@ public class AnnotationBasedGrpcExceptionResolver
                         throw new IllegalStateException("Duplicate exception handler method: "
                                 + formatMethod(o.getMethod()) + ", " + formatMethod(n.getMethod()));
                     }
-                    log.warn(
-                            "Duplicate exception handler method: {}, {}. Using the one with higher priority",
-                            formatMethod(o.getMethod()),
-                            formatMethod(n.getMethod()));
+                    GrpcExceptionHandlerMethod result;
                     if (o.getBeanOrder() == null) {
-                        return n;
+                        result = n;
+                    } else if (n.getBeanOrder() == null) {
+                        result = o;
+                    } else {
+                        result = o.getBeanOrder() < n.getBeanOrder() ? o : n;
                     }
-                    if (n.getBeanOrder() == null) {
-                        return o;
-                    }
-                    return o.getBeanOrder() < n.getBeanOrder() ? o : n;
+                    log.warn(
+                            "Duplicate exception handler method: {}, {}. The one with higher priority will be used: {}",
+                            formatMethod(o.getMethod()),
+                            formatMethod(n.getMethod()),
+                            formatMethod(result.getMethod()));
+                    return result;
                 }));
         exceptionClassToMethod.putAll(classToMethod);
     }

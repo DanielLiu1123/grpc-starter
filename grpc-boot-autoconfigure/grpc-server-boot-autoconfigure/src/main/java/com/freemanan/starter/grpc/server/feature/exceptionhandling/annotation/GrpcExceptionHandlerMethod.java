@@ -71,7 +71,7 @@ public class GrpcExceptionHandlerMethod {
         GrpcExceptionHandler anno = AnnotationUtils.findAnnotation(method, GrpcExceptionHandler.class);
         Assert.notNull(anno, "The method must be annotated with @GrpcExceptionHandler");
         if (!ObjectUtils.isEmpty(anno.value())) {
-            // find first Throwable parameter,
+            // find the first Throwable parameter,
             Optional<Parameter> parameter = Arrays.stream(method.getParameters())
                     .filter(param -> Throwable.class.isAssignableFrom(param.getType()))
                     .findFirst();
