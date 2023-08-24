@@ -29,11 +29,7 @@ import org.springframework.core.annotation.Order;
  */
 @SpringBootTest(
         classes = AnnotationBasedExceptionHandlingIT.Cfg.class,
-        properties = {
-            "grpc.server.in-process.name=AnnotationBasedIT",
-            "grpc.client.in-process.name=AnnotationBasedIT",
-            "grpc.client.base-packages[0]=io.grpc"
-        })
+        properties = {"grpc.client.base-packages[0]=io.grpc"})
 @ExtendWith(OutputCaptureExtension.class)
 class AnnotationBasedExceptionHandlingIT {
 
@@ -71,6 +67,7 @@ class AnnotationBasedExceptionHandlingIT {
     @GrpcAdvice
     @GrpcService
     @Import(ExceptionAdvice2.class)
+    @Order(0)
     static class Cfg extends SimpleServiceGrpc.SimpleServiceImplBase {
 
         @Override

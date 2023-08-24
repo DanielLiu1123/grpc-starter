@@ -1,5 +1,9 @@
 package com.freemanan.starter.grpc.server.feature.exceptionhandling.annotation;
 
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsLast;
+
 import com.freemanan.starter.grpc.server.feature.exceptionhandling.GrpcExceptionResolver;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
@@ -10,36 +14,46 @@ import java.lang.reflect.Method;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.OrderUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
  * @author Freeman
  */
+@Slf4j
 public class AnnotationBasedGrpcExceptionResolver
-        implements GrpcExceptionResolver, ApplicationContextAware, SmartInitializingSingleton, Ordered {
-    private static final Logger log = LoggerFactory.getLogger(AnnotationBasedGrpcExceptionResolver.class);
+        implements GrpcExceptionResolver, ApplicationContextAware, SmartInitializingSingleton, Ordered, DisposableBean {
 
     public static final int ORDER = 0;
 
-    // TODO(Freeman): refactor this to process advice beans by order
-    private final Map<Class<? extends Throwable>, GrpcExceptionHandlerMethod> exceptionClassToMethod = new HashMap<>();
+    /**
+     * Cache exception class to {@link GrpcExceptionHandlerMethod} mapping, make it faster to find the handler method
+     */
+    private final ConcurrentMap<Class<? extends Throwable>, GrpcExceptionHandlerMethod> exceptionClassToMethodCache =
+            new ConcurrentHashMap<>();
+
+    private final List<GrpcAdviceBean> advices = new ArrayList<>();
 
     private ApplicationContext ctx;
 
@@ -49,32 +63,142 @@ public class AnnotationBasedGrpcExceptionResolver
         if (entry == null) {
             return null;
         }
+        return handleException(entry, call, headers);
+    }
+
+    @Override
+    public int getOrder() {
+        return ORDER;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.ctx = applicationContext;
+    }
+
+    @Override
+    public void afterSingletonsInstantiated() {
+        populateGrpcAdviceBeans();
+    }
+
+    @Override
+    public void destroy() {
+        exceptionClassToMethodCache.clear();
+        advices.clear();
+    }
+
+    private StatusRuntimeException handleException(
+            Map.Entry<Throwable, GrpcExceptionHandlerMethod> entry, ServerCall<?, ?> call, Metadata headers) {
         GrpcExceptionHandlerMethod method = entry.getValue();
         Throwable caughtException = entry.getKey();
-        Object[] args = getArgs(method.getMethod(), caughtException, call, headers);
-        Object res = ReflectionUtils.invokeMethod(method.getMethod(), method.getBean(), args);
-        if (res == null) {
-            log.warn(
-                    "Caught exception {} but @GrpcExceptionHandler method returned null, ignoring it",
-                    caughtException.getClass().getSimpleName());
-            return null;
+
+        Object res = invokeHandlerMethod(method, caughtException, call, headers);
+        return convertResponseToStatusRuntimeException(res, caughtException);
+    }
+
+    private void populateGrpcAdviceBeans() {
+        List<GrpcAdviceBean> beans = new ArrayList<>();
+        ctx.getBeansWithAnnotation(GrpcAdvice.class).forEach((beanName, bean) -> {
+            List<GrpcExceptionHandlerMethod> beanMethods = new ArrayList<>();
+            ReflectionUtils.doWithMethods(AopProxyUtils.ultimateTargetClass(bean), method -> {
+                GrpcExceptionHandler anno = AnnotationUtils.findAnnotation(method, GrpcExceptionHandler.class);
+                if (anno != null) {
+                    ReflectionUtils.makeAccessible(method);
+                    beanMethods.add(new GrpcExceptionHandlerMethod(bean, method));
+                }
+            });
+            beans.add(new GrpcAdviceBean(bean, beanMethods));
+        });
+        beans.stream()
+                .map(GrpcAdviceBean::getMethods)
+                .flatMap(Collection::stream)
+                .flatMap(method -> Arrays.stream(method.getExceptions())
+                        .map(exceptionClass -> new AbstractMap.SimpleEntry<>(exceptionClass, method)))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (o, n) -> {
+                    if (Objects.equals(o.getBeanOrder(), n.getBeanOrder())) {
+                        throw new IllegalStateException("Duplicate exception handler method: "
+                                + formatMethod(o.getMethod()) + ", " + formatMethod(n.getMethod()));
+                    }
+                    GrpcExceptionHandlerMethod result;
+                    if (o.getBeanOrder() == null) {
+                        result = n;
+                    } else if (n.getBeanOrder() == null) {
+                        result = o;
+                    } else {
+                        result = o.getBeanOrder() < n.getBeanOrder() ? o : n;
+                    }
+                    log.warn(
+                            "Duplicate exception handler method: {}, {}. The one with higher priority will be used: {}",
+                            formatMethod(o.getMethod()),
+                            formatMethod(n.getMethod()),
+                            formatMethod(result.getMethod()));
+                    return result;
+                }));
+        beans.sort(comparing(GrpcAdviceBean::getOrder, nullsLast(naturalOrder())));
+        advices.addAll(beans);
+    }
+
+    @Nullable
+    private Map.Entry<Throwable, GrpcExceptionHandlerMethod> findHandlerMethod(Throwable throwable) {
+        GrpcExceptionHandlerMethod cached = exceptionClassToMethodCache.get(throwable.getClass());
+        if (cached != null) {
+            return new AbstractMap.SimpleEntry<>(throwable, cached);
         }
-        if (res instanceof StatusRuntimeException) {
-            return (StatusRuntimeException) res;
-        } else if (res instanceof StatusException) {
-            return new StatusRuntimeException(
-                    ((StatusException) res).getStatus(), ((StatusException) res).getTrailers());
-        } else if (res instanceof Status) {
-            return new StatusRuntimeException((Status) res);
-        } else if (res instanceof Throwable) {
-            Status status = Status.fromThrowable((Throwable) res);
-            Metadata trailers = Status.trailersFromThrowable((Throwable) res);
+        Throwable current = throwable;
+        while (current != null) {
+            final Class<? extends Throwable> clz = current.getClass();
+            for (GrpcAdviceBean advice : advices) {
+                Map<Class<? extends Throwable>, GrpcExceptionHandlerMethod> matchedMethods = new HashMap<>();
+                Optional<? extends Class<? extends Throwable>> bestMatch = advice.getMethods().stream()
+                        .map(method -> Arrays.stream(method.getExceptions())
+                                .filter(ex -> ex.isAssignableFrom(clz))
+                                .min(new ExceptionDepthComparator(clz))
+                                .map(exceptionClass -> new AbstractMap.SimpleEntry<>(exceptionClass, method))
+                                .orElse(null))
+                        .filter(Objects::nonNull)
+                        .peek(en -> matchedMethods.putIfAbsent(en.getKey(), en.getValue()))
+                        .map(Map.Entry::getKey)
+                        .min(new ExceptionDepthComparator(clz));
+                if (bestMatch.isPresent()) {
+                    GrpcExceptionHandlerMethod method = matchedMethods.get(bestMatch.get());
+                    return new AbstractMap.SimpleEntry<>(
+                            current, exceptionClassToMethodCache.computeIfAbsent(clz, k -> method));
+                }
+            }
+            current = current.getCause();
+        }
+        return null;
+    }
+
+    private Object invokeHandlerMethod(
+            GrpcExceptionHandlerMethod method, Throwable throwable, ServerCall<?, ?> call, Metadata headers) {
+        Object[] args = getArgs(method.getMethod(), throwable, call, headers);
+        return ReflectionUtils.invokeMethod(method.getMethod(), method.getBean(), args);
+    }
+
+    private StatusRuntimeException convertResponseToStatusRuntimeException(Object response, Throwable caughtException) {
+        if (response instanceof StatusRuntimeException) {
+            return (StatusRuntimeException) response;
+        }
+        if (response instanceof StatusException) {
+            StatusException statusException = (StatusException) response;
+            return new StatusRuntimeException(statusException.getStatus(), statusException.getTrailers());
+        }
+        if (response instanceof Status) {
+            return new StatusRuntimeException((Status) response);
+        }
+        if (response instanceof Throwable) {
+            Status status = Status.fromThrowable((Throwable) response);
+            Metadata trailers = Status.trailersFromThrowable((Throwable) response);
             return new StatusRuntimeException(
                     status, Optional.ofNullable(trailers).orElseGet(Metadata::new));
-        } else {
-            throw new IllegalStateException("Unsupported return type for @GrpcExceptionHandler method: "
-                    + res.getClass().getSimpleName());
         }
+
+        log.warn(
+                "Caught exception {} but @GrpcExceptionHandler method returned null, ignoring it",
+                caughtException.getClass().getSimpleName());
+        throw new IllegalStateException("Unsupported return type for @GrpcExceptionHandler method: "
+                + response.getClass().getSimpleName());
     }
 
     private static Object[] getArgs(Method method, Throwable rootCause, ServerCall<?, ?> call, Metadata headers) {
@@ -98,74 +222,20 @@ public class AnnotationBasedGrpcExceptionResolver
         return args;
     }
 
-    @Override
-    public int getOrder() {
-        return ORDER;
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.ctx = applicationContext;
-    }
-
-    @Override
-    public void afterSingletonsInstantiated() {
-        List<GrpcExceptionHandlerMethod> methods = new ArrayList<>();
-        ctx.getBeansWithAnnotation(GrpcAdvice.class)
-                .forEach((beanName, bean) ->
-                        ReflectionUtils.doWithMethods(AopProxyUtils.ultimateTargetClass(bean), method -> {
-                            GrpcExceptionHandler anno =
-                                    AnnotationUtils.findAnnotation(method, GrpcExceptionHandler.class);
-                            if (anno != null) {
-                                ReflectionUtils.makeAccessible(method);
-                                methods.add(new GrpcExceptionHandlerMethod(bean, method));
-                            }
-                        }));
-        Map<Class<? extends Throwable>, GrpcExceptionHandlerMethod> classToMethod = methods.stream()
-                .flatMap(method -> Arrays.stream(method.getExceptions())
-                        .map(exceptionClass -> new AbstractMap.SimpleEntry<>(exceptionClass, method)))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (o, n) -> {
-                    if (Objects.equals(o.getBeanOrder(), n.getBeanOrder())) {
-                        throw new IllegalStateException("Duplicate exception handler method: "
-                                + formatMethod(o.getMethod()) + ", " + formatMethod(n.getMethod()));
-                    }
-                    GrpcExceptionHandlerMethod result;
-                    if (o.getBeanOrder() == null) {
-                        result = n;
-                    } else if (n.getBeanOrder() == null) {
-                        result = o;
-                    } else {
-                        result = o.getBeanOrder() < n.getBeanOrder() ? o : n;
-                    }
-                    log.warn(
-                            "Duplicate exception handler method: {}, {}. The one with higher priority will be used: {}",
-                            formatMethod(o.getMethod()),
-                            formatMethod(n.getMethod()),
-                            formatMethod(result.getMethod()));
-                    return result;
-                }));
-        exceptionClassToMethod.putAll(classToMethod);
-    }
-
-    @Nullable
-    private Map.Entry<Throwable, GrpcExceptionHandlerMethod> findHandlerMethod(Throwable throwable) {
-        Throwable current = throwable;
-        while (current != null) {
-            final Class<? extends Throwable> clz = current.getClass();
-            GrpcExceptionHandlerMethod method = exceptionClassToMethod.keySet().stream()
-                    .filter(ex -> ex.isAssignableFrom(clz))
-                    .min(new ExceptionDepthComparator(clz))
-                    .map(exceptionClassToMethod::get)
-                    .orElse(null);
-            if (method != null) {
-                return new AbstractMap.SimpleEntry<>(current, method);
-            }
-            current = current.getCause();
-        }
-        return null;
-    }
-
     private static String formatMethod(Method method) {
         return method.getDeclaringClass().getSimpleName() + "#" + method.getName();
+    }
+
+    @Getter
+    private static final class GrpcAdviceBean {
+        private final Object bean;
+        private final Integer order;
+        private final List<GrpcExceptionHandlerMethod> methods;
+
+        public GrpcAdviceBean(Object bean, List<GrpcExceptionHandlerMethod> methods) {
+            this.bean = bean;
+            this.order = OrderUtils.getOrder(AopProxyUtils.ultimateTargetClass(bean));
+            this.methods = methods;
+        }
     }
 }
