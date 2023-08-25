@@ -58,6 +58,11 @@ class AnnotationBasedExceptionHandlingIT {
                         .build()))
                 .isInstanceOf(StatusRuntimeException.class)
                 .hasMessage("INVALID_ARGUMENT: java.lang.RuntimeException");
+        assertThatCode(() -> stub.unaryRpc(SimpleRequest.newBuilder()
+                        .setRequestMessage("UnsupportedOperationException")
+                        .build()))
+                .isInstanceOf(StatusRuntimeException.class)
+                .hasMessage("INTERNAL");
 
         assertThat(output).contains("The one with higher priority will be used:");
     }
@@ -82,6 +87,8 @@ class AnnotationBasedExceptionHandlingIT {
                     throw new RuntimeException();
                 case "NestedException":
                     throw new IllegalArgumentException(new RuntimeException());
+                case "UnsupportedOperationException":
+                    throw new UnsupportedOperationException();
                 default:
                     responseObserver.onNext(
                             SimpleResponse.newBuilder().setResponseMessage(msg).build());
@@ -102,11 +109,6 @@ class AnnotationBasedExceptionHandlingIT {
         public StatusRuntimeException missingResourceExceptionHandler(
                 ServerCall<?, ?> call, RuntimeException e, Metadata headers) {
             return Status.NOT_FOUND.withDescription(e.getMessage()).withCause(e).asRuntimeException();
-        }
-
-        @GrpcExceptionHandler(RuntimeException.class)
-        public StatusRuntimeException runtimeExceptionHandler(RuntimeException e) {
-            return Status.INTERNAL.withDescription(e.getMessage()).withCause(e).asRuntimeException();
         }
     }
 
