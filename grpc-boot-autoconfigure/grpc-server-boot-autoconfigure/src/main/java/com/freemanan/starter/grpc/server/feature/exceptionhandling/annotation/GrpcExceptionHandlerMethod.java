@@ -71,7 +71,7 @@ public class GrpcExceptionHandlerMethod {
         GrpcExceptionHandler anno = AnnotationUtils.findAnnotation(method, GrpcExceptionHandler.class);
         Assert.notNull(anno, "The method must be annotated with @GrpcExceptionHandler");
         if (!ObjectUtils.isEmpty(anno.value())) {
-            // find first Throwable parameter,
+            // find the first Throwable parameter,
             Optional<Parameter> parameter = Arrays.stream(method.getParameters())
                     .filter(param -> Throwable.class.isAssignableFrom(param.getType()))
                     .findFirst();
@@ -79,8 +79,8 @@ public class GrpcExceptionHandlerMethod {
             parameter.ifPresent(value -> Arrays.stream(anno.value()).forEach(type -> {
                 if (!value.getType().isAssignableFrom(type)) {
                     throw new IllegalStateException(String.format(
-                            "The parameter of the method annotated with @GrpcExceptionHandler must be assignable from all the exception types, but %s is not assignable from %s on method %s",
-                            value.getType().getSimpleName(), type.getSimpleName(), method.getName()));
+                            "The parameter of the method annotated with @GrpcExceptionHandler must be assignable from all the exception types, but '%s' is not assignable from '%s' on method %s",
+                            value.getType().getSimpleName(), type.getSimpleName(), formatMethod(method)));
                 }
             }));
             return anno.value();
@@ -90,8 +90,13 @@ public class GrpcExceptionHandlerMethod {
                 .collect(Collectors.toList());
         if (parameters.size() != 1) {
             throw new IllegalStateException(
-                    "The method annotated with @GrpcExceptionHandler must have only one Throwable parameter");
+                    "The method annotated with @GrpcExceptionHandler must have only one Throwable parameter: "
+                            + formatMethod(method));
         }
         return new Class[] {parameters.get(0).getType()};
+    }
+
+    private static String formatMethod(Method method) {
+        return method.getDeclaringClass().getSimpleName() + "#" + method.getName();
     }
 }
