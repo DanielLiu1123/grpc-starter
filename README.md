@@ -99,7 +99,7 @@ Mainly maintain the following versions:
 
 - 3.x
 
-  Based on Spring Boot 3, baseline is JDK 17, corresponding branch
+  Based on Spring Boot 3, baseline is JDK 17, the corresponding branch
   is [main](https://github.com/DanielLiu1123/grpc-starter/)
 
   | Spring Boot | grpc-boot-starter |
@@ -108,7 +108,7 @@ Mainly maintain the following versions:
 
 - 2.x
 
-  Based on Spring Boot 2, baseline is JDK 8, corresponding branch
+  Based on Spring Boot 2, baseline is JDK 8, the corresponding branch
   is [2.x](https://github.com/DanielLiu1123/grpc-starter/tree/2.x)
 
   | Spring Boot | grpc-boot-starter |
