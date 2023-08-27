@@ -4,7 +4,7 @@ package fm.foo.v1;
 
 import "google/protobuf/empty.proto";
 
-import "validate/validate.proto";
+//import "validate/validate.proto";
 //import "buf/validate/validate.proto";
 
 option java_multiple_files = true;

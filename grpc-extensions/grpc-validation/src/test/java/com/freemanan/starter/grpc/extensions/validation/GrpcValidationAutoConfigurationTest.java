@@ -1,5 +1,7 @@
 package com.freemanan.starter.grpc.extensions.validation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.freemanan.cr.core.anno.Action;
 import com.freemanan.cr.core.anno.ClasspathReplacer;
 import com.freemanan.cr.core.anno.Verb;
@@ -8,8 +10,6 @@ import io.envoyproxy.pgv.grpc.ValidatingServerInterceptor;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * {@link GrpcValidationAutoConfiguration} tester.
@@ -34,23 +34,19 @@ class GrpcValidationAutoConfigurationTest {
         ApplicationContextRunner runner = new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(GrpcValidationAutoConfiguration.class));
 
-        runner
-                .withPropertyValues("grpc.validation.backend=PROTO_VALIDATE")
-                .run(ctx -> {
-                    assertThat(ctx).doesNotHaveBean(ValidatingClientInterceptor.class);
-                    assertThat(ctx).doesNotHaveBean(ValidatingServerInterceptor.class);
-                    assertThat(ctx).hasSingleBean(ProtoValidateClientInterceptor.class);
-                    assertThat(ctx).hasSingleBean(ProtoValidateServerInterceptor.class);
-                });
+        runner.withPropertyValues("grpc.validation.backend=PROTO_VALIDATE").run(ctx -> {
+            assertThat(ctx).doesNotHaveBean(ValidatingClientInterceptor.class);
+            assertThat(ctx).doesNotHaveBean(ValidatingServerInterceptor.class);
+            assertThat(ctx).hasSingleBean(ProtoValidateClientInterceptor.class);
+            assertThat(ctx).hasSingleBean(ProtoValidateServerInterceptor.class);
+        });
 
-        runner
-                .withPropertyValues("grpc.validation.backend=proto_validate")
-                .run(ctx -> {
-                    assertThat(ctx).doesNotHaveBean(ValidatingClientInterceptor.class);
-                    assertThat(ctx).doesNotHaveBean(ValidatingServerInterceptor.class);
-                    assertThat(ctx).hasSingleBean(ProtoValidateClientInterceptor.class);
-                    assertThat(ctx).hasSingleBean(ProtoValidateServerInterceptor.class);
-                });
+        runner.withPropertyValues("grpc.validation.backend=proto_validate").run(ctx -> {
+            assertThat(ctx).doesNotHaveBean(ValidatingClientInterceptor.class);
+            assertThat(ctx).doesNotHaveBean(ValidatingServerInterceptor.class);
+            assertThat(ctx).hasSingleBean(ProtoValidateClientInterceptor.class);
+            assertThat(ctx).hasSingleBean(ProtoValidateServerInterceptor.class);
+        });
     }
 
     @Test
@@ -58,33 +54,25 @@ class GrpcValidationAutoConfigurationTest {
         ApplicationContextRunner runner = new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(GrpcValidationAutoConfiguration.class));
 
-        runner
-                .withPropertyValues("grpc.validation.backend=PGV")
-                .run(ctx -> {
-                    assertThat(ctx).hasSingleBean(ValidatingClientInterceptor.class);
-                    assertThat(ctx).hasSingleBean(ValidatingServerInterceptor.class);
-                    assertThat(ctx).doesNotHaveBean(ProtoValidateClientInterceptor.class);
-                    assertThat(ctx).doesNotHaveBean(ProtoValidateServerInterceptor.class);
-                });
+        runner.withPropertyValues("grpc.validation.backend=PGV").run(ctx -> {
+            assertThat(ctx).hasSingleBean(ValidatingClientInterceptor.class);
+            assertThat(ctx).hasSingleBean(ValidatingServerInterceptor.class);
+            assertThat(ctx).doesNotHaveBean(ProtoValidateClientInterceptor.class);
+            assertThat(ctx).doesNotHaveBean(ProtoValidateServerInterceptor.class);
+        });
 
-        runner
-                .withPropertyValues("grpc.validation.backend=pgv")
-                .run(ctx -> {
-                    assertThat(ctx).hasSingleBean(ValidatingClientInterceptor.class);
-                    assertThat(ctx).hasSingleBean(ValidatingServerInterceptor.class);
-                    assertThat(ctx).doesNotHaveBean(ProtoValidateClientInterceptor.class);
-                    assertThat(ctx).doesNotHaveBean(ProtoValidateServerInterceptor.class);
-                });
+        runner.withPropertyValues("grpc.validation.backend=pgv").run(ctx -> {
+            assertThat(ctx).hasSingleBean(ValidatingClientInterceptor.class);
+            assertThat(ctx).hasSingleBean(ValidatingServerInterceptor.class);
+            assertThat(ctx).doesNotHaveBean(ProtoValidateClientInterceptor.class);
+            assertThat(ctx).doesNotHaveBean(ProtoValidateServerInterceptor.class);
+        });
     }
 
     @Test
-    @ClasspathReplacer(value = {
-            @Action(
-                    verb = Verb.EXCLUDE,
-                    value = "build.buf:protovalidate"
-            )},
-            recursiveExclude = true
-    )
+    @ClasspathReplacer(
+            value = {@Action(verb = Verb.EXCLUDE, value = "build.buf:protovalidate")},
+            recursiveExclude = true)
     void testWithoutProtoValidate() {
         ApplicationContextRunner runner = new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(GrpcValidationAutoConfiguration.class));
@@ -98,13 +86,9 @@ class GrpcValidationAutoConfigurationTest {
     }
 
     @Test
-    @ClasspathReplacer(value = {
-            @Action(
-                    verb = Verb.EXCLUDE,
-                    value = "build.buf.protoc-gen-validate:pgv-java-grpc"
-            )},
-            recursiveExclude = true
-    )
+    @ClasspathReplacer(
+            value = {@Action(verb = Verb.EXCLUDE, value = "build.buf.protoc-gen-validate:pgv-java-grpc")},
+            recursiveExclude = true)
     void testWithoutPgv() {
         ApplicationContextRunner runner = new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(GrpcValidationAutoConfiguration.class));
@@ -116,5 +100,4 @@ class GrpcValidationAutoConfigurationTest {
             assertThat(ctx).hasSingleBean(ProtoValidateServerInterceptor.class);
         });
     }
-
 }
