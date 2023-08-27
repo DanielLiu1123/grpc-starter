@@ -10,7 +10,6 @@ import io.envoyproxy.pgv.ValidatorIndex;
 import io.envoyproxy.pgv.grpc.ValidatingClientInterceptor;
 import io.envoyproxy.pgv.grpc.ValidatingServerInterceptor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -32,8 +31,7 @@ public class GrpcValidationAutoConfiguration {
      */
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(ValidatorIndex.class)
-    @ConditionalOnExpression(
-            "T(com.freemanan.starter.grpc.extensions.validation.GrpcValidationProperties$Type).AUTO.name().equalsIgnoreCase(${grpc.validation.implementation:'AUTO'}) || T(com.freemanan.starter.grpc.extensions.validation.GrpcValidationProperties$Type).PGV.name().equalsIgnoreCase(${grpc.validation.implementation:'AUTO'})")
+    @ConditionalOnProperty(prefix = GrpcValidationProperties.PREFIX, name = "backend", havingValue = "PGV", matchIfMissing = true)
     static class Pgv {
 
         @Configuration(proxyBeanMethods = false)
@@ -72,8 +70,7 @@ public class GrpcValidationAutoConfiguration {
      */
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(Validator.class)
-    @ConditionalOnExpression(
-            "T(com.freemanan.starter.grpc.extensions.validation.GrpcValidationProperties$Type).AUTO.name().equalsIgnoreCase(${grpc.validation.implementation:'AUTO'}) || T(com.freemanan.starter.grpc.extensions.validation.GrpcValidationProperties$Type).PROTO_VALIDATE.name().equalsIgnoreCase(${grpc.validation.implementation:'AUTO'})")
+    @ConditionalOnProperty(prefix = GrpcValidationProperties.PREFIX, name = "backend", havingValue = "PROTO_VALIDATE", matchIfMissing = true)
     static class ProtoValidate {
         @Configuration(proxyBeanMethods = false)
         @ConditionalOnClass({GrpcClientProperties.class})

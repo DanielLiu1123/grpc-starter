@@ -27,9 +27,9 @@ public class GrpcValidationProperties {
     private Server server = new Server();
 
     /**
-     * Validation implementation, default is {@link Type#PGV}.
+     * Validation implementation.
      */
-    private Type type;
+    private Backend backend;
 
     @Data
     public static class Client {
@@ -59,11 +59,7 @@ public class GrpcValidationProperties {
         private int order = 0;
     }
 
-    public enum Type {
-        /**
-         * Auto-detect validation implementation.
-         */
-        AUTO,
+    public enum Backend {
         /**
          * Validation implementation based on <a href="https://github.com/bufbuild/protovalidate-java">protovalidate</a>.
          */

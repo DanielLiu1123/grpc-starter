@@ -21,8 +21,10 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
+    testImplementation("build.buf:protovalidate:${protovalidateVersion}")
     testImplementation(project(":grpc-starters:grpc-boot-starter"))
     testImplementation(project(":grpc-starters:grpc-starter-test"))
+    testImplementation("com.freemanan:classpath-replacer-junit5:${classpathReplacerVersion}")
 }
 
 apply from: "${rootDir}/deploy.gradle"
