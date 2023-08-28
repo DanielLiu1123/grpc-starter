@@ -54,6 +54,12 @@ subprojects {
             mavenBom "io.grpc:grpc-bom:${grpcVersion}"
         }
     }
+    dependencies {
+        compileOnly("org.projectlombok:lombok")
+        annotationProcessor("org.projectlombok:lombok")
+        testCompileOnly("org.projectlombok:lombok")
+        testAnnotationProcessor("org.projectlombok:lombok")
+    }
     // spotless
     apply plugin: 'com.diffplug.spotless'
     spotless {

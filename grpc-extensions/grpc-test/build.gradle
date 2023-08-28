@@ -6,9 +6,6 @@ dependencies {
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
-
     testImplementation(project(":grpc-starters:grpc-boot-starter"))
 }
 

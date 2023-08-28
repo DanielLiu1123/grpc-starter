@@ -9,8 +9,6 @@ dependencies {
     // dynamic refresh configuration for grpc clients
     compileOnly("org.springframework.cloud:spring-cloud-context")
 
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation(project(":grpc-starters:grpc-server-boot-starter"))

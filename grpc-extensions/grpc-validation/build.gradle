@@ -8,8 +8,6 @@ dependencies {
 
     compileOnly("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
 
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
