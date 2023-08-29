@@ -13,8 +13,13 @@ import org.springframework.stereotype.Component;
  *
  * <p> Usually used with {@link GrpcExceptionHandler @GrpcExceptionHandler} together.
  *
+ * <p> {@link GrpcAdvice} can work with {@link org.springframework.core.annotation.Order} and {@link org.springframework.core.Ordered},
+ * exceptions will be handled in order.
+ *
  * @author Freeman
  * @see GrpcExceptionHandler
+ * @see org.springframework.core.annotation.Order
+ * @see org.springframework.core.Ordered
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
