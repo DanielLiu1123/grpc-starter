@@ -5,10 +5,9 @@ plugins {
 dependencies {
     implementation(project(":examples:grpc-sample-api"))
     implementation(project(":grpc-starters:grpc-boot-starter"))
-    implementation(project(":grpc-extensions:grpc-tracing"))
+    implementation(project(":grpc-starters:grpc-starter-tracing"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.micrometer:micrometer-tracing-bridge-brave")
     implementation("com.freemanan:httpexchange-spring-boot-starter:3.1.3")
 
