@@ -2,6 +2,7 @@ package com.freemanan.starter.grpc.server;
 
 import io.grpc.internal.GrpcUtil;
 import io.grpc.protobuf.services.ChannelzService;
+import io.grpc.services.AdminInterface;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.unit.DataSize;
@@ -137,6 +138,8 @@ public class GrpcServerProperties {
         private boolean enabled = false;
         /**
          * The maximum page size to return, default {@code 100}
+         *
+         * @see AdminInterface#DEFAULT_CHANNELZ_MAX_PAGE_SIZE
          */
         private int maxPageSize = 100;
     }

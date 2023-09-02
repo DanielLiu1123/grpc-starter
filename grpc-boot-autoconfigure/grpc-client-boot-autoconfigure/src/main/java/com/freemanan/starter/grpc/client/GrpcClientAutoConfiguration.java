@@ -10,7 +10,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 @ConditionOnGrpcClientEnabled
 @EnableConfigurationProperties(GrpcClientProperties.class)
-public class GrpcClientAutoConfiguration implements SmartInitializingSingleton, DisposableBean {
+public class GrpcClientAutoConfiguration implements CommandLineRunner, DisposableBean {
     private static final Logger log = LoggerFactory.getLogger(GrpcClientAutoConfiguration.class);
 
     private final GrpcClientProperties properties;
@@ -32,7 +32,7 @@ public class GrpcClientAutoConfiguration implements SmartInitializingSingleton, 
     }
 
     @Bean
-    public static GrpcStubBeanDefinitionRegistry genGrpcBeanDefinitionRegistry() {
+    static GrpcStubBeanDefinitionRegistry genGrpcBeanDefinitionRegistry() {
         return new GrpcStubBeanDefinitionRegistry();
     }
 
@@ -47,7 +47,7 @@ public class GrpcClientAutoConfiguration implements SmartInitializingSingleton, 
     }
 
     @Override
-    public void afterSingletonsInstantiated() {
+    public void run(String... args) throws Exception {
         warningUnusedConfigurations();
     }
 
