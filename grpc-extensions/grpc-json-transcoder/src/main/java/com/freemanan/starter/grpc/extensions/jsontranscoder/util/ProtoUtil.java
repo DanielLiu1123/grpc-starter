@@ -45,9 +45,9 @@ public class ProtoUtil {
     }
 
     /**
-     * Convert protobuf message to JSON string.
+     * Convert a protobuf message to JSON string.
      *
-     * <p> Wrapper types (Int32Value, Int64Value, etc. ) will be converted to simple value.
+     * <p> Wrapper types (Int32Value, Int64Value, etc.) will be converted to simple value.
      * <p> If kind of {@link Value} is {@link Value.KindCase#NULL_VALUE}, {@link Value.KindCase#BOOL_VALUE}, {@link Value.KindCase#NUMBER_VALUE} or {@link Value.KindCase#STRING_VALUE}, it will be converted to simple value.
      *
      * @param message protobuf message
