@@ -2,7 +2,7 @@
 
 # gRPC Starter <small>3.1.3</small>
 
-> Spring Boot Starter for gRPC ecosystem
+> Spring Boot Starters for gRPC ecosystem
 
 - **Spring Boot** 🤜 💥⚡ 🤛 **gRPC**
 
