@@ -5,7 +5,7 @@ plugins {
 dependencies {
     implementation(project(":examples:grpc-sample-api"))
     implementation(project(":grpc-starters:grpc-boot-starter"))
-    implementation(project(":grpc-extensions:grpc-metrics"))
+    implementation(project(":grpc-starters:grpc-starter-metrics"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-aop")

@@ -9,8 +9,6 @@ dependencies {
     compileOnly("org.springframework.boot:spring-boot-starter-jdbc")
     compileOnly("org.springframework.boot:spring-boot-starter-data-redis")
 
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testRuntimeOnly("io.grpc:grpc-netty-shaded")

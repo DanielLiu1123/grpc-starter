@@ -181,7 +181,7 @@ public class GrpcClientProperties implements InitializingBean {
         /**
          * In-process client name.
          *
-         * <p> If set, will create in-process channels by default, usually for testing.
+         * <p> If set, will create an in-process channel by default, usually for testing.
          */
         private String name;
     }

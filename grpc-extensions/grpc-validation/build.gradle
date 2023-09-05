@@ -16,8 +16,6 @@ dependencies {
     compileOnly("build.buf:protovalidate:${protovalidateVersion}")
 //    compileOnly("org.projectnessie.cel:cel-core")
 
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")

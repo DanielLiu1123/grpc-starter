@@ -106,12 +106,12 @@ class Util {
             Thread.currentThread().interrupt();
         }
 
-        // Forceful shut down if still not terminated.
+        // Forcefully shut down if still not terminated.
         if (!channel.isTerminated()) {
             try {
                 channel.shutdownNow();
                 if (!channel.awaitTermination(15, TimeUnit.SECONDS)) {
-                    log.warn("Forceful shutdown timed out: 15s, channel: {}. ", channel);
+                    log.warn("Forcefully shutdown timed out: 15s, channel: {}. ", channel);
                 }
             } catch (InterruptedException e) {
                 log.warn("Interrupted forcefully shutting down channel: {}. ", channel);

@@ -8,8 +8,6 @@ dependencies {
     compileOnly("io.micrometer:micrometer-tracing-bridge-otel")
     compileOnly("io.micrometer:micrometer-tracing-bridge-brave")
 
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation(project(":grpc-starters:grpc-starter-test"))

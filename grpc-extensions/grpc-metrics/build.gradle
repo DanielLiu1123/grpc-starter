@@ -8,8 +8,6 @@ dependencies {
     compileOnly("io.micrometer:micrometer-registry-otlp")
     compileOnly("org.springframework.boot:spring-boot-starter-aop")
 
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation(project(":grpc-starters:grpc-starter-test"))

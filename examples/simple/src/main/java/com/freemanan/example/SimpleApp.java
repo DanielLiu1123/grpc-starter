@@ -5,17 +5,16 @@ import com.freemanan.starter.grpc.client.EnableGrpcClients;
 import io.grpc.health.v1.HealthCheckRequest;
 import io.grpc.health.v1.HealthGrpc;
 import io.grpc.reflection.v1alpha.ServerReflectionGrpc;
-import io.grpc.reflection.v1alpha.ServerReflectionRequest;
-import io.grpc.reflection.v1alpha.ServerReflectionResponse;
-import io.grpc.stub.StreamObserver;
 import io.grpc.testing.protobuf.SimpleServiceGrpc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.util.Assert;
 
 /**
  * @author Freeman
@@ -33,37 +32,21 @@ public class SimpleApp implements ApplicationRunner {
     HealthGrpc.HealthBlockingStub healthBlockingStub;
 
     @Autowired
-    HealthGrpc.HealthStub healthStub;
-
-    @Autowired
-    ServerReflectionGrpc.ServerReflectionStub reflectionStub;
-
-    @Autowired
-    FooServiceGrpc.FooServiceBlockingStub fooStub;
-
-    @Autowired
-    SimpleServiceGrpc.SimpleServiceBlockingStub simpleStub;
+    BeanFactory beanFactory;
 
     @Override
     public void run(ApplicationArguments args) {
-        log.info(healthBlockingStub
-                .check(HealthCheckRequest.newBuilder().build())
-                .toString());
-        StreamObserver<ServerReflectionRequest> so =
-                reflectionStub.serverReflectionInfo(new StreamObserver<ServerReflectionResponse>() {
-                    @Override
-                    public void onNext(ServerReflectionResponse value) {
-                        log.info(value.toString());
-                    }
+        Assert.notNull(beanFactory.getBean(HealthGrpc.HealthStub.class), "HealthStub should not be null");
+        Assert.notNull(
+                beanFactory.getBean(ServerReflectionGrpc.ServerReflectionStub.class),
+                "ServerReflectionStub should not be null");
+        Assert.notNull(
+                beanFactory.getBean(FooServiceGrpc.FooServiceBlockingStub.class),
+                "FooServiceBlockingStub should not be null");
+        Assert.notNull(
+                beanFactory.getBean(SimpleServiceGrpc.SimpleServiceBlockingStub.class),
+                "SimpleServiceBlockingStub should not be null");
 
-                    @Override
-                    public void onError(Throwable t) {}
-
-                    @Override
-                    public void onCompleted() {
-                        log.info("onCompleted");
-                    }
-                });
-        so.onNext(ServerReflectionRequest.newBuilder().setListServices("").build());
+        log.info("HealthCheckResponse: {}", healthBlockingStub.check(HealthCheckRequest.getDefaultInstance()));
     }
 }
