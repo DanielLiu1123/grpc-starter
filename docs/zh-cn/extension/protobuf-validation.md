@@ -55,34 +55,33 @@ user
 
    配置 `com.google.protobuf` 插件，用于生成 gRPC 和 validation 相关的代码：
 
-    ```groovy
-    apply plugin: 'com.google.protobuf'
-    
-    protobuf {
-        def suffix = osdetector.os == 'osx' ? ':osx-x86_64' : ''
-        protoc {
-            artifact = "com.google.protobuf:protoc:${protobufVersion}" + suffix
-        }
-        plugins {
-            grpc {
-                artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" + suffix // 生成 gRPC 相关代码
-            }
-            javapgv {
-                artifact = "build.buf.protoc-gen-validate:protoc-gen-validate:${pgvVersion}" + suffix // 生成 pgv 相关代码
-            }
-        }
-        generateProtoTasks {
-            all()*.plugins {
-                grpc {}
-                javapgv { option "lang=java" }
-            }
-        }
-    }
-    ```
+   ```groovy
+   apply plugin: 'com.google.protobuf'
+   
+   protobuf {
+       protoc {
+           artifact = "com.google.protobuf:protoc:${protobufVersion}"
+       }
+       plugins {
+           grpc {
+               artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+           }
+           javapgv {
+               artifact = "build.buf.protoc-gen-validate:protoc-gen-validate:${pgvVersion}"
+           }
+       }
+       generateProtoTasks {
+           all()*.plugins {
+               grpc {}
+               javapgv { option "lang=java" }
+           }
+       }
+   }
+   ```
 
    有关 Maven 的配置，可以参考 [here](https://github.com/bufbuild/protoc-gen-validate#java)。
 
-可以参考 [user](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/user) example。 
+可以参考 [user](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/user) example。
 
 ## 使用说明
 
