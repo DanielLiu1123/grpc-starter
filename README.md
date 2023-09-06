@@ -38,7 +38,6 @@ This project provides out-of-the-box, highly scalable Spring Boot starters for t
 ```java
 @SpringBootApplication
 @EnableGrpcClients("io.grpc")
-@GrpcService
 public class SimpleApp extends SimpleServiceGrpc.SimpleServiceImplBase {
 
     public static void main(String[] args) {
