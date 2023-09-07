@@ -78,7 +78,7 @@ Mainly maintain the following versions:
   is [main](https://github.com/DanielLiu1123/grpc-starter/).
 
   3.x version is kept in sync with Spring Boot 3,
-  if you are using Spring Boot 3.1.3, then grpc-boot-starter 3.1.3 should be used.
+  if you are using Spring Boot 3.1.3, then `grpc-boot-starter` 3.1.3 should be used.
 
   | Spring Boot | grpc-boot-starter |
   |-------------|-------------------|
