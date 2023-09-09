@@ -54,30 +54,29 @@ user
 
    Configure the `com.google.protobuf` plugin to generate gRPC and validation-related code:
 
-    ```groovy
-    apply plugin: 'com.google.protobuf'
-    
-    protobuf {
-        def suffix = osdetector.os == 'osx' ? ':osx-x86_64' : ''
-        protoc {
-            artifact = "com.google.protobuf:protoc:${protobufVersion}" + suffix
-        }
-        plugins {
-            grpc {
-                artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" + suffix // Generate gRPC-related code
-            }
-            javapgv {
-                artifact = "build.buf.protoc-gen-validate:protoc-gen-validate:${pgvVersion}" + suffix // Generate pgv-related code
-            }
-        }
-        generateProtoTasks {
-            all()*.plugins {
-                grpc {}
-                javapgv { option "lang=java" }
-            }
-        }
-    }
-    ```
+   ```groovy
+   apply plugin: 'com.google.protobuf'
+   
+   protobuf {
+       protoc {
+           artifact = "com.google.protobuf:protoc:${protobufVersion}"
+       }
+       plugins {
+           grpc {
+               artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+           }
+           javapgv {
+               artifact = "build.buf.protoc-gen-validate:protoc-gen-validate:${pgvVersion}"
+           }
+       }
+       generateProtoTasks {
+           all()*.plugins {
+               grpc {}
+               javapgv { option "lang=java" }
+           }
+       }
+   }
+   ```
 
    For Maven configuration, you can refer to the documentation [here](https://github.com/bufbuild/protoc-gen-validate#java).
 
