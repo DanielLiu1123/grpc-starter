@@ -1,0 +1,20 @@
+dependencies {
+    compileOnly(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
+    compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+
+    api("org.springframework.cloud:spring-cloud-commons")
+
+    compileOnly("org.springframework.cloud:spring-cloud-starter-loadbalancer")
+    compileOnly("org.springframework.boot:spring-boot-starter-web")
+
+    compileOnly("org.springframework.cloud:spring-cloud-starter-consul-discovery")
+    compileOnly("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+    compileOnly("org.springframework.cloud:spring-cloud-starter-zookeeper-discovery")
+
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+    testImplementation(project(":grpc-starters:grpc-boot-starter"))
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
+}
+
+apply from: "${rootDir}/deploy.gradle"

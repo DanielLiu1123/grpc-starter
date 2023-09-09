@@ -1,0 +1,14 @@
+dependencies {
+    api(project(":grpc-extensions:grpc-discovery"))
+
+    optionalSupportApi(project(":grpc-starters:grpc-client-boot-starter"))
+    optionalSupportApi(project(":grpc-starters:grpc-server-boot-starter"))
+
+    optionalSupportApi("org.springframework.cloud:spring-cloud-starter-loadbalancer")
+
+    optionalSupportApi("org.springframework.cloud:spring-cloud-starter-consul-discovery")
+    optionalSupportApi("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+    optionalSupportApi("org.springframework.cloud:spring-cloud-starter-zookeeper-discovery")
+}
+
+apply from: "${rootDir}/deploy.gradle"

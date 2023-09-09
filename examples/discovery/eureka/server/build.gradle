@@ -1,0 +1,14 @@
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation(project(":examples:grpc-sample-api"))
+    implementation(project(":grpc-starters:grpc-boot-starter"))
+    implementation(project(":grpc-starters:grpc-starter-discovery"))
+
+    implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-server")
+
+    implementation(project(":grpc-starters:grpc-starter-test"))
+}

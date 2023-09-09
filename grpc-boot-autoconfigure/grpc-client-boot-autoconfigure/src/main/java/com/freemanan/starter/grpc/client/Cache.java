@@ -1,7 +1,7 @@
 package com.freemanan.starter.grpc.client;
 
+import static com.freemanan.starter.grpc.client.GrpcChannelUtil.shutdownChannel;
 import static com.freemanan.starter.grpc.client.Util.serviceName;
-import static com.freemanan.starter.grpc.client.Util.shutdownChannel;
 
 import io.grpc.ManagedChannel;
 import java.time.Duration;

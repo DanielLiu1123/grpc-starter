@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: producer
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        port: ${grpc.server.port}
+        instance-id: ${spring.application.name}-${random.uuid}
+grpc:
+  server:
+    port: 9091

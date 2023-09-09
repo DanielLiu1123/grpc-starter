@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: consumer
+grpc:
+  server:
+    port: 9093
+  client:
+    channels:
+      - authority: producer
+        classes:
+          - io.grpc.testing.protobuf.SimpleServiceGrpc.SimpleServiceBlockingStub
+eureka:
+  instance:
+    appname: ${spring.application.name}
+    instance-id: ${spring.application.name}-${random.uuid}
+  client:
+    service-url:
+        defaultZone: http://localhost:7001/eureka/

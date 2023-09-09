@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: producer
+grpc:
+  server:
+    port: 9091
+eureka:
+  instance:
+    appname: ${spring.application.name}
+    instance-id: ${spring.application.name}-${random.uuid}
+  client:
+    service-url:
+      defaultZone: http://localhost:7001/eureka/

@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: consumer
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        port: ${grpc.server.port}
+        instance-id: ${spring.application.name}-${random.uuid}
+grpc:
+  server:
+    port: 9093
+  client:
+    channels:
+      - authority: producer
+        classes:
+          - io.grpc.testing.protobuf.SimpleServiceGrpc.SimpleServiceBlockingStub
