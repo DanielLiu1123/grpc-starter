@@ -1,6 +1,7 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder;
 
 import com.freemanan.starter.grpc.server.GrpcServerProperties;
+import com.freemanan.starter.grpc.server.GrpcServerShutdownEvent;
 import com.freemanan.starter.grpc.server.GrpcServerStartedEvent;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
@@ -35,7 +37,7 @@ import org.springframework.web.server.ResponseStatusException;
  * @author Freeman
  */
 public abstract class AbstractHandlerAdaptor
-        implements ApplicationListener<GrpcServerStartedEvent>, BeanFactoryAware, Ordered {
+        implements ApplicationListener<ApplicationEvent>, BeanFactoryAware, Ordered {
     private static final Logger log = LoggerFactory.getLogger(AbstractHandlerAdaptor.class);
 
     public static final int ORDER = 0;
@@ -140,7 +142,16 @@ public abstract class AbstractHandlerAdaptor
     }
 
     @Override
-    public void onApplicationEvent(GrpcServerStartedEvent event) {
+    public void onApplicationEvent(ApplicationEvent event) {
+        if (event instanceof GrpcServerStartedEvent) {
+            onGrpcServerStartedEvent((GrpcServerStartedEvent) event);
+        }
+        if (event instanceof GrpcServerShutdownEvent && channel != null) {
+            channel.shutdown();
+        }
+    }
+
+    private void onGrpcServerStartedEvent(GrpcServerStartedEvent event) {
         GrpcServerProperties properties = beanFactory.getBean(GrpcServerProperties.class);
         boolean usingInProcess = properties.getInProcess() != null
                 && StringUtils.hasText(properties.getInProcess().getName());
