@@ -124,7 +124,7 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
         new Thread(
                         () -> {
                             try {
-                                // wait here until terminate
+                                // wait here until terminating
                                 latch.await();
                             } catch (InterruptedException e) {
                                 log.warn("gRPC server await termination interrupted", e);
@@ -141,7 +141,7 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
         // stop accepting new calls
         server.shutdown();
 
-        // publish shutdown event, user can listen the event to complete the StreamObserver manually
+        // publish shutdown event, user can listen to the event to complete the StreamObserver manually
         publisher.publishEvent(new GrpcServerShutdownEvent(server));
 
         long start = System.currentTimeMillis();
