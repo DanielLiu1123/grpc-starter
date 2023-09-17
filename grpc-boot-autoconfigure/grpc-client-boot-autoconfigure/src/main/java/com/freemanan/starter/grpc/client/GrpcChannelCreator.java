@@ -7,7 +7,7 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.Metadata;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.MetadataUtils;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -17,11 +17,11 @@ import org.springframework.util.StringUtils;
  */
 class GrpcChannelCreator {
 
-    private final ConfigurableBeanFactory beanFactory;
+    private final BeanFactory beanFactory;
     private final Class<?> stubClass;
     private final GrpcClientProperties properties;
 
-    GrpcChannelCreator(ConfigurableBeanFactory beanFactory, Class<?> stubClass, GrpcClientProperties properties) {
+    GrpcChannelCreator(BeanFactory beanFactory, Class<?> stubClass, GrpcClientProperties properties) {
         this.beanFactory = beanFactory;
         this.stubClass = stubClass;
         this.properties = properties;
