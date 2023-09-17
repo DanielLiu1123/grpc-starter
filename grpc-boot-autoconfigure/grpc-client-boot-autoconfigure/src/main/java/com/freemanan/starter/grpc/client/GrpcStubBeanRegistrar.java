@@ -7,9 +7,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
@@ -66,12 +66,9 @@ class GrpcStubBeanRegistrar {
             throw new IllegalStateException(e);
         }
 
-        Assert.isInstanceOf(
-                ConfigurableBeanFactory.class,
-                registry,
-                "BeanDefinitionRegistry must be instance of ConfigurableBeanFactory");
+        Assert.isInstanceOf(BeanFactory.class, registry, "BeanDefinitionRegistry must be instance of BeanFactory");
 
-        GrpcClientCreator creator = new GrpcClientCreator((ConfigurableBeanFactory) registry, properties, clz);
+        GrpcClientCreator creator = new GrpcClientCreator((BeanFactory) registry, properties, clz);
 
         AbstractBeanDefinition abd = BeanDefinitionBuilder.genericBeanDefinition(clz, creator::create)
                 .getBeanDefinition();
