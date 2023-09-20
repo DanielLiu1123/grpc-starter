@@ -41,7 +41,7 @@ public class GrpcClientAutoConfiguration implements CommandLineRunner, Disposabl
     static class ChannelCloserConfiguration {
 
         @Bean
-        public static ShutdownEventBasedChannelCloser shutdownEventBasedChannelCloser() {
+        static ShutdownEventBasedChannelCloser shutdownEventBasedChannelCloser() {
             return new ShutdownEventBasedChannelCloser();
         }
     }

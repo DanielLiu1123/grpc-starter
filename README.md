@@ -27,11 +27,11 @@ This project provides out-of-the-box, highly scalable Spring Boot starters for t
 
 ***Extensions:***
 
-- [JSON transcoder](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/json-transcoder): one set of code supports both gRPC and HTTP/JSON.
+- [JSON transcoder](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/json-transcoder): A single codebase to simultaneously support both gRPC and HTTP/JSON.
 - [Protobuf validation](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/protobuf-validation): Protobuf message validation implemented by [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).
 - [Metric](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/metrics): Spring Boot Actuator integration with gRPC service.
 - [Tracing](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/tracing): Spring Boot Actuator integration with gRPC server and client.
-- [Testing](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/test): integration with `SpringBootTest`.
+- [Testing](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/test): Integration with `SpringBootTest`.
 
 ## Quick Start
 

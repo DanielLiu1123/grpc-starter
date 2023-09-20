@@ -5,8 +5,8 @@ import io.grpc.ManagedChannel;
 import java.lang.reflect.Method;
 import java.util.UUID;
 import org.springframework.aop.scope.ScopedProxyUtils;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
@@ -28,11 +28,11 @@ class GrpcClientCreator {
     private static final boolean SPRING_CLOUD_CONTEXT_PRESENT =
             ClassUtils.isPresent("org.springframework.cloud.context.scope.refresh.RefreshScope", null);
 
-    private final ConfigurableBeanFactory beanFactory;
+    private final BeanFactory beanFactory;
     private final GrpcClientProperties properties;
     private final Class<?> stubClass;
 
-    GrpcClientCreator(ConfigurableBeanFactory beanFactory, GrpcClientProperties properties, Class<?> stubClass) {
+    GrpcClientCreator(BeanFactory beanFactory, GrpcClientProperties properties, Class<?> stubClass) {
         this.beanFactory = beanFactory;
         this.properties = properties;
         this.stubClass = stubClass;
@@ -56,15 +56,13 @@ class GrpcClientCreator {
         abd.setLazyInit(true);
 
         String channelBeanName = UUID.randomUUID().toString();
+        BeanDefinitionHolder holder = new BeanDefinitionHolder(abd, channelBeanName);
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
         if (SPRING_CLOUD_CONTEXT_PRESENT && properties.getRefresh().isEnabled()) {
             abd.setScope("refresh");
-            BeanDefinitionHolder scopedProxy =
-                    ScopedProxyUtils.createScopedProxy(new BeanDefinitionHolder(abd, channelBeanName), registry, true);
-            BeanDefinitionReaderUtils.registerBeanDefinition(scopedProxy, registry);
-        } else {
-            BeanDefinitionReaderUtils.registerBeanDefinition(new BeanDefinitionHolder(abd, channelBeanName), registry);
+            holder = ScopedProxyUtils.createScopedProxy(holder, registry, true);
         }
+        BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
 
         ManagedChannel channel = beanFactory.getBean(channelBeanName, ManagedChannel.class);
         T stub = (T) ReflectionUtils.invokeMethod(stubMethod, null, channel);
