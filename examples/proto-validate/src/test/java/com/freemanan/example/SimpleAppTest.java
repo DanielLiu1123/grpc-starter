@@ -24,7 +24,7 @@ class SimpleAppTest {
 
     @Test
     void testCreateFoo() {
-        Foo foo = fooBlockingStub.create(
+        Foo foo = fooBlockingStub.insertFoo(
                 Foo.newBuilder().setId("001").setName("Freeman").build());
         assertThat(foo.getId()).isEqualTo("001");
         assertThat(foo.getName()).isEqualTo("Freeman");
@@ -34,7 +34,7 @@ class SimpleAppTest {
     void testCreateFoo_whenServerErrorAndNoExceptionHandler_thenClientSideShouldGetUnknownCode() {
         Foo foo = Foo.newBuilder().setId("002").setName("Fre").build();
         assertThatExceptionOfType(StatusRuntimeException.class)
-                .isThrownBy(() -> fooBlockingStub.create(foo))
+                .isThrownBy(() -> fooBlockingStub.insertFoo(foo))
                 .withMessageContaining("UNKNOWN");
     }
 

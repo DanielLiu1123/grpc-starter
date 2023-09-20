@@ -4,19 +4,16 @@ package fm.foo.v1;
 
 import "google/protobuf/empty.proto";
 
-//import "validate/validate.proto";
-//import "buf/validate/validate.proto";
+import "buf/validate/validate.proto";
 
 option java_multiple_files = true;
 option java_package = "com.freemanan.foo.v1.api";
 
 message Foo {
   string id = 1;
-  string name = 2/* [(buf.validate.field).string.min_len = 1]*/;
+  string name = 2 [(buf.validate.field).string.min_len = 1];
 }
 
 service FooService {
-  rpc Create(Foo) returns (Foo) {}
-  rpc Stream(stream Foo) returns (stream Foo) {}
-  rpc ClintStream(stream Foo) returns (Foo) {}
+  rpc InsertFoo(Foo) returns (Foo) {}
 }
