@@ -13,4 +13,4 @@ dependencies {
     testImplementation(project(":examples:grpc-sample-api"))
 }
 
-apply from: "${rootDir}/deploy.gradle"
+apply from: "${rootDir}/gradle/deploy.gradle"

@@ -9,4 +9,4 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-webflux")
 }
 
-apply from: "${rootDir}/deploy.gradle"
+apply from: "${rootDir}/gradle/deploy.gradle"

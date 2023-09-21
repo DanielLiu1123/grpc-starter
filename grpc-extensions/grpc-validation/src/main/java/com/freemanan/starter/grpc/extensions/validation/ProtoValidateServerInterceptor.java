@@ -1,5 +1,6 @@
 package com.freemanan.starter.grpc.extensions.validation;
 
+import build.buf.protovalidate.ValidationResult;
 import build.buf.protovalidate.Validator;
 import build.buf.protovalidate.exceptions.ValidationException;
 import com.google.protobuf.Message;
@@ -37,12 +38,17 @@ public class ProtoValidateServerInterceptor implements ServerInterceptor, Ordere
             @Override
             public void onMessage(ReqT message) {
                 try {
-                    validator.validate((Message) message);
-                    super.onMessage(message);
-                } catch (ValidationException ex) {
-                    StatusRuntimeException status = ValidationExceptionUtil.asStatusRuntimeException(ex);
-                    aborted = true;
-                    call.close(status.getStatus(), status.getTrailers());
+                    ValidationResult result = validator.validate((Message) message);
+                    if (result.isSuccess()) {
+                        super.onMessage(message);
+                    } else {
+                        StatusRuntimeException sre =
+                                ValidationExceptionUtil.asStatusRuntimeException(result.getViolations());
+                        aborted = true;
+                        call.close(sre.getStatus(), sre.getTrailers());
+                    }
+                } catch (ValidationException e) {
+                    throw ValidationExceptionUtil.asStatusRuntimeException(e);
                 }
             }
 
