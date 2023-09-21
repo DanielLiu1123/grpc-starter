@@ -5,7 +5,7 @@ plugins {
     id "com.google.protobuf" version "${protobufGradlePluginVersion}" apply false
     id 'com.diffplug.spotless' version "${spotlessVersion}" apply false
     id "com.github.spotbugs" version "${spotbugsVersion}" apply false
-    id "com.parmet.buf" version "${bufGradlePluginVersion}" apply false
+    id "build.buf" version "${bufGradlePluginVersion}" apply false
 }
 
 subprojects {
