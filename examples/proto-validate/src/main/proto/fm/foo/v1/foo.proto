@@ -12,6 +12,7 @@ option java_package = "com.freemanan.foo.v1.api";
 message Foo {
   string id = 1;
   string name = 2 [(buf.validate.field).string = {min_len: 5}];
+  repeated string hobbies = 3 [(buf.validate.field).repeated = {min_items: 1}];
 }
 
 service FooService {

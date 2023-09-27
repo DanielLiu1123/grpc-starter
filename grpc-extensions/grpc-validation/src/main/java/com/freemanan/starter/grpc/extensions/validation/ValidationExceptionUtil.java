@@ -2,37 +2,35 @@ package com.freemanan.starter.grpc.extensions.validation;
 
 import build.buf.protovalidate.exceptions.ValidationException;
 import build.buf.validate.Violation;
-import com.google.rpc.Code;
-import com.google.rpc.Status;
+import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import io.grpc.protobuf.StatusProto;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 
 /**
- * TODO(Freeman): optimize!
- *
  * @author Freeman
  */
 @UtilityClass
-public class ValidationExceptionUtil {
+class ValidationExceptionUtil {
     /**
-     * Convert {@link ValidationException} to {@link StatusRuntimeException}
+     * Convert {@link ValidationException} to {@link StatusRuntimeException}.
      *
      * @param ex {@link ValidationException}
      * @return {@link StatusRuntimeException}
      */
     public static StatusRuntimeException asStatusRuntimeException(ValidationException ex) {
-        return StatusProto.toStatusRuntimeException(Status.newBuilder()
-                .setCode(Code.INTERNAL.getNumber())
-                .setMessage(ex.getLocalizedMessage())
-                .build());
+        return new StatusRuntimeException(Status.INTERNAL.withDescription(ex.getLocalizedMessage()));
     }
 
+    /**
+     * Convert validation violations to {@link StatusRuntimeException}.
+     *
+     * @param violations validation violations
+     * @return {@link StatusRuntimeException}
+     */
     public static StatusRuntimeException asStatusRuntimeException(List<Violation> violations) {
-        return StatusProto.toStatusRuntimeException(Status.newBuilder()
-                .setCode(Code.INVALID_ARGUMENT.getNumber())
-                .setMessage(violations.get(0).getMessage())
-                .build());
+        String message = violations.stream().map(Violation::getMessage).collect(Collectors.joining(", "));
+        return new StatusRuntimeException(Status.INVALID_ARGUMENT.withDescription(message));
     }
 }

@@ -1,5 +1,7 @@
 package com.freemanan.starter.grpc.extensions.validation;
 
+import static com.freemanan.starter.grpc.extensions.validation.ValidationExceptionUtil.asStatusRuntimeException;
+
 import build.buf.protovalidate.ValidationResult;
 import build.buf.protovalidate.Validator;
 import build.buf.protovalidate.exceptions.ValidationException;
@@ -31,15 +33,16 @@ public class ProtoValidateClientInterceptor implements ClientInterceptor, Ordere
         return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(next.newCall(method, callOptions)) {
             @Override
             public void sendMessage(ReqT message) {
+                ValidationResult result;
                 try {
-                    ValidationResult result = validator.validate((Message) message);
-                    if (result.isSuccess()) {
-                        super.sendMessage(message);
-                    } else {
-                        throw ValidationExceptionUtil.asStatusRuntimeException(result.getViolations());
-                    }
+                    result = validator.validate((Message) message);
                 } catch (ValidationException e) {
-                    throw ValidationExceptionUtil.asStatusRuntimeException(e);
+                    throw asStatusRuntimeException(e);
+                }
+                if (result.isSuccess()) {
+                    super.sendMessage(message);
+                } else {
+                    throw asStatusRuntimeException(result.getViolations());
                 }
             }
         };

@@ -18,8 +18,11 @@ class ProtoValidateAppTest {
 
     @Test
     void testInsertFoo() {
-        Foo foo = fooBlockingStub.insertFoo(
-                Foo.newBuilder().setId("001").setName("Freeman").build());
+        Foo foo = fooBlockingStub.insertFoo(Foo.newBuilder()
+                .setId("001")
+                .setName("Freeman")
+                .addHobbies("Coding")
+                .build());
         assertThat(foo.getId()).isEqualTo("001");
         assertThat(foo.getName()).isEqualTo("Freeman");
     }
@@ -29,6 +32,7 @@ class ProtoValidateAppTest {
         assertThatCode(() -> fooBlockingStub.insertFoo(
                         Foo.newBuilder().setId("001").setName("Free").build()))
                 .isInstanceOf(StatusRuntimeException.class)
-                .hasMessage("INVALID_ARGUMENT: value length must be at least 5 characters");
+                .hasMessage(
+                        "INVALID_ARGUMENT: value length must be at least 5 characters, value must contain at least 1 item(s)");
     }
 }

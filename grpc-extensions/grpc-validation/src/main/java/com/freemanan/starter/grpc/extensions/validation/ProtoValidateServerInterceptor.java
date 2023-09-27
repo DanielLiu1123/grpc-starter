@@ -1,5 +1,7 @@
 package com.freemanan.starter.grpc.extensions.validation;
 
+import static com.freemanan.starter.grpc.extensions.validation.ValidationExceptionUtil.asStatusRuntimeException;
+
 import build.buf.protovalidate.ValidationResult;
 import build.buf.protovalidate.Validator;
 import build.buf.protovalidate.exceptions.ValidationException;
@@ -37,18 +39,19 @@ public class ProtoValidateServerInterceptor implements ServerInterceptor, Ordere
 
             @Override
             public void onMessage(ReqT message) {
+                ValidationResult result;
                 try {
-                    ValidationResult result = validator.validate((Message) message);
-                    if (result.isSuccess()) {
-                        super.onMessage(message);
-                    } else {
-                        StatusRuntimeException sre =
-                                ValidationExceptionUtil.asStatusRuntimeException(result.getViolations());
-                        aborted = true;
-                        call.close(sre.getStatus(), sre.getTrailers());
-                    }
+                    result = validator.validate((Message) message);
                 } catch (ValidationException e) {
-                    throw ValidationExceptionUtil.asStatusRuntimeException(e);
+                    aborted = true;
+                    throw asStatusRuntimeException(e);
+                }
+                if (result.isSuccess()) {
+                    super.onMessage(message);
+                } else {
+                    StatusRuntimeException sre = asStatusRuntimeException(result.getViolations());
+                    aborted = true;
+                    call.close(sre.getStatus(), sre.getTrailers());
                 }
             }
 
