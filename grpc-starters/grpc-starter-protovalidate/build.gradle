@@ -1,9 +1,3 @@
-//dependencyManagement {
-//    imports {
-//        mavenBom("org.projectnessie.cel:cel-bom:${celVersion}")
-//    }
-//}
-
 dependencies {
     api(project(":grpc-extensions:grpc-validation"))
 
