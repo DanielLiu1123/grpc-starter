@@ -16,6 +16,7 @@ import org.springframework.core.Ordered;
 
 /**
  * @author Freeman
+ * @see io.envoyproxy.pgv.grpc.ValidatingServerInterceptor
  */
 public class ProtoValidateServerInterceptor implements ServerInterceptor, Ordered {
 
