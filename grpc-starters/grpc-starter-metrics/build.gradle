@@ -7,4 +7,4 @@ dependencies {
     optionalSupportApi("io.micrometer:micrometer-registry-otlp")
 }
 
-apply from: "${rootDir}/deploy.gradle"
+apply from: "${rootDir}/gradle/deploy.gradle"

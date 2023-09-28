@@ -16,4 +16,4 @@ dependencies {
     testImplementation("org.springframework.cloud:spring-cloud-context")
 }
 
-apply from: "${rootDir}/deploy.gradle"
+apply from: "${rootDir}/gradle/deploy.gradle"

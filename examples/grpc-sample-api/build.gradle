@@ -1,7 +1,9 @@
 dependencies {
-    api(project(":grpc-starters:grpc-starter-validation"))
     api("io.grpc:grpc-testing-proto")
+    api("io.grpc:grpc-stub")
+    api("io.grpc:grpc-protobuf")
+    api("javax.annotation:javax.annotation-api:${javaxValidationApiVersion}")
 }
 
-apply from: "$rootDir/deploy.gradle"
-apply from: "$rootDir/protobuf.gradle"
+apply from: "${rootDir}/gradle/deploy.gradle"
+apply from: "${rootDir}/gradle/protobuf-with-pgv.gradle"

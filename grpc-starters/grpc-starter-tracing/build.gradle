@@ -5,4 +5,4 @@ dependencies {
     optionalSupportApi("io.micrometer:micrometer-tracing-bridge-otel")
 }
 
-apply from: "${rootDir}/deploy.gradle"
+apply from: "${rootDir}/gradle/deploy.gradle"

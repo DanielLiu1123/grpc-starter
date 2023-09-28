@@ -1,5 +1,6 @@
 package com.freemanan.starter.grpc.extensions.validation;
 
+import build.buf.protovalidate.Validator;
 import com.freemanan.starter.grpc.client.ConditionOnGrpcClientEnabled;
 import com.freemanan.starter.grpc.client.GrpcClientProperties;
 import com.freemanan.starter.grpc.server.ConditionOnGrpcServerEnabled;
@@ -30,6 +31,11 @@ public class GrpcValidationAutoConfiguration {
      */
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(ValidatorIndex.class)
+    @ConditionalOnProperty(
+            prefix = GrpcValidationProperties.PREFIX,
+            name = "backend",
+            havingValue = "PGV",
+            matchIfMissing = true)
     static class Pgv {
 
         @Configuration(proxyBeanMethods = false)
@@ -57,6 +63,48 @@ public class GrpcValidationAutoConfiguration {
             public ValidatingServerInterceptor grpcValidatingServerInterceptor(GrpcValidationProperties properties) {
                 return new OrderedValidatingServerInterceptor(
                         new ReflectiveValidatorIndex(), properties.getServer().getOrder());
+            }
+        }
+    }
+
+    /**
+     * Validation implementation based on protovalidate.
+     *
+     * @see <a href="https://github.com/bufbuild/protovalidate-java">protovalidate</a>
+     */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(Validator.class)
+    @ConditionalOnProperty(
+            prefix = GrpcValidationProperties.PREFIX,
+            name = "backend",
+            havingValue = "PROTO_VALIDATE",
+            matchIfMissing = true)
+    static class ProtoValidate {
+        @Configuration(proxyBeanMethods = false)
+        @ConditionalOnClass({GrpcClientProperties.class})
+        @ConditionOnGrpcClientEnabled
+        @ConditionalOnProperty(prefix = GrpcValidationProperties.Client.PREFIX, name = "enabled", matchIfMissing = true)
+        static class Client {
+
+            @Bean
+            @ConditionalOnMissingBean
+            public ProtoValidateClientInterceptor protoValidateClientInterceptor(GrpcValidationProperties properties) {
+                return new ProtoValidateClientInterceptor(
+                        new Validator(), properties.getClient().getOrder());
+            }
+        }
+
+        @Configuration(proxyBeanMethods = false)
+        @ConditionalOnClass({GrpcServerProperties.class})
+        @ConditionOnGrpcServerEnabled
+        @ConditionalOnProperty(prefix = GrpcValidationProperties.Server.PREFIX, name = "enabled", matchIfMissing = true)
+        static class Server {
+
+            @Bean
+            @ConditionalOnMissingBean
+            public ProtoValidateServerInterceptor protoValidateServerInterceptor(GrpcValidationProperties properties) {
+                return new ProtoValidateServerInterceptor(
+                        new Validator(), properties.getServer().getOrder());
             }
         }
     }

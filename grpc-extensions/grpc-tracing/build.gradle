@@ -15,4 +15,4 @@ dependencies {
     testImplementation("com.freemanan:classpath-replacer-junit5:${classpathReplacerVersion}")
 }
 
-apply from: "${rootDir}/deploy.gradle"
+apply from: "${rootDir}/gradle/deploy.gradle"

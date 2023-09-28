@@ -11,7 +11,7 @@ dependencies {
     testImplementation(project(":grpc-starters:grpc-starter-test"))
 }
 
-apply from: "${rootDir}/protobuf.gradle"
+apply from: "${rootDir}/gradle/protobuf-with-pgv.gradle"
 
 buf {
     enforceFormat = true
