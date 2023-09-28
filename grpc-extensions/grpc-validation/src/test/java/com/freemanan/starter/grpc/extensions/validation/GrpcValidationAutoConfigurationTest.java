@@ -17,7 +17,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 class GrpcValidationAutoConfigurationTest {
 
     @Test
-    void testAllInClasspath_thenOnlyHavePgvRelatedBeans() {
+    void haveAllBeans_whenAllInClasspath() {
         ApplicationContextRunner runner = new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(GrpcValidationAutoConfiguration.class));
 
@@ -80,6 +80,8 @@ class GrpcValidationAutoConfigurationTest {
         runner.run(ctx -> {
             assertThat(ctx).hasSingleBean(ValidatingClientInterceptor.class);
             assertThat(ctx).hasSingleBean(ValidatingServerInterceptor.class);
+            assertThat(ctx).hasBean("grpcValidatingClientInterceptor");
+            assertThat(ctx).hasBean("grpcValidatingServerInterceptor");
             assertThat(ctx).doesNotHaveBean(ProtoValidateClientInterceptor.class);
             assertThat(ctx).doesNotHaveBean(ProtoValidateServerInterceptor.class);
         });
