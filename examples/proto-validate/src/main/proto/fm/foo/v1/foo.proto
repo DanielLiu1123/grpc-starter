@@ -3,16 +3,25 @@ syntax = "proto3";
 package fm.foo.v1;
 
 import "google/protobuf/empty.proto";
-
 import "buf/validate/validate.proto";
 
 option java_multiple_files = true;
 option java_package = "com.freemanan.foo.v1.api";
 
 message Foo {
-  string id = 1;
+  string id = 1 [(buf.validate.field).cel = {
+    id: "id",
+    message: "id length must be at least 5 characters",
+    expression: "this.size() >= 5",
+  }];
   string name = 2 [(buf.validate.field).string = {min_len: 5}];
   repeated string hobbies = 3 [(buf.validate.field).repeated = {min_items: 1}];
+
+  option (buf.validate.message).cel = {
+    id: "foo",
+    message: "not a valid Foo",
+    expression: "this.name != 'aaaaa' && !('coding' in this.hobbies)",
+  };
 }
 
 service FooService {
