@@ -14,6 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.io.Resource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.unit.DataSize;
 
@@ -76,6 +77,10 @@ public class GrpcClientProperties implements InitializingBean {
      * Refresh configuration.
      */
     private Refresh refresh = new Refresh();
+    /**
+     * Credentials configuration.
+     */
+    private Tls tls;
 
     @Override
     public void afterPropertiesSet() {
@@ -114,6 +119,10 @@ public class GrpcClientProperties implements InitializingBean {
          * In-process configuration for this channel, use {@link GrpcClientProperties#inProcess} if not set.
          */
         private InProcess inProcess;
+        /**
+         * TLS configuration for this channel, use {@link GrpcClientProperties#tls} if not set.
+         */
+        private Tls tls;
         /**
          * gRPC stub classes to apply this channel.
          *
@@ -198,6 +207,22 @@ public class GrpcClientProperties implements InitializingBean {
         private boolean enabled = false;
     }
 
+    @Data
+    public static class Tls {
+        public static final String PREFIX = GrpcClientProperties.PREFIX + ".tls";
+        /**
+         *
+         */
+        private Resource certChain;
+
+        private Resource privateKey;
+        private String privateKeyPassword;
+        /**
+         *
+         */
+        private Resource rootCerts;
+    }
+
     /**
      * Merge default properties with channel specified properties.
      */
@@ -217,6 +242,9 @@ public class GrpcClientProperties implements InitializingBean {
             }
             if (stub.getInProcess() == null) {
                 stub.setInProcess(inProcess);
+            }
+            if (stub.getTls() == null) {
+                stub.setTls(tls);
             }
             // default + client specified
             LinkedHashMap<String, List<String>> total = metadata.stream()
@@ -240,6 +268,7 @@ public class GrpcClientProperties implements InitializingBean {
                 shutdownTimeout,
                 metadata,
                 inProcess,
+                tls,
                 null,
                 null,
                 null);

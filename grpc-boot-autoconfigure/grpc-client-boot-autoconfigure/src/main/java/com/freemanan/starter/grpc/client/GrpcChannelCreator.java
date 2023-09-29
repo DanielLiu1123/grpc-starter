@@ -2,11 +2,15 @@ package com.freemanan.starter.grpc.client;
 
 import com.freemanan.starter.grpc.client.exception.MissingChannelConfigurationException;
 import io.grpc.ClientInterceptor;
+import io.grpc.Grpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Metadata;
+import io.grpc.TlsChannelCredentials;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.MetadataUtils;
+import java.io.IOException;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
@@ -42,21 +46,9 @@ class GrpcChannelCreator {
         return channel;
     }
 
+    @SneakyThrows
     private ManagedChannel buildChannel(GrpcClientProperties.Channel channelConfig) {
-        ManagedChannelBuilder<?> builder;
-        if (channelConfig.getInProcess() == null) {
-            if (!StringUtils.hasText(channelConfig.getAuthority())) {
-                throw new MissingChannelConfigurationException(stubClass);
-            }
-            builder = ManagedChannelBuilder.forTarget(channelConfig.getAuthority());
-        } else {
-            Assert.hasText(
-                    channelConfig.getInProcess().getName(),
-                    "Not configure in-process name for stub: " + stubClass.getName());
-            builder = InProcessChannelBuilder.forName(
-                            channelConfig.getInProcess().getName())
-                    .directExecutor();
-        }
+        ManagedChannelBuilder<?> builder = getManagedChannelBuilder(channelConfig);
 
         // set max message size and max metadata size
         builder.maxInboundMessageSize((int) channelConfig.getMaxMessageSize().toBytes());
@@ -78,9 +70,6 @@ class GrpcChannelCreator {
                 .sorted(AnnotationAwareOrderComparator.INSTANCE.reversed())
                 .forEach(builder::intercept);
 
-        // use plaintext
-        builder.usePlaintext();
-
         // apply customizers
         beanFactory
                 .getBeanProvider(GrpcChannelCustomizer.class)
@@ -88,5 +77,41 @@ class GrpcChannelCreator {
                 .forEach(cc -> cc.customize(channelConfig, builder));
 
         return builder.build();
+    }
+
+    private ManagedChannelBuilder<?> getManagedChannelBuilder(GrpcClientProperties.Channel channelConfig)
+            throws IOException {
+        if (channelConfig.getInProcess() == null) {
+            if (!StringUtils.hasText(channelConfig.getAuthority())) {
+                throw new MissingChannelConfigurationException(stubClass);
+            }
+            GrpcClientProperties.Tls tls = channelConfig.getTls();
+            if (tls == null) {
+                return ManagedChannelBuilder.forTarget(channelConfig.getAuthority())
+                        .usePlaintext();
+            }
+            TlsChannelCredentials.Builder tlsBuilder = TlsChannelCredentials.newBuilder();
+            if (tls.getCertChain() != null) {
+                if (StringUtils.hasText(tls.getPrivateKeyPassword())) {
+                    tlsBuilder.keyManager(
+                            tls.getCertChain().getInputStream(),
+                            tls.getPrivateKey().getInputStream(),
+                            tls.getPrivateKeyPassword());
+                } else {
+                    tlsBuilder.keyManager(
+                            tls.getCertChain().getInputStream(),
+                            tls.getPrivateKey().getInputStream());
+                }
+            }
+            if (tls.getRootCerts() != null) {
+                tlsBuilder.trustManager(tls.getRootCerts().getInputStream());
+            }
+            return Grpc.newChannelBuilder(channelConfig.getAuthority(), tlsBuilder.build());
+        }
+        Assert.hasText(
+                channelConfig.getInProcess().getName(),
+                "Not configure in-process name for stub: " + stubClass.getName());
+        return InProcessChannelBuilder.forName(channelConfig.getInProcess().getName())
+                .directExecutor();
     }
 }

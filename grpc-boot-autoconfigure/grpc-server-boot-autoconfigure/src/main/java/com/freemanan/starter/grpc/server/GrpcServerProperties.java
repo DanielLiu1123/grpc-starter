@@ -5,6 +5,7 @@ import io.grpc.protobuf.services.ChannelzService;
 import io.grpc.services.AdminInterface;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.io.Resource;
 import org.springframework.util.unit.DataSize;
 
 /**
@@ -61,6 +62,10 @@ public class GrpcServerProperties {
      * In-process server configuration.
      */
     private InProcess inProcess;
+    /**
+     * TLS configuration.
+     */
+    private Tls tls;
 
     @Data
     public static class Reflection {
@@ -162,5 +167,21 @@ public class GrpcServerProperties {
          * In-process server name, if configured, will create an in-process server, usually for testing.
          */
         private String name;
+    }
+
+    @Data
+    public static class Tls {
+        public static final String PREFIX = GrpcServerProperties.PREFIX + ".tls";
+        /**
+         *
+         */
+        private Resource certChain;
+
+        private Resource privateKey;
+        private String privateKeyPassword;
+        /**
+         *
+         */
+        private Resource rootCerts;
     }
 }
