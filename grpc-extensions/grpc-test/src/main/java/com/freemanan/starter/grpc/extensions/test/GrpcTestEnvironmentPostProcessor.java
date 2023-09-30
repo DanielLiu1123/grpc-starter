@@ -48,7 +48,7 @@ public class GrpcTestEnvironmentPostProcessor implements EnvironmentPostProcesso
                 .bind(GrpcTestProperties.PREFIX, GrpcTestProperties.class)
                 .orElseGet(GrpcTestProperties::new);
 
-        if (!properties.getServer().isEnabled()) {
+        if (!properties.isEnabled() || !properties.getServer().isEnabled()) {
             return;
         }
 
