@@ -7,6 +7,9 @@ grpc:
     max-metadata-size: 8KB         # global default max metadata size
     refresh:
       enabled: true                # enable dynamic refresh grpc channel
+    tls:
+      trust-manager:
+        root-certs: classpath:ca.crt
     metadata:                      # global default metadata
       - key: foo1
         values: [bar1, bar2]
