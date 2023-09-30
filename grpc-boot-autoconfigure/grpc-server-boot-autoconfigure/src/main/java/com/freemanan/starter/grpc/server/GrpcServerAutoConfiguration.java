@@ -7,6 +7,7 @@ import com.freemanan.starter.grpc.server.feature.exceptionhandling.ExceptionHand
 import com.freemanan.starter.grpc.server.feature.health.Health;
 import com.freemanan.starter.grpc.server.feature.reflection.Reflection;
 import io.grpc.BindableService;
+import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptor;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.ObjectProvider;
@@ -28,12 +29,13 @@ public class GrpcServerAutoConfiguration {
     @ConditionalOnMissingBean
     public GrpcServer grpcServer(
             GrpcServerProperties properties,
+            ObjectProvider<ServerBuilder<?>> serverBuilder,
             ObjectProvider<BindableService> services,
             ObjectProvider<ServerInterceptor> interceptors,
             ObjectProvider<GrpcServerCustomizer> customizers) {
         return properties.isEnableEmptyServer()
                         || !allInternalServices(services.stream().collect(Collectors.toSet()))
-                ? new DefaultGrpcServer(properties, services, interceptors, customizers)
+                ? new DefaultGrpcServer(properties, serverBuilder, services, interceptors, customizers)
                 : new DummyGrpcServer();
     }
 

@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toMap;
 import io.grpc.health.v1.HealthGrpc;
 import io.grpc.internal.GrpcUtil;
 import io.grpc.stub.AbstractStub;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.io.Resource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.unit.DataSize;
 
@@ -76,6 +78,10 @@ public class GrpcClientProperties implements InitializingBean {
      * Refresh configuration.
      */
     private Refresh refresh = new Refresh();
+    /**
+     * TLS configuration.
+     */
+    private Tls tls;
 
     @Override
     public void afterPropertiesSet() {
@@ -114,6 +120,10 @@ public class GrpcClientProperties implements InitializingBean {
          * In-process configuration for this channel, use {@link GrpcClientProperties#inProcess} if not set.
          */
         private InProcess inProcess;
+        /**
+         * TLS configuration for this channel, use {@link GrpcClientProperties#tls} if not set.
+         */
+        private Tls tls;
         /**
          * gRPC stub classes to apply this channel.
          *
@@ -198,6 +208,45 @@ public class GrpcClientProperties implements InitializingBean {
         private boolean enabled = false;
     }
 
+    @Data
+    public static class Tls {
+        public static final String PREFIX = GrpcClientProperties.PREFIX + ".tls";
+
+        /**
+         * @see io.grpc.TlsChannelCredentials.Builder#keyManager(InputStream, InputStream, String)
+         * @see io.grpc.TlsChannelCredentials.Builder#keyManager(InputStream, InputStream)
+         */
+        private KeyManager keyManager;
+        /**
+         * @see io.grpc.TlsChannelCredentials.Builder#trustManager(InputStream)
+         */
+        private TrustManager trustManager;
+
+        @Data
+        public static class KeyManager {
+            /**
+             * @see io.grpc.TlsChannelCredentials.Builder#certificateChain
+             */
+            private Resource certChain;
+            /**
+             * @see io.grpc.TlsChannelCredentials.Builder#privateKey
+             */
+            private Resource privateKey;
+            /**
+             * @see io.grpc.TlsChannelCredentials.Builder#privateKeyPassword
+             */
+            private String privateKeyPassword;
+        }
+
+        @Data
+        public static class TrustManager {
+            /**
+             * @see io.grpc.TlsChannelCredentials.Builder#rootCertificates
+             */
+            private Resource rootCerts;
+        }
+    }
+
     /**
      * Merge default properties with channel specified properties.
      */
@@ -217,6 +266,9 @@ public class GrpcClientProperties implements InitializingBean {
             }
             if (stub.getInProcess() == null) {
                 stub.setInProcess(inProcess);
+            }
+            if (stub.getTls() == null) {
+                stub.setTls(tls);
             }
             // default + client specified
             LinkedHashMap<String, List<String>> total = metadata.stream()
@@ -240,6 +292,7 @@ public class GrpcClientProperties implements InitializingBean {
                 shutdownTimeout,
                 metadata,
                 inProcess,
+                tls,
                 null,
                 null,
                 null);

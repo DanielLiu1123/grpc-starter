@@ -19,4 +19,4 @@ dependencies {
     testImplementation(project(":grpc-starters:grpc-client-boot-starter"))
 }
 
-apply from: "${rootDir}/deploy.gradle"
+apply from: "${rootDir}/gradle/deploy.gradle"

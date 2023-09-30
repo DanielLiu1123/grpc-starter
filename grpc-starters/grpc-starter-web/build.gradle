@@ -3,4 +3,4 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-web")
 }
 
-apply from: "${rootDir}/deploy.gradle"
+apply from: "${rootDir}/gradle/deploy.gradle"

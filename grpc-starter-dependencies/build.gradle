@@ -23,8 +23,8 @@ dependencies {
         api(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
 
         // extensions
-        api(project(":grpc-extensions:grpc-test"))
         api(project(":grpc-extensions:grpc-json-transcoder"))
+        api(project(":grpc-extensions:grpc-test"))
         api(project(":grpc-extensions:grpc-validation"))
 
         // starters
@@ -38,9 +38,6 @@ dependencies {
 
         // sample api
         api(project(":examples:grpc-sample-api"))
-
-        // third party
-        api("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
     }
 
     api(platform("io.grpc:grpc-bom:${grpcVersion}"))

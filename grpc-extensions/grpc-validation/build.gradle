@@ -17,5 +17,5 @@ dependencies {
     testImplementation(project(":grpc-starters:grpc-starter-test"))
 }
 
-apply from: "${rootDir}/deploy.gradle"
-apply from: "${rootDir}/protobuf.gradle"
+apply from: "${rootDir}/gradle/deploy.gradle"
+apply from: "${rootDir}/gradle/protobuf-with-pgv.gradle"

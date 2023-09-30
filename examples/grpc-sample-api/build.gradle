@@ -3,5 +3,5 @@ dependencies {
     api("io.grpc:grpc-testing-proto")
 }
 
-apply from: "$rootDir/deploy.gradle"
-apply from: "$rootDir/protobuf.gradle"
+apply from: "${rootDir}/gradle/deploy.gradle"
+apply from: "${rootDir}/gradle/protobuf-with-pgv.gradle"

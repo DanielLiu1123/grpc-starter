@@ -4,10 +4,10 @@ plugins {
 
 dependencies {
     implementation(project(":grpc-starters:grpc-boot-starter"))
-    implementation(project(":grpc-starters:grpc-starter-validation"))
-    implementation(project(":examples:grpc-sample-api"))
+    implementation("io.grpc:grpc-testing-proto")
 
     testImplementation(project(":grpc-starters:grpc-starter-test"))
 }
 
 apply from: "${rootDir}/gradle/protobuf-with-pgv.gradle"
+
