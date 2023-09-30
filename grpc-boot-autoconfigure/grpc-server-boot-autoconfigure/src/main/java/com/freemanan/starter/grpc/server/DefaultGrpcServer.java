@@ -55,7 +55,7 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
             ObjectProvider<BindableService> serviceProvider,
             ObjectProvider<ServerInterceptor> interceptorProvider,
             ObjectProvider<GrpcServerCustomizer> customizers) {
-        ServerBuilder<?> builder = serverBuilder.getIfUnique(() -> getServerBuilder(properties));
+        ServerBuilder<?> builder = serverBuilder.getIfUnique(() -> getDefaultServerBuilder(properties));
 
         // add services
         serviceProvider.forEach(builder::addService);
@@ -75,7 +75,7 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
     }
 
     @SneakyThrows
-    private static ServerBuilder<? extends ServerBuilder<?>> getServerBuilder(GrpcServerProperties properties) {
+    private static ServerBuilder<? extends ServerBuilder<?>> getDefaultServerBuilder(GrpcServerProperties properties) {
         if (properties.getInProcess() == null) {
             int port = Math.max(properties.getPort(), 0);
             GrpcServerProperties.Tls tls = properties.getTls();
@@ -83,20 +83,22 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
                 return ServerBuilder.forPort(port);
             }
             TlsServerCredentials.Builder tlsBuilder = TlsServerCredentials.newBuilder();
-            if (tls.getCertChain() != null) {
-                if (StringUtils.hasText(tls.getPrivateKeyPassword())) {
+            GrpcServerProperties.Tls.KeyManager keyManager = tls.getKeyManager();
+            if (keyManager != null) {
+                if (StringUtils.hasText(keyManager.getPrivateKeyPassword())) {
                     tlsBuilder.keyManager(
-                            tls.getCertChain().getInputStream(),
-                            tls.getPrivateKey().getInputStream(),
-                            tls.getPrivateKeyPassword());
+                            keyManager.getCertChain().getInputStream(),
+                            keyManager.getPrivateKey().getInputStream(),
+                            keyManager.getPrivateKeyPassword());
                 } else {
                     tlsBuilder.keyManager(
-                            tls.getCertChain().getInputStream(),
-                            tls.getPrivateKey().getInputStream());
+                            keyManager.getCertChain().getInputStream(),
+                            keyManager.getPrivateKey().getInputStream());
                 }
             }
-            if (tls.getRootCerts() != null) {
-                tlsBuilder.trustManager(tls.getRootCerts().getInputStream());
+            GrpcServerProperties.Tls.TrustManager trustManager = tls.getTrustManager();
+            if (trustManager != null) {
+                tlsBuilder.trustManager(trustManager.getRootCerts().getInputStream());
             }
             return Grpc.newServerBuilderForPort(port, tlsBuilder.build());
         } else {

@@ -3,6 +3,7 @@ package com.freemanan.starter.grpc.server;
 import io.grpc.internal.GrpcUtil;
 import io.grpc.protobuf.services.ChannelzService;
 import io.grpc.services.AdminInterface;
+import java.io.InputStream;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
@@ -172,16 +173,39 @@ public class GrpcServerProperties {
     @Data
     public static class Tls {
         public static final String PREFIX = GrpcServerProperties.PREFIX + ".tls";
-        /**
-         *
-         */
-        private Resource certChain;
 
-        private Resource privateKey;
-        private String privateKeyPassword;
         /**
-         *
+         * @see io.grpc.TlsServerCredentials.Builder#keyManager(InputStream, InputStream, String)
+         * @see io.grpc.TlsServerCredentials.Builder#keyManager(InputStream, InputStream)
          */
-        private Resource rootCerts;
+        private KeyManager keyManager;
+        /**
+         * @see io.grpc.TlsServerCredentials.Builder#trustManager(InputStream)
+         */
+        private TrustManager trustManager;
+
+        @Data
+        public static class KeyManager {
+            /**
+             * @see io.grpc.TlsServerCredentials.Builder#certificateChain
+             */
+            private Resource certChain;
+            /**
+             * @see io.grpc.TlsServerCredentials.Builder#privateKey
+             */
+            private Resource privateKey;
+            /**
+             * @see io.grpc.TlsServerCredentials.Builder#privateKeyPassword
+             */
+            private String privateKeyPassword;
+        }
+
+        @Data
+        public static class TrustManager {
+            /**
+             * @see io.grpc.TlsServerCredentials.Builder#rootCertificates
+             */
+            private Resource rootCerts;
+        }
     }
 }

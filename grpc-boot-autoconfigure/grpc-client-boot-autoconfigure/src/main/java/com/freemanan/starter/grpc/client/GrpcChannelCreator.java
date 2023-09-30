@@ -9,7 +9,6 @@ import io.grpc.Metadata;
 import io.grpc.TlsChannelCredentials;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.MetadataUtils;
-import java.io.IOException;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -46,7 +45,6 @@ class GrpcChannelCreator {
         return channel;
     }
 
-    @SneakyThrows
     private ManagedChannel buildChannel(GrpcClientProperties.Channel channelConfig) {
         ManagedChannelBuilder<?> builder = getManagedChannelBuilder(channelConfig);
 
@@ -79,8 +77,8 @@ class GrpcChannelCreator {
         return builder.build();
     }
 
-    private ManagedChannelBuilder<?> getManagedChannelBuilder(GrpcClientProperties.Channel channelConfig)
-            throws IOException {
+    @SneakyThrows
+    private ManagedChannelBuilder<?> getManagedChannelBuilder(GrpcClientProperties.Channel channelConfig) {
         if (channelConfig.getInProcess() == null) {
             if (!StringUtils.hasText(channelConfig.getAuthority())) {
                 throw new MissingChannelConfigurationException(stubClass);
@@ -91,20 +89,21 @@ class GrpcChannelCreator {
                         .usePlaintext();
             }
             TlsChannelCredentials.Builder tlsBuilder = TlsChannelCredentials.newBuilder();
-            if (tls.getCertChain() != null) {
-                if (StringUtils.hasText(tls.getPrivateKeyPassword())) {
+            if (tls.getKeyManager() != null) {
+                GrpcClientProperties.Tls.KeyManager keyManager = tls.getKeyManager();
+                if (StringUtils.hasText(keyManager.getPrivateKeyPassword())) {
                     tlsBuilder.keyManager(
-                            tls.getCertChain().getInputStream(),
-                            tls.getPrivateKey().getInputStream(),
-                            tls.getPrivateKeyPassword());
+                            keyManager.getCertChain().getInputStream(),
+                            keyManager.getPrivateKey().getInputStream(),
+                            keyManager.getPrivateKeyPassword());
                 } else {
                     tlsBuilder.keyManager(
-                            tls.getCertChain().getInputStream(),
-                            tls.getPrivateKey().getInputStream());
+                            keyManager.getCertChain().getInputStream(),
+                            keyManager.getPrivateKey().getInputStream());
                 }
             }
-            if (tls.getRootCerts() != null) {
-                tlsBuilder.trustManager(tls.getRootCerts().getInputStream());
+            if (tls.getTrustManager() != null) {
+                tlsBuilder.trustManager(tls.getTrustManager().getRootCerts().getInputStream());
             }
             return Grpc.newChannelBuilder(channelConfig.getAuthority(), tlsBuilder.build());
         }

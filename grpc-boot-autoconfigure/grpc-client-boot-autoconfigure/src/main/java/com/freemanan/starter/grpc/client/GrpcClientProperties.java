@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toMap;
 import io.grpc.health.v1.HealthGrpc;
 import io.grpc.internal.GrpcUtil;
 import io.grpc.stub.AbstractStub;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -78,7 +79,7 @@ public class GrpcClientProperties implements InitializingBean {
      */
     private Refresh refresh = new Refresh();
     /**
-     * Credentials configuration.
+     * TLS configuration.
      */
     private Tls tls;
 
@@ -210,17 +211,40 @@ public class GrpcClientProperties implements InitializingBean {
     @Data
     public static class Tls {
         public static final String PREFIX = GrpcClientProperties.PREFIX + ".tls";
-        /**
-         *
-         */
-        private Resource certChain;
 
-        private Resource privateKey;
-        private String privateKeyPassword;
         /**
-         *
+         * @see io.grpc.TlsChannelCredentials.Builder#keyManager(InputStream, InputStream, String)
+         * @see io.grpc.TlsChannelCredentials.Builder#keyManager(InputStream, InputStream)
          */
-        private Resource rootCerts;
+        private KeyManager keyManager;
+        /**
+         * @see io.grpc.TlsChannelCredentials.Builder#trustManager(InputStream)
+         */
+        private TrustManager trustManager;
+
+        @Data
+        public static class KeyManager {
+            /**
+             * @see io.grpc.TlsChannelCredentials.Builder#certificateChain
+             */
+            private Resource certChain;
+            /**
+             * @see io.grpc.TlsChannelCredentials.Builder#privateKey
+             */
+            private Resource privateKey;
+            /**
+             * @see io.grpc.TlsChannelCredentials.Builder#privateKeyPassword
+             */
+            private String privateKeyPassword;
+        }
+
+        @Data
+        public static class TrustManager {
+            /**
+             * @see io.grpc.TlsChannelCredentials.Builder#rootCertificates
+             */
+            private Resource rootCerts;
+        }
     }
 
     /**

@@ -3,9 +3,11 @@ grpc:
     reflection:
       enabled: true
     tls:
-      cert-chain: classpath:server.crt
-      private-key: classpath:server.key
+      key-manager:
+        cert-chain: classpath:server.crt
+        private-key: classpath:server.key
   client:
     authority: localhost:${grpc.server.port:9090}
     tls:
-      root-certs: classpath:ca.crt
+      trust-manager:
+        root-certs: classpath:ca.crt
