@@ -129,7 +129,7 @@ public class WebFluxProtobufHandlerAdaptor extends AbstractHandlerAdaptor
             ArrayList<Throwable> exceptions = new ArrayList<>();
             try {
                 if (log.isDebugEnabled()) {
-                    log.debug(exchange.getLogPrefix() + "Using @ExceptionHandler " + invocable);
+                    log.debug("{} using @ExceptionHandler {}", exchange.getLogPrefix(), invocable);
                 }
                 if (bindingContext != null) {
                     bindingContext.getModel().asMap().clear();
