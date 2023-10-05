@@ -76,36 +76,35 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
 
     @SneakyThrows
     private static ServerBuilder<? extends ServerBuilder<?>> getDefaultServerBuilder(GrpcServerProperties properties) {
-        if (properties.getInProcess() == null) {
-            int port = Math.max(properties.getPort(), 0);
-            GrpcServerProperties.Tls tls = properties.getTls();
-            if (tls == null) {
-                return ServerBuilder.forPort(port);
-            }
-            TlsServerCredentials.Builder tlsBuilder = TlsServerCredentials.newBuilder();
-            GrpcServerProperties.Tls.KeyManager keyManager = tls.getKeyManager();
-            if (keyManager != null) {
-                if (StringUtils.hasText(keyManager.getPrivateKeyPassword())) {
-                    tlsBuilder.keyManager(
-                            keyManager.getCertChain().getInputStream(),
-                            keyManager.getPrivateKey().getInputStream(),
-                            keyManager.getPrivateKeyPassword());
-                } else {
-                    tlsBuilder.keyManager(
-                            keyManager.getCertChain().getInputStream(),
-                            keyManager.getPrivateKey().getInputStream());
-                }
-            }
-            GrpcServerProperties.Tls.TrustManager trustManager = tls.getTrustManager();
-            if (trustManager != null) {
-                tlsBuilder.trustManager(trustManager.getRootCerts().getInputStream());
-            }
-            return Grpc.newServerBuilderForPort(port, tlsBuilder.build());
-        } else {
+        if (properties.getInProcess() != null) {
             Assert.hasText(properties.getInProcess().getName(), "In-process server name must not be empty");
             return InProcessServerBuilder.forName(properties.getInProcess().getName())
                     .directExecutor();
         }
+        int port = Math.max(properties.getPort(), 0);
+        GrpcServerProperties.Tls tls = properties.getTls();
+        if (tls == null) {
+            return ServerBuilder.forPort(port);
+        }
+        TlsServerCredentials.Builder tlsBuilder = TlsServerCredentials.newBuilder();
+        GrpcServerProperties.Tls.KeyManager keyManager = tls.getKeyManager();
+        if (keyManager != null) {
+            if (StringUtils.hasText(keyManager.getPrivateKeyPassword())) {
+                tlsBuilder.keyManager(
+                        keyManager.getCertChain().getInputStream(),
+                        keyManager.getPrivateKey().getInputStream(),
+                        keyManager.getPrivateKeyPassword());
+            } else {
+                tlsBuilder.keyManager(
+                        keyManager.getCertChain().getInputStream(),
+                        keyManager.getPrivateKey().getInputStream());
+            }
+        }
+        GrpcServerProperties.Tls.TrustManager trustManager = tls.getTrustManager();
+        if (trustManager != null) {
+            tlsBuilder.trustManager(trustManager.getRootCerts().getInputStream());
+        }
+        return Grpc.newServerBuilderForPort(port, tlsBuilder.build());
     }
 
     @Override
