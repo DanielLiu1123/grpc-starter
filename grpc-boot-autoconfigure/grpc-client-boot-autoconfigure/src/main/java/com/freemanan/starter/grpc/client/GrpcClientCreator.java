@@ -29,12 +29,10 @@ class GrpcClientCreator {
             ClassUtils.isPresent("org.springframework.cloud.context.scope.refresh.RefreshScope", null);
 
     private final BeanFactory beanFactory;
-    private final GrpcClientProperties properties;
     private final Class<?> stubClass;
 
-    GrpcClientCreator(BeanFactory beanFactory, GrpcClientProperties properties, Class<?> stubClass) {
+    GrpcClientCreator(BeanFactory beanFactory, Class<?> stubClass) {
         this.beanFactory = beanFactory;
-        this.properties = properties;
         this.stubClass = stubClass;
     }
 
@@ -58,7 +56,8 @@ class GrpcClientCreator {
         String channelBeanName = UUID.randomUUID().toString();
         BeanDefinitionHolder holder = new BeanDefinitionHolder(abd, channelBeanName);
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-        if (SPRING_CLOUD_CONTEXT_PRESENT && properties.getRefresh().isEnabled()) {
+        if (SPRING_CLOUD_CONTEXT_PRESENT
+                && beanFactory.getBean(GrpcClientProperties.class).getRefresh().isEnabled()) {
             abd.setScope("refresh");
             holder = ScopedProxyUtils.createScopedProxy(holder, registry, true);
         }
