@@ -68,7 +68,7 @@ class GrpcStubBeanRegistrar {
 
         Assert.isInstanceOf(BeanFactory.class, registry, "BeanDefinitionRegistry must be instance of BeanFactory");
 
-        GrpcClientCreator creator = new GrpcClientCreator((BeanFactory) registry, properties, clz);
+        GrpcClientCreator creator = new GrpcClientCreator((BeanFactory) registry, clz);
 
         AbstractBeanDefinition abd = BeanDefinitionBuilder.genericBeanDefinition(clz, creator::create)
                 .getBeanDefinition();
