@@ -51,7 +51,7 @@ class GrpcClientCreator {
         Assert.notNull(stubMethod, "stubMethod must not be null");
 
         AbstractBeanDefinition abd = BeanDefinitionBuilder.genericBeanDefinition(
-                        ManagedChannel.class, () -> new GrpcChannelCreator(beanFactory, stubClass, properties).create())
+                        ManagedChannel.class, () -> new GrpcChannelCreator(beanFactory, stubClass).create())
                 .getBeanDefinition();
         abd.setLazyInit(true);
 

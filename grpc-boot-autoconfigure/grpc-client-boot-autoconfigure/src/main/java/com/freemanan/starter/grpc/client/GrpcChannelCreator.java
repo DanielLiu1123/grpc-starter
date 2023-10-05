@@ -22,18 +22,15 @@ class GrpcChannelCreator {
 
     private final BeanFactory beanFactory;
     private final Class<?> stubClass;
-    private final GrpcClientProperties properties;
 
-    GrpcChannelCreator(BeanFactory beanFactory, Class<?> stubClass, GrpcClientProperties properties) {
+    GrpcChannelCreator(BeanFactory beanFactory, Class<?> stubClass) {
         this.beanFactory = beanFactory;
         this.stubClass = stubClass;
-        this.properties = properties;
     }
 
     public ManagedChannel create() {
-        GrpcClientProperties grpcClientProperties = beanFactory
-                .getBeanProvider(GrpcClientProperties.class) // get from beanFactory first because it can be refreshed
-                .getIfUnique(() -> properties);
+        GrpcClientProperties grpcClientProperties = beanFactory.getBean(
+                GrpcClientProperties.class); // get from beanFactory first because it can be refreshed
 
         GrpcClientProperties.Channel channelConfig =
                 Util.findMatchedConfig(stubClass, grpcClientProperties).orElseGet(grpcClientProperties::defaultChannel);
@@ -79,38 +76,37 @@ class GrpcChannelCreator {
 
     @SneakyThrows
     private ManagedChannelBuilder<?> getManagedChannelBuilder(GrpcClientProperties.Channel channelConfig) {
-        if (channelConfig.getInProcess() == null) {
-            if (!StringUtils.hasText(channelConfig.getAuthority())) {
-                throw new MissingChannelConfigurationException(stubClass);
-            }
-            GrpcClientProperties.Tls tls = channelConfig.getTls();
-            if (tls == null) {
-                return ManagedChannelBuilder.forTarget(channelConfig.getAuthority())
-                        .usePlaintext();
-            }
-            TlsChannelCredentials.Builder tlsBuilder = TlsChannelCredentials.newBuilder();
-            if (tls.getKeyManager() != null) {
-                GrpcClientProperties.Tls.KeyManager keyManager = tls.getKeyManager();
-                if (StringUtils.hasText(keyManager.getPrivateKeyPassword())) {
-                    tlsBuilder.keyManager(
-                            keyManager.getCertChain().getInputStream(),
-                            keyManager.getPrivateKey().getInputStream(),
-                            keyManager.getPrivateKeyPassword());
-                } else {
-                    tlsBuilder.keyManager(
-                            keyManager.getCertChain().getInputStream(),
-                            keyManager.getPrivateKey().getInputStream());
-                }
-            }
-            if (tls.getTrustManager() != null) {
-                tlsBuilder.trustManager(tls.getTrustManager().getRootCerts().getInputStream());
-            }
-            return Grpc.newChannelBuilder(channelConfig.getAuthority(), tlsBuilder.build());
+        if (channelConfig.getInProcess() != null) {
+            Assert.hasText(
+                    channelConfig.getInProcess().getName(),
+                    "Not configure in-process name for stub: " + stubClass.getName());
+            return InProcessChannelBuilder.forName(channelConfig.getInProcess().getName())
+                    .directExecutor();
         }
-        Assert.hasText(
-                channelConfig.getInProcess().getName(),
-                "Not configure in-process name for stub: " + stubClass.getName());
-        return InProcessChannelBuilder.forName(channelConfig.getInProcess().getName())
-                .directExecutor();
+        if (!StringUtils.hasText(channelConfig.getAuthority())) {
+            throw new MissingChannelConfigurationException(stubClass);
+        }
+        GrpcClientProperties.Tls tls = channelConfig.getTls();
+        if (tls == null) {
+            return ManagedChannelBuilder.forTarget(channelConfig.getAuthority()).usePlaintext();
+        }
+        TlsChannelCredentials.Builder tlsBuilder = TlsChannelCredentials.newBuilder();
+        if (tls.getKeyManager() != null) {
+            GrpcClientProperties.Tls.KeyManager keyManager = tls.getKeyManager();
+            if (StringUtils.hasText(keyManager.getPrivateKeyPassword())) {
+                tlsBuilder.keyManager(
+                        keyManager.getCertChain().getInputStream(),
+                        keyManager.getPrivateKey().getInputStream(),
+                        keyManager.getPrivateKeyPassword());
+            } else {
+                tlsBuilder.keyManager(
+                        keyManager.getCertChain().getInputStream(),
+                        keyManager.getPrivateKey().getInputStream());
+            }
+        }
+        if (tls.getTrustManager() != null) {
+            tlsBuilder.trustManager(tls.getTrustManager().getRootCerts().getInputStream());
+        }
+        return Grpc.newChannelBuilder(channelConfig.getAuthority(), tlsBuilder.build());
     }
 }
