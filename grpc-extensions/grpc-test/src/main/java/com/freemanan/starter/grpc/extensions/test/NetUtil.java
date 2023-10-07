@@ -1,7 +1,7 @@
 package com.freemanan.starter.grpc.extensions.test;
 
-import java.io.IOException;
 import java.net.ServerSocket;
+import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -15,11 +15,10 @@ public class NetUtil {
      *
      * @return port
      */
+    @SneakyThrows
     public static int getRandomPort() {
         try (ServerSocket ss = new ServerSocket(0)) {
             return ss.getLocalPort();
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
         }
     }
 }
