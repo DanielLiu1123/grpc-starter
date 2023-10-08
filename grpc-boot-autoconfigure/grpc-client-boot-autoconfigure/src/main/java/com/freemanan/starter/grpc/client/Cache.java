@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.slf4j.Logger;
@@ -49,9 +50,10 @@ class Cache {
         serviceToStubClasses.computeIfAbsent(service, k -> new ArrayList<>()).add(stubClass);
     }
 
-    public static void addChannel(GrpcClientProperties.Channel channelConfig, ManagedChannel channel) {
+    public static ManagedChannel getOrSupplyChannel(
+            GrpcClientProperties.Channel channelConfig, Supplier<ManagedChannel> channelSupplier) {
         // Do not close the channel if it already exists, it may be still in use
-        cfgToChannel.put(channelConfig, channel);
+        return cfgToChannel.computeIfAbsent(channelConfig, k -> channelSupplier.get());
     }
 
     /**
