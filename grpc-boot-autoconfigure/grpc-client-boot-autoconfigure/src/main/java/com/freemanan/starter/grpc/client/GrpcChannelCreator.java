@@ -35,11 +35,9 @@ class GrpcChannelCreator {
         GrpcClientProperties.Channel channelConfig =
                 Util.findMatchedConfig(stubClass, grpcClientProperties).orElseGet(grpcClientProperties::defaultChannel);
 
-        ManagedChannel channel = buildChannel(channelConfig);
-
-        Cache.addChannel(channelConfig, channel);
-
-        return channel;
+        // One channel configuration results in the creation of one gRPC channel.
+        // See https://github.com/DanielLiu1123/grpc-starter/issues/23
+        return Cache.getOrSupplyChannel(channelConfig, () -> buildChannel(channelConfig));
     }
 
     private ManagedChannel buildChannel(GrpcClientProperties.Channel channelConfig) {
