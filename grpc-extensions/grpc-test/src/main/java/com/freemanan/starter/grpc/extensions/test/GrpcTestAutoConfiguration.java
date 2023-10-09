@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 public class GrpcTestAutoConfiguration {
 
     @Bean
-    static GrpcPortBeanPostProcessor grpcPortBeanPostProcessor() {
-        return new GrpcPortBeanPostProcessor();
+    static GrpcTestBeanPostProcessor grpcTestBeanPostProcessor() {
+        return new GrpcTestBeanPostProcessor();
     }
 }

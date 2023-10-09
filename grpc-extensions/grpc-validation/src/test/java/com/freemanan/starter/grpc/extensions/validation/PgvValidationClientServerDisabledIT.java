@@ -2,12 +2,13 @@ package com.freemanan.starter.grpc.extensions.validation;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 
+import com.freemanan.starter.grpc.extensions.test.InProcessName;
+import com.freemanan.starter.grpc.extensions.test.StubUtil;
 import com.freemanan.validation.v1.Foo;
 import com.freemanan.validation.v1.FooServiceGrpc;
 import com.freemanan.validation.v1.GetFooRequest;
 import io.grpc.stub.StreamObserver;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
@@ -25,13 +26,16 @@ import org.springframework.stereotype.Controller;
         })
 class PgvValidationClientServerDisabledIT {
 
-    @Autowired
-    FooServiceGrpc.FooServiceBlockingStub fooStub;
+    @InProcessName
+    String name;
 
     @Test
     void testPgvValidationClientDisabled_whenIllegalArgument() {
+        FooServiceGrpc.FooServiceBlockingStub stub =
+                StubUtil.createStub(name, FooServiceGrpc.FooServiceBlockingStub.class);
+
         GetFooRequest req = GetFooRequest.newBuilder().setName("12345678901").build();
-        assertThatCode(() -> fooStub.getFoo(req)).doesNotThrowAnyException();
+        assertThatCode(() -> stub.getFoo(req)).doesNotThrowAnyException();
     }
 
     @Configuration(proxyBeanMethods = false)
