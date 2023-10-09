@@ -1,5 +1,7 @@
 package com.freemanan.starter.grpc.client;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.freemanan.starter.grpc.extensions.test.NetUtil;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -7,7 +9,6 @@ import io.grpc.stub.StreamObserver;
 import io.grpc.testing.protobuf.SimpleRequest;
 import io.grpc.testing.protobuf.SimpleResponse;
 import io.grpc.testing.protobuf.SimpleServiceGrpc;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -76,13 +77,13 @@ class DynamicRefreshTests {
                 ctx.getBean(SimpleServiceGrpc.SimpleServiceBlockingStub.class);
 
         SimpleResponse response = stub.unaryRpc(SimpleRequest.getDefaultInstance());
-        Assertions.assertThat(response.getResponseMessage()).isEqualTo("v1");
+        assertThat(response.getResponseMessage()).isEqualTo("v1");
 
         System.setProperty("grpc.client.authority", "localhost:" + port2);
         ctx.publishEvent(new RefreshEvent(ctx, null, null));
 
         response = stub.unaryRpc(SimpleRequest.getDefaultInstance());
-        Assertions.assertThat(response.getResponseMessage()).isEqualTo("v2");
+        assertThat(response.getResponseMessage()).isEqualTo("v2");
 
         System.clearProperty("grpc.client.authority");
         ctx.close();
