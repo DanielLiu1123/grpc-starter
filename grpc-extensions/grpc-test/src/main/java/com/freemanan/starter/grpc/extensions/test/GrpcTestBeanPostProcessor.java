@@ -2,6 +2,7 @@ package com.freemanan.starter.grpc.extensions.test;
 
 import com.freemanan.starter.grpc.server.GrpcServerProperties;
 import com.freemanan.starter.grpc.server.GrpcServerStartedEvent;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -82,35 +83,45 @@ class GrpcTestBeanPostProcessor
             // Already injected
             return;
         }
+
         ReflectionUtils.doWithFields(AopProxyUtils.ultimateTargetClass(bean), field -> {
             if (AnnotationUtils.findAnnotation(field, InProcessName.class) != null) {
-                if (inProcessName == null) {
-                    return;
-                }
-                ReflectionUtils.makeAccessible(field);
-                Class<?> type = field.getType();
-                if (type != String.class) {
-                    throw new UnsupportedOperationException(String.format(
-                            "@InProcessName can only be applied to String field; found: %s", type.getSimpleName()));
-                }
-                ReflectionUtils.setField(field, bean, inProcessName);
+                injectInProcessName(bean, field);
             } else if (AnnotationUtils.findAnnotation(field, LocalGrpcPort.class) != null) {
-                ReflectionUtils.makeAccessible(field);
-                Class<?> type = field.getType();
-                if (type == int.class || type == Integer.class) {
-                    ReflectionUtils.setField(field, bean, port);
-                } else if (type == long.class || type == Long.class) {
-                    ReflectionUtils.setField(field, bean, (long) port);
-                } else if (type == String.class) {
-                    ReflectionUtils.setField(field, bean, String.valueOf(port));
-                } else {
-                    throw new UnsupportedOperationException(String.format(
-                            "@LocalGrpcPort can only be applied to fields of type int/Integer, long/Long, String; "
-                                    + "found: %s",
-                            type.getSimpleName()));
-                }
+                injectLocalGrpcPort(bean, field);
             }
         });
+
         beansToInject.put(bean, true);
+    }
+
+    private void injectInProcessName(Object bean, Field field) {
+        if (inProcessName == null) {
+            return;
+        }
+        Class<?> type = field.getType();
+        if (type != String.class) {
+            throw new UnsupportedOperationException(String.format(
+                    "@InProcessName can only be applied to String field; found: %s", type.getSimpleName()));
+        }
+        ReflectionUtils.makeAccessible(field);
+        ReflectionUtils.setField(field, bean, inProcessName);
+    }
+
+    private void injectLocalGrpcPort(Object bean, Field field) {
+        Class<?> type = field.getType();
+        ReflectionUtils.makeAccessible(field);
+
+        if (type == int.class || type == Integer.class) {
+            ReflectionUtils.setField(field, bean, port);
+        } else if (type == long.class || type == Long.class) {
+            ReflectionUtils.setField(field, bean, (long) port);
+        } else if (type == String.class) {
+            ReflectionUtils.setField(field, bean, String.valueOf(port));
+        } else {
+            throw new UnsupportedOperationException(String.format(
+                    "@LocalGrpcPort can only be applied to fields of type int/Integer, long/Long, String; found: %s",
+                    type.getSimpleName()));
+        }
     }
 }
