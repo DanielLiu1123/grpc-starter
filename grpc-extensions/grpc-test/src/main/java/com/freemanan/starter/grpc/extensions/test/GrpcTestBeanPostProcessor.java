@@ -10,6 +10,7 @@ import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationListener;
@@ -21,7 +22,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Freeman
  */
 class GrpcTestBeanPostProcessor
-        implements ApplicationListener<GrpcServerStartedEvent>, BeanPostProcessor, BeanFactoryAware {
+        implements ApplicationListener<GrpcServerStartedEvent>, BeanPostProcessor, BeanFactoryAware, DisposableBean {
 
     private final Map<Object, Boolean> beansToInject = new HashMap<>();
 
@@ -59,6 +60,11 @@ class GrpcTestBeanPostProcessor
                 .orElse(null);
 
         beansToInject.keySet().forEach(this::injectFields);
+    }
+
+    @Override
+    public void destroy() {
+        beansToInject.clear();
     }
 
     private boolean isTestInstance(Object bean) {
