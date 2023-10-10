@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @SpringBootTest(
         classes = RandomPortIT.Cfg.class,
         properties = {
-            "grpc.test.server.port=random_port",
+            "grpc.test.server.port-type=random_port",
         })
 class RandomPortIT {
 

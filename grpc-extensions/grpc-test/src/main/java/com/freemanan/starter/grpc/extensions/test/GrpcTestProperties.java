@@ -29,28 +29,31 @@ public class GrpcTestProperties {
          */
         private boolean enabled = true;
         /**
-         * Port configuration, default is {@link Port#IN_PROCESS}, which means start grpc server with in-process transport.
+         * Port configuration, default is {@link PortType#IN_PROCESS}, which means start grpc server with in-process transport.
          *
          * <p>
-         * NOTE: if {@code grpc-client-starter} is not in classpath, will fall back to {@link Port#RANDOM_PORT}.
+         * NOTE: if {@code grpc-client-starter} is not in classpath, will fall back to {@link PortType#RANDOM_PORT}.
          */
-        private Port port = Port.IN_PROCESS;
+        private PortType portType = PortType.IN_PROCESS;
+    }
 
-        public enum Port {
-            /**
-             * Start grpc server with in-process transport.
-             */
-            IN_PROCESS,
-            /**
-             * Start grpc server with random port.
-             */
-            RANDOM_PORT,
-            /**
-             * Start grpc server with defined port.
-             *
-             * <p> using {@code grpc.server.port} property.
-             */
-            DEFINED_PORT
-        }
+    /**
+     * If used as a static internal class of {@link Server}, the IDE's automatic prompt will be lost :)
+     */
+    public enum PortType {
+        /**
+         * Start grpc server with in-process transport.
+         */
+        IN_PROCESS,
+        /**
+         * Start grpc server with random port.
+         */
+        RANDOM_PORT,
+        /**
+         * Start grpc server with defined port.
+         *
+         * <p> using {@code grpc.server.port} property.
+         */
+        DEFINED_PORT
     }
 }

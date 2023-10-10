@@ -1,8 +1,12 @@
 package com.freemanan.starter.grpc.server.feature.exceptionhandling.annotation;
 
+import static io.grpc.testing.protobuf.SimpleServiceGrpc.SimpleServiceBlockingStub;
+import static io.grpc.testing.protobuf.SimpleServiceGrpc.SimpleServiceImplBase;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
+import com.freemanan.starter.grpc.extensions.test.InProcessName;
+import com.freemanan.starter.grpc.extensions.test.StubUtil;
 import com.freemanan.starter.grpc.server.GrpcService;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
@@ -11,11 +15,9 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.protobuf.SimpleRequest;
 import io.grpc.testing.protobuf.SimpleResponse;
-import io.grpc.testing.protobuf.SimpleServiceGrpc;
 import java.util.MissingResourceException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
@@ -33,11 +35,13 @@ import org.springframework.core.annotation.Order;
 @ExtendWith(OutputCaptureExtension.class)
 class AnnotationBasedExceptionHandlingIT {
 
-    @Autowired
-    SimpleServiceGrpc.SimpleServiceBlockingStub stub;
+    @InProcessName
+    String name;
 
     @Test
     void testAnnotationBasedExceptionHandler(CapturedOutput output) {
+        SimpleServiceBlockingStub stub = StubUtil.createStub(name, SimpleServiceBlockingStub.class);
+
         assertThatCode(() -> stub.unaryRpc(SimpleRequest.newBuilder()
                         .setRequestMessage("IllegalArgumentException")
                         .build()))
@@ -73,7 +77,7 @@ class AnnotationBasedExceptionHandlingIT {
     @GrpcService
     @Import(ExceptionAdvice2.class)
     @Order(0)
-    static class Cfg extends SimpleServiceGrpc.SimpleServiceImplBase {
+    static class Cfg extends SimpleServiceImplBase {
 
         @Override
         public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> responseObserver) {
