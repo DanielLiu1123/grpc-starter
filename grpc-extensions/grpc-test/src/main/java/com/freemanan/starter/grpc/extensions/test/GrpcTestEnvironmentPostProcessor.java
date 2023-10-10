@@ -45,7 +45,7 @@ public class GrpcTestEnvironmentPostProcessor implements EnvironmentPostProcesso
             return;
         }
 
-        GrpcTestProperties.Server.Port port = properties.getServer().getPort();
+        GrpcTestProperties.PortType port = properties.getServer().getPortType();
 
         Map<String, Object> configMap = new HashMap<>();
         switch (port) {

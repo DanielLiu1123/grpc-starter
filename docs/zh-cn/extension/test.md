@@ -33,7 +33,7 @@ class LocalGrpcPortTest {
 }
 ```
 
-可以通过配置 `grpc.test.server.port` 来指定 server 端口。
+可以通过配置 `grpc.test.server.port-type` 来指定 server 端口类型。
 
 - `IN_PROCESS`: 这是默认值，如果 `grpc-client-boot-starter` 不在类路径中，那么会 fall back 到 `RANDOM_PORT`。
 - `RANDOM_PORT`: 使用随机端口。
@@ -44,7 +44,7 @@ class LocalGrpcPortTest {
 ```java
 @SpringBootTest(
         classes = DefinedPortIT.Cfg.class,
-        properties = {"grpc.server.port=50054", "grpc.test.server.port=DEFINED_PORT"})
+        properties = {"grpc.server.port=50054", "grpc.test.server.port-type=DEFINED_PORT"})
 class DefinedPortIT {
 
     @LocalGrpcPort
