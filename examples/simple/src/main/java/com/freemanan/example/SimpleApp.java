@@ -2,12 +2,9 @@ package com.freemanan.example;
 
 import com.freemanan.foo.v1.api.FooServiceGrpc;
 import com.freemanan.starter.grpc.client.EnableGrpcClients;
-import io.grpc.health.v1.HealthCheckRequest;
 import io.grpc.health.v1.HealthGrpc;
 import io.grpc.reflection.v1alpha.ServerReflectionGrpc;
 import io.grpc.testing.protobuf.SimpleServiceGrpc;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -22,14 +19,10 @@ import org.springframework.util.Assert;
 @SpringBootApplication
 @EnableGrpcClients({"com.freemanan", "io.grpc"})
 public class SimpleApp implements ApplicationRunner {
-    private static final Logger log = LoggerFactory.getLogger(SimpleApp.class);
 
     public static void main(String[] args) {
         SpringApplication.run(SimpleApp.class, args);
     }
-
-    @Autowired
-    HealthGrpc.HealthBlockingStub healthBlockingStub;
 
     @Autowired
     BeanFactory beanFactory;
@@ -46,7 +39,5 @@ public class SimpleApp implements ApplicationRunner {
         Assert.notNull(
                 beanFactory.getBean(SimpleServiceGrpc.SimpleServiceBlockingStub.class),
                 "SimpleServiceBlockingStub should not be null");
-
-        log.info("HealthCheckResponse: {}", healthBlockingStub.check(HealthCheckRequest.getDefaultInstance()));
     }
 }

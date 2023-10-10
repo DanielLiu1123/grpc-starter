@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @SpringBootTest(
         classes = DefinedPortIT.Cfg.class,
-        properties = {"grpc.server.port=50054", "grpc.test.server.port=DEFINED_PORT"})
+        properties = {"grpc.server.port=50054", "grpc.test.server.port-type=DEFINED_PORT"})
 class DefinedPortIT {
 
     @LocalGrpcPort

@@ -35,7 +35,7 @@ class LocalGrpcPortTest {
 }
 ```
 
-You can specify the server port type on the `grpc.test.server.port` configuration.
+You can specify the server port type on the `grpc.test.server.port-type` configuration.
 
 - `IN_PROCESS`: This is the default value. If `grpc-client-boot-starter` is not on the classpath, it will fall back to `RANDOM_PORT`.
 - `RANDOM_PORT`: Use a random available port.
@@ -46,7 +46,7 @@ Here's an example using `DEFINED_PORT`:
 ```java
 @SpringBootTest(
         classes = DefinedPortIT.Cfg.class,
-        properties = {"grpc.server.port=50054", "grpc.test.server.port=DEFINED_PORT"})
+        properties = {"grpc.server.port=50054", "grpc.test.server.port-type=DEFINED_PORT"})
 class DefinedPortIT {
 
     @LocalGrpcPort
