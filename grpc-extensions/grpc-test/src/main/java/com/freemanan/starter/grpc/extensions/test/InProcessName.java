@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation at the field that injects the gRPC server port that was allocated at runtime.
+ * Annotation at the field that injects the gRPC server in-process name.
  *
  * <p> Example:
  *
