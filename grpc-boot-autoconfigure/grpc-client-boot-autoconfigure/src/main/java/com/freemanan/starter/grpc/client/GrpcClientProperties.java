@@ -2,6 +2,7 @@ package com.freemanan.starter.grpc.client;
 
 import static java.util.stream.Collectors.toMap;
 
+import io.grpc.TlsChannelCredentials;
 import io.grpc.health.v1.HealthGrpc;
 import io.grpc.internal.GrpcUtil;
 import io.grpc.stub.AbstractStub;
@@ -225,15 +226,15 @@ public class GrpcClientProperties implements InitializingBean {
         @Data
         public static class KeyManager {
             /**
-             * @see io.grpc.TlsChannelCredentials.Builder#certificateChain
+             * @see TlsChannelCredentials.Builder#getCertificateChain()
              */
             private Resource certChain;
             /**
-             * @see io.grpc.TlsChannelCredentials.Builder#privateKey
+             * @see TlsChannelCredentials.Builder#getPrivateKey()
              */
             private Resource privateKey;
             /**
-             * @see io.grpc.TlsChannelCredentials.Builder#privateKeyPassword
+             * @see TlsChannelCredentials.Builder#getPrivateKeyPassword()
              */
             private String privateKeyPassword;
         }
@@ -241,7 +242,7 @@ public class GrpcClientProperties implements InitializingBean {
         @Data
         public static class TrustManager {
             /**
-             * @see io.grpc.TlsChannelCredentials.Builder#rootCertificates
+             * @see TlsChannelCredentials.Builder#getRootCertificates()
              */
             private Resource rootCerts;
         }
