@@ -1,5 +1,6 @@
 package com.freemanan.starter.grpc.server;
 
+import io.grpc.TlsServerCredentials;
 import io.grpc.internal.GrpcUtil;
 import io.grpc.protobuf.services.ChannelzService;
 import io.grpc.services.AdminInterface;
@@ -145,7 +146,7 @@ public class GrpcServerProperties {
         /**
          * The maximum page size to return, default {@code 100}
          *
-         * @see AdminInterface#DEFAULT_CHANNELZ_MAX_PAGE_SIZE
+         * @see AdminInterface
          */
         private int maxPageSize = 100;
     }
@@ -187,15 +188,15 @@ public class GrpcServerProperties {
         @Data
         public static class KeyManager {
             /**
-             * @see io.grpc.TlsServerCredentials.Builder#certificateChain
+             * @see TlsServerCredentials.Builder#getCertificateChain()
              */
             private Resource certChain;
             /**
-             * @see io.grpc.TlsServerCredentials.Builder#privateKey
+             * @see TlsServerCredentials.Builder#getPrivateKey()
              */
             private Resource privateKey;
             /**
-             * @see io.grpc.TlsServerCredentials.Builder#privateKeyPassword
+             * @see TlsServerCredentials.Builder#getPrivateKeyPassword()
              */
             private String privateKeyPassword;
         }
@@ -203,7 +204,7 @@ public class GrpcServerProperties {
         @Data
         public static class TrustManager {
             /**
-             * @see io.grpc.TlsServerCredentials.Builder#rootCertificates
+             * @see TlsServerCredentials.Builder#getRootCertificates()
              */
             private Resource rootCerts;
         }
