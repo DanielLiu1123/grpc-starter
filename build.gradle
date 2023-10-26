@@ -85,7 +85,7 @@ subprojects {
     apply plugin: 'com.github.spotbugs'
     spotbugs {
         spotbugsTest.enabled = false
-        omitVisitors.addAll 'FindReturnRef', 'MethodReturnCheck'
+        omitVisitors.addAll 'FindReturnRef', 'DontReusePublicIdentifiers'
         excludeFilter = file("${rootDir}/config/spotbugs/exclude.xml")
     }
 }
@@ -95,5 +95,4 @@ tasks.register('installGitHook', Copy) {
     into { new File(rootProject.rootDir, '.git/hooks') }
     fileMode 0775
 }
-
-build.dependsOn installGitHook
+compileJava.dependsOn installGitHook
