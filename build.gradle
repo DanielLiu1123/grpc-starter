@@ -1,5 +1,4 @@
 plugins {
-    id 'java'
     id 'org.springframework.boot' version "${springBootVersion}" apply false
     id 'io.spring.dependency-management' version "${springDependencyManagementVersion}" apply false
     id "com.google.protobuf" version "${protobufGradlePluginVersion}" apply false
@@ -8,7 +7,7 @@ plugins {
     id "build.buf" version "${bufGradlePluginVersion}" apply false
 }
 
-subprojects {
+allprojects {
     if (it.name == "grpc-starter-dependencies") {
         // skip the bom project
         return
@@ -77,7 +76,7 @@ subprojects {
                 if (it =~ /\nimport .*\*;/) {
                     throw new IllegalStateException("Do not use wildcard imports, 'spotlessApply' cannot resolve this issue, please fix it manually.")
                 }
-            })
+            } as Closure<String>)
         }
     }
 
@@ -85,7 +84,7 @@ subprojects {
     apply plugin: 'com.github.spotbugs'
     spotbugs {
         spotbugsTest.enabled = false
-        omitVisitors.addAll 'FindReturnRef', 'MethodReturnCheck'
+        omitVisitors.addAll 'FindReturnRef', 'DontReusePublicIdentifiers'
         excludeFilter = file("${rootDir}/config/spotbugs/exclude.xml")
     }
 }
@@ -95,5 +94,4 @@ tasks.register('installGitHook', Copy) {
     into { new File(rootProject.rootDir, '.git/hooks') }
     fileMode 0775
 }
-
-build.dependsOn installGitHook
+compileJava.dependsOn installGitHook
