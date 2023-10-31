@@ -10,7 +10,7 @@
     openssl genpkey -algorithm RSA -out server.key
     openssl req -new -key server.key -out server.csr
     
-    openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -out server.crt
+    openssl x509 -req -days 3650 -in server.csr -CA ca.crt -CAkey ca.key -out server.crt
     ```
 
 2. Run tests
