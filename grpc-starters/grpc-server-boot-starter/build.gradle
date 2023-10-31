@@ -1,7 +1,6 @@
 dependencies {
     api(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
     runtimeOnly("io.grpc:grpc-netty-shaded")
-    api("io.grpc:grpc-services")
 
     optionalSupportApi("io.grpc:grpc-netty")
 
