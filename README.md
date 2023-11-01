@@ -66,7 +66,7 @@ public class SimpleApp extends SimpleServiceGrpc.SimpleServiceImplBase {
 }
 ```
 
-See the [example](examples/simple) project。
+See the [example](examples/quick-start) project。
 
 ## Version
 

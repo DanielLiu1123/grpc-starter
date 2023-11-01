@@ -119,4 +119,4 @@ public class FooServiceImpl extends FooServiceGrpc.FooServiceImplBase {
     }
     ```
 
-For more details, please refer to the [example](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/simple).
+For more details, please refer to the [example](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/quick-start).
