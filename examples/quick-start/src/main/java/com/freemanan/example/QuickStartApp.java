@@ -18,10 +18,10 @@ import org.springframework.util.Assert;
  */
 @SpringBootApplication
 @EnableGrpcClients({"com.freemanan", "io.grpc"})
-public class SimpleApp implements ApplicationRunner {
+public class QuickStartApp implements ApplicationRunner {
 
     public static void main(String[] args) {
-        SpringApplication.run(SimpleApp.class, args);
+        SpringApplication.run(QuickStartApp.class, args);
     }
 
     @Autowired
