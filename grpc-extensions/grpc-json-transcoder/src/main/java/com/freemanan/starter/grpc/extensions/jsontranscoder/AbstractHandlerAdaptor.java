@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -83,12 +84,9 @@ public abstract class AbstractHandlerAdaptor
         }
     }
 
+    @SneakyThrows
     protected Object applyInterceptor4Stub(ClientInterceptor clientInterceptor, Object stub) {
-        try {
-            return withInterceptorsMethod.invoke(stub, (Object) new ClientInterceptor[] {clientInterceptor});
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw new IllegalStateException(e);
-        }
+        return withInterceptorsMethod.invoke(stub, (Object) new ClientInterceptor[] {clientInterceptor});
     }
 
     protected Message convert2ProtobufMessage(Class<?> messageClass, InputStream is) {

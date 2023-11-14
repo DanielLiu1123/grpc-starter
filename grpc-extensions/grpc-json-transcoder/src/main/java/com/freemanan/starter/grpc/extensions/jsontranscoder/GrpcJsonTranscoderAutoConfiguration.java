@@ -10,6 +10,7 @@ import com.freemanan.starter.grpc.extensions.jsontranscoder.webflux.WebFluxGrpcS
 import com.freemanan.starter.grpc.extensions.jsontranscoder.webflux.WebFluxProtobufHandlerAdaptor;
 import io.grpc.BindableService;
 import io.grpc.Metadata;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -47,7 +48,8 @@ public class GrpcJsonTranscoderAutoConfiguration {
         @ConditionalOnMissingBean
         public WebMvcGrpcServiceHandlerMapping webMvcGrpcServiceHandlerMapping(
                 ObjectProvider<BindableService> grpcServices) {
-            return new WebMvcGrpcServiceHandlerMapping(grpcServices);
+            return new WebMvcGrpcServiceHandlerMapping(
+                    grpcServices.orderedStream().collect(Collectors.toList()));
         }
 
         @Bean

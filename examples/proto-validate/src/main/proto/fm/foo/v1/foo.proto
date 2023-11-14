@@ -4,6 +4,7 @@ package fm.foo.v1;
 
 import "google/protobuf/empty.proto";
 import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
 
 option java_multiple_files = true;
 option java_package = "com.freemanan.foo.v1.api";
@@ -25,5 +26,10 @@ message Foo {
 }
 
 service FooService {
-  rpc InsertFoo(Foo) returns (Foo) {}
+  rpc InsertFoo(Foo) returns (Foo) {
+    option(google.api.http) = {
+      post: "/v1/foo",
+      body: "*"
+    };
+  }
 }

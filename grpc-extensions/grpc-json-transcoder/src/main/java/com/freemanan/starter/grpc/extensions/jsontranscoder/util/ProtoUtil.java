@@ -6,13 +6,13 @@ import com.google.protobuf.DoubleValue;
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.Value;
 import com.google.protobuf.util.JsonFormat;
+import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -24,10 +24,10 @@ public class ProtoUtil {
     private static final JsonFormat.Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
 
     /**
-     * Check if protobuf message is simple value.
+     * Check if the protobuf message is a simple value.
      *
      * @param message protobuf message
-     * @return true if message is simple value
+     * @return true if the message is simple value
      */
     public static boolean isSimpleValueMessage(Message message) {
         if (isWrapperType(message.getClass())) {
@@ -53,12 +53,9 @@ public class ProtoUtil {
      * @param message protobuf message
      * @return JSON string
      */
+    @SneakyThrows
     public static String toJson(Message message) {
-        try {
-            return printer.print(message);
-        } catch (InvalidProtocolBufferException e) {
-            throw new IllegalStateException("Can't convert message to JSON", e);
-        }
+        return printer.print(message);
     }
 
     private static boolean isWrapperType(Class<?> clz) {

@@ -25,7 +25,7 @@ public class GrpcExceptionAdvice {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    static class ErrorResponse {
+    public static class ErrorResponse {
         private int code;
         private String message;
         private Object data;

@@ -149,7 +149,7 @@ public class WebFluxProtobufHandlerAdaptor extends AbstractHandlerAdaptor
                 arguments[arguments.length - 1] = handlerMethod;
 
                 return invocable.invoke(exchange, bindingContext, arguments);
-            } catch (Throwable invocationEx) {
+            } catch (Exception invocationEx) {
                 // Any other than the original exception (or a cause) is unintended here,
                 // probably an accident (e.g. failed assertion or the like).
                 if (!exceptions.contains(invocationEx) && log.isWarnEnabled()) {

@@ -8,6 +8,7 @@ import io.grpc.ServerInterceptor;
 import io.grpc.TlsServerCredentials;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.internal.GrpcUtil;
+import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
@@ -131,6 +132,12 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
     @Override
     public int getPort() {
         return server.getPort();
+    }
+
+    @Nullable
+    @Override
+    public Object getServer() {
+        return server;
     }
 
     @Override

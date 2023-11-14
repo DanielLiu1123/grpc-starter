@@ -1,7 +1,7 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder;
 
-import java.io.IOException;
 import java.net.ServerSocket;
+import lombok.SneakyThrows;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -13,11 +13,10 @@ public class U {
     /**
      * @return a random port
      */
+    @SneakyThrows
     public static int randomPort() {
         try (ServerSocket serverSocket = new ServerSocket(0)) {
             return serverSocket.getLocalPort();
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to find available port", e);
         }
     }
 

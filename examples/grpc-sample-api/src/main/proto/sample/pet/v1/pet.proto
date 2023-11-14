@@ -6,6 +6,7 @@ option java_multiple_files = true;
 option java_package = "com.freemanan.sample.pet.v1";
 
 import "google/protobuf/wrappers.proto";
+import "google/api/annotations.proto";
 
 message Pet {
   string name = 1;
@@ -15,9 +16,21 @@ message Pet {
 
 message GetPetRequest {
   string name = 1;
+  Pet pet = 2;
+  google.protobuf.StringValue pet_name = 3;
 }
 
 service PetService {
-  rpc GetPet(GetPetRequest) returns (Pet);
+  rpc GetPet(GetPetRequest) returns (Pet) {
+    option(google.api.http) = {
+      post: "/v1/foo",
+      body: "*",
+      additional_bindings: [
+        {
+          post: "/v1/bar"
+        }
+      ]
+    };
+  }
   rpc GetPetName(google.protobuf.StringValue) returns (google.protobuf.StringValue);
 }
