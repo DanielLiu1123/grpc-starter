@@ -53,7 +53,7 @@ class GrpcClientCreator {
                 .getBeanDefinition();
         abd.setLazyInit(true);
 
-        String channelBeanName = UUID.randomUUID().toString();
+        String channelBeanName = "grpc-channel-" + UUID.randomUUID();
         BeanDefinitionHolder holder = new BeanDefinitionHolder(abd, channelBeanName);
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
         if (SPRING_CLOUD_CONTEXT_PRESENT
