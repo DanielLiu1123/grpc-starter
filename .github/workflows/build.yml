@@ -3,11 +3,13 @@ on:
   push:
     branches:
       - main
-      - 2.x
+      - 3.1.x
+      - 2.7.x
   pull_request:
     branches:
       - main
-      - 2.x
+      - 3.1.x
+      - 2.7.x
 jobs:
   build:
     runs-on: ubuntu-latest
