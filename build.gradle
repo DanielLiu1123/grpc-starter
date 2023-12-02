@@ -25,12 +25,8 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven {
-            url "https://repo.spring.io/snapshot"
-        }
-        maven {
-            url "https://repo.spring.io/milestone"
-        }
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
     }
     compileJava {
         options.encoding = 'UTF-8'
