@@ -41,9 +41,10 @@ class GrpcMetricsAutoConfigurationTest {
                 .doesNotThrowAnyException();
         assertThatCode(() -> ctx.getBean(AnnotationAwareAspectJAutoProxyCreator.class))
                 .doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(CountedAspect.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
-        assertThatCode(() -> ctx.getBean(TimedAspect.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
-        assertThatCode(() -> ctx.getBean(ObservedAspect.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
+        // MetricsAspectsAutoConfiguration add CountedAspect, TimedAspect and ObservedAspect beans from 3.2.0
+        assertThatCode(() -> ctx.getBean(CountedAspect.class)).doesNotThrowAnyException();
+        assertThatCode(() -> ctx.getBean(TimedAspect.class)).doesNotThrowAnyException();
+        assertThatCode(() -> ctx.getBean(ObservedAspect.class)).doesNotThrowAnyException();
 
         ctx.close();
     }
