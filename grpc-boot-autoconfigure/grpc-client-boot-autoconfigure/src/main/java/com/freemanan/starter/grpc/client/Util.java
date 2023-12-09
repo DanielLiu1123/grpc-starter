@@ -31,10 +31,10 @@ class Util {
     private static final AntPathMatcher matcher = new AntPathMatcher(".");
 
     public static Optional<GrpcClientProperties.Channel> findMatchedConfig(
-            Class<?> clz, GrpcClientProperties properties) {
+            Class<?> stubClass, GrpcClientProperties properties) {
         // find from classes first
         Optional<GrpcClientProperties.Channel> foundClassConfig = properties.getChannels().stream()
-                .filter(ch -> matchAnyClassesConfig(clz, ch))
+                .filter(ch -> matchAnyClassesConfig(stubClass, ch))
                 .findFirst();
         if (foundClassConfig.isPresent()) {
             return foundClassConfig;
@@ -42,7 +42,7 @@ class Util {
 
         // then, find from stubs
         Optional<GrpcClientProperties.Channel> foundStubConfig = properties.getChannels().stream()
-                .filter(ch -> matchAnyStubsConfig(clz, ch))
+                .filter(ch -> matchAnyStubsConfig(stubClass, ch))
                 .findFirst();
         if (foundStubConfig.isPresent()) {
             return foundStubConfig;
@@ -50,7 +50,7 @@ class Util {
 
         // finally, find from services
         return properties.getChannels().stream()
-                .filter(it -> matchAnyServicesConfig(clz, it))
+                .filter(it -> matchAnyServicesConfig(stubClass, it))
                 .findFirst();
     }
 

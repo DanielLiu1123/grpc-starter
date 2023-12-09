@@ -1,7 +1,7 @@
 ## Basic Usage
 
 This feature allows for the dynamic refreshing of gRPC client configurations. You can place your configuration settings with the `grpc.client` prefix in any configuration center (like [Consul](https://github.com/hashicorp/consul), [Apollo](https://github.com/apolloconfig/apollo), [Nacos](https://github.com/alibaba/nacos), etc.). 
-By adjusting these configurations (for instance, `authority`, `max-message-size`), your gRPC client will automatically refresh without the need to restart your application.
+By adjusting these configurations (for instance, `authority`, `max-inbound-message-size`), your gRPC client will automatically refresh without the need to restart your application.
 
 Activate this feature by using the following configuration:
 

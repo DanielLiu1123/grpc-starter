@@ -2,15 +2,15 @@
 grpc:
   client:
     authority: localhost:9090     # global default authority
-    max-message-size: 4MB         # global default max message size
-    max-metadata-size: 8KB        # global default max metadata size
+    max-inbound-message-size: 4MB         # global default max message size
+    max-inbound-metadata-size: 8KB        # global default max metadata size
     metadata:                     # global default metadata
       - key: foo1
         values: [bar1, bar2]
     channels:
       - authority: localhost:9090 # override default authority
-        max-message-size: 8MB     # override default max message size
-        max-metadata-size: 16KB   # override default max metadata size
+        max-inbound-message-size: 8MB     # override default max message size
+        max-inbound-metadata-size: 16KB   # override default max metadata size
         metadata:                 # merge with default metadata, result is {foo1=[bar1, bar2], foo2=[bar3, bar4]}
           - key: foo2
             values: [bar3, bar4]

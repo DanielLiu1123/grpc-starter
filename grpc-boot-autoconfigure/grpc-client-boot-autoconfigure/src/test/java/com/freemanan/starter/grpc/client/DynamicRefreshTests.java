@@ -24,33 +24,13 @@ import org.springframework.context.annotation.Configuration;
 class DynamicRefreshTests {
 
     static int port1 = NetUtil.getRandomPort();
-    static Server server1;
     static int port2 = NetUtil.getRandomPort();
+    static Server server1;
     static Server server2;
 
     static {
-        server1 = ServerBuilder.forPort(port1)
-                .addService(new SimpleServiceGrpc.SimpleServiceImplBase() {
-                    @Override
-                    public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> responseObserver) {
-                        responseObserver.onNext(SimpleResponse.newBuilder()
-                                .setResponseMessage("v1")
-                                .build());
-                        responseObserver.onCompleted();
-                    }
-                })
-                .build();
-        server2 = ServerBuilder.forPort(port2)
-                .addService(new SimpleServiceGrpc.SimpleServiceImplBase() {
-                    @Override
-                    public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> responseObserver) {
-                        responseObserver.onNext(SimpleResponse.newBuilder()
-                                .setResponseMessage("v2")
-                                .build());
-                        responseObserver.onCompleted();
-                    }
-                })
-                .build();
+        server1 = getServer(port1, "v1");
+        server2 = getServer(port2, "v2");
     }
 
     @BeforeAll
@@ -80,6 +60,7 @@ class DynamicRefreshTests {
         assertThat(response.getResponseMessage()).isEqualTo("v1");
 
         System.setProperty("grpc.client.authority", "localhost:" + port2);
+        System.setProperty("grpc.client.deadline", "2000");
         ctx.publishEvent(new RefreshEvent(ctx, null, null));
 
         response = stub.unaryRpc(SimpleRequest.getDefaultInstance());
@@ -93,4 +74,18 @@ class DynamicRefreshTests {
     @EnableAutoConfiguration
     @EnableGrpcClients(clients = SimpleServiceGrpc.SimpleServiceBlockingStub.class)
     static class Cfg {}
+
+    private static Server getServer(int port, String returnValue) {
+        return ServerBuilder.forPort(port)
+                .addService(new SimpleServiceGrpc.SimpleServiceImplBase() {
+                    @Override
+                    public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> responseObserver) {
+                        responseObserver.onNext(SimpleResponse.newBuilder()
+                                .setResponseMessage(returnValue)
+                                .build());
+                        responseObserver.onCompleted();
+                    }
+                })
+                .build();
+    }
 }
