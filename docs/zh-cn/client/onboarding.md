@@ -114,8 +114,8 @@
   grpc:
     client:
       authority: localhost:9090
-      max-message-size: 8MB
-      max-metadata-size: 16KB
+      max-inbound-message-size: 8MB
+      max-inbound-metadata-size: 16KB
       metadata:
         - key: foo1
           values: [bar-01, bar-02]
@@ -123,8 +123,8 @@
           values: [bar-01, bar-02]
       channels:
         - authority: localhost:9090
-          max-message-size: 8MB
-          max-metadata-size: 16KB
+          max-inbound-message-size: 8MB
+          max-inbound-metadata-size: 16KB
           metadata:           # will merge with global metadata, same key will be overwritten, different key will be added, the result is: {foo1: [bar-01], foo2: [bar-01, bar-02]}
             - key: foo1
               values: [bar-01]
@@ -140,15 +140,15 @@ grpc:
     enabled: true
     base-packages: [ com.example ]   # base packages to scan for stubs
     authority: localhost:9090      # global default authority
-    max-message-size: 4MB          # global default max message size
-    max-metadata-size: 8KB         # global default max metadata size
+    max-inbound-message-size: 4MB          # global default max message size
+    max-inbound-metadata-size: 8KB         # global default max metadata size
     metadata: # global default metadata
       - key: foo1
         values: [ bar1, bar2 ]
     channels:
       - authority: localhost:9090  # override default authority
-        max-message-size: 8MB      # override default max message size
-        max-metadata-size: 16KB    # override default max metadata size
+        max-inbound-message-size: 8MB      # override default max message size
+        max-inbound-metadata-size: 16KB    # override default max metadata size
         metadata: # merge with default metadata, result is {foo1=[bar1, bar2], foo2=[bar3, bar4]}
           - key: foo2
             values: [ bar3, bar4 ]

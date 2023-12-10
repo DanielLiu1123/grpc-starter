@@ -2,8 +2,8 @@ grpc:
   server:
     enabled: true                  # whether to enable grpc server
     port: 9090                     # grpc server port
-    max-message-size: 16MB         # max message size
-    max-metadata-size: 16KB        # max metadata size
+    max-inbound-message-size: 16MB         # max message size
+    max-inbound-metadata-size: 16KB        # max metadata size
     shutdown-timeout: 5000         # graceful shutdown timeout, 0 means no timeout
     reflection:
       enabled: true                # whether to register reflection service

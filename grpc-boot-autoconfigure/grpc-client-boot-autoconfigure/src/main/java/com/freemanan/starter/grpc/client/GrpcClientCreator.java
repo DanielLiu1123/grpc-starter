@@ -2,8 +2,11 @@ package com.freemanan.starter.grpc.client;
 
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
+import io.grpc.stub.AbstractStub;
 import java.lang.reflect.Method;
+import java.util.Optional;
 import java.util.UUID;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.unit.DataSize;
 
 /**
  * @author Freeman
@@ -42,7 +46,7 @@ class GrpcClientCreator {
      * @param <T> stub type
      * @return gRPC stub instance
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked"})
     public <T> T create() {
         Method stubMethod =
                 ReflectionUtils.findMethod(stubClass.getEnclosingClass(), getStubMethodName(stubClass), Channel.class);
@@ -56,8 +60,8 @@ class GrpcClientCreator {
         String channelBeanName = "grpc-channel-" + UUID.randomUUID();
         BeanDefinitionHolder holder = new BeanDefinitionHolder(abd, channelBeanName);
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-        if (SPRING_CLOUD_CONTEXT_PRESENT
-                && beanFactory.getBean(GrpcClientProperties.class).getRefresh().isEnabled()) {
+        GrpcClientProperties properties = beanFactory.getBean(GrpcClientProperties.class);
+        if (SPRING_CLOUD_CONTEXT_PRESENT && properties.getRefresh().isEnabled()) {
             abd.setScope("refresh");
             holder = ScopedProxyUtils.createScopedProxy(holder, registry, true);
         }
@@ -65,8 +69,34 @@ class GrpcClientCreator {
 
         ManagedChannel channel = beanFactory.getBean(channelBeanName, ManagedChannel.class);
         T stub = (T) ReflectionUtils.invokeMethod(stubMethod, null, channel);
+
+        Assert.isTrue(stub != null, "stub must not be null");
+
+        stub = setOptions(stub, properties);
+
         Cache.addStubClass(stubClass);
         return stub;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static <T> T setOptions(T stub, GrpcClientProperties properties) {
+        GrpcClientProperties.Channel cfg =
+                GrpcChannelCreator.getMatchedConfig(AopProxyUtils.ultimateTargetClass(stub), properties);
+
+        GrpcClientOptions opt = new GrpcClientOptions();
+
+        setOptionValues(opt, cfg);
+
+        return (T) ((AbstractStub) stub).withOption(GrpcClientOptions.KEY, opt);
+    }
+
+    static void setOptionValues(GrpcClientOptions opt, GrpcClientProperties.Channel cfg) {
+        Optional.ofNullable(cfg.getDeadline()).ifPresent(opt::setDeadline);
+        Optional.ofNullable(cfg.getMaxOutboundMessageSize())
+                .map(DataSize::toBytes)
+                .map(Long::intValue)
+                .ifPresent(opt::setMaxOutboundMessageSize);
+        Optional.ofNullable(cfg.getCompression()).ifPresent(opt::setCompression);
     }
 
     private static String getStubMethodName(Class<?> stubClass) {

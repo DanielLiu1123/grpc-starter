@@ -14,7 +14,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * @author Freeman
- * @see <a href="https://github.com/DanielLiu1123/grpc-starter/issues/23">issue 23</a>
+ * @see <a href="https://github.com/DanielLiu1123/grpc-starter/issues/23">One channel config create one single channel</a>
  */
 class Issue23Test {
 
