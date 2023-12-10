@@ -334,10 +334,9 @@ public class GrpcClientProperties implements InitializingBean {
     /**
      * Merge default properties with channel specified properties.
      */
-    public void merge() {
+    void merge() {
+        PropertyMapper mapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
         for (Channel stub : channels) {
-            PropertyMapper mapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
-
             mapper.from(authority).when(e -> isNull(stub.getAuthority())).to(stub::setAuthority);
             mapper.from(maxInboundMessageSize)
                     .when(e -> isNull(stub.getMaxInboundMessageSize()))
