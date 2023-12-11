@@ -9,7 +9,12 @@ import io.grpc.MethodDescriptor;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Set stub options from {@link GrpcClientOptions} to {@link CallOptions}.
+ *
  * @author Freeman
+ * @see ClientInterceptor
+ * @see GrpcClientOptions
+ * @since 3.2.0
  */
 public class GrpcClientOptionsClientInterceptor implements ClientInterceptor {
 

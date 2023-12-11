@@ -9,7 +9,19 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * @author Freeman
+ * Annotation that enables gRPC clients in Spring Boot applications.
+ *
+ * <p> Basic usage:
+ * <pre>{@code
+ * // register beans(lazy-init) for all gRPC clients in the package and sub-packages
+ * @EnableGrpcClients("com.example")
+ *
+ * // register beans(lazy-init) for SimpleServiceBlockingStub
+ * @EnableGrpcClients(clients = {SimpleServiceBlockingStub.class})
+ *
+ * // register beans(lazy-init) for all gRPC clients in the package and sub-packages, and SimpleServiceBlockingStub
+ * @EnableGrpcClients(value = "com.example", clients = {SimpleServiceBlockingStub.class})
+ * }</pre>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})

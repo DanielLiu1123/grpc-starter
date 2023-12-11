@@ -3,7 +3,9 @@ package com.freemanan.starter.grpc.client;
 import io.grpc.ManagedChannelBuilder;
 
 /**
- * gRPC {@link ManagedChannelBuilder} customizer.
+ * The interface {@link GrpcChannelCustomizer} represents a mechanism for customizing a gRPC channel.
+ * Implementations of this interface can customize the channel by modifying the channel configuration,
+ * such as setting timeouts or adding interceptors.
  *
  * @author Freeman
  */

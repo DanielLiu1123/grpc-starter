@@ -14,6 +14,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * This class is responsible for autoconfiguring the necessary beans and components
+ * for the gRPC client.
+ *
  * @author Freeman
  */
 @Configuration(proxyBeanMethods = false)
@@ -43,12 +46,12 @@ public class GrpcClientAutoConfiguration implements DisposableBean {
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(RefreshScopeRefreshedEvent.class)
-    static class SpringCloudConfiguration {
+    static class RefreshConfiguration {
         @Bean
         @ConditionalOnMissingBean
         @ConditionalOnProperty(prefix = GrpcClientProperties.Refresh.PREFIX, name = "enabled", havingValue = "true")
-        public RefreshScopeRefreshedEventListener grpcClientRefreshScopeRefreshedEventListener() {
-            return new RefreshScopeRefreshedEventListener();
+        public GrpcClientRefreshScopeRefreshedEventListener grpcClientRefreshScopeRefreshedEventListener() {
+            return new GrpcClientRefreshScopeRefreshedEventListener();
         }
     }
 

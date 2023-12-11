@@ -14,9 +14,13 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * {@link GrpcClientRefreshScopeRefreshedEventListener} listens for {@link RefreshScopeRefreshedEvent}
+ * and refreshes the options of registered gRPC stubs.
+ *
  * @author Freeman
+ * @see GrpcClientOptions
  */
-public class RefreshScopeRefreshedEventListener
+public class GrpcClientRefreshScopeRefreshedEventListener
         implements ApplicationListener<RefreshScopeRefreshedEvent>, BeanFactoryAware {
 
     private DefaultListableBeanFactory beanFactory;
