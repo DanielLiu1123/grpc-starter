@@ -54,12 +54,16 @@ public class GrpcServerProperties {
     private ExceptionHandling exceptionHandling = new ExceptionHandling();
     /**
      * The maximum message size allowed to be received on the server, default {@code 4MB}.
+     *
+     * @see GrpcUtil#DEFAULT_MAX_MESSAGE_SIZE
      */
-    private DataSize maxMessageSize = DataSize.ofBytes(GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE);
+    private DataSize maxInboundMessageSize;
     /**
      * The maximum size of metadata allowed to be received, default {@code 8KB}.
+     *
+     * @see GrpcUtil#DEFAULT_MAX_HEADER_LIST_SIZE
      */
-    private DataSize maxMetadataSize = DataSize.ofBytes(GrpcUtil.DEFAULT_MAX_HEADER_LIST_SIZE);
+    private DataSize maxInboundMetadataSize;
     /**
      * In-process server configuration.
      */
@@ -115,9 +119,9 @@ public class GrpcServerProperties {
              */
             private String validationQuery = "SELECT 1";
             /**
-             * {@link #validationQuery} timeout, unit seconds, default {@code 2} seconds.
+             * {@link #validationQuery} timeout, unit seconds.
              */
-            private int timeout = 2;
+            private Integer timeout;
         }
 
         @Data

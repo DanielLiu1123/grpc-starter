@@ -10,6 +10,7 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.internal.GrpcUtil;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,6 +23,7 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.util.unit.DataSize;
 
 /**
  * gRPC server.
@@ -65,8 +67,14 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
                 .sorted(AnnotationAwareOrderComparator.INSTANCE.reversed())
                 .forEach(builder::intercept);
 
-        builder.maxInboundMessageSize((int) properties.getMaxMessageSize().toBytes());
-        builder.maxInboundMetadataSize((int) properties.getMaxMetadataSize().toBytes());
+        Optional.ofNullable(properties.getMaxInboundMessageSize())
+                .map(DataSize::toBytes)
+                .map(Long::intValue)
+                .ifPresent(builder::maxInboundMessageSize);
+        Optional.ofNullable(properties.getMaxInboundMetadataSize())
+                .map(DataSize::toBytes)
+                .map(Long::intValue)
+                .ifPresent(builder::maxInboundMetadataSize);
 
         // apply customizers
         customizers.orderedStream().forEach(customizer -> customizer.customize(builder));

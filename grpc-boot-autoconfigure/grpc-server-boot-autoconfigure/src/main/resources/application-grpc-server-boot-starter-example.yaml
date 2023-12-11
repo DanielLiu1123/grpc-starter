@@ -1,29 +1,29 @@
 grpc:
   server:
-    enabled: true                  # whether to enable grpc server
-    port: 9090                     # grpc server port
-    max-inbound-message-size: 16MB         # max message size
-    max-inbound-metadata-size: 16KB        # max metadata size
-    shutdown-timeout: 5000         # graceful shutdown timeout, 0 means no timeout
+    enabled: true                      # whether to enable grpc server
+    port: 9090                         # grpc server port
+    max-inbound-message-size: 16MB     # max message size
+    max-inbound-metadata-size: 16KB    # max metadata size
+    shutdown-timeout: 5000             # graceful shutdown timeout, 0 means no timeout
     reflection:
-      enabled: true                # whether to register reflection service
+      enabled: true                    # whether to register reflection service
     health:
-      enabled: true                # whether to enable health check
+      enabled: true                    # whether to enable health check
       datasource:
-        enabled: true              # whether to enable datasource health check
-        service: ds                # datasource service name
-        validation-query: SELECT 1 # datasource validation query
-        timeout: 2                 # datasource health check timeout, unit: second
+        enabled: true                  # whether to enable datasource health check
+        service: ds                    # datasource service name
+        validation-query: SELECT 1     # datasource validation query
+        timeout: 2                     # datasource health check timeout, unit: second
       redis:
-        service: redis             # redis service name
-        enabled: true              # whether to enable redis health check
+        service: redis                 # redis service name
+        enabled: true                  # whether to enable redis health check
     exception-handling:
-      enabled: true                # whether to enable exception handling
+      enabled: true                    # whether to enable exception handling
     in-process:
-      name: test                   # in-process server name
+      name: test                       # in-process server name
     channelz:
-      enabled: true                # whether to enable channelz
-      max-page-size: 100           # max page size
+      enabled: true                    # whether to enable channelz
+      max-page-size: 100               # max page size
     tls:
       key-manager:
         cert-chain: classpath:server.crt

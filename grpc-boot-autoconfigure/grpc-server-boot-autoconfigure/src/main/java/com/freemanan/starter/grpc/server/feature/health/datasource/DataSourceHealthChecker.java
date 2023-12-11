@@ -39,7 +39,9 @@ public class DataSourceHealthChecker implements HealthChecker, BeanFactoryAware,
         for (DataSource dataSource : dataSources) {
             try (Connection conn = dataSource.getConnection();
                     PreparedStatement statement = conn.prepareStatement(config.getValidationQuery())) {
-                statement.setQueryTimeout(config.getTimeout());
+                if (config.getTimeout() != null) {
+                    statement.setQueryTimeout(config.getTimeout());
+                }
                 statement.execute();
             } catch (Exception e) {
                 log.warn("DataSource health check failed!", e);
