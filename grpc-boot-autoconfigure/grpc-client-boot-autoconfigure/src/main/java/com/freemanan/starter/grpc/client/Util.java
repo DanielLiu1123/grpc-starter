@@ -85,7 +85,7 @@ class Util {
         GrpcClientProperties properties = Binder.get(environment)
                 .bind(GrpcClientProperties.PREFIX, GrpcClientProperties.class)
                 .orElseGet(GrpcClientProperties::new);
-        properties.merge();
+        properties.afterPropertiesSet();
         return properties;
     }
 
