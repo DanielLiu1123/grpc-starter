@@ -1,6 +1,7 @@
 package com.freemanan.starter.grpc.extensions.validation;
 
-import static com.freemanan.starter.grpc.extensions.validation.ValidationExceptionUtil.asStatusRuntimeException;
+import static com.freemanan.starter.grpc.extensions.validation.ValidationExceptionUtil.asInternalException;
+import static com.freemanan.starter.grpc.extensions.validation.ValidationExceptionUtil.asInvalidArgumentException;
 
 import build.buf.protovalidate.ValidationResult;
 import build.buf.protovalidate.Validator;
@@ -37,12 +38,12 @@ public class ProtoValidateClientInterceptor implements ClientInterceptor, Ordere
                 try {
                     result = validator.validate((Message) message);
                 } catch (ValidationException e) {
-                    throw asStatusRuntimeException(e);
+                    throw asInternalException(e);
                 }
                 if (result.isSuccess()) {
                     super.sendMessage(message);
                 } else {
-                    throw asStatusRuntimeException(result.getViolations());
+                    throw asInvalidArgumentException(result.getViolations());
                 }
             }
         };

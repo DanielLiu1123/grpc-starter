@@ -38,7 +38,7 @@ public class GrpcUtil {
             case RESOURCE_EXHAUSTED:
                 return HttpStatus.TOO_MANY_REQUESTS;
             case FAILED_PRECONDITION:
-                return HttpStatus.PRECONDITION_FAILED;
+                return HttpStatus.BAD_REQUEST;
             case ABORTED:
                 return HttpStatus.CONFLICT;
             case OUT_OF_RANGE:
