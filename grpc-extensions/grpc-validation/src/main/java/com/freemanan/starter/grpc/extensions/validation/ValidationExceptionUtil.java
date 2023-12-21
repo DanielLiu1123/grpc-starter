@@ -19,7 +19,7 @@ class ValidationExceptionUtil {
      * @param ex {@link ValidationException}
      * @return {@link StatusRuntimeException}
      */
-    public static StatusRuntimeException asStatusRuntimeException(ValidationException ex) {
+    public static StatusRuntimeException asInternalException(ValidationException ex) {
         return new StatusRuntimeException(Status.INTERNAL.withDescription(ex.getLocalizedMessage()));
     }
 
@@ -29,7 +29,7 @@ class ValidationExceptionUtil {
      * @param violations validation violations
      * @return {@link StatusRuntimeException}
      */
-    public static StatusRuntimeException asStatusRuntimeException(List<Violation> violations) {
+    public static StatusRuntimeException asInvalidArgumentException(List<Violation> violations) {
         String message = violations.stream().map(Violation::getMessage).collect(Collectors.joining(", "));
         return new StatusRuntimeException(Status.INVALID_ARGUMENT.withDescription(message));
     }
