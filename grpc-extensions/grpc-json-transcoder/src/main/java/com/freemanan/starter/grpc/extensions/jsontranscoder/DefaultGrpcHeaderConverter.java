@@ -1,5 +1,6 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.grpc.Metadata;
 import io.grpc.internal.GrpcUtil;
 import java.lang.reflect.Modifier;
@@ -21,6 +22,7 @@ public class DefaultGrpcHeaderConverter implements GrpcHeaderConverter {
 
     private final Set<String> removeHeaders;
 
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public DefaultGrpcHeaderConverter() {
         this.removeHeaders = getRemoveHeaders();
     }

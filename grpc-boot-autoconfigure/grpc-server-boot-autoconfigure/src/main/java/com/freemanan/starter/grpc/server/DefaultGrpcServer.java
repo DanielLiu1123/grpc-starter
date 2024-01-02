@@ -1,5 +1,6 @@
 package com.freemanan.starter.grpc.server;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.grpc.BindableService;
 import io.grpc.Grpc;
 import io.grpc.Server;
@@ -41,6 +42,7 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
 
     private ApplicationEventPublisher publisher;
 
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public DefaultGrpcServer(
             GrpcServerProperties properties,
             ObjectProvider<ServerBuilder<?>> serverBuilder,

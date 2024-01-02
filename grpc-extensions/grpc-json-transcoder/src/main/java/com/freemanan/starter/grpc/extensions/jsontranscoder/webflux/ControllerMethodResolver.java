@@ -16,6 +16,7 @@
 
 package com.freemanan.starter.grpc.extensions.jsontranscoder.webflux;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -74,6 +75,7 @@ class ControllerMethodResolver {
     private final Map<ControllerAdviceBean, ExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
             new LinkedHashMap<>(64);
 
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     ControllerMethodResolver(
             ReactiveAdapterRegistry adapterRegistry,
             ConfigurableApplicationContext context,
