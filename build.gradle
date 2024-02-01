@@ -91,4 +91,4 @@ tasks.register('installGitHook', Copy) {
     into { new File(rootProject.rootDir, '.git/hooks') }
     fileMode 0775
 }
-compileJava.dependsOn installGitHook
+installGitHook
