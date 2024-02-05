@@ -18,6 +18,18 @@ jobs:
           distribution: 'corretto'
           cache: 'gradle'
 
+      - name: Check version
+        run: |
+          VERSION_TAG=${{ github.ref_name }}
+          VERSION_TAG=${VERSION_TAG#v}
+          PROJECT_VERSION=$(grep "^version=" gradle.properties | cut -d'=' -f2)
+          if [[ "$PROJECT_VERSION" == "${VERSION_TAG}-SNAPSHOT" ]]; then
+            echo "Version match: tag $VERSION_TAG matches project version $PROJECT_VERSION, proceeding with release"
+          else
+            echo "Version mismatch: tag $VERSION_TAG does not match project version $PROJECT_VERSION"
+            exit 1
+          fi
+
       - name: Decrypt secring.gpg
         run: openssl enc -aes-256-cbc -d -pbkdf2 -in private.key.bin -out private.key -pass pass:${{ secrets.privateKeyPassword }}
 
