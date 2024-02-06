@@ -5,7 +5,7 @@
 #### **Gradle**
 
 ```groovy
-implementation platform('com.freemanan:grpc-starter-dependencies:3.2.0')
+implementation platform('com.freemanan:grpc-starter-dependencies:3.2.2')
 implementation 'com.freemanan:grpc-boot-starter'
 ```
 
@@ -17,7 +17,7 @@ implementation 'com.freemanan:grpc-boot-starter'
     <dependency>
       <groupId>com.freemanan</groupId>
       <artifactId>grpc-starter-dependencies</artifactId>
-      <version>3.2.0</version>
+      <version>3.2.2</version>
       <type>pom</type>
       <scope>import</scope>
     </dependency>
