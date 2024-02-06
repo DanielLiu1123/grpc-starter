@@ -1,7 +1,7 @@
 # gRPC Starter
 
 [![Build](https://img.shields.io/github/actions/workflow/status/DanielLiu1123/grpc-starter/build.yml?branch=main)](https://github.com/DanielLiu1123/grpc-starter/actions)
-[![Maven Central](https://img.shields.io/maven-central/v/com.freemanan/grpc-starter-dependencies?versionPrefix=3.)](https://central.sonatype.com/artifact/com.freemanan/grpc-starter-dependencies)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.danielliu1123/grpc-starter-dependencies?versionPrefix=3.)](https://central.sonatype.com/artifact/com.freemanan/grpc-starter-dependencies)
 [![Maven Central](https://img.shields.io/maven-central/v/com.freemanan/grpc-starter-dependencies?versionPrefix=2.)](https://central.sonatype.com/artifact/com.freemanan/grpc-starter-dependencies)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -34,6 +34,13 @@ This project provides out-of-the-box, highly scalable Spring Boot starters for t
 - [Testing](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/test): Integration with `SpringBootTest`.
 
 ## Quick Start
+
+```groovy
+implementation(platform("io.github.danielliu1123:grpc-starter-dependencies:3.2.2"))
+implementation("io.github.danielliu1123:grpc-boot-starter")
+```
+
+> From version 3.2.0, the groupId of the project has been changed to `io.github.danielliu1123` from `com.freemanan`.
 
 ```java
 @SpringBootApplication
