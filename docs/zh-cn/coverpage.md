@@ -1,6 +1,6 @@
 ![logo](assets/images/logo.png)
 
-# gRPC Starter <small>3.1.6</small>
+# gRPC Starter <small>3.1.8</small>
 
 > Spring Boot Starters for gRPC ecosystem
 
