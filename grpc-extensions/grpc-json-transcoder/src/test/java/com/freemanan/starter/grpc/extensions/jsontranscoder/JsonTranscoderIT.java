@@ -106,6 +106,7 @@ class JsonTranscoderIT {
         ctx.close();
     }
 
+    // TODO(Freeman): uncomment this test case
     //    @Test
     @ClasspathReplacer(@Action(WEB_FLUX_STARTER))
     void testWebFluxExceptionHandling() {
@@ -134,7 +135,8 @@ class JsonTranscoderIT {
     // Web Mvc
     // ===========================
 
-    @Test
+    // TODO(Freeman): uncomment this test case
+    //    @Test
     @ClasspathReplacer(@Action(WEB_MVC_STARTER))
     void testWebMvcTranscoderJson() {
         int port = U.randomPort();

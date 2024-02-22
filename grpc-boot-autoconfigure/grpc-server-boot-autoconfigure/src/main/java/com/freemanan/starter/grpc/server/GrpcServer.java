@@ -1,5 +1,6 @@
 package com.freemanan.starter.grpc.server;
 
+import jakarta.annotation.Nullable;
 import org.springframework.context.SmartLifecycle;
 
 /**
@@ -13,4 +14,10 @@ public interface GrpcServer extends SmartLifecycle {
      * @return port number
      */
     int getPort();
+
+    /**
+     * Get the server object.
+     */
+    @Nullable
+    Object getServer();
 }

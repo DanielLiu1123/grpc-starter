@@ -32,7 +32,8 @@ public class WebFluxGrpcServiceHandlerMapping extends AbstractHandlerMapping {
     private final Map<String, HandlerMethod> pathToMethod;
 
     public WebFluxGrpcServiceHandlerMapping(ObjectProvider<BindableService> grpcServiceProvider) {
-        this.pathToMethod = JsonTranscoderUtil.getPathToMethod(grpcServiceProvider);
+        this.pathToMethod =
+                JsonTranscoderUtil.getPathToMethod(grpcServiceProvider.stream().toList());
     }
 
     @Override

@@ -32,4 +32,9 @@ public class DummyGrpcServer implements GrpcServer {
     public int getPort() {
         return DUMMY_PORT;
     }
+
+    @Override
+    public Object getServer() {
+        return null;
+    }
 }

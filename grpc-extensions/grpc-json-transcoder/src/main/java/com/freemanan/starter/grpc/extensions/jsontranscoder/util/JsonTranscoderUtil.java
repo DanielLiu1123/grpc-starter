@@ -5,21 +5,24 @@ import static io.grpc.MethodDescriptor.MethodType.UNARY;
 import com.google.protobuf.Message;
 import io.grpc.BindableService;
 import io.grpc.ServerMethodDefinition;
+import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.Data;
 import lombok.experimental.UtilityClass;
 import org.springframework.aop.framework.AopProxyUtils;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.server.NotAcceptableStatusException;
 
@@ -57,15 +60,20 @@ public class JsonTranscoderUtil {
         return null;
     }
 
-    public static Map<String, HandlerMethod> getPathToMethod(ObjectProvider<BindableService> grpcServiceProvider) {
+    public static Map<String, HandlerMethod> getPathToMethod(Collection<BindableService> grpcServiceProvider) {
         return grpcServiceProvider.stream()
-                .map(bs -> Tuple2.of(bs.bindService(), bs))
-                .flatMap(en -> en.getT1().getMethods().stream()
-                        .map(m -> Tuple2.of(m.getMethodDescriptor().getFullMethodName(), en.getT2())))
-                .map(en -> Tuple3.of(en.getT1(), en.getT2(), findMethod(en.getT2(), en.getT1())))
-                .filter(en -> en.getT3() != null)
-                .map(en -> Tuple2.of("/" + en.getT1(), new HandlerMethod(en.getT2(), en.getT3())))
-                .collect(Collectors.toMap(Tuple2::getT1, Tuple2::getT2));
+                .map(bindableService -> new ServiceDefinitionPair(bindableService.bindService(), bindableService))
+                .flatMap(pair -> pair.getServiceDefinition().getMethods().stream()
+                        .map(md -> new MethodHandlerInfo(
+                                md.getMethodDescriptor().getFullMethodName(),
+                                pair.getBindableService(),
+                                findMethod(
+                                        pair.getBindableService(),
+                                        md.getMethodDescriptor().getFullMethodName()))))
+                .filter(info -> info.getMethod() != null)
+                .collect(Collectors.toMap(
+                        info -> "/" + info.getFullMethodName(),
+                        info -> new HandlerMethod(info.getBindableService(), info.getMethod())));
     }
 
     public static boolean isGrpcHandleMethod(Object handler) {
@@ -77,6 +85,10 @@ public class JsonTranscoderUtil {
      * @return true if json string is a json object or json array
      */
     public static boolean isJson(String json) {
+        if (!StringUtils.hasText(json)) {
+            return false;
+        }
+        json = json.trim();
         return (json.startsWith("{") && json.endsWith("}")) || (json.startsWith("[") && json.endsWith("]"));
     }
 
@@ -103,5 +115,18 @@ public class JsonTranscoderUtil {
 
     public static NotAcceptableStatusException notAcceptableException() {
         return new NotAcceptableStatusException("Could not find acceptable representation");
+    }
+
+    @Data
+    private static final class ServiceDefinitionPair {
+        private final ServerServiceDefinition serviceDefinition;
+        private final BindableService bindableService;
+    }
+
+    @Data
+    private static final class MethodHandlerInfo {
+        private final String fullMethodName;
+        private final BindableService bindableService;
+        private final Method method;
     }
 }
