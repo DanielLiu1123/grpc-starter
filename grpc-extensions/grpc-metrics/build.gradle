@@ -1,0 +1,20 @@
+dependencies {
+    compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+    compileOnly(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
+
+    api("org.springframework.boot:spring-boot-starter-actuator")
+
+    compileOnly("io.micrometer:micrometer-registry-prometheus")
+    compileOnly("io.micrometer:micrometer-registry-otlp")
+    compileOnly("org.springframework.boot:spring-boot-starter-aop")
+
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
+    testImplementation(project(":grpc-starters:grpc-boot-starter"))
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("com.freemanan:classpath-replacer-junit5:${classpathReplacerVersion}")
+}
+
+apply from: "${rootDir}/gradle/deploy.gradle"

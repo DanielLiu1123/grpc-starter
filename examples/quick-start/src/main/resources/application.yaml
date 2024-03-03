@@ -1,0 +1,15 @@
+grpc:
+  server:
+    reflection:
+      enabled: true
+  client:
+    shutdown-timeout: 1000
+    channels:
+      - authority: localhost:${grpc.server.port:9090}
+        classes:
+          - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceBlockingStub
+        stubs:
+          - io.grpc.**.Health*Stub
+        services:
+          - grpc.reflection.*.ServerReflection
+          - grpc.testing.SimpleService

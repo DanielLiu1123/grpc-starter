@@ -1,0 +1,22 @@
+dependencies {
+    compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+    compileOnly(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
+
+    api("io.grpc:grpc-stub")
+    api("io.grpc:grpc-protobuf")
+    api("javax.annotation:javax.annotation-api:${javaxValidationApiVersion}") // necessary for Java 9+, @javax.annotation.Generated
+
+    compileOnly("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
+    compileOnly("build.buf:protovalidate:${protovalidateVersion}")
+
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+    testImplementation("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
+    testImplementation("build.buf:protovalidate:${protovalidateVersion}")
+    testImplementation(project(":grpc-starters:grpc-boot-starter"))
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
+    testImplementation("com.freemanan:classpath-replacer-junit5:${classpathReplacerVersion}")
+}
+
+apply from: "${rootDir}/gradle/deploy.gradle"
+apply from: "${rootDir}/gradle/protobuf-with-pgv.gradle"

@@ -1,0 +1,6 @@
+dependencies {
+    api(project(":grpc-starters:grpc-client-boot-starter"))
+    api(project(":grpc-starters:grpc-server-boot-starter"))
+}
+
+apply from: "${rootDir}/gradle/deploy.gradle"

@@ -1,0 +1,18 @@
+dependencies {
+    api(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+    api("com.google.protobuf:protobuf-java-util")
+
+    compileOnly("org.springframework.boot:spring-boot-starter-web")
+    compileOnly("org.springframework.boot:spring-boot-starter-webflux")
+
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+    testCompileOnly("org.springframework.boot:spring-boot-starter-web")
+    testCompileOnly("org.springframework.boot:spring-boot-starter-webflux")
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
+    testImplementation(project(":grpc-starters:grpc-boot-starter"))
+    testImplementation("com.freemanan:classpath-replacer-junit5:${classpathReplacerVersion}")
+}
+
+apply from: "${rootDir}/gradle/deploy.gradle"
+apply from: "${rootDir}/gradle/protobuf-with-pgv.gradle"

@@ -1,0 +1,13 @@
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation(project(":grpc-starters:grpc-boot-starter"))
+    implementation("io.grpc:grpc-testing-proto")
+
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
+}
+
+apply from: "${rootDir}/gradle/protobuf.gradle"
+

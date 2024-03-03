@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package sample.pet.v1;
+
+option java_multiple_files = true;
+option java_package = "com.freemanan.sample.pet.v1";
+
+import "google/protobuf/wrappers.proto";
+
+message Pet {
+  string name = 1;
+  int32 age = 2;
+  repeated string favorite_foods = 3;
+}
+
+message GetPetRequest {
+  string name = 1;
+}
+
+service PetService {
+  rpc GetPet(GetPetRequest) returns (Pet);
+  rpc GetPetName(google.protobuf.StringValue) returns (google.protobuf.StringValue);
+}

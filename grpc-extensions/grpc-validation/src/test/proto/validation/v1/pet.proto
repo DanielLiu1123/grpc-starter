@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package validation.v1;
+
+option java_multiple_files = true;
+option java_package = "com.freemanan.validation.v1";
+
+import "validate/validate.proto";
+
+message Foo {
+  string name = 1;
+  int32 age = 2;
+  repeated string favorite_foods = 3;
+}
+
+message GetFooRequest {
+  string name = 1 [(validate.rules).string = {
+    max_len: 10
+  }];
+}
+
+service FooService {
+  rpc GetFoo(GetFooRequest) returns (Foo) {};
+}

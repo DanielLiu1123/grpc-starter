@@ -1,0 +1,15 @@
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation(project(":examples:grpc-sample-api"))
+    implementation(project(":grpc-starters:grpc-server-boot-starter")){
+        exclude(group: 'io.grpc', module: "grpc-netty-shaded")
+    }
+    implementation(project(":grpc-starters:grpc-starter-webflux"))
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+
+apply from: "${rootDir}/gradle/protobuf-with-pgv.gradle"
