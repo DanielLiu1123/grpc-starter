@@ -1,4 +1,0 @@
-grpc:
-  server:
-    reflection:
-      enabled: true

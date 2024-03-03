@@ -1,7 +1,0 @@
-dependencies {
-    api(project(":grpc-extensions:grpc-validation"))
-
-    api("build.buf:protovalidate:${protovalidateVersion}")
-}
-
-apply from: "${rootDir}/gradle/deploy.gradle"

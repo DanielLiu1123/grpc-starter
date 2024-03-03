@@ -1,9 +1,0 @@
-dependencies {
-    api(project(":grpc-extensions:grpc-test"))
-    api(project(":examples:grpc-sample-api"))
-
-    optionalSupportApi(project(":grpc-starters:grpc-server-boot-starter"))
-    optionalSupportApi(project(":grpc-starters:grpc-client-boot-starter"))
-}
-
-apply from: "${rootDir}/gradle/deploy.gradle"

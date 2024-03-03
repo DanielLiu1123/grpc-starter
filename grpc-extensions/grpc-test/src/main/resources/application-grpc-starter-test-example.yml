@@ -1,4 +1,0 @@
-grpc:
-  test:
-    server:
-      port-type: in_process

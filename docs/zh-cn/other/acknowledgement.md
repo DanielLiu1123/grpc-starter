@@ -1,2 +1,0 @@
-- 感谢 [Spring](https://spring.io/) 和 [gRPC](https://grpc.io/) 的开发者们，创建出了这么优秀的框架。
-- 感谢 [yidongnan](https://github.com/yidongnan) 的 [grpc-spring-boot-starter](https://github.com/yidongnan/grpc-spring-boot-starter)，为这个项目的实现和文档提供了许多思路。
