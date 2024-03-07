@@ -21,7 +21,7 @@ public class GrpcContextKeys {
      */
     @Data
     public static class ResponseMetadataModifier {
-        public static final Context.Key<ResponseMetadataModifier> INSTANCE =
+        static final Context.Key<ResponseMetadataModifier> INSTANCE =
                 Context.key("GrpcContextKeys.ResponseMetadataModifier");
 
         @Nonnull

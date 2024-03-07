@@ -1,5 +1,6 @@
 package com.freemanan.starter.grpc.server;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.grpc.Context;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
@@ -11,8 +12,9 @@ import org.springframework.lang.Nullable;
  * @author Freeman
  */
 @Data
+@SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
 public class GrpcRequestContext {
-    public static final Context.Key<GrpcRequestContext> INSTANCE = Context.key("GrpcRequestContext");
+    static final Context.Key<GrpcRequestContext> INSTANCE = Context.key("GrpcRequestContext");
 
     @Nonnull
     private final ServerCall<?, ?> call;
