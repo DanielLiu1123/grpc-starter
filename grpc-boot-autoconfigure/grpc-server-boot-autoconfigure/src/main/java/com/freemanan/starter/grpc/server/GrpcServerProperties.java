@@ -72,6 +72,10 @@ public class GrpcServerProperties {
      * TLS configuration.
      */
     private Tls tls;
+    /**
+     * Response configuration.
+     */
+    private Response response = new Response();
 
     @Data
     public static class Reflection {
@@ -212,5 +216,18 @@ public class GrpcServerProperties {
              */
             private Resource rootCerts;
         }
+    }
+
+    @Data
+    public static class Response {
+
+        /**
+         * The maximum length of response description.
+         *
+         * <p> When the length of the description exceeds this value, it will be truncated.
+         *
+         * @since 3.2.3
+         */
+        private Integer maxDescriptionLength = 2048;
     }
 }
