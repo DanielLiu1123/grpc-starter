@@ -1,5 +1,8 @@
 package com.freemanan.starter.grpc.server;
 
+import com.freemanan.starter.grpc.server.feature.exceptionhandling.annotation.DefaultGrpcExceptionAdvice;
+import io.grpc.StatusException;
+import io.grpc.StatusRuntimeException;
 import io.grpc.TlsServerCredentials;
 import io.grpc.internal.GrpcUtil;
 import io.grpc.protobuf.services.ChannelzService;
@@ -72,6 +75,10 @@ public class GrpcServerProperties {
      * TLS configuration.
      */
     private Tls tls;
+    /**
+     * Response configuration.
+     */
+    private Response response = new Response();
 
     @Data
     public static class Reflection {
@@ -163,6 +170,33 @@ public class GrpcServerProperties {
          * Whether to enable exception handling, default {@code true}
          */
         private boolean enabled = true;
+
+        /**
+         * Whether to enable {@link DefaultGrpcExceptionAdvice}, default {@code true}.
+         *
+         * <p> {@link DefaultGrpcExceptionAdvice} will handle exceptions recognized by gRPC, including:
+         * <ul>
+         *     <li>{@link StatusRuntimeException}</li>
+         *     <li>{@link StatusException}</li>
+         * </ul>
+         *
+         * <p> When enabled, you can directly throw {@link StatusRuntimeException} or {@link StatusException} in service implementation,
+         * and the exception will be handled by {@link DefaultGrpcExceptionAdvice}.
+         *
+         * <pre>{@code
+         * @GrpcService
+         * public class SimpleService extends SimpleServiceGrpc.SimpleServiceImplBase {
+         *     @Override
+         *     public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> responseObserver) {
+         *         throw new StatusRuntimeException(Status.INVALID_ARGUMENT.withDescription("Invalid request"));
+         *     }
+         * }
+         * }</pre>
+         *
+         * @see DefaultGrpcExceptionAdvice
+         * @since 3.2.3
+         */
+        private boolean defaultExceptionAdviceEnabled = true;
     }
 
     @Data
@@ -212,5 +246,18 @@ public class GrpcServerProperties {
              */
             private Resource rootCerts;
         }
+    }
+
+    @Data
+    public static class Response {
+
+        /**
+         * The maximum length of response description.
+         *
+         * <p> When the length of the description exceeds this value, it will be truncated.
+         *
+         * @since 3.2.3
+         */
+        private Integer maxDescriptionLength = 2048;
     }
 }
