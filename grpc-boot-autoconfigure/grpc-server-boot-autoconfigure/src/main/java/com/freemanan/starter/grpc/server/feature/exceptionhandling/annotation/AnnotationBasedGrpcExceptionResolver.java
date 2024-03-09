@@ -93,7 +93,7 @@ public class AnnotationBasedGrpcExceptionResolver
         Throwable caughtException = entry.getKey();
 
         Object res = invokeHandlerMethod(method, caughtException, call, headers);
-        return convertResponseToStatusRuntimeException(res, caughtException);
+        return convertResponseToStatusRuntimeException(res, method.getMethod());
     }
 
     private void populateGrpcAdviceBeans() {
@@ -176,7 +176,7 @@ public class AnnotationBasedGrpcExceptionResolver
         return ReflectionUtils.invokeMethod(method.getMethod(), method.getBean(), args);
     }
 
-    private StatusRuntimeException convertResponseToStatusRuntimeException(Object response, Throwable caughtException) {
+    private StatusRuntimeException convertResponseToStatusRuntimeException(Object response, Method method) {
         if (response instanceof StatusRuntimeException) {
             return (StatusRuntimeException) response;
         }
@@ -194,11 +194,8 @@ public class AnnotationBasedGrpcExceptionResolver
                     status, Optional.ofNullable(trailers).orElseGet(Metadata::new));
         }
 
-        log.warn(
-                "Caught exception {} but @GrpcExceptionHandler method returned null, ignoring it",
-                caughtException.getClass().getSimpleName());
-        throw new IllegalStateException("Unsupported return type for @GrpcExceptionHandler method: "
-                + response.getClass().getSimpleName());
+        throw new IllegalStateException(String.format(
+                "Unsupported return value (%s) for @GrpcExceptionHandler method: %s", response, formatMethod(method)));
     }
 
     private static Object[] getArgs(Method method, Throwable rootCause, ServerCall<?, ?> call, Metadata headers) {

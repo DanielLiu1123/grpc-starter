@@ -30,7 +30,9 @@ class ValidationExceptionUtil {
      * @return {@link StatusRuntimeException}
      */
     public static StatusRuntimeException asInvalidArgumentException(List<Violation> violations) {
-        String message = violations.stream().map(Violation::getMessage).collect(Collectors.joining(", "));
+        String message = violations.stream()
+                .map(e -> e.getFieldPath() + ": " + e.getMessage())
+                .collect(Collectors.joining(", "));
         return new StatusRuntimeException(Status.INVALID_ARGUMENT.withDescription(message));
     }
 }

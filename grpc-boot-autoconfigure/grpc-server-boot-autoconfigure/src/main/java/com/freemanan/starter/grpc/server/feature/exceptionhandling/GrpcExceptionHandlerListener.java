@@ -5,6 +5,7 @@ import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.StatusRuntimeException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @param <I> input/request message type
@@ -56,8 +57,8 @@ public class GrpcExceptionHandlerListener<I, O> extends SimpleForwardingServerCa
         for (GrpcExceptionResolver resolver : grpcExceptionResolvers) {
             StatusRuntimeException sre = resolver.resolve(e, call, headers);
             if (sre != null) {
-                Metadata trailers = sre.getTrailers() != null ? sre.getTrailers() : new Metadata();
-                call.close(sre.getStatus(), trailers);
+                call.close(
+                        sre.getStatus(), Optional.ofNullable(sre.getTrailers()).orElseGet(Metadata::new));
                 return true;
             }
         }

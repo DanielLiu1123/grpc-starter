@@ -10,6 +10,7 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import io.grpc.Status;
+import java.util.Optional;
 import org.springframework.core.PriorityOrdered;
 
 /**
@@ -59,10 +60,11 @@ public class GrpcRequestContextServerInterceptor implements ServerInterceptor, P
 
         @Override
         public void close(Status status, Metadata trailers) {
+            Metadata trailersToUse = Optional.ofNullable(trailers).orElseGet(Metadata::new);
 
-            setResponseMetadata(trailers);
+            setResponseMetadata(trailersToUse);
 
-            super.close(truncateDescriptionIfNecessary(status), trailers);
+            super.close(truncateDescriptionIfNecessary(status), trailersToUse);
         }
 
         private Status truncateDescriptionIfNecessary(Status status) {

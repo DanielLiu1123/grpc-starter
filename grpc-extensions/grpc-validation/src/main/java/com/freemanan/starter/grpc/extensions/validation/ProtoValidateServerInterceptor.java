@@ -12,6 +12,7 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import io.grpc.StatusRuntimeException;
+import java.util.Optional;
 import org.springframework.core.Ordered;
 
 /**
@@ -52,7 +53,9 @@ public class ProtoValidateServerInterceptor implements ServerInterceptor, Ordere
                 } else {
                     StatusRuntimeException sre = asInvalidArgumentException(result.getViolations());
                     aborted = true;
-                    call.close(sre.getStatus(), sre.getTrailers());
+                    call.close(
+                            sre.getStatus(),
+                            Optional.ofNullable(sre.getTrailers()).orElseGet(Metadata::new));
                 }
             }
 
