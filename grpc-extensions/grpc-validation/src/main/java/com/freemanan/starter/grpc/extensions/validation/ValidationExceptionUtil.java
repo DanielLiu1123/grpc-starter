@@ -7,6 +7,7 @@ import io.grpc.StatusRuntimeException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Freeman
@@ -30,7 +31,17 @@ class ValidationExceptionUtil {
      * @return {@link StatusRuntimeException}
      */
     public static StatusRuntimeException asInvalidArgumentException(List<Violation> violations) {
-        String message = violations.stream().map(Violation::getMessage).collect(Collectors.joining(", "));
+        String message = violations.stream()
+                .map(ValidationExceptionUtil::getErrorMessage)
+                .collect(Collectors.joining(", "));
         return new StatusRuntimeException(Status.INVALID_ARGUMENT.withDescription(message));
+    }
+
+    private static String getErrorMessage(Violation violation) {
+        String field = violation.getFieldPath();
+        if (StringUtils.hasText(field)) {
+            return field + ": " + violation.getMessage();
+        }
+        return violation.getMessage();
     }
 }
