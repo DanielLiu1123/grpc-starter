@@ -12,7 +12,7 @@ dependencies {
 
     testImplementation(project(":grpc-starters:grpc-starter-test"))
     testImplementation(project(":grpc-starters:grpc-boot-starter"))
-    testImplementation("com.freemanan:classpath-replacer-junit5:${classpathReplacerVersion}")
+    testImplementation("com.freemanan:classpath-replacer-junit5")
 }
 
 apply from: "${rootDir}/gradle/deploy.gradle"

@@ -5,6 +5,7 @@ on:
       - main
       - 3.1.x
       - 2.7.x
+      - test-include-builder
   pull_request:
     branches:
       - main

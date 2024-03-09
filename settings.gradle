@@ -48,3 +48,4 @@ include(":examples:user:user-api")
 include(":examples:user:user-server")
 
 apply from: 'https://raw.githubusercontent.com/DanielLiu1123/gradle-include-builder/feat-include-builder/include-build.gradle'
+//apply from: '../gradle-include-builder/include-build.gradle'

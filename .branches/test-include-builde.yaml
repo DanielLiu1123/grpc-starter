@@ -1,0 +1,4 @@
+httpexchange-spring-boot-starter:
+  branch: main
+classpath-replacer:
+  branch: main

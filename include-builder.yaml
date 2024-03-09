@@ -1,10 +1,14 @@
 branch-mapping-dir: .branches
 try-same-branch: true
 projects:
-  - name: httpexchange-spring-boot-starter
-    local:
-      dir: '../httpexchange-spring-boot-starter'
+  - local:
+      dir: ../httpexchange-spring-boot-starter
     remote:
       git:
         url: https://github.com/DanielLiu1123/httpexchange-spring-boot-starter
-#        branch: main
+  - local:
+      dir: ../classpath-replacer
+    remote:
+      git:
+        url: https://github.com/DanielLiu1123/classpath-replacer
+    try-same-branch: false

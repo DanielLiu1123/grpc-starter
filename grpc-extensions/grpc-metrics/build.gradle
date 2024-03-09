@@ -14,7 +14,7 @@ dependencies {
     testImplementation(project(":grpc-starters:grpc-boot-starter"))
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("com.freemanan:classpath-replacer-junit5:${classpathReplacerVersion}")
+    testImplementation("com.freemanan:classpath-replacer-junit5")
 }
 
 apply from: "${rootDir}/gradle/deploy.gradle"
