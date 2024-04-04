@@ -10,7 +10,6 @@ import io.grpc.TlsServerCredentials;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.internal.GrpcUtil;
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -178,7 +177,7 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
     }
 
     private void gracefulShutdown() {
-        Duration timeout = Duration.ofMillis(properties.getShutdownTimeout());
+        long start = System.currentTimeMillis();
 
         // stop accepting new calls
         server.shutdown();
@@ -186,9 +185,8 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
         // publish shutdown event, user can listen to the event to complete the StreamObserver manually
         publisher.publishEvent(new GrpcServerShutdownEvent(server));
 
-        long start = System.currentTimeMillis();
         try {
-            long time = timeout.toMillis();
+            long time = properties.getShutdownTimeout();
             if (time > 0L) {
                 server.awaitTermination(time, TimeUnit.MILLISECONDS);
             } else {
