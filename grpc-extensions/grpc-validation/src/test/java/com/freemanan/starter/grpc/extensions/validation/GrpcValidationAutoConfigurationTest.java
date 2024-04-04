@@ -70,9 +70,7 @@ class GrpcValidationAutoConfigurationTest {
     }
 
     @Test
-    @ClasspathReplacer(
-            value = {@Action(verb = EXCLUDE, value = "build.buf:protovalidate")},
-            recursiveExclude = true)
+    @ClasspathReplacer(value = {@Action(verb = EXCLUDE, value = "build.buf:protovalidate")})
     void testWithoutProtoValidate() {
         ApplicationContextRunner runner = new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(GrpcValidationAutoConfiguration.class));
