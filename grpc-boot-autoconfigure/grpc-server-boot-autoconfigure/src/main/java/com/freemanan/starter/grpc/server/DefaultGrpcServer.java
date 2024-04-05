@@ -125,7 +125,14 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
             server.start();
             isRunning.set(true);
             if (log.isInfoEnabled()) {
-                log.info("gRPC server started on port: {} ({})", server.getPort(), GrpcUtil.getGrpcBuildVersion());
+                if (properties.getInProcess() != null
+                        && StringUtils.hasText(properties.getInProcess().getName())) {
+                    log.info(
+                            "gRPC in-process server started: {}",
+                            properties.getInProcess().getName());
+                } else {
+                    log.info("gRPC server started on port: {} ({})", server.getPort(), GrpcUtil.getGrpcBuildVersion());
+                }
             }
 
             publisher.publishEvent(new GrpcServerStartedEvent(server));
