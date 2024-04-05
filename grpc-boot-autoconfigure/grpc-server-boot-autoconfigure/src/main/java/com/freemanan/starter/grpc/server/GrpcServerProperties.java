@@ -32,9 +32,9 @@ public class GrpcServerProperties {
      */
     private int port = 9090;
     /**
-     * Graceful shutdown timeout, default {@code 5s}, if {@code 0} will wait forever util all active calls finished.
+     * Graceful shutdown timeout, default {@code 30s}, if {@code 0} will wait forever util all active calls finished.
      */
-    private long shutdownTimeout = 5000L;
+    private long shutdownTimeout = 30000L;
     /**
      * Whether to start a gRPC server when no service found, default {@code true}.
      */
