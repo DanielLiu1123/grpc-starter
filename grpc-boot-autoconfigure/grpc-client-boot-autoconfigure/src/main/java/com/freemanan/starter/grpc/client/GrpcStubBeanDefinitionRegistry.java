@@ -10,6 +10,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * {@link GrpcStubBeanDefinitionRegistry} registers the bean definitions for gRPC stubs based on the configuration provided.
+ *
  * @author Freeman
  */
 class GrpcStubBeanDefinitionRegistry implements BeanDefinitionRegistryPostProcessor, EnvironmentAware {

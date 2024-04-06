@@ -1,0 +1,5 @@
+grpc:
+  client:
+    refresh:
+      enabled: true
+    base-packages: [ io.grpc ]

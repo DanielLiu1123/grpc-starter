@@ -1,5 +1,6 @@
 package com.freemanan.starter.grpc.server;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.grpc.BindableService;
 import io.grpc.Grpc;
 import io.grpc.Server;
@@ -10,7 +11,7 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.internal.GrpcUtil;
 import jakarta.annotation.Nullable;
 import java.io.IOException;
-import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,6 +24,7 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.util.unit.DataSize;
 
 /**
  * gRPC server.
@@ -40,6 +42,7 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
 
     private ApplicationEventPublisher publisher;
 
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public DefaultGrpcServer(
             GrpcServerProperties properties,
             ObjectProvider<ServerBuilder<?>> serverBuilder,
@@ -66,8 +69,14 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
                 .sorted(AnnotationAwareOrderComparator.INSTANCE.reversed())
                 .forEach(builder::intercept);
 
-        builder.maxInboundMessageSize((int) properties.getMaxMessageSize().toBytes());
-        builder.maxInboundMetadataSize((int) properties.getMaxMetadataSize().toBytes());
+        Optional.ofNullable(properties.getMaxInboundMessageSize())
+                .map(DataSize::toBytes)
+                .map(Long::intValue)
+                .ifPresent(builder::maxInboundMessageSize);
+        Optional.ofNullable(properties.getMaxInboundMetadataSize())
+                .map(DataSize::toBytes)
+                .map(Long::intValue)
+                .ifPresent(builder::maxInboundMetadataSize);
 
         // apply customizers
         customizers.orderedStream().forEach(customizer -> customizer.customize(builder));
@@ -117,7 +126,14 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
             server.start();
             isRunning.set(true);
             if (log.isInfoEnabled()) {
-                log.info("gRPC server started on port: {} ({})", server.getPort(), GrpcUtil.getGrpcBuildVersion());
+                if (properties.getInProcess() != null
+                        && StringUtils.hasText(properties.getInProcess().getName())) {
+                    log.info(
+                            "gRPC in-process server started: {}",
+                            properties.getInProcess().getName());
+                } else {
+                    log.info("gRPC server started on port: {} ({})", server.getPort(), GrpcUtil.getGrpcBuildVersion());
+                }
             }
 
             publisher.publishEvent(new GrpcServerStartedEvent(server));
@@ -175,7 +191,7 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
     }
 
     private void gracefulShutdown() {
-        Duration timeout = Duration.ofMillis(properties.getShutdownTimeout());
+        long start = System.currentTimeMillis();
 
         // stop accepting new calls
         server.shutdown();
@@ -183,9 +199,8 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
         // publish shutdown event, user can listen to the event to complete the StreamObserver manually
         publisher.publishEvent(new GrpcServerShutdownEvent(server));
 
-        long start = System.currentTimeMillis();
         try {
-            long time = timeout.toMillis();
+            long time = properties.getShutdownTimeout();
             if (time > 0L) {
                 server.awaitTermination(time, TimeUnit.MILLISECONDS);
             } else {

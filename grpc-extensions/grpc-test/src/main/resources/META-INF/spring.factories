@@ -1,6 +1,2 @@
-# for Spring Boot 2.x
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.freemanan.starter.grpc.extensions.test.GrpcTestAutoConfiguration
-
 org.springframework.boot.env.EnvironmentPostProcessor=\
   com.freemanan.starter.grpc.extensions.test.GrpcTestEnvironmentPostProcessor

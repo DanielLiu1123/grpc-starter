@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
@@ -58,13 +59,9 @@ class GrpcStubBeanRegistrar {
         registerBeans4BasePackages(packages);
     }
 
+    @SneakyThrows
     public void registerGrpcStubBean(String className) {
-        Class<?> clz;
-        try {
-            clz = Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException(e);
-        }
+        Class<?> clz = Class.forName(className);
 
         Assert.isInstanceOf(BeanFactory.class, registry, "BeanDefinitionRegistry must be instance of BeanFactory");
 

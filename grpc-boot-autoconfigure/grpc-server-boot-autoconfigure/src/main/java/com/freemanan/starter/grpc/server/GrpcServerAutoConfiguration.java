@@ -41,8 +41,9 @@ public class GrpcServerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public GrpcRequestContextServerInterceptor grpcRequestContextServerInterceptor() {
-        return new GrpcRequestContextServerInterceptor();
+    public GrpcRequestContextServerInterceptor grpcRequestContextServerInterceptor(
+            GrpcServerProperties grpcServerProperties) {
+        return new GrpcRequestContextServerInterceptor(grpcServerProperties);
     }
 
     @Configuration(proxyBeanMethods = false)

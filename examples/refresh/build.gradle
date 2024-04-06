@@ -1,0 +1,10 @@
+dependencies {
+    implementation(project(":grpc-starters:grpc-boot-starter"))
+    implementation("io.grpc:grpc-testing-proto")
+    implementation("org.springframework.cloud:spring-cloud-context")
+
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
+}
+
+apply from: "${rootDir}/gradle/protobuf.gradle"
+

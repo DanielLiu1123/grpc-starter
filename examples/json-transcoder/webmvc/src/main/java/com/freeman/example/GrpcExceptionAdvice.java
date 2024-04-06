@@ -19,7 +19,8 @@ public class GrpcExceptionAdvice {
     @ExceptionHandler(StatusRuntimeException.class)
     public ResponseEntity<ErrorResponse> handleStatusRuntimeException(StatusRuntimeException sre) {
         HttpStatus httpStatus = GrpcUtil.toHttpStatus(sre.getStatus());
-        return ResponseEntity.status(httpStatus).body(new ErrorResponse(httpStatus.value(), sre.getMessage(), null));
+        return ResponseEntity.status(httpStatus)
+                .body(new ErrorResponse(httpStatus.value(), sre.getStatus().getDescription(), null));
     }
 
     @Data

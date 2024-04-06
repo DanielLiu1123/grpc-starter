@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -159,8 +161,14 @@ public abstract class AbstractHandlerAdaptor
                 : ManagedChannelBuilder.forAddress(
                         "127.0.0.1", event.getSource().getPort());
 
-        builder.maxInboundMessageSize((int) properties.getMaxMessageSize().toBytes());
-        builder.maxInboundMetadataSize((int) properties.getMaxMetadataSize().toBytes());
+        Optional.ofNullable(properties.getMaxInboundMessageSize())
+                .map(DataSize::toBytes)
+                .map(Long::intValue)
+                .ifPresent(builder::maxInboundMessageSize);
+        Optional.ofNullable(properties.getMaxInboundMetadataSize())
+                .map(DataSize::toBytes)
+                .map(Long::intValue)
+                .ifPresent(builder::maxInboundMetadataSize);
 
         builder.usePlaintext();
 

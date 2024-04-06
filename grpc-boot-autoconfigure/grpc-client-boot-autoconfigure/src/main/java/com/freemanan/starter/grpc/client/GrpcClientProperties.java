@@ -1,7 +1,9 @@
 package com.freemanan.starter.grpc.client;
 
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toMap;
 
+import io.grpc.Deadline;
 import io.grpc.TlsChannelCredentials;
 import io.grpc.health.v1.HealthGrpc;
 import io.grpc.internal.GrpcUtil;
@@ -16,6 +18,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.PropertyMapper;
 import org.springframework.core.io.Resource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.unit.DataSize;
@@ -48,17 +51,26 @@ public class GrpcClientProperties implements InitializingBean {
      */
     private List<String> basePackages = new ArrayList<>();
     /**
-     * Default max message size, default value is {@code 4MB}.
+     * Default max inbound message size, default value is {@code 4MB}.
      *
      * @see DataSize
+     * @see GrpcUtil#DEFAULT_MAX_MESSAGE_SIZE
      */
-    private DataSize maxMessageSize = DataSize.ofBytes(GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE);
+    private DataSize maxInboundMessageSize;
+    /**
+     * Default max outbound message size.
+     *
+     * @see DataSize
+     * @see AbstractStub#withMaxOutboundMessageSize(int)
+     */
+    private DataSize maxOutboundMessageSize;
     /**
      * Default max metadata size, default value is {@code 8KB}.
      *
      * @see DataSize
+     * @see GrpcUtil#DEFAULT_MAX_HEADER_LIST_SIZE
      */
-    private DataSize maxMetadataSize = DataSize.ofBytes(GrpcUtil.DEFAULT_MAX_HEADER_LIST_SIZE);
+    private DataSize maxInboundMetadataSize;
     /**
      * Default metadata will be added to all the gRPC requests.
      */
@@ -72,6 +84,27 @@ public class GrpcClientProperties implements InitializingBean {
      */
     private Long shutdownTimeout = 5000L;
     /**
+     * TLS configuration.
+     */
+    private Tls tls;
+    /**
+     * Retry configuration.
+     */
+    private Retry retry;
+    /**
+     * Deadline after in milliseconds, default value is {@code 5000}.
+     *
+     * @see AbstractStub#withDeadline(Deadline)
+     * @since 3.2.0
+     */
+    private Long deadline;
+    /**
+     * Compression configuration.
+     *
+     * @see AbstractStub#withCompression(String)
+     */
+    private String compression;
+    /**
      * Channels configuration.
      */
     private List<Channel> channels = new ArrayList<>();
@@ -80,9 +113,9 @@ public class GrpcClientProperties implements InitializingBean {
      */
     private Refresh refresh = new Refresh();
     /**
-     * TLS configuration.
+     * Whether to enable warn unused config, default {@code true}.
      */
-    private Tls tls;
+    private boolean warnUnusedConfigEnabled = true;
 
     @Override
     public void afterPropertiesSet() {
@@ -102,13 +135,17 @@ public class GrpcClientProperties implements InitializingBean {
          */
         private String authority;
         /**
-         * Max message size for this channel, use {@link GrpcClientProperties#maxMessageSize} if not set.
+         * Max inbound message size, use {@link GrpcClientProperties#maxInboundMessageSize} if not set.
          */
-        private DataSize maxMessageSize;
+        private DataSize maxInboundMessageSize;
         /**
-         * Max metadata size for this channel, use {@link GrpcClientProperties#maxMetadataSize} if not set.
+         * Max outbound message size, use {@link GrpcClientProperties#maxOutboundMessageSize} if not set.
          */
-        private DataSize maxMetadataSize;
+        private DataSize maxOutboundMessageSize;
+        /**
+         * Max metadata size for this channel, use {@link GrpcClientProperties#maxInboundMetadataSize} if not set.
+         */
+        private DataSize maxInboundMetadataSize;
         /**
          * Channel shutdown timeout in milliseconds, use {@link GrpcClientProperties#shutdownTimeout} if not set.
          */
@@ -125,6 +162,22 @@ public class GrpcClientProperties implements InitializingBean {
          * TLS configuration for this channel, use {@link GrpcClientProperties#tls} if not set.
          */
         private Tls tls;
+        /**
+         * Retry configuration for this channel, use {@link GrpcClientProperties#retry} if not set.
+         */
+        private Retry retry;
+        /**
+         * Deadline after in milliseconds, use {@link GrpcClientProperties#deadline} if not set.
+         *
+         * @see AbstractStub#withDeadline(Deadline)
+         */
+        private Long deadline;
+        /**
+         * Compression for this channel, use {@link GrpcClientProperties#compression} if not set.
+         *
+         * @see AbstractStub#withCompression(String)
+         */
+        private String compression;
         /**
          * gRPC stub classes to apply this channel.
          *
@@ -198,6 +251,36 @@ public class GrpcClientProperties implements InitializingBean {
     }
 
     @Data
+    public static class Retry {
+        public static final String PREFIX = GrpcClientProperties.PREFIX + ".retry";
+        /**
+         * Whether to enable retry.
+         *
+         * @see io.grpc.ManagedChannelBuilder#enableRetry()
+         * @see io.grpc.ManagedChannelBuilder#disableRetry()
+         */
+        private Boolean enabled;
+        /**
+         * Maximum number of attempts to retry.
+         *
+         * @see io.grpc.ManagedChannelBuilder#maxRetryAttempts(int)
+         */
+        private Integer maxRetryAttempts;
+        /**
+         * The maximum number of retry buffer entries.
+         *
+         * @see io.grpc.ManagedChannelBuilder#retryBufferSize(long)
+         */
+        private DataSize retryBufferSize;
+        /**
+         * The maximum number of retry buffer entries per RPC.
+         *
+         * @see io.grpc.ManagedChannelBuilder#perRpcBufferLimit(long)
+         */
+        private DataSize perRpcBufferLimit;
+    }
+
+    @Data
     public static class Refresh {
         public static final String PREFIX = GrpcClientProperties.PREFIX + ".refresh";
 
@@ -251,26 +334,28 @@ public class GrpcClientProperties implements InitializingBean {
     /**
      * Merge default properties with channel specified properties.
      */
-    public void merge() {
+    void merge() {
+        PropertyMapper mapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
         for (Channel stub : channels) {
-            if (stub.getAuthority() == null) {
-                stub.setAuthority(authority);
-            }
-            if (stub.getMaxMessageSize() == null) {
-                stub.setMaxMessageSize(maxMessageSize);
-            }
-            if (stub.getMaxMetadataSize() == null) {
-                stub.setMaxMetadataSize(maxMetadataSize);
-            }
-            if (stub.getShutdownTimeout() == null) {
-                stub.setShutdownTimeout(shutdownTimeout);
-            }
-            if (stub.getInProcess() == null) {
-                stub.setInProcess(inProcess);
-            }
-            if (stub.getTls() == null) {
-                stub.setTls(tls);
-            }
+            mapper.from(authority).when(e -> isNull(stub.getAuthority())).to(stub::setAuthority);
+            mapper.from(maxInboundMessageSize)
+                    .when(e -> isNull(stub.getMaxInboundMessageSize()))
+                    .to(stub::setMaxInboundMessageSize);
+            mapper.from(maxOutboundMessageSize)
+                    .when(e -> isNull(stub.getMaxOutboundMessageSize()))
+                    .to(stub::setMaxOutboundMessageSize);
+            mapper.from(maxInboundMetadataSize)
+                    .when(e -> isNull(stub.getMaxInboundMetadataSize()))
+                    .to(stub::setMaxInboundMetadataSize);
+            mapper.from(shutdownTimeout)
+                    .when(e -> isNull(stub.getShutdownTimeout()))
+                    .to(stub::setShutdownTimeout);
+            mapper.from(inProcess).when(e -> isNull(stub.getInProcess())).to(stub::setInProcess);
+            mapper.from(tls).when(e -> isNull(stub.getTls())).to(stub::setTls);
+            mapper.from(retry).when(e -> isNull(stub.getRetry())).to(stub::setRetry);
+            mapper.from(deadline).when(e -> isNull(stub.getDeadline())).to(stub::setDeadline);
+            mapper.from(compression).when(e -> isNull(stub.getCompression())).to(stub::setCompression);
+
             // default + client specified
             LinkedHashMap<String, List<String>> total = metadata.stream()
                     .collect(toMap(Metadata::getKey, Metadata::getValues, (oldV, newV) -> oldV, LinkedHashMap::new));
@@ -288,12 +373,16 @@ public class GrpcClientProperties implements InitializingBean {
         return new Channel(
                 "__default__",
                 authority,
-                maxMessageSize,
-                maxMetadataSize,
+                maxInboundMessageSize,
+                maxOutboundMessageSize,
+                maxInboundMetadataSize,
                 shutdownTimeout,
                 metadata,
                 inProcess,
                 tls,
+                retry,
+                deadline,
+                compression,
                 null,
                 null,
                 null);

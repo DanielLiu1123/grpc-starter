@@ -54,6 +54,7 @@ allprojects {
         annotationProcessor("org.projectlombok:lombok")
         testCompileOnly("org.projectlombok:lombok")
         testAnnotationProcessor("org.projectlombok:lombok")
+        compileOnly("com.github.spotbugs:spotbugs-annotations:${spotbugsAnnotationsVersion}")
     }
     // spotless
     apply plugin: 'com.diffplug.spotless'
@@ -90,4 +91,4 @@ tasks.register('installGitHook', Copy) {
     into { new File(rootProject.rootDir, '.git/hooks') }
     fileMode 0775
 }
-compileJava.dependsOn installGitHook
+installGitHook

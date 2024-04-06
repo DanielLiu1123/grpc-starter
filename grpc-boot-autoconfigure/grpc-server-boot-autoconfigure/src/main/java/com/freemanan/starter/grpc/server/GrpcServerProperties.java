@@ -1,5 +1,8 @@
 package com.freemanan.starter.grpc.server;
 
+import com.freemanan.starter.grpc.server.feature.exceptionhandling.annotation.DefaultGrpcExceptionAdvice;
+import io.grpc.StatusException;
+import io.grpc.StatusRuntimeException;
 import io.grpc.TlsServerCredentials;
 import io.grpc.internal.GrpcUtil;
 import io.grpc.protobuf.services.ChannelzService;
@@ -29,9 +32,9 @@ public class GrpcServerProperties {
      */
     private int port = 9090;
     /**
-     * Graceful shutdown timeout, default {@code 5s}, if {@code 0} will wait forever util all active calls finished.
+     * Graceful shutdown timeout, default {@code 30s}, if {@code 0} will wait forever util all active calls finished.
      */
-    private long shutdownTimeout = 5000L;
+    private long shutdownTimeout = 30000L;
     /**
      * Whether to start a gRPC server when no service found, default {@code true}.
      */
@@ -54,12 +57,16 @@ public class GrpcServerProperties {
     private ExceptionHandling exceptionHandling = new ExceptionHandling();
     /**
      * The maximum message size allowed to be received on the server, default {@code 4MB}.
+     *
+     * @see GrpcUtil#DEFAULT_MAX_MESSAGE_SIZE
      */
-    private DataSize maxMessageSize = DataSize.ofBytes(GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE);
+    private DataSize maxInboundMessageSize;
     /**
      * The maximum size of metadata allowed to be received, default {@code 8KB}.
+     *
+     * @see GrpcUtil#DEFAULT_MAX_HEADER_LIST_SIZE
      */
-    private DataSize maxMetadataSize = DataSize.ofBytes(GrpcUtil.DEFAULT_MAX_HEADER_LIST_SIZE);
+    private DataSize maxInboundMetadataSize;
     /**
      * In-process server configuration.
      */
@@ -68,6 +75,10 @@ public class GrpcServerProperties {
      * TLS configuration.
      */
     private Tls tls;
+    /**
+     * Response configuration.
+     */
+    private Response response = new Response();
 
     @Data
     public static class Reflection {
@@ -115,9 +126,9 @@ public class GrpcServerProperties {
              */
             private String validationQuery = "SELECT 1";
             /**
-             * {@link #validationQuery} timeout, unit seconds, default {@code 2} seconds.
+             * {@link #validationQuery} timeout, unit seconds.
              */
-            private int timeout = 2;
+            private Integer timeout;
         }
 
         @Data
@@ -159,6 +170,33 @@ public class GrpcServerProperties {
          * Whether to enable exception handling, default {@code true}
          */
         private boolean enabled = true;
+
+        /**
+         * Whether to enable {@link DefaultGrpcExceptionAdvice}, default {@code true}.
+         *
+         * <p> {@link DefaultGrpcExceptionAdvice} will handle exceptions recognized by gRPC, including:
+         * <ul>
+         *     <li>{@link StatusRuntimeException}</li>
+         *     <li>{@link StatusException}</li>
+         * </ul>
+         *
+         * <p> When enabled, you can directly throw {@link StatusRuntimeException} or {@link StatusException} in service implementation,
+         * and the exception will be handled by {@link DefaultGrpcExceptionAdvice}.
+         *
+         * <pre>{@code
+         * @GrpcService
+         * public class SimpleService extends SimpleServiceGrpc.SimpleServiceImplBase {
+         *     @Override
+         *     public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> responseObserver) {
+         *         throw new StatusRuntimeException(Status.INVALID_ARGUMENT.withDescription("Invalid request"));
+         *     }
+         * }
+         * }</pre>
+         *
+         * @see DefaultGrpcExceptionAdvice
+         * @since 3.2.3
+         */
+        private boolean defaultExceptionAdviceEnabled = true;
     }
 
     @Data
@@ -208,5 +246,18 @@ public class GrpcServerProperties {
              */
             private Resource rootCerts;
         }
+    }
+
+    @Data
+    public static class Response {
+
+        /**
+         * The maximum length of response description.
+         *
+         * <p> When the length of the description exceeds this value, it will be truncated.
+         *
+         * @since 3.2.3
+         */
+        private Integer maxDescriptionLength = 2048;
     }
 }

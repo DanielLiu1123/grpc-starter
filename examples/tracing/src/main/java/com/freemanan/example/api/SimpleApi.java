@@ -1,15 +1,15 @@
 package com.freemanan.example.api;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
 /**
  * @author Freeman
  */
-@RequestMapping("/simple")
+@HttpExchange("/simple")
 public interface SimpleApi {
 
-    @GetMapping
+    @GetExchange
     String get(@RequestParam String message);
 }

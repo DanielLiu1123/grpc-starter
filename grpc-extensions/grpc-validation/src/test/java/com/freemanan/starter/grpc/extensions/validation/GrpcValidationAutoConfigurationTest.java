@@ -1,10 +1,10 @@
 package com.freemanan.starter.grpc.extensions.validation;
 
+import static com.freemanan.cr.core.anno.Verb.EXCLUDE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.freemanan.cr.core.anno.Action;
 import com.freemanan.cr.core.anno.ClasspathReplacer;
-import com.freemanan.cr.core.anno.Verb;
 import io.envoyproxy.pgv.grpc.ValidatingClientInterceptor;
 import io.envoyproxy.pgv.grpc.ValidatingServerInterceptor;
 import org.junit.jupiter.api.Test;
@@ -70,9 +70,7 @@ class GrpcValidationAutoConfigurationTest {
     }
 
     @Test
-    @ClasspathReplacer(
-            value = {@Action(verb = Verb.EXCLUDE, value = "build.buf:protovalidate")},
-            recursiveExclude = true)
+    @ClasspathReplacer(value = {@Action(verb = EXCLUDE, value = "build.buf:protovalidate")})
     void testWithoutProtoValidate() {
         ApplicationContextRunner runner = new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(GrpcValidationAutoConfiguration.class));
@@ -88,9 +86,7 @@ class GrpcValidationAutoConfigurationTest {
     }
 
     @Test
-    @ClasspathReplacer(
-            value = {@Action(verb = Verb.EXCLUDE, value = "build.buf.protoc-gen-validate:pgv-java-grpc")},
-            recursiveExclude = true)
+    @ClasspathReplacer(value = {@Action(verb = EXCLUDE, value = "build.buf.protoc-gen-validate:pgv-java-stub")})
     void testWithoutPgv() {
         ApplicationContextRunner runner = new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(GrpcValidationAutoConfiguration.class));

@@ -82,7 +82,7 @@ By default, the maximum message size for the gRPC server is 4MB, and you can mod
 ```yaml
 grpc:
   server:
-    max-message-size: 16MB
+    max-inbound-message-size: 16MB
 ```
 
 ## Maximum Metadata Size Configuration
@@ -93,7 +93,7 @@ configuration:
 ```yaml
 grpc:
   server:
-    max-metadata-size: 16KB
+    max-inbound-metadata-size: 16KB
 ```
 
 ## Related Configuration
@@ -103,6 +103,6 @@ grpc:
   server:
     port: 9090
     enable-empty-server: true
-    max-message-size: 4MB
-    max-metadata-size: 8KB
+    max-inbound-message-size: 4MB
+    max-inbound-metadata-size: 8KB
 ```

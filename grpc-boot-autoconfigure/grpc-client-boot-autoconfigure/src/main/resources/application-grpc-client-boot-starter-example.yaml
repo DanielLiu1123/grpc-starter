@@ -1,35 +1,41 @@
 grpc:
   client:
     enabled: true
-    base-packages: [com.example]   # base packages to scan for stubs
-    authority: localhost:9090      # global default authority
-    max-message-size: 4MB          # global default max message size
-    max-metadata-size: 8KB         # global default max metadata size
+    base-packages: [com.example]         # base packages to scan for stubs
+    authority: localhost:9090            # global default authority
+    max-inbound-message-size: 4MB        # global default max message size
+    max-outbound-message-size: 4MB       # global default max message size
+    deadline: 10000                      # global default deadline
+    max-inbound-metadata-size: 8KB       # global default max metadata size
+    retry:
+      enabled: true                      # enable retry
+      max-retry-attempts: 3              # max retry attempts
+    compression: gzip                    # global default compression
     refresh:
-      enabled: true                # enable dynamic refresh grpc channel
+      enabled: true                      # enable dynamic refresh grpc channel
     tls:
       trust-manager:
         root-certs: classpath:ca.crt
-    metadata:                      # global default metadata
+    metadata:                            # global default metadata
       - key: foo1
         values: [bar1, bar2]
     channels:
-      - authority: localhost:9090  # override default authority
-        max-message-size: 8MB      # override default max message size
-        max-metadata-size: 16KB    # override default max metadata size
-        metadata:                  # merge with default metadata, result is {foo1=[bar1, bar2], foo2=[bar3, bar4]}
+      - authority: localhost:9090        # override default authority
+        max-inbound-message-size: 8MB    # override default max message size
+        max-inbound-metadata-size: 16KB          # override default max metadata size
+        metadata:                        # merge with default metadata, result is {foo1=[bar1, bar2], foo2=[bar3, bar4]}
           - key: foo2
             values: [bar3, bar4]
-        services:                  # services to apply this channel
+        services:                        # services to apply this channel
           - fm.foo.v1.FooService
           - grpc.**
           - pet.v*.**.*Service
-        stubs:                     # stub classes to apply this channel, use this or services/classes, not this first if both set
+        stubs:                           # stub classes to apply this channel, use this or services/classes, not this first if both set
           - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceBlockingStub
           - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceStub
-        classes:                   # classes to apply this channel, use this or services/stubs, not this first if both set
+        classes:                         # classes to apply this channel, use this or services/stubs, not this first if both set
           - io.grpc.health.v1.HealthGrpc.HealthBlockingStub
       - in-process:
-          name: whatever           # in-process channel name
+          name: whatever                 # in-process channel name
         classes:
           - io.grpc.reflection.v1alpha.ServerReflectionGrpc.ServerReflectionStub

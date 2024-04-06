@@ -18,7 +18,9 @@ class GrpcServerIT {
 
     @Test
     void testGrpcServer() {
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class).run();
+        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+                .properties("grpc.server.port=0")
+                .run();
 
         assertThatCode(() -> ctx.getBean(GrpcServerProperties.class)).doesNotThrowAnyException();
         assertThatCode(() -> ctx.getBean(DefaultGrpcServer.class)).doesNotThrowAnyException();
@@ -45,6 +47,7 @@ class GrpcServerIT {
     @Test
     void testReflectionEnabled() {
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+                .properties("grpc.server.port=0")
                 .properties(GrpcServerProperties.PREFIX + ".reflection.enabled=true")
                 .run();
 
@@ -68,7 +71,9 @@ class GrpcServerIT {
 
     @Test
     void testEmptyServerEnabled() {
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class).run();
+        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+                .properties("grpc.server.port=0")
+                .run();
 
         GrpcServer server = ctx.getBean(GrpcServer.class);
 

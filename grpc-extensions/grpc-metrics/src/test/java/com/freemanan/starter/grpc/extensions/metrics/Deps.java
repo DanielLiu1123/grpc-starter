@@ -7,5 +7,5 @@ public final class Deps {
 
     private Deps() {}
 
-    public static final String SPRING_BOOT_VERSION = "3.2.0";
+    public static final String SPRING_BOOT_VERSION = "3.2.4";
 }

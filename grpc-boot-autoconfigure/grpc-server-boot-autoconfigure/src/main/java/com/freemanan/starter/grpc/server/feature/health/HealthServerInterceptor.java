@@ -56,8 +56,8 @@ public class HealthServerInterceptor implements ServerInterceptor {
                         next.startCall(call, headers)) {
                     @Override
                     public void onMessage(ReqT message) {
-                        if (message instanceof HealthCheckRequest) {
-                            changeServiceHealthStatus((HealthCheckRequest) message);
+                        if (message instanceof HealthCheckRequest req) {
+                            changeServiceHealthStatus(req);
                         }
                         super.onMessage(message);
                     }
