@@ -3,7 +3,7 @@ package com.freemanan.starter.grpc.extensions.jsontranscoder;
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.REACTIVE;
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.SERVLET;
 
-import com.freemanan.starter.grpc.extensions.jsontranscoder.web.JsonTranscoderRouterFunction;
+import com.freemanan.starter.grpc.extensions.jsontranscoder.web.TranscodingRouterFunction;
 import com.freemanan.starter.grpc.extensions.jsontranscoder.web.WebMvcGrpcServiceHandlerMapping;
 import com.freemanan.starter.grpc.extensions.jsontranscoder.web.WebMvcProtobufHandlerAdaptor;
 import com.freemanan.starter.grpc.extensions.jsontranscoder.webflux.GrpcHandlerResultHandler;
@@ -30,7 +30,6 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.web.servlet.function.RouterFunction;
-import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerResponse;
 
 /**
@@ -78,8 +77,7 @@ public class GrpcJsonTranscoderAutoConfiguration {
 
         @Bean
         public RouterFunction<ServerResponse> webMvcTranscodingRouterFunction(List<BindableService> services) {
-            JsonTranscoderRouterFunction rf = new JsonTranscoderRouterFunction(services);
-            return RouterFunctions.route(rf, rf);
+            return new TranscodingRouterFunction(services);
         }
     }
 

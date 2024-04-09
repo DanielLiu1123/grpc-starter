@@ -22,13 +22,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.function.HandlerFunction;
-import org.springframework.web.servlet.function.RequestPredicate;
+import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
@@ -38,18 +40,17 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * @author Freeman
  * @since 3.3.0
  */
-public class JsonTranscoderRouterFunction
-        implements RequestPredicate, HandlerFunction<ServerResponse>, SmartInitializingSingleton {
+public class TranscodingRouterFunction
+        implements RouterFunction<ServerResponse>, HandlerFunction<ServerResponse>, SmartInitializingSingleton {
 
-    private static final String MATCHING_ROUTE = JsonTranscoderRouterFunction.class + ".matchingRoute";
+    private static final String MATCHING_ROUTE = TranscodingRouterFunction.class + ".matchingRoute";
 
-    private final List<ServerServiceDefinition> definitions;
+    private final List<ServerServiceDefinition> definitions = new ArrayList<>();
     private final List<Route> routes = new ArrayList<>();
     private Channel channel;
 
-    public JsonTranscoderRouterFunction(List<BindableService> bindableServices) {
-        this.definitions =
-                bindableServices.stream().map(BindableService::bindService).toList();
+    public TranscodingRouterFunction(List<BindableService> bindableServices) {
+        bindableServices.stream().map(BindableService::bindService).forEach(definitions::add);
     }
 
     @Override
@@ -58,23 +59,25 @@ public class JsonTranscoderRouterFunction
     }
 
     @Override
-    public boolean test(@Nonnull ServerRequest request) {
+    @Nonnull
+    public Optional<HandlerFunction<ServerResponse>> route(@Nonnull ServerRequest request) {
         for (Route route : routes) {
             if (route.predicate().test(request)) {
                 request.attributes().put(MATCHING_ROUTE, route);
-                return true;
+                return Optional.of(this);
             }
         }
-        return false;
+        return Optional.empty();
     }
 
     @Override
     @Nonnull
     public ServerResponse handle(@Nonnull ServerRequest request) throws Exception {
         ClientCall<Object, Object> call = getClientCall(request);
+        Route route = (Route) request.attributes().get(MATCHING_ROUTE);
 
         call.start(
-                new ClientCall.Listener<Object>() {
+                new ClientCall.Listener<>() {
                     @Override
                     public void onMessage(Object message) {
                         super.onMessage(message);
@@ -95,7 +98,6 @@ public class JsonTranscoderRouterFunction
         return (ClientCall<Object, Object>) channel.newCall(route.methodDescriptor(), CallOptions.DEFAULT);
     }
 
-    @SuppressWarnings("unchecked")
     private void init() {
         for (ServerServiceDefinition ssd : definitions) {
             Descriptors.ServiceDescriptor serviceDescriptor = getServiceDescriptor(ssd);
@@ -104,14 +106,14 @@ public class JsonTranscoderRouterFunction
             Map<String, Descriptors.MethodDescriptor> methodNameToMethodDescriptor =
                     serviceDescriptor.getMethods().stream()
                             .collect(Collectors.toMap(Descriptors.MethodDescriptor::getName, Function.identity()));
-
-            for (ServerMethodDefinition<?, ?> method : ssd.getMethods()) {
-                MethodDescriptor<?, ?> md = method.getMethodDescriptor();
+            for (ServerMethodDefinition<?, ?> serverMethodDefinition : ssd.getMethods()) {
+                MethodDescriptor<?, ?> md = serverMethodDefinition.getMethodDescriptor();
                 String methodName = md.getBareMethodName();
                 Descriptors.MethodDescriptor methodDescriptor = methodNameToMethodDescriptor.get(methodName);
                 if (methodDescriptor == null || !methodDescriptor.getOptions().hasExtension(AnnotationsProto.http)) {
                     continue;
                 }
+
                 HttpRule httpRule = methodDescriptor.getOptions().getExtension(AnnotationsProto.http);
                 switch (httpRule.getPatternCase()) {
                     case GET -> routes.add(new Route(
@@ -165,7 +167,9 @@ public class JsonTranscoderRouterFunction
         public boolean test(ServerRequest request) {
             if (!Objects.equals(request.method(), httpMethod)) return false;
 
-            var path = request.path();
+            String path = request.path();
+            path = StringUtils.trimLeadingCharacter(path, '/');
+            path = StringUtils.trimTrailingCharacter(path, '/');
             if (path.contains(":") && !pathTemplate.endsWithCustomVerb()) {
                 return false;
             }
