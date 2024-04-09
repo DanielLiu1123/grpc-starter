@@ -7,3 +7,14 @@ dependencies {
 
 apply from: "${rootDir}/gradle/deploy.gradle"
 apply from: "${rootDir}/gradle/protobuf.gradle"
+
+sourceSets {
+    main {
+        proto {
+            srcDirs "proto"
+        }
+        java {
+            srcDirs "proto"
+        }
+    }
+}

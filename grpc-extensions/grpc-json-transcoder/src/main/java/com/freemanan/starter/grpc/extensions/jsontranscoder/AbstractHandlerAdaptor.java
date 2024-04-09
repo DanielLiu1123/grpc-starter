@@ -87,7 +87,7 @@ public abstract class AbstractHandlerAdaptor
     }
 
     @SneakyThrows
-    protected Object applyInterceptor4Stub(ClientInterceptor clientInterceptor, Object stub) {
+    protected static Object applyInterceptor4Stub(ClientInterceptor clientInterceptor, Object stub) {
         return withInterceptorsMethod.invoke(stub, (Object) new ClientInterceptor[] {clientInterceptor});
     }
 

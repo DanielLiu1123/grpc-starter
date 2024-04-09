@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.experimental.UtilityClass;
@@ -31,6 +32,9 @@ import org.springframework.web.server.NotAcceptableStatusException;
  */
 @UtilityClass
 public class JsonTranscoderUtil {
+
+    public static final String TRANSCODING_SERVER_IN_PROCESS_NAME =
+            UUID.randomUUID().toString();
 
     public static boolean isUnaryGrpcMethod(Method method) {
         return method.getParameterCount() == 2

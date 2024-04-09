@@ -4,6 +4,7 @@ package sample.pet.v1;
 
 option java_multiple_files = true;
 option java_package = "com.freemanan.sample.pet.v1";
+option java_outer_classname = "PetProto";
 
 import "google/protobuf/wrappers.proto";
 import "google/api/annotations.proto";

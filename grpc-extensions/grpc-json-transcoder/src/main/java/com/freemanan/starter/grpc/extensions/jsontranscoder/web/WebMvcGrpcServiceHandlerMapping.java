@@ -69,6 +69,7 @@ public class WebMvcGrpcServiceHandlerMapping extends AbstractHandlerMapping impl
                     if (methodDescriptor != null
                             && methodDescriptor.getOptions().hasExtension(AnnotationsProto.http)) {
                         HttpRule httpRule = methodDescriptor.getOptions().getExtension(AnnotationsProto.http);
+
                         HandlerMethod hm = pathToMethod.get(
                                 "/" + method.getMethodDescriptor().getFullMethodName());
                         if (hm != null) {

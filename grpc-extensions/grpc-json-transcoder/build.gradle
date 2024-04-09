@@ -1,6 +1,7 @@
 dependencies {
     api(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
     api("com.google.protobuf:protobuf-java-util")
+    api("com.google.api:api-common:${googleApiCommonVersion}")
 
     compileOnly("org.springframework.boot:spring-boot-starter-web")
     compileOnly("org.springframework.boot:spring-boot-starter-webflux")
@@ -15,4 +16,4 @@ dependencies {
 }
 
 apply from: "${rootDir}/gradle/deploy.gradle"
-apply from: "${rootDir}/gradle/protobuf-with-pgv.gradle"
+apply from: "${rootDir}/gradle/protobuf.gradle"

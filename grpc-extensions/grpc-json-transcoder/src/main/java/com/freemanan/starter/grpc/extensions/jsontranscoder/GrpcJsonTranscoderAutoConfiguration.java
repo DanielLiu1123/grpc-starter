@@ -3,13 +3,18 @@ package com.freemanan.starter.grpc.extensions.jsontranscoder;
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.REACTIVE;
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.SERVLET;
 
+import com.freemanan.starter.grpc.extensions.jsontranscoder.web.JsonTranscoderRouterFunction;
 import com.freemanan.starter.grpc.extensions.jsontranscoder.web.WebMvcGrpcServiceHandlerMapping;
 import com.freemanan.starter.grpc.extensions.jsontranscoder.web.WebMvcProtobufHandlerAdaptor;
 import com.freemanan.starter.grpc.extensions.jsontranscoder.webflux.GrpcHandlerResultHandler;
 import com.freemanan.starter.grpc.extensions.jsontranscoder.webflux.WebFluxGrpcServiceHandlerMapping;
 import com.freemanan.starter.grpc.extensions.jsontranscoder.webflux.WebFluxProtobufHandlerAdaptor;
+import com.freemanan.starter.grpc.server.GrpcServerCustomizer;
+import com.freemanan.starter.grpc.server.GrpcServerProperties;
 import io.grpc.BindableService;
 import io.grpc.Metadata;
+import io.grpc.ServerInterceptor;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,6 +29,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.web.servlet.function.RouterFunction;
+import org.springframework.web.servlet.function.RouterFunctions;
+import org.springframework.web.servlet.function.ServerResponse;
 
 /**
  * @author Freeman
@@ -38,6 +46,16 @@ public class GrpcJsonTranscoderAutoConfiguration {
     @ConditionalOnMissingBean
     public GrpcHeaderConverter defaultGrpcHeaderConverter() {
         return new DefaultGrpcHeaderConverter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TranscodingGrpcServer transcodingGrpcServer(
+            GrpcServerProperties properties,
+            ObjectProvider<BindableService> serviceProvider,
+            ObjectProvider<ServerInterceptor> interceptorProvider,
+            ObjectProvider<GrpcServerCustomizer> customizers) {
+        return new TranscodingGrpcServer(properties, serviceProvider, interceptorProvider, customizers);
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -56,6 +74,12 @@ public class GrpcJsonTranscoderAutoConfiguration {
         @ConditionalOnMissingBean
         public WebMvcProtobufHandlerAdaptor webMvcProtobufHandlerAdaptor(GrpcHeaderConverter grpcHeaderConverter) {
             return new WebMvcProtobufHandlerAdaptor(grpcHeaderConverter);
+        }
+
+        @Bean
+        public RouterFunction<ServerResponse> webMvcTranscodingRouterFunction(List<BindableService> services) {
+            JsonTranscoderRouterFunction rf = new JsonTranscoderRouterFunction(services);
+            return RouterFunctions.route(rf, rf);
         }
     }
 
