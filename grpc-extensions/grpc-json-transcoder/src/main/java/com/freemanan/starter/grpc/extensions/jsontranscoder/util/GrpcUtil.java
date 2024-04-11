@@ -18,43 +18,25 @@ public class GrpcUtil {
      * @see <a href="https://chromium.googlesource.com/external/github.com/grpc/grpc/+/refs/tags/v1.21.4-pre1/doc/statuscodes.md">statuscodes</a>
      */
     public static HttpStatus toHttpStatus(Status grpcStatus) {
-        switch (grpcStatus.getCode()) {
-            case OK:
-                return HttpStatus.OK;
-            case CANCELLED:
-                return HttpStatus.BAD_REQUEST; // NOTE: 499 is non-standard http/1.1 code, use 400 instead
-            case UNKNOWN:
-                return HttpStatus.INTERNAL_SERVER_ERROR;
-            case INVALID_ARGUMENT:
-                return HttpStatus.BAD_REQUEST;
-            case DEADLINE_EXCEEDED:
-                return HttpStatus.GATEWAY_TIMEOUT;
-            case NOT_FOUND:
-                return HttpStatus.NOT_FOUND;
-            case ALREADY_EXISTS:
-                return HttpStatus.CONFLICT;
-            case PERMISSION_DENIED:
-                return HttpStatus.FORBIDDEN;
-            case RESOURCE_EXHAUSTED:
-                return HttpStatus.TOO_MANY_REQUESTS;
-            case FAILED_PRECONDITION:
-                return HttpStatus.BAD_REQUEST;
-            case ABORTED:
-                return HttpStatus.CONFLICT;
-            case OUT_OF_RANGE:
-                return HttpStatus.BAD_REQUEST;
-            case UNIMPLEMENTED:
-                return HttpStatus.NOT_IMPLEMENTED;
-            case INTERNAL:
-                return HttpStatus.INTERNAL_SERVER_ERROR;
-            case UNAVAILABLE:
-                return HttpStatus.SERVICE_UNAVAILABLE;
-            case DATA_LOSS:
-                return HttpStatus.INTERNAL_SERVER_ERROR;
-            case UNAUTHENTICATED:
-                return HttpStatus.UNAUTHORIZED;
-            default:
-                return HttpStatus.INTERNAL_SERVER_ERROR;
-        }
+        return switch (grpcStatus.getCode()) {
+            case OK -> HttpStatus.OK;
+            case CANCELLED -> HttpStatus.BAD_REQUEST; // NOTE: 499 is non-standard http/1.1 code, use 400 instead
+            case UNKNOWN -> HttpStatus.INTERNAL_SERVER_ERROR;
+            case INVALID_ARGUMENT -> HttpStatus.BAD_REQUEST;
+            case DEADLINE_EXCEEDED -> HttpStatus.GATEWAY_TIMEOUT;
+            case NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case ALREADY_EXISTS -> HttpStatus.CONFLICT;
+            case PERMISSION_DENIED -> HttpStatus.FORBIDDEN;
+            case RESOURCE_EXHAUSTED -> HttpStatus.TOO_MANY_REQUESTS;
+            case FAILED_PRECONDITION -> HttpStatus.BAD_REQUEST;
+            case ABORTED -> HttpStatus.CONFLICT;
+            case OUT_OF_RANGE -> HttpStatus.BAD_REQUEST;
+            case UNIMPLEMENTED -> HttpStatus.NOT_IMPLEMENTED;
+            case INTERNAL -> HttpStatus.INTERNAL_SERVER_ERROR;
+            case UNAVAILABLE -> HttpStatus.SERVICE_UNAVAILABLE;
+            case DATA_LOSS -> HttpStatus.INTERNAL_SERVER_ERROR;
+            case UNAUTHENTICATED -> HttpStatus.UNAUTHORIZED;
+            default -> HttpStatus.INTERNAL_SERVER_ERROR;
+        };
     }
 }

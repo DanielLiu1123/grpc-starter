@@ -61,7 +61,7 @@ import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
@@ -138,16 +138,34 @@ public class TranscodingRouterFunction
             return processUnaryCall(request, call, callMethod, route);
         }
 
-        ResponseBodyEmitter emitter = new ResponseBodyEmitter();
-        ClientCalls.asyncServerStreamingCall(call, request, new StreamObserver<Object>() {
+        SseEmitter emitter = new SseEmitter();
+        ClientCalls.asyncServerStreamingCall(call, request, new StreamObserver<>() {
             @Override
-            public void onNext(Object value) {}
+            public void onNext(Object value) {
+                //                String json;
+                //                try {
+                //                    json = printer.print((Message) value);
+                //                } catch (InvalidProtocolBufferException e) {
+                //                    emitter.completeWithError(e);
+                //                    return;
+                //                }
+
+                try {
+                    emitter.send(value, MediaType.APPLICATION_JSON);
+                } catch (IOException e) {
+                    emitter.completeWithError(e);
+                }
+            }
 
             @Override
-            public void onError(Throwable t) {}
+            public void onError(Throwable t) {
+                emitter.completeWithError(t);
+            }
 
             @Override
-            public void onCompleted() {}
+            public void onCompleted() {
+                emitter.complete();
+            }
         });
 
         ServerResponse.BodyBuilder builder = ServerResponse.status(HttpStatus.OK);
@@ -174,7 +192,7 @@ public class TranscodingRouterFunction
         HttpServletResponse response = Optional.of(WebAsyncUtils.getAsyncManager(request.servletRequest()))
                 .map(WebAsyncManager::getAsyncWebRequest)
                 .map(e -> e.getNativeResponse(HttpServletResponse.class))
-                .orElseThrow();
+                .orElseThrow(() -> new IllegalStateException("Failed to get HttpServletResponse"));
 
         String json;
         try {
