@@ -1,34 +1,56 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder.web;
 
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.GrpcUtil.toHttpStatus;
 import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil.TRANSCODING_SERVER_IN_PROCESS_NAME;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 import com.google.api.AnnotationsProto;
 import com.google.api.HttpRule;
 import com.google.api.pathtemplate.PathTemplate;
+import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+import com.google.protobuf.util.JsonFormat;
 import io.grpc.BindableService;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.ClientCall;
+import io.grpc.ForwardingClientCall;
+import io.grpc.ForwardingClientCallListener;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
 import io.grpc.ServerMethodDefinition;
 import io.grpc.ServerServiceDefinition;
+import io.grpc.StatusRuntimeException;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.protobuf.ProtoFileDescriptorSupplier;
+import io.grpc.stub.ClientCalls;
+import io.grpc.stub.StreamObserver;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageConversionException;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.function.HandlerFunction;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
@@ -47,6 +69,10 @@ public class TranscodingRouterFunction
 
     private final List<ServerServiceDefinition> definitions = new ArrayList<>();
     private final List<Route> routes = new ArrayList<>();
+    private final Map<Descriptors.MethodDescriptor, Message> methodCache = new ConcurrentReferenceHashMap<>();
+    private final JsonFormat.Parser parser = JsonFormat.parser().ignoringUnknownFields();
+    private final JsonFormat.Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
+
     private Channel channel;
 
     public TranscodingRouterFunction(List<BindableService> bindableServices) {
@@ -72,30 +98,146 @@ public class TranscodingRouterFunction
 
     @Override
     @Nonnull
+    @SuppressWarnings("unchecked")
     public ServerResponse handle(@Nonnull ServerRequest request) throws Exception {
-        ClientCall<Object, Object> call = getClientCall(request);
         Route route = (Route) request.attributes().get(MATCHING_ROUTE);
+        Descriptors.MethodDescriptor callMethod = route.methodDescriptor();
 
-        call.start(
-                new ClientCall.Listener<>() {
-                    @Override
-                    public void onMessage(Object message) {
-                        super.onMessage(message);
-                    }
-                },
-                new Metadata());
+        if (callMethod.isServerStreaming()) {
+            throw new ResponseStatusException(BAD_REQUEST, "Server streaming is not supported for transcoding");
+        }
 
-        call.request(2);
+        ClientCall<Object, Object> call =
+                (ClientCall<Object, Object>) channel.newCall(route.invokeMethod(), CallOptions.DEFAULT);
 
-        byte[] body = request.body(byte[].class);
+        AtomicReference<Metadata> grpcResponseHeaders = new AtomicReference<>();
+        call = new ForwardingClientCall.SimpleForwardingClientCall<>(call) {
+            @Override
+            public void start(Listener<Object> responseListener, Metadata headers) {
+                super.start(
+                        new ForwardingClientCallListener.SimpleForwardingClientCallListener<>(responseListener) {
+                            @Override
+                            public void onHeaders(Metadata headers) {
+                                grpcResponseHeaders.set(headers);
+                                super.onHeaders(headers);
+                            }
+                        },
+                        headers);
+            }
+        };
 
-        return ServerResponse.status(200).body(body);
+        Message responseMessage;
+        try {
+            responseMessage =
+                    (Message) ClientCalls.blockingUnaryCall(call, buildRequestMessage(request, callMethod, route));
+        } catch (StatusRuntimeException e) {
+            return handleException(e);
+        }
+
+        ClientCalls.asyncServerStreamingCall(call, request, new StreamObserver<Object>() {
+            @Override
+            public void onNext(Object value) {}
+
+            @Override
+            public void onError(Throwable t) {}
+
+            @Override
+            public void onCompleted() {}
+        });
+
+        ServerResponse.BodyBuilder builder = ServerResponse.status(HttpStatus.OK);
+        Optional.ofNullable(grpcResponseHeaders.get())
+                .map(TranscodingRouterFunction::toHttpHeaders)
+                .ifPresent(grpcHeaders -> builder.headers(headers -> headers.addAll(grpcHeaders)));
+        return builder.body(printer.print(responseMessage));
+    }
+
+    private static ServerResponse handleException(StatusRuntimeException e) {
+        ServerResponse.BodyBuilder builder = ServerResponse.status(toHttpStatus(e.getStatus()));
+        Optional.ofNullable(e.getTrailers())
+                .map(TranscodingRouterFunction::toHttpHeaders)
+                .ifPresent(grpcHeaders -> builder.headers(headers -> headers.addAll(grpcHeaders)));
+        return builder.body(e.getLocalizedMessage());
+    }
+
+    private Message buildRequestMessage(ServerRequest request, Descriptors.MethodDescriptor callMethod, Route route) {
+        try {
+            Message.Builder messageBuilder = methodCache
+                    .computeIfAbsent(
+                            callMethod,
+                            k -> getDefaultMessage(route.methodDescriptor().getInputType()))
+                    .toBuilder();
+            parser.merge(new InputStreamReader(request.servletRequest().getInputStream(), UTF_8), messageBuilder);
+            return messageBuilder.build();
+        } catch (InvalidProtocolBufferException e) {
+            throw new ResponseStatusException(
+                    BAD_REQUEST,
+                    "The input is not valid proto3 JSON format or there are unknown fields in the input",
+                    e);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to read request body", e);
+        }
+    }
+
+    private Message getDefaultMessage(Descriptors.Descriptor descriptor) {
+        DescriptorProtos.FileOptions options = descriptor.getFile().getOptions();
+        String javaPackage = options.hasJavaPackage()
+                ? options.getJavaPackage()
+                : descriptor.getFile().getPackage();
+        List<String> classNames = new ArrayList<>(2);
+        if (options.getJavaMultipleFiles()) {
+            classNames.add(javaPackage + "." + descriptor.getName());
+        } else {
+            if (options.hasJavaOuterClassname()) {
+                classNames.add(javaPackage + "." + options.getJavaOuterClassname() + "$" + descriptor.getName());
+            } else {
+                String name = descriptor.getFile().getName(); // "google/protobuf/empty.proto"
+                String fileName = name.substring(name.lastIndexOf('/') + 1); // "empty.proto"
+
+                // If there’s a service, enum, or message (including nested types) in the file with the same name,
+                // “OuterClass” will be appended to the wrapper class’s name.
+                // See https://protobuf.dev/reference/java/java-generated/#invocation
+                String outerClassName = snakeToPascal(fileName.replace(".proto", "")); // "Empty"
+                classNames.add("%s.%sOuterClass$%s"
+                        .formatted(
+                                javaPackage,
+                                outerClassName,
+                                descriptor.getName())); // "com.google.protobuf.EmptyOuterClass$Empty"
+                classNames.add("%s.%s$%s"
+                        .formatted(
+                                javaPackage,
+                                outerClassName,
+                                descriptor.getName())); // "com.google.protobuf.Empty$Empty"
+            }
+        }
+
+        Class<?> clazz = null;
+        for (String className : classNames) {
+            try {
+                clazz = ClassUtils.forName(className, null);
+                break;
+            } catch (ClassNotFoundException ignored) {
+                // no-op
+            }
+        }
+
+        if (clazz == null) {
+            throw new HttpMessageConversionException("Invalid Protobuf Message type: no class found for " + classNames);
+        }
+
+        try {
+            Method defaultInstance = clazz.getMethod("getDefaultInstance");
+            return ((Message) defaultInstance.invoke(null));
+        } catch (Exception ex) {
+            throw new HttpMessageConversionException(
+                    "Invalid Protobuf Message type: no invocable newBuilder() method on " + clazz, ex);
+        }
     }
 
     @SuppressWarnings("unchecked")
     private ClientCall<Object, Object> getClientCall(ServerRequest request) {
         Route route = (Route) request.attributes().get(MATCHING_ROUTE);
-        return (ClientCall<Object, Object>) channel.newCall(route.methodDescriptor(), CallOptions.DEFAULT);
+        return (ClientCall<Object, Object>) channel.newCall(route.invokeMethod(), CallOptions.DEFAULT);
     }
 
     private void init() {
@@ -107,9 +249,9 @@ public class TranscodingRouterFunction
                     serviceDescriptor.getMethods().stream()
                             .collect(Collectors.toMap(Descriptors.MethodDescriptor::getName, Function.identity()));
             for (ServerMethodDefinition<?, ?> serverMethodDefinition : ssd.getMethods()) {
-                MethodDescriptor<?, ?> md = serverMethodDefinition.getMethodDescriptor();
-                String methodName = md.getBareMethodName();
-                Descriptors.MethodDescriptor methodDescriptor = methodNameToMethodDescriptor.get(methodName);
+                MethodDescriptor<?, ?> invokeMethod = serverMethodDefinition.getMethodDescriptor();
+                Descriptors.MethodDescriptor methodDescriptor =
+                        methodNameToMethodDescriptor.get(invokeMethod.getBareMethodName());
                 if (methodDescriptor == null || !methodDescriptor.getOptions().hasExtension(AnnotationsProto.http)) {
                     continue;
                 }
@@ -117,18 +259,28 @@ public class TranscodingRouterFunction
                 HttpRule httpRule = methodDescriptor.getOptions().getExtension(AnnotationsProto.http);
                 switch (httpRule.getPatternCase()) {
                     case GET -> routes.add(new Route(
-                            md, new HttpRequestPredicate(HttpMethod.GET, PathTemplate.create(httpRule.getGet()))));
+                            invokeMethod,
+                            methodDescriptor,
+                            new HttpRequestPredicate(HttpMethod.GET, PathTemplate.create(httpRule.getGet()))));
                     case PUT -> routes.add(new Route(
-                            md, new HttpRequestPredicate(HttpMethod.PUT, PathTemplate.create(httpRule.getPut()))));
+                            invokeMethod,
+                            methodDescriptor,
+                            new HttpRequestPredicate(HttpMethod.PUT, PathTemplate.create(httpRule.getPut()))));
                     case POST -> routes.add(new Route(
-                            md, new HttpRequestPredicate(HttpMethod.POST, PathTemplate.create(httpRule.getPost()))));
+                            invokeMethod,
+                            methodDescriptor,
+                            new HttpRequestPredicate(HttpMethod.POST, PathTemplate.create(httpRule.getPost()))));
                     case DELETE -> routes.add(new Route(
-                            md,
+                            invokeMethod,
+                            methodDescriptor,
                             new HttpRequestPredicate(HttpMethod.DELETE, PathTemplate.create(httpRule.getDelete()))));
                     case PATCH -> routes.add(new Route(
-                            md, new HttpRequestPredicate(HttpMethod.PATCH, PathTemplate.create(httpRule.getPatch()))));
+                            invokeMethod,
+                            methodDescriptor,
+                            new HttpRequestPredicate(HttpMethod.PATCH, PathTemplate.create(httpRule.getPatch()))));
                     case CUSTOM -> routes.add(new Route(
-                            md,
+                            invokeMethod,
+                            methodDescriptor,
                             new HttpRequestPredicate(
                                     HttpMethod.valueOf(httpRule.getCustom().getKind()),
                                     PathTemplate.create(httpRule.getCustom().getPath()))));
@@ -158,7 +310,10 @@ public class TranscodingRouterFunction
         return null;
     }
 
-    private record Route(MethodDescriptor<?, ?> methodDescriptor, HttpRequestPredicate predicate) {}
+    private record Route(
+            MethodDescriptor<?, ?> invokeMethod,
+            Descriptors.MethodDescriptor methodDescriptor,
+            Predicate<ServerRequest> predicate) {}
 
     private record HttpRequestPredicate(HttpMethod httpMethod, PathTemplate pathTemplate)
             implements Predicate<ServerRequest> {
@@ -185,5 +340,37 @@ public class TranscodingRouterFunction
             attributes.put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, result);
             return true;
         }
+    }
+
+    private static String snakeToPascal(String input) {
+        if (input == null || input.isEmpty()) return input;
+
+        StringBuilder result = new StringBuilder(input.length());
+        boolean toUpperCase = true;
+
+        for (char c : input.toCharArray()) {
+            if (c == '_') {
+                toUpperCase = true;
+            } else {
+                result.append(toUpperCase ? Character.toUpperCase(c) : c);
+                toUpperCase = false;
+            }
+        }
+
+        return result.toString();
+    }
+
+    private static HttpHeaders toHttpHeaders(Metadata headers) {
+        HttpHeaders result = new HttpHeaders();
+        for (String key : headers.keys()) {
+            if (key.startsWith("grpc-") || key.endsWith(Metadata.BINARY_HEADER_SUFFIX)) {
+                continue;
+            }
+            Iterable<String> iter = headers.getAll(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER));
+            if (iter != null) {
+                iter.forEach(value -> result.add(key, value));
+            }
+        }
+        return result;
     }
 }
