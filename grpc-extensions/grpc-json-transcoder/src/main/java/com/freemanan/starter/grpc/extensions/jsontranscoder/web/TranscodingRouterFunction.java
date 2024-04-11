@@ -30,6 +30,8 @@ import io.grpc.stub.ClientCalls;
 import io.grpc.stub.StreamObserver;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
@@ -46,16 +48,20 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.function.HandlerFunction;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
@@ -96,8 +102,10 @@ public class TranscodingRouterFunction
         return Optional.empty();
     }
 
+    /**
+     * NOTE: This method can return null.
+     */
     @Override
-    @Nonnull
     @SuppressWarnings("unchecked")
     public ServerResponse handle(@Nonnull ServerRequest request) throws Exception {
         Route route = (Route) request.attributes().get(MATCHING_ROUTE);
@@ -126,14 +134,11 @@ public class TranscodingRouterFunction
             }
         };
 
-        Message responseMessage;
-        try {
-            responseMessage =
-                    (Message) ClientCalls.blockingUnaryCall(call, buildRequestMessage(request, callMethod, route));
-        } catch (StatusRuntimeException e) {
-            return handleException(e);
+        if (route.invokeMethod().getType() == MethodDescriptor.MethodType.UNARY) {
+            return processUnaryCall(request, call, callMethod, route);
         }
 
+        ResponseBodyEmitter emitter = new ResponseBodyEmitter();
         ClientCalls.asyncServerStreamingCall(call, request, new StreamObserver<Object>() {
             @Override
             public void onNext(Object value) {}
@@ -149,7 +154,65 @@ public class TranscodingRouterFunction
         Optional.ofNullable(grpcResponseHeaders.get())
                 .map(TranscodingRouterFunction::toHttpHeaders)
                 .ifPresent(grpcHeaders -> builder.headers(headers -> headers.addAll(grpcHeaders)));
-        return builder.body(printer.print(responseMessage));
+
+        return null;
+    }
+
+    private ServerResponse processUnaryCall(
+            ServerRequest request,
+            ClientCall<Object, Object> call,
+            Descriptors.MethodDescriptor callMethod,
+            Route route) {
+        Message responseMessage;
+        try {
+            responseMessage =
+                    (Message) ClientCalls.blockingUnaryCall(call, buildRequestMessage(request, callMethod, route));
+        } catch (StatusRuntimeException e) {
+            return handleException(e);
+        }
+
+        HttpServletResponse response = Optional.of(WebAsyncUtils.getAsyncManager(request.servletRequest()))
+                .map(WebAsyncManager::getAsyncWebRequest)
+                .map(e -> e.getNativeResponse(HttpServletResponse.class))
+                .orElseThrow();
+
+        String json;
+        try {
+            json = printer.print(responseMessage);
+        } catch (InvalidProtocolBufferException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to serialize response", e);
+        }
+
+        byte[] bytes = json.getBytes(UTF_8);
+        response.setContentLength(bytes.length);
+        if (json.startsWith("{") || json.startsWith("[")) {
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        } else {
+            response.setContentType(MediaType.TEXT_PLAIN_VALUE);
+            response.setCharacterEncoding(UTF_8.name());
+        }
+
+        ServletOutputStream os;
+        try {
+            os = response.getOutputStream();
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "getWriter() method has been called on this response", e);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to get output stream", e);
+        }
+        try {
+            os.write(bytes);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to write response", e);
+        }
+        try {
+            os.flush();
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to flush response", e);
+        }
+
+        return null;
     }
 
     private static ServerResponse handleException(StatusRuntimeException e) {
