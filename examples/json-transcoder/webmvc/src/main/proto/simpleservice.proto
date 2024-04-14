@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+package transcoding.mvc;
+
+// A simple service for test.
+service SimpleService {
+  // Simple unary RPC.
+  rpc UnaryRpc (SimpleRequest) returns (SimpleResponse) {}
+
+  // Simple client-to-server streaming RPC.
+  rpc ClientStreamingRpc (stream SimpleRequest) returns (SimpleResponse) {}
+
+  // Simple server-to-client streaming RPC.
+  rpc ServerStreamingRpc (SimpleRequest) returns (stream SimpleResponse) {
+    option (google.api.http) = {
+      get: "/v1/simple/serverstreaming"
+    };
+  }
+
+  // Simple bidirectional streaming RPC.
+  rpc BidiStreamingRpc (stream SimpleRequest) returns (stream SimpleResponse) {}
+}
+
+// A simple request message type for test.
+message SimpleRequest {
+  // An optional string message for test.
+  string requestMessage = 1;
+  map<string, SimpleResponse> map = 2;
+  repeated int32 repeatedInt32 = 3;
+  repeated string repeatedString = 4;
+  repeated SimpleResponse repeated = 5;
+}
+
+// A simple response message type for test.
+message SimpleResponse {
+  // An optional string message for test.
+  string responseMessage = 1;
+}
