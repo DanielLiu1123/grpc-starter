@@ -41,7 +41,7 @@ class RefreshAppTest {
 
         assertThatCode(() -> simpleStub.unaryRpc(request))
                 .isInstanceOf(StatusRuntimeException.class)
-                .hasMessageContaining("DEADLINE_EXCEEDED: deadline exceeded after");
+                .hasMessageContaining("DEADLINE_EXCEEDED: CallOptions deadline exceeded after");
 
         System.clearProperty("grpc.client.deadline");
     }

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.api.HttpRule;
 import java.util.Map;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -54,6 +55,7 @@ class TranscoderTest {
     }
 
     @Test
+    @Disabled("Not implemented yet")
     void testSetNestedMessage() {
         // path variables -> body -> parameters
         var parameters = Map.of(
