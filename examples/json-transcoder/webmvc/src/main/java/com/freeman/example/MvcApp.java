@@ -4,6 +4,7 @@ import jakarta.servlet.AsyncContext;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.MediaType;
@@ -34,7 +35,7 @@ public class MvcApp {
             try {
                 ServletOutputStream out = asyncContext.getResponse().getOutputStream();
                 for (int i = 0; i < 5; i++) {
-                    out.write(("data: " + i + "\n\n").getBytes());
+                    out.write(("data: " + i + "\n\n").getBytes(StandardCharsets.UTF_8));
                     out.flush();
                     Thread.sleep(1000);
                 }
@@ -58,7 +59,7 @@ public class MvcApp {
             try {
                 ServletOutputStream out = asyncContext.getResponse().getOutputStream();
                 for (int i = 0; i < 5; i++) {
-                    out.write(("{\"data\": " + i + "}\n").getBytes());
+                    out.write(("{\"data\": " + i + "}\n").getBytes(StandardCharsets.UTF_8));
                     out.flush();
                     Thread.sleep(1000);
                 }

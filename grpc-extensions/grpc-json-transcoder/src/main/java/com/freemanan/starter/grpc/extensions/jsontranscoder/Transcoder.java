@@ -1,6 +1,5 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder;
 
-import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import static com.google.protobuf.Descriptors.FieldDescriptor.Type;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -10,6 +9,8 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 import jakarta.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -42,38 +43,52 @@ public class Transcoder {
             // automatically become HTTP query parameters if there is no HTTP request body.
 
             Optional.ofNullable(variable.parameters()).orElseGet(Map::of).forEach((key, values) -> {
-                if (key.contains(".")) {
-                    // Handle nested field setting, e.g., "x.y"
+                String[] fieldPath = key.split("\\.");
+                Message.Builder currentBuilder = messageBuilder;
+                List<Message.Builder> builderPath = new ArrayList<>(); // To store all builders from root to leaf
 
-                    // TODO
-                    String[] parts = key.split("\\.");
-                    Message.Builder nestedBuilder = getNestedBuilder(messageBuilder, parts, 0, parts.length - 1);
+                // Navigate to the last field descriptor
+                for (int i = 0; i < fieldPath.length - 1; i++) {
                     Descriptors.FieldDescriptor field =
-                            nestedBuilder.getDescriptorForType().findFieldByName(parts[parts.length - 1]);
-                    setField(nestedBuilder, field, values);
-                } else {
-                    // Handle non-nested field setting
-                    Descriptors.FieldDescriptor field =
-                            messageBuilder.getDescriptorForType().findFieldByName(key);
-                    setField(messageBuilder, field, values);
+                            currentBuilder.getDescriptorForType().findFieldByName(fieldPath[i]);
+                    if (field == null || field.getType() != Type.MESSAGE) {
+                        // If the field not exists or not a message type, skip the rest of the path
+                        return;
+                    }
+                    currentBuilder = currentBuilder.getFieldBuilder(field);
+                    builderPath.add(currentBuilder); // Add builder to path
                 }
 
                 Descriptors.FieldDescriptor field =
-                        messageBuilder.getDescriptorForType().findFieldByName(key);
-                if (field == null || field.isMapField()) return;
+                        currentBuilder.getDescriptorForType().findFieldByName(fieldPath[fieldPath.length - 1]);
+                if (field == null) return;
 
+                // Set the value at the leaf level
                 if (field.isRepeated()) {
-                    // Repeated message fields must not be mapped to URL query parameters, because
-                    // no client library can support such complicated mapping.
-                    if (field.getJavaType() == JavaType.MESSAGE) return;
-
+                    // TODO: repeated message not supported
                     for (String value : values) {
-                        messageBuilder.addRepeatedField(field, parseValue(field, value));
+                        currentBuilder.addRepeatedField(field, parseValue(field, value));
                     }
                 } else {
                     if (values.length > 0) {
-                        messageBuilder.setField(field, parseValue(field, values[0]));
+                        currentBuilder.setField(field, parseValue(field, values[0]));
                     }
+                }
+
+                // Set all intermediate message builders back up the chain
+                for (int i = builderPath.size() - 1; i > 0; i--) {
+                    Message.Builder childBuilder = builderPath.get(i);
+                    Message.Builder parentBuilder = builderPath.get(i - 1);
+                    Descriptors.FieldDescriptor parentField =
+                            parentBuilder.getDescriptorForType().findFieldByName(fieldPath[i - 1]);
+                    parentBuilder.setField(parentField, childBuilder.build());
+                }
+
+                // Finally set the topmost builder back to the original messageBuilder
+                if (!builderPath.isEmpty()) {
+                    messageBuilder.setField(
+                            messageBuilder.getDescriptorForType().findFieldByName(fieldPath[0]),
+                            builderPath.get(0).build());
                 }
             });
         } else {
