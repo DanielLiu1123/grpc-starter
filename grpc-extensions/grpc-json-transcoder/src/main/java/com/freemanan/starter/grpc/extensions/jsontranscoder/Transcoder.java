@@ -6,15 +6,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import com.google.api.HttpRule;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 import jakarta.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import lombok.SneakyThrows;
 
 /**
  * @author Freeman
@@ -30,86 +28,63 @@ public class Transcoder {
         this.variable = variable;
     }
 
-    @SneakyThrows
     public void into(@Nonnull Message.Builder messageBuilder, @Nonnull HttpRule httpRule) {
-        if (httpRule.getBody().isBlank()) {
-            // Note that when using `*` in the body mapping, it is not possible to
-            // have HTTP parameters, as all fields not bound by the path end in
-            // the body. This makes this option more rarely used in practice when
-            // defining REST APIs. The common usage of `*` is in custom methods
-            // which don't use the URL at all for transferring data.
+        // Note that when using `*` in the body mapping, it is not possible to
+        // have HTTP parameters, as all fields not bound by the path end in
+        // the body. This makes this option more rarely used in practice when
+        // defining REST APIs. The common usage of `*` is in custom methods
+        // which don't use the URL at all for transferring data.
 
-            // Any fields in the request message which are not bound by the path template
-            // automatically become HTTP query parameters if there is no HTTP request body.
+        // Any fields in the request message which are not bound by the path template
+        // automatically become HTTP query parameters if there is no HTTP request body.
 
-            Optional.ofNullable(variable.parameters()).orElseGet(Map::of).forEach((key, values) -> {
-                String[] fieldPath = key.split("\\.");
-                Message.Builder currentBuilder = messageBuilder;
-                List<Message.Builder> builderPath = new ArrayList<>(); // To store all builders from root to leaf
+        Optional.ofNullable(variable.parameters()).orElseGet(Map::of).forEach((key, values) -> {
+            String[] fieldPath = key.split("\\.");
 
-                // Navigate to the last field descriptor
-                for (int i = 0; i < fieldPath.length - 1; i++) {
-                    Descriptors.FieldDescriptor field =
-                            currentBuilder.getDescriptorForType().findFieldByName(fieldPath[i]);
-                    if (field == null || field.getType() != Type.MESSAGE) {
-                        // If the field not exists or not a message type, skip the rest of the path
-                        return;
-                    }
-                    currentBuilder = currentBuilder.getFieldBuilder(field);
-                    builderPath.add(currentBuilder); // Add builder to path
-                }
-
+            // Navigate to the last field descriptor
+            Message.Builder lastBuilder = messageBuilder;
+            for (int i = 0; i < fieldPath.length - 1; i++) {
                 Descriptors.FieldDescriptor field =
-                        currentBuilder.getDescriptorForType().findFieldByName(fieldPath[fieldPath.length - 1]);
-                if (field == null) return;
+                        lastBuilder.getDescriptorForType().findFieldByName(fieldPath[i]);
+                if (noBuilder(field)) return;
 
-                // Set the value at the leaf level
-                if (field.isRepeated()) {
-                    // TODO: repeated message not supported
-                    for (String value : values) {
-                        currentBuilder.addRepeatedField(field, parseValue(field, value));
-                    }
-                } else {
-                    if (values.length > 0) {
-                        currentBuilder.setField(field, parseValue(field, values[0]));
-                    }
-                }
+                lastBuilder = lastBuilder.getFieldBuilder(field);
+            }
 
-                // Set all intermediate message builders back up the chain
-                for (int i = builderPath.size() - 1; i > 0; i--) {
-                    Message.Builder childBuilder = builderPath.get(i);
-                    Message.Builder parentBuilder = builderPath.get(i - 1);
-                    Descriptors.FieldDescriptor parentField =
-                            parentBuilder.getDescriptorForType().findFieldByName(fieldPath[i - 1]);
-                    parentBuilder.setField(parentField, childBuilder.build());
-                }
+            Descriptors.FieldDescriptor field =
+                    lastBuilder.getDescriptorForType().findFieldByName(fieldPath[fieldPath.length - 1]);
+            if (!isValueType(field)) return;
 
-                // Finally set the topmost builder back to the original messageBuilder
-                if (!builderPath.isEmpty()) {
-                    messageBuilder.setField(
-                            messageBuilder.getDescriptorForType().findFieldByName(fieldPath[0]),
-                            builderPath.get(0).build());
+            if (field.isRepeated()) {
+                for (String value : values) {
+                    lastBuilder.addRepeatedField(field, parseValue(field, value));
                 }
-            });
-        } else {
-            // The special name `*` can be used in the body mapping to define that
-            // every field not bound by the path template should be mapped to the
-            // request body.
+            } else {
+                if (values.length > 0) {
+                    setValueField(lastBuilder, field, values[0]);
+                }
+            }
+        });
+
+        // The special name `*` can be used in the body mapping to define that
+        // every field not bound by the path template should be mapped to the
+        // request body.
+
+        if (!httpRule.getBody().isBlank()) {
             String bodyString = Optional.ofNullable(variable.body())
                     .map(e -> new String(e, UTF_8))
                     .orElse("");
             if (!bodyString.isBlank()) {
                 if (Objects.equals(httpRule.getBody(), "*")) {
-                    parser.merge(bodyString, messageBuilder);
+                    merge(messageBuilder, bodyString);
                 } else {
                     Descriptors.FieldDescriptor field =
                             messageBuilder.getDescriptorForType().findFieldByName(httpRule.getBody());
-                    if (field != null && field.getType() == Type.MESSAGE) {
-                        Message.Builder fieldBuilder = messageBuilder.getFieldBuilder(field);
-                        if (fieldBuilder != null) {
-                            parser.merge(bodyString, fieldBuilder);
-                            messageBuilder.setField(field, fieldBuilder.build());
-                        }
+                    if (noBuilder(field)) return;
+
+                    Message.Builder fieldBuilder = messageBuilder.getFieldBuilder(field);
+                    if (fieldBuilder != null) {
+                        merge(fieldBuilder, bodyString);
                     }
                 }
             }
@@ -118,16 +93,14 @@ public class Transcoder {
         // The path variables **must not** capture the leading "/" character. The reason
         // is that the most common use case "{var}" does not capture the leading "/"
         // character. For consistency, all path variables must share the same behavior.
+
+        // The path variables **must not** refer to any repeated or mapped field,
+        // because client libraries are not capable of handling such variable expansion.
         Optional.ofNullable(variable.pathVariables()).orElseGet(Map::of).forEach((key, value) -> {
             Descriptors.FieldDescriptor field =
                     messageBuilder.getDescriptorForType().findFieldByName(key);
-            if (field == null) return;
-
-            // The path variables **must not** refer to any repeated or mapped field,
-            // because client libraries are not capable of handling such variable expansion.
-            if (field.isRepeated() || field.isMapField()) return;
-
-            messageBuilder.setField(field, parseValue(field, value));
+            if (!isValueType(field)) return;
+            setValueField(messageBuilder, field, value);
         });
     }
 
@@ -142,30 +115,31 @@ public class Transcoder {
         return response;
     }
 
-    private void setField(Message.Builder builder, Descriptors.FieldDescriptor field, String... values) {
-        if (field == null || field.isMapField()) return;
-
-        if (field.isRepeated()) {
-            for (String value : values) {
-                builder.addRepeatedField(field, parseValue(field, value));
-            }
-        } else {
-            if (values.length > 0) {
-                builder.setField(field, parseValue(field, values[0]));
-            }
+    private static void merge(Message.Builder messageBuilder, String bodyString) {
+        try {
+            parser.merge(bodyString, messageBuilder);
+        } catch (InvalidProtocolBufferException e) {
+            throw new IllegalArgumentException("Merge JSON to message failed", e);
         }
     }
 
-    private Message.Builder getNestedBuilder(Message.Builder builder, String[] parts, int start, int end) {
-        Message.Builder currentBuilder = builder;
-        for (int i = start; i <= end; i++) {
-            Descriptors.FieldDescriptor field =
-                    currentBuilder.getDescriptorForType().findFieldByName(parts[i]);
-            if (field != null && field.getType() == Type.MESSAGE) {
-                currentBuilder = currentBuilder.getFieldBuilder(field);
-            }
+    private static boolean noBuilder(Descriptors.FieldDescriptor field) {
+        return field == null || field.isRepeated() || field.isMapField() || field.getType() != Type.MESSAGE;
+    }
+
+    private static void setValueField(Message.Builder lastBuilder, Descriptors.FieldDescriptor field, String values) {
+        if (lastBuilder == null || field == null || values == null) return;
+        if (isValueType(field)) {
+            lastBuilder.setField(field, parseValue(field, values));
         }
-        return currentBuilder;
+    }
+
+    private static boolean isValueType(Descriptors.FieldDescriptor field) {
+        return field != null
+                && switch (field.getJavaType()) {
+                    case INT, LONG, FLOAT, DOUBLE, BOOLEAN, STRING, BYTE_STRING, ENUM -> true;
+                    default -> false;
+                };
     }
 
     private static Object parseValue(Descriptors.FieldDescriptor field, String value) {
@@ -178,13 +152,24 @@ public class Transcoder {
             case STRING -> value;
             case BYTE_STRING -> ByteString.copyFrom(value.getBytes(UTF_8));
             case ENUM -> {
-                Descriptors.EnumValueDescriptor enumValueDescriptor =
-                        field.getEnumType().findValueByName(value);
-                if (enumValueDescriptor != null) {
-                    yield enumValueDescriptor;
+                // if is a number format
+                if (value.isBlank()) {
+                    yield field.getEnumType().getValues().get(0);
+                }
+                Descriptors.EnumValueDescriptor e = null;
+                if (Character.isDigit(value.charAt(0))) {
+                    try {
+                        e = field.getEnumType().findValueByNumber(Integer.parseInt(value));
+                    } catch (NumberFormatException ignored) {
+                    }
+                } else {
+                    e = field.getEnumType().findValueByName(value);
+                }
+                if (e != null) {
+                    yield e;
                 }
                 throw new IllegalArgumentException(
-                        "Enum value " + value + " not recognized for field " + field.getName());
+                        "Can't parse enum value '" + value + "' for field '" + field.getName() + "'");
             }
             case MESSAGE -> throw new IllegalArgumentException(
                     "Direct parsing to message type not supported, field " + field.getName());

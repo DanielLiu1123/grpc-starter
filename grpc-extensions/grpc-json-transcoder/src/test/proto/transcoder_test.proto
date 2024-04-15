@@ -29,6 +29,15 @@ message SimpleRequest {
   string requestMessage = 1;
   string some_message = 2;
   SimpleRequest nested = 3;
+  repeated string repeated_string = 4;
+  repeated SimpleRequest repeated_message = 5;
+  Enum enum = 6;
+
+  enum Enum {
+    ENUM_UNSPECIFIED = 0;
+    V1 = 1;
+    V2 = 2;
+  }
 }
 
 // A simple response message type for test.
