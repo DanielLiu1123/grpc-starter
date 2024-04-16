@@ -38,6 +38,7 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +49,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import lombok.SneakyThrows;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -73,6 +77,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  */
 public class TranscodingRouterFunction
         implements RouterFunction<ServerResponse>, HandlerFunction<ServerResponse>, SmartInitializingSingleton {
+    private static final Logger log = LoggerFactory.getLogger(TranscodingRouterFunction.class);
 
     private static final String MATCHING_ROUTE = TranscodingRouterFunction.class + ".matchingRoute";
 
@@ -175,31 +180,30 @@ public class TranscodingRouterFunction
 
         asyncContext.start(() -> ClientCalls.asyncServerStreamingCall(call, req, new StreamObserver<>() {
             @Override
+            @SneakyThrows
             public void onNext(Object value) {
                 Object resp = transcoder.out((Message) value, route.httpRule());
                 String result = JsonUtil.toJson(resp);
-                try {
-                    ServletOutputStream out = response.getOutputStream();
-                    String ret = "data: " + result + "\n\n";
-                    out.write(ret.getBytes(UTF_8));
-                    out.flush();
-                } catch (IOException e) {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to write response", e);
-                }
+                PrintWriter writer = response.getWriter();
+                String ret = "data: " + result + "\n";
+                writer.println(ret);
+                writer.flush();
             }
 
             @Override
+            @SneakyThrows
             public void onError(Throwable t) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to process response", t);
+                throw t;
             }
 
             @Override
+            @SneakyThrows
             public void onCompleted() {
+                response.getWriter().flush();
                 try {
-                    response.getOutputStream().flush();
                     asyncContext.complete();
-                } catch (IOException e) {
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to flush response", e);
+                } catch (Exception e) {
+                    log.warn("Failed to complete async context", e);
                 }
             }
         }));
@@ -468,7 +472,7 @@ public class TranscodingRouterFunction
         }
     }
 
-    private static String snakeToPascal(String input) {
+    static String snakeToPascal(String input) {
         if (input == null || input.isEmpty()) return input;
 
         StringBuilder result = new StringBuilder(input.length());

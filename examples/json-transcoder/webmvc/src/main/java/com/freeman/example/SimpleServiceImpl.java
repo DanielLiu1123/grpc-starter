@@ -16,7 +16,7 @@ public class SimpleServiceImpl extends SimpleServiceGrpc.SimpleServiceImplBase {
     @SneakyThrows
     public void serverStreamingRpc(
             Simpleservice.SimpleRequest request, StreamObserver<Simpleservice.SimpleResponse> responseObserver) {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 100; i++) {
             responseObserver.onNext(Simpleservice.SimpleResponse.newBuilder()
                     .setResponseMessage("message " + i)
                     .build());
