@@ -34,6 +34,8 @@ import io.grpc.stub.StreamObserver;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.AsyncContext;
+import jakarta.servlet.AsyncEvent;
+import jakarta.servlet.AsyncListener;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -135,7 +137,6 @@ public class TranscodingRouterFunction
                             @Override
                             public void onClose(Status status, Metadata trailers) {
                                 grpcResponseHeaders.set(trailers);
-                                super.onClose(status, trailers);
                             }
                         },
                         headers);
@@ -207,6 +208,22 @@ public class TranscodingRouterFunction
                 }
             }
         }));
+
+        asyncContext.addListener(new AsyncListener() {
+            @Override
+            public void onComplete(AsyncEvent event) throws IOException {}
+
+            @Override
+            public void onTimeout(AsyncEvent event) throws IOException {}
+
+            @Override
+            public void onError(AsyncEvent event) throws IOException {
+                call.cancel("AsyncContext error", null);
+            }
+
+            @Override
+            public void onStartAsync(AsyncEvent event) throws IOException {}
+        });
 
         return null;
     }
