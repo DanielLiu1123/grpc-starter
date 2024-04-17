@@ -46,3 +46,10 @@ include(":examples:tls")
 include(":examples:tracing")
 include(":examples:user:user-api")
 include(":examples:user:user-server")
+
+new File("${rootDir}/.githooks").eachFile(groovy.io.FileType.FILES) {
+    def f = new File("${rootDir}/.git/hooks")
+    if (f.exists() && f.isDirectory()) {
+        java.nio.file.Files.copy(it.toPath(), new File("${rootDir}/.git/hooks", it.name).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+    }
+}

@@ -36,7 +36,6 @@ import jakarta.annotation.Nullable;
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.AsyncEvent;
 import jakarta.servlet.AsyncListener;
-import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -57,7 +56,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.util.ClassUtils;
@@ -137,6 +135,7 @@ public class TranscodingRouterFunction
                             @Override
                             public void onClose(Status status, Metadata trailers) {
                                 grpcResponseHeaders.set(trailers);
+                                super.onClose(status, trailers);
                             }
                         },
                         headers);
@@ -179,15 +178,28 @@ public class TranscodingRouterFunction
 
         Message req = buildRequestMessage(transcoder, callMethod, route);
 
-        asyncContext.start(() -> ClientCalls.asyncServerStreamingCall(call, req, new StreamObserver<>() {
+        asyncContext.addListener(new BaseAsyncListener() {
+            @Override
+            public void onError(AsyncEvent event) throws IOException {
+                call.cancel("AsyncContext error", null);
+            }
+        });
+
+        asyncContext.start(() -> ClientCalls.asyncServerStreamingCall(
+                call, req, getFailedToCompleteAsyncContext(route, transcoder, response, asyncContext)));
+
+        return null;
+    }
+
+    private static StreamObserver<Object> getFailedToCompleteAsyncContext(
+            Route route, Transcoder transcoder, HttpServletResponse response, AsyncContext asyncContext) {
+        return new StreamObserver<>() {
             @Override
             @SneakyThrows
             public void onNext(Object value) {
                 Object resp = transcoder.out((Message) value, route.httpRule());
-                String result = JsonUtil.toJson(resp);
                 PrintWriter writer = response.getWriter();
-                String ret = "data: " + result + "\n";
-                writer.println(ret);
+                writer.println("data: " + JsonUtil.toJson(resp) + "\n");
                 writer.flush();
             }
 
@@ -207,25 +219,7 @@ public class TranscodingRouterFunction
                     log.warn("Failed to complete async context", e);
                 }
             }
-        }));
-
-        asyncContext.addListener(new AsyncListener() {
-            @Override
-            public void onComplete(AsyncEvent event) throws IOException {}
-
-            @Override
-            public void onTimeout(AsyncEvent event) throws IOException {}
-
-            @Override
-            public void onError(AsyncEvent event) throws IOException {
-                call.cancel("AsyncContext error", null);
-            }
-
-            @Override
-            public void onStartAsync(AsyncEvent event) throws IOException {}
-        });
-
-        return null;
+        };
     }
 
     @SuppressWarnings("unchecked")
@@ -273,6 +267,7 @@ public class TranscodingRouterFunction
                 .orElseThrow(() -> new IllegalStateException("Failed to get HttpServletResponse"));
     }
 
+    @SneakyThrows
     private static void write(HttpServletResponse response, String returnVal) {
         byte[] bytes = returnVal.getBytes(UTF_8);
         response.setContentLength(bytes.length);
@@ -283,26 +278,9 @@ public class TranscodingRouterFunction
             response.setContentType(MediaType.TEXT_PLAIN_VALUE);
             response.setCharacterEncoding(UTF_8.name());
         }
-
-        ServletOutputStream os;
-        try {
-            os = response.getOutputStream();
-        } catch (IllegalStateException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "getWriter() method has been called on this response", e);
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to get output stream", e);
-        }
-        try {
-            os.write(bytes);
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to write response", e);
-        }
-        try {
-            os.flush();
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to flush response", e);
-        }
+        PrintWriter w = response.getWriter();
+        w.write(returnVal);
+        w.flush();
     }
 
     private static ServerResponse handleException(StatusRuntimeException e) {
@@ -519,5 +497,49 @@ public class TranscodingRouterFunction
             }
         }
         return result;
+    }
+
+    private abstract static class BaseAsyncListener implements AsyncListener {
+        @Override
+        public void onComplete(AsyncEvent event) throws IOException {}
+
+        @Override
+        public void onTimeout(AsyncEvent event) throws IOException {}
+
+        @Override
+        public void onError(AsyncEvent event) throws IOException {}
+
+        @Override
+        public void onStartAsync(AsyncEvent event) throws IOException {}
+    }
+
+    private record TranscodingStreamingObserver(
+            HttpServletResponse response, AsyncContext asyncContext, Transcoder transcoder, Route route)
+            implements StreamObserver<Object> {
+        @Override
+        @SneakyThrows
+        public void onNext(Object value) {
+            Object resp = transcoder.out((Message) value, route.httpRule());
+            PrintWriter writer = response.getWriter();
+            writer.println("data: " + JsonUtil.toJson(resp) + "\n");
+            writer.flush();
+        }
+
+        @Override
+        @SneakyThrows
+        public void onError(Throwable t) {
+            throw t;
+        }
+
+        @Override
+        @SneakyThrows
+        public void onCompleted() {
+            response.getWriter().flush();
+            try {
+                asyncContext.complete();
+            } catch (Exception e) {
+                log.warn("Failed to complete async context", e);
+            }
+        }
     }
 }

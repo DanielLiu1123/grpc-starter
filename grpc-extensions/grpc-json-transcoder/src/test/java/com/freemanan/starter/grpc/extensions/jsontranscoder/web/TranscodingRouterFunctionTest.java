@@ -18,5 +18,7 @@ class TranscodingRouterFunctionTest {
         assertThat(snakeToPascal("Ss")).isEqualTo("Ss");
         assertThat(snakeToPascal("SS")).isEqualTo("SS");
         assertThat(snakeToPascal("Ss_ss")).isEqualTo("SsSs");
+        assertThat(snakeToPascal("SsSs")).isEqualTo("SsSs");
+        assertThat(snakeToPascal("ssSs")).isEqualTo("SsSs");
     }
 }

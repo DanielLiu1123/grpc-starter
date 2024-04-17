@@ -84,10 +84,3 @@ allprojects {
         excludeFilter = file("${rootDir}/config/spotbugs/exclude.xml")
     }
 }
-
-tasks.register('installGitHook', Copy) {
-    from "$rootProject.rootDir/.githooks"
-    into { new File(rootProject.rootDir, '.git/hooks') }
-    fileMode 0775
-}
-installGitHook
