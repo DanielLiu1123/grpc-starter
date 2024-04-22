@@ -8,6 +8,7 @@ import jakarta.servlet.AsyncContext;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
 import lombok.SneakyThrows;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,8 +21,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import transcoding.mvc.SimpleServiceGrpc;
 import transcoding.mvc.Simpleservice;
 
-import java.nio.charset.StandardCharsets;
-
 /**
  * @author Freeman
  */
@@ -33,7 +32,8 @@ public class MvcApp extends SimpleServiceGrpc.SimpleServiceImplBase {
     }
 
     @Override
-    public void unaryRpc(Simpleservice.SimpleRequest request, StreamObserver<Simpleservice.SimpleResponse> responseObserver) {
+    public void unaryRpc(
+            Simpleservice.SimpleRequest request, StreamObserver<Simpleservice.SimpleResponse> responseObserver) {
         if (request.getRequestMessage().contains("err")) {
             var metadata = new Metadata();
             metadata.put(Metadata.Key.of("error", Metadata.ASCII_STRING_MARSHALLER), "invalid argument");
@@ -112,16 +112,16 @@ public class MvcApp extends SimpleServiceGrpc.SimpleServiceImplBase {
         SseEmitter emitter = new SseEmitter();
 
         new Thread(() -> {
-            try {
-                for (int i = 0; i < 5; i++) {
-                    emitter.send(i);
-                    Thread.sleep(1000);
-                }
-                emitter.complete();
-            } catch (Exception e) {
-                emitter.completeWithError(e);
-            }
-        })
+                    try {
+                        for (int i = 0; i < 5; i++) {
+                            emitter.send(i);
+                            Thread.sleep(1000);
+                        }
+                        emitter.complete();
+                    } catch (Exception e) {
+                        emitter.completeWithError(e);
+                    }
+                })
                 .start();
         return emitter;
     }

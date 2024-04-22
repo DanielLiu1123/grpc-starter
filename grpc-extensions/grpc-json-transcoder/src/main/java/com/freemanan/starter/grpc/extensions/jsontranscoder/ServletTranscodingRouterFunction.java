@@ -10,20 +10,18 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
 import static org.springframework.util.StreamUtils.copyToByteArray;
 
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import io.grpc.BindableService;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.ClientCall;
-import io.grpc.ForwardingClientCall;
-import io.grpc.ForwardingClientCallListener;
+import io.grpc.ClientInterceptors;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
 import io.grpc.ServerServiceDefinition;
-import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCalls;
+import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
@@ -103,57 +101,29 @@ public class ServletTranscodingRouterFunction
     public ServerResponse handle(@Nonnull ServerRequest request) throws Exception {
         Util.Route<ServerRequest> route =
                 (Util.Route<ServerRequest>) request.attributes().get(MATCHING_ROUTE);
-        Descriptors.MethodDescriptor callMethod = route.methodDescriptor();
-
-        ClientCall<Object, Object> call =
-                (ClientCall<Object, Object>) channel.newCall(route.invokeMethod(), CallOptions.DEFAULT);
-
-        AtomicReference<Metadata> grpcResponseHeaders = new AtomicReference<>();
-        call = new ForwardingClientCall.SimpleForwardingClientCall<>(call) {
-            @Override
-            public void start(Listener<Object> responseListener, Metadata headers) {
-                super.start(
-                        new ForwardingClientCallListener.SimpleForwardingClientCallListener<>(responseListener) {
-                            @Override
-                            public void onHeaders(Metadata headers) {
-                                grpcResponseHeaders.set(headers);
-                                super.onHeaders(headers);
-                            }
-
-                            @Override
-                            public void onClose(Status status, Metadata trailers) {
-                                grpcResponseHeaders.set(trailers);
-                                super.onClose(status, trailers);
-                            }
-                        },
-                        headers);
-            }
-        };
 
         MethodDescriptor.MethodType methodType = route.invokeMethod().getType();
 
         if (methodType == MethodDescriptor.MethodType.UNARY) {
-            return processUnaryCall(request, call, callMethod, route, grpcResponseHeaders);
+            return processUnaryCall(request, route);
         }
 
         if (methodType == MethodDescriptor.MethodType.SERVER_STREAMING) {
             if (!Objects.equals(request.method(), HttpMethod.GET)) {
                 throw new ResponseStatusException(METHOD_NOT_ALLOWED, "SSE only supports GET method");
             }
-            return processServerStreamingCall(request, call, callMethod, route);
+            return processServerStreamingCall(request, route);
         }
 
         throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "Unsupported rpc method type: " + methodType);
     }
 
-    private ServerResponse processServerStreamingCall(
-            ServerRequest request,
-            ClientCall<Object, Object> call,
-            Descriptors.MethodDescriptor callMethod,
-            Route<ServerRequest> route) {
+    private ServerResponse processServerStreamingCall(ServerRequest request, Route<ServerRequest> route) {
         Transcoder transcoder = getTranscoder(request);
 
-        Message req = Util.buildRequestMessage(transcoder, callMethod, route);
+        ClientCall<Object, Object> call = getCall(channel, route);
+
+        Message req = Util.buildRequestMessage(transcoder, route);
 
         return ServerResponse.sse(
                 (sse -> {
@@ -188,6 +158,11 @@ public class ServletTranscodingRouterFunction
     }
 
     @SuppressWarnings("unchecked")
+    private static ClientCall<Object, Object> getCall(Channel channel, Route<ServerRequest> route) {
+        return (ClientCall<Object, Object>) channel.newCall(route.invokeMethod(), CallOptions.DEFAULT);
+    }
+
+    @SuppressWarnings("unchecked")
     private static Transcoder getTranscoder(ServerRequest request) {
         try {
             return new Transcoder(new Transcoder.Variable(
@@ -200,26 +175,27 @@ public class ServletTranscodingRouterFunction
         }
     }
 
-    private ServerResponse processUnaryCall(
-            ServerRequest request,
-            ClientCall<Object, Object> call,
-            Descriptors.MethodDescriptor callMethod,
-            Route<ServerRequest> route,
-            AtomicReference<Metadata> grpcResponseHeaders) {
+    private ServerResponse processUnaryCall(ServerRequest request, Route<ServerRequest> route) {
         Transcoder transcoder = getTranscoder(request);
+
+        AtomicReference<Metadata> headers = new AtomicReference<>();
+        AtomicReference<Metadata> trailers = new AtomicReference<>();
+        Channel chan =
+                ClientInterceptors.intercept(channel, MetadataUtils.newCaptureMetadataInterceptor(headers, trailers));
+
+        ClientCall<Object, Object> call = getCall(chan, route);
 
         Message responseMessage;
         try {
-            responseMessage = (Message)
-                    ClientCalls.blockingUnaryCall(call, Util.buildRequestMessage(transcoder, callMethod, route));
+            responseMessage =
+                    (Message) ClientCalls.blockingUnaryCall(call, Util.buildRequestMessage(transcoder, route));
         } catch (StatusRuntimeException e) {
             // Not control by problemdetails.enabled, Spring bug?
             throw new TranscodingRuntimeException(
-                    toHttpStatus(e.getStatus()), e.getLocalizedMessage(), toHttpHeaders(grpcResponseHeaders.get()));
+                    toHttpStatus(e.getStatus()), e.getLocalizedMessage(), toHttpHeaders(trailers.get()));
         }
 
-        ServerResponse.BodyBuilder builder =
-                ServerResponse.ok().headers(h -> h.addAll(toHttpHeaders(grpcResponseHeaders.get())));
+        ServerResponse.BodyBuilder builder = ServerResponse.ok().headers(h -> h.addAll(toHttpHeaders(headers.get())));
         String json = JsonUtil.toJson(transcoder.out(responseMessage, route.httpRule()));
         if (isJson(json)) {
             builder.contentType(MediaType.APPLICATION_JSON);

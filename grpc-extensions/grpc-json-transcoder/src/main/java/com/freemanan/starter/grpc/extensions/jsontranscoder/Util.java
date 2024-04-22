@@ -152,7 +152,7 @@ class Util {
         return result.toString();
     }
 
-    static HttpHeaders toHttpHeaders(Metadata headers) {
+    static HttpHeaders toHttpHeaders(@Nullable Metadata headers) {
         if (headers == null) return new HttpHeaders();
 
         HttpHeaders result = new HttpHeaders();
@@ -243,11 +243,10 @@ class Util {
                 .build();
     }
 
-    public static Message buildRequestMessage(
-            Transcoder transcoder, Descriptors.MethodDescriptor callMethod, Route<?> route) {
+    public static Message buildRequestMessage(Transcoder transcoder, Route<?> route) {
         Message.Builder messageBuilder = methodCache
                 .computeIfAbsent(
-                        callMethod,
+                        route.methodDescriptor(),
                         k -> getDefaultMessage(route.methodDescriptor().getInputType()))
                 .toBuilder();
 

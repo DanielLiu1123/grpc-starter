@@ -1,6 +1,7 @@
 package com.freeman.example;
 
-import com.freemanan.starter.grpc.server.GrpcContextKeys;
+import static com.freemanan.starter.grpc.server.GrpcContextKeys.ResponseMetadataModifier;
+
 import io.grpc.Metadata;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -10,8 +11,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import transcoding.flux.SimpleServiceGrpc;
 import transcoding.flux.Simpleservice;
-
-import static com.freemanan.starter.grpc.server.GrpcContextKeys.*;
 
 /**
  * @author Freeman

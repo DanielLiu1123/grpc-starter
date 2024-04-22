@@ -11,20 +11,18 @@ import static com.freemanan.starter.grpc.extensions.jsontranscoder.Util.toHttpHe
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
 
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import io.grpc.BindableService;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.ClientCall;
-import io.grpc.ForwardingClientCall;
-import io.grpc.ForwardingClientCallListener;
+import io.grpc.ClientInterceptors;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
 import io.grpc.ServerServiceDefinition;
-import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCalls;
+import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
@@ -104,63 +102,37 @@ public class ReactiveTranscodingRouterFunction
     public Mono<ServerResponse> handle(@Nonnull ServerRequest request) {
         var route = (Util.Route<ServerRequest>) request.attributes().get(MATCHING_ROUTE);
 
-        Descriptors.MethodDescriptor callMethod = route.methodDescriptor();
-
-        ClientCall<Object, Object> call =
-                (ClientCall<Object, Object>) channel.newCall(route.invokeMethod(), CallOptions.DEFAULT);
-
-        AtomicReference<Metadata> grpcResponseHeaders = new AtomicReference<>();
-        call = new ForwardingClientCall.SimpleForwardingClientCall<>(call) {
-            @Override
-            public void start(Listener<Object> responseListener, Metadata headers) {
-                super.start(
-                        new ForwardingClientCallListener.SimpleForwardingClientCallListener<>(responseListener) {
-                            @Override
-                            public void onHeaders(Metadata headers) {
-                                grpcResponseHeaders.set(headers);
-                                super.onHeaders(headers);
-                            }
-
-                            @Override
-                            public void onClose(Status status, Metadata trailers) {
-                                grpcResponseHeaders.set(trailers);
-                                super.onClose(status, trailers);
-                            }
-                        },
-                        headers);
-            }
-        };
-
         MethodDescriptor.MethodType methodType = route.invokeMethod().getType();
 
         if (methodType == MethodDescriptor.MethodType.UNARY) {
-            return processUnaryCall(request, call, callMethod, route, grpcResponseHeaders);
+            return processUnaryCall(request, route);
         }
 
         if (methodType == MethodDescriptor.MethodType.SERVER_STREAMING) {
             if (!Objects.equals(request.method(), HttpMethod.GET)) {
                 throw new ResponseStatusException(METHOD_NOT_ALLOWED, "SSE only supports GET method");
             }
-            return processServerStreamingCall(request, call, callMethod, route);
+            return processServerStreamingCall(request, route);
         }
 
         throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "Unsupported rpc method type: " + methodType);
     }
 
-    private Mono<ServerResponse> processServerStreamingCall(
-            ServerRequest request,
-            ClientCall<Object, Object> call,
-            Descriptors.MethodDescriptor callMethod,
-            Route<ServerRequest> route) {
+    @SuppressWarnings("unchecked")
+    private static ClientCall<Object, Object> getCall(Channel channel, Route<ServerRequest> route) {
+        return (ClientCall<Object, Object>) channel.newCall(route.invokeMethod(), CallOptions.DEFAULT);
+    }
+
+    private Mono<ServerResponse> processServerStreamingCall(ServerRequest request, Route<ServerRequest> route) {
         return request.bodyToMono(DataBuffer.class)
                 .defaultIfEmpty(request.exchange().getResponse().bufferFactory().wrap(new byte[0]))
                 .flatMap(buf -> {
+                    ClientCall<Object, Object> call = getCall(channel, route);
                     Transcoder transcoder = new Transcoder(new Transcoder.Variable(
                             getBytes(buf),
                             convert(request.queryParams()),
                             request.exchange().getAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE)));
-                    Message msg = Util.buildRequestMessage(transcoder, callMethod, route);
-
+                    Message msg = Util.buildRequestMessage(transcoder, route);
                     Flux<ServerSentEvent<String>> response =
                             Flux.create(sink -> ClientCalls.asyncServerStreamingCall(call, msg, new StreamObserver<>() {
                                 @Override
@@ -190,27 +162,29 @@ public class ReactiveTranscodingRouterFunction
                 });
     }
 
-    private Mono<ServerResponse> processUnaryCall(
-            ServerRequest request,
-            ClientCall<Object, Object> call,
-            Descriptors.MethodDescriptor callMethod,
-            Route<ServerRequest> route,
-            AtomicReference<Metadata> grpcResponseHeaders) {
+    private Mono<ServerResponse> processUnaryCall(ServerRequest request, Route<ServerRequest> route) {
         return request.bodyToMono(DataBuffer.class)
                 .defaultIfEmpty(request.exchange().getResponse().bufferFactory().wrap(new byte[0]))
                 .flatMap(buf -> {
+                    AtomicReference<Metadata> headers = new AtomicReference<>();
+                    AtomicReference<Metadata> trailers = new AtomicReference<>();
+                    Channel chan = ClientInterceptors.intercept(
+                            channel, MetadataUtils.newCaptureMetadataInterceptor(headers, trailers));
+
+                    ClientCall<Object, Object> call = getCall(chan, route);
+
                     Transcoder transcoder = new Transcoder(new Transcoder.Variable(
                             getBytes(buf),
                             convert(request.queryParams()),
                             request.exchange().getAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE)));
-                    Message msg = Util.buildRequestMessage(transcoder, callMethod, route);
+                    Message msg = Util.buildRequestMessage(transcoder, route);
                     return Mono.create(sink -> ClientCalls.asyncUnaryCall(call, msg, new StreamObserver<>() {
                         @Override
                         public void onNext(Object o) {
                             String json = JsonUtil.toJson(transcoder.out((Message) o, route.httpRule()));
 
-                            ServerResponse.BodyBuilder builder = ServerResponse.ok()
-                                    .headers(h -> h.addAll(toHttpHeaders(grpcResponseHeaders.get())));
+                            ServerResponse.BodyBuilder builder =
+                                    ServerResponse.ok().headers(h -> h.addAll(toHttpHeaders(headers.get())));
                             if (isJson(json)) {
                                 builder.contentType(MediaType.APPLICATION_JSON);
                             }
@@ -224,7 +198,7 @@ public class ReactiveTranscodingRouterFunction
                                 sink.error(new TranscodingRuntimeException(
                                         toHttpStatus(sre.getStatus()),
                                         sre.getLocalizedMessage(),
-                                        toHttpHeaders(grpcResponseHeaders.get())));
+                                        toHttpHeaders(trailers.get())));
                             } else {
                                 sink.error(throwable);
                             }
