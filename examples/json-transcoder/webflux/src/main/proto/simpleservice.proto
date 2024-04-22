@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "google/api/annotations.proto";
 
-package transcoding.mvc;
+package transcoding.flux;
 
 // A simple service for test.
 service SimpleService {

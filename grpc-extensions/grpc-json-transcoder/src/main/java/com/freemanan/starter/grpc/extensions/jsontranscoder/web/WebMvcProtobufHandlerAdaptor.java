@@ -1,11 +1,11 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder.web;
 
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil.anyCompatible;
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil.getAccept;
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil.isGrpcHandleMethod;
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil.isJson;
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil.notAcceptableException;
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.ProtoUtil.toJson;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.JsonTranscoderUtil.anyCompatible;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.JsonTranscoderUtil.getAccept;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.JsonTranscoderUtil.isGrpcHandleMethod;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.JsonTranscoderUtil.isJson;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.JsonTranscoderUtil.notAcceptableException;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.ProtoUtil.toJson;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import com.freemanan.starter.grpc.extensions.jsontranscoder.AbstractHandlerAdaptor;

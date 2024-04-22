@@ -1,6 +1,6 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder.webflux;
 
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil.isGrpcHandleMethod;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.JsonTranscoderUtil.isGrpcHandleMethod;
 
 import com.freemanan.starter.grpc.extensions.jsontranscoder.AbstractHandlerAdaptor;
 import com.freemanan.starter.grpc.extensions.jsontranscoder.FutureAdapter;

@@ -2,6 +2,7 @@ grpc:
   server:
     reflection:
       enabled: true
-server:
-  error:
-    include-message: always
+spring:
+  mvc:
+    problemdetails:
+      enabled: true

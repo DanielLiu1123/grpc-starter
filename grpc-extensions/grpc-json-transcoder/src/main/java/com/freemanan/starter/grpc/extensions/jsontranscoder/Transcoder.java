@@ -20,7 +20,6 @@ import java.util.Optional;
 public class Transcoder {
 
     private static final JsonFormat.Parser parser = JsonFormat.parser().ignoringUnknownFields();
-    private static final JsonFormat.Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
 
     private final Variable variable;
 

@@ -12,6 +12,7 @@ import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import java.io.IOException;
 import lombok.experimental.UtilityClass;
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 /**
@@ -46,13 +47,22 @@ public class JsonUtil {
      * @return json string
      */
     public static String toJson(Object obj) {
-        if (obj instanceof MessageOrBuilder m) {
+        if (obj instanceof Message m) {
+            var res = ProtoUtil.stringfy(m);
+            if (res.isValueMessage()) {
+                return res.stringValue();
+            }
             try {
                 return printer.print(m);
             } catch (InvalidProtocolBufferException e) {
                 throw new IllegalArgumentException(e);
             }
         }
+
+        if (BeanUtils.isSimpleValueType(obj.getClass())) {
+            return String.valueOf(obj);
+        }
+
         try {
             return om.writeValueAsString(obj);
         } catch (JsonProcessingException e) {

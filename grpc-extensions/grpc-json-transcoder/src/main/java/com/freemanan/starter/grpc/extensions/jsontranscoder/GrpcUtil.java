@@ -1,4 +1,4 @@
-package com.freemanan.starter.grpc.extensions.jsontranscoder.util;
+package com.freemanan.starter.grpc.extensions.jsontranscoder;
 
 import io.grpc.Status;
 import lombok.experimental.UtilityClass;

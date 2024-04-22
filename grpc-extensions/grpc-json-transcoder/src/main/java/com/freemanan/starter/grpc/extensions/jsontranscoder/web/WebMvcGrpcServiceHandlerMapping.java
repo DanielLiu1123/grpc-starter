@@ -1,6 +1,6 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder.web;
 
-import com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil;
+import com.freemanan.starter.grpc.extensions.jsontranscoder.JsonTranscoderUtil;
 import com.google.api.AnnotationsProto;
 import com.google.api.HttpRule;
 import com.google.protobuf.Descriptors;

@@ -1,6 +1,6 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder.webflux;
 
-import com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil;
+import com.freemanan.starter.grpc.extensions.jsontranscoder.JsonTranscoderUtil;
 import io.grpc.BindableService;
 import java.util.Map;
 import org.springframework.beans.factory.ObjectProvider;

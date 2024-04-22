@@ -1,14 +1,15 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder.web;
 
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.web.TranscodingRouterFunction.snakeToPascal;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.ServletTranscodingRouterFunction.snakeToPascal;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.freemanan.starter.grpc.extensions.jsontranscoder.ServletTranscodingRouterFunction;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link TranscodingRouterFunction} tester.
+ * {@link ServletTranscodingRouterFunction} tester.
  */
-class TranscodingRouterFunctionTest {
+class ServletTranscodingRouterFunctionTest {
 
     @Test
     void testSnakeToPascal() {

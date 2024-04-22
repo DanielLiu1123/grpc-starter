@@ -11,3 +11,5 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
+
+apply from: "${rootDir}/gradle/protobuf.gradle"

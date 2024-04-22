@@ -1,6 +1,6 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder.util;
 
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.ProtoUtil.isSimpleValueMessage;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.ProtoUtil.isSimpleValueMessage;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.protobuf.BoolValue;

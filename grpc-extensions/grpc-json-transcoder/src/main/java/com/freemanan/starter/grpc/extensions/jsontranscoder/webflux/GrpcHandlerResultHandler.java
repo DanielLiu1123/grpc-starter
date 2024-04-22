@@ -1,9 +1,9 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder.webflux;
 
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil.isJson;
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.util.ProtoUtil.toJson;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.JsonTranscoderUtil.isJson;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.ProtoUtil.toJson;
 
-import com.freemanan.starter.grpc.extensions.jsontranscoder.util.JsonTranscoderUtil;
+import com.freemanan.starter.grpc.extensions.jsontranscoder.JsonTranscoderUtil;
 import com.google.protobuf.Message;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
