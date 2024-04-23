@@ -1,5 +1,7 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder;
 
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.Util.stringify;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,39 +18,37 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 /**
- * JSON util.
+ * Utility class for JSON serialization, aimed to support both Java bean and Protobuf {@link Message}.
  *
  * @author Freeman
  */
 @UtilityClass
-public class JsonUtil {
+class JsonUtil {
 
     private static final ObjectMapper om;
     private static final JsonFormat.Printer printer;
-    private static final JsonFormat.Parser parser;
 
     static {
-        om = new Jackson2ObjectMapperBuilder() // Use Jackson2ObjectMapperBuilder to be consistent with Spring Boot
-                // behavior
+        // Use Jackson2ObjectMapperBuilder to be consistent with Spring Boot behavior
+        om = new Jackson2ObjectMapperBuilder()
                 .failOnEmptyBeans(false)
                 .modules(new SimpleModule().addSerializer(new ProtoMessageSerializer()))
                 .build();
         printer = JsonFormat.printer().omittingInsignificantWhitespace();
-        parser = JsonFormat.parser().ignoringUnknownFields();
     }
 
     /**
      * Convert the Java bean or Protobuf {@link Message} to JSON string.
      *
      * <p> For Java Bean: include all fields, even if they are null.
-     * <p> For Protobuf message: use {@link JsonFormat.Printer#print(MessageOrBuilder)}'s default behavior, default value will be omitted.
+     * <p> For Protobuf {@link Message}: use {@link JsonFormat.Printer#print(MessageOrBuilder)}'s default behavior, default value will be omitted.
      *
      * @param obj the object/{@link Message} to encode
      * @return json string
      */
     public static String toJson(Object obj) {
         if (obj instanceof Message m) {
-            var res = ProtoUtil.stringfy(m);
+            var res = stringify(m);
             if (res.isValueMessage()) {
                 return res.stringValue();
             }

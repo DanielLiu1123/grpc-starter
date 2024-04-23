@@ -1,6 +1,7 @@
-package com.freemanan.starter.grpc.extensions.jsontranscoder.util;
+package com.freemanan.starter.grpc.extensions.jsontranscoder;
 
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.ProtoUtil.isSimpleValueMessage;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.Util.isSimpleValueMessage;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.Util.snakeToPascal;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.protobuf.BoolValue;
@@ -12,6 +13,7 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.ListValue;
+import com.google.protobuf.Message;
 import com.google.protobuf.NullValue;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Struct;
@@ -22,7 +24,10 @@ import com.google.protobuf.util.JsonFormat;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
-class ProtoUtilTest {
+class UtilTest {
+    /**
+     * {@link Util#isSimpleValueMessage(Message)}
+     */
     @Test
     void testSimpleValue() {
         assertThat(isSimpleValueMessage(StringValue.of(""))).isTrue();
@@ -111,5 +116,20 @@ class ProtoUtilTest {
         parser.merge(json, valueBuilder);
 
         assertThat(printer.print(valueBuilder.build())).isEqualTo("1.0");
+    }
+
+    /**
+     * {@link Util#snakeToPascal(String)}
+     */
+    @Test
+    void testSnakeToPascal() {
+        assertThat(snakeToPascal("snake_case")).isEqualTo("SnakeCase");
+        assertThat(snakeToPascal("s_s")).isEqualTo("SS");
+        assertThat(snakeToPascal("s")).isEqualTo("S");
+        assertThat(snakeToPascal("Ss")).isEqualTo("Ss");
+        assertThat(snakeToPascal("SS")).isEqualTo("SS");
+        assertThat(snakeToPascal("Ss_ss")).isEqualTo("SsSs");
+        assertThat(snakeToPascal("SsSs")).isEqualTo("SsSs");
+        assertThat(snakeToPascal("ssSs")).isEqualTo("SsSs");
     }
 }

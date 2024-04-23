@@ -17,14 +17,18 @@ import java.util.Optional;
 /**
  * @author Freeman
  */
-public class Transcoder {
+class Transcoder {
 
     private static final JsonFormat.Parser parser = JsonFormat.parser().ignoringUnknownFields();
 
     private final Variable variable;
 
-    public Transcoder(Variable variable) {
+    private Transcoder(Variable variable) {
         this.variable = variable;
+    }
+
+    public static Transcoder create(Variable variable) {
+        return new Transcoder(variable);
     }
 
     public void into(@Nonnull Message.Builder messageBuilder, @Nonnull HttpRule httpRule) {

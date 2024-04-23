@@ -1,7 +1,8 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder;
 
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.GrpcUtil.toHttpStatus;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.TranscodingUtil.toHttpStatus;
 import static com.freemanan.starter.grpc.extensions.jsontranscoder.Util.Route;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.Util.buildRequestMessage;
 import static com.freemanan.starter.grpc.extensions.jsontranscoder.Util.getInProcessChannel;
 import static com.freemanan.starter.grpc.extensions.jsontranscoder.Util.getServletRoutes;
 import static com.freemanan.starter.grpc.extensions.jsontranscoder.Util.isJson;
@@ -18,7 +19,6 @@ import io.grpc.ClientCall;
 import io.grpc.ClientInterceptors;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
-import io.grpc.ServerServiceDefinition;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCalls;
 import io.grpc.stub.MetadataUtils;
@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.function.HandlerFunction;
 import org.springframework.web.servlet.function.RouterFunction;
@@ -56,40 +55,29 @@ public class ServletTranscodingRouterFunction
 
     private static final String MATCHING_ROUTE = ServletTranscodingRouterFunction.class + ".matchingRoute";
 
-    private final List<ServerServiceDefinition> definitions = new ArrayList<>();
-    private final List<Util.Route<ServerRequest>> routes = new ArrayList<>();
-    private final Map<Util.QuickRoute, Util.Route<ServerRequest>> fastCache = new ConcurrentReferenceHashMap<>();
+    private final List<Route<ServerRequest>> routes = new ArrayList<>();
 
     private Channel channel;
 
-    public ServletTranscodingRouterFunction(List<BindableService> bindableServices) {
-        bindableServices.stream().map(BindableService::bindService).forEach(definitions::add);
+    public ServletTranscodingRouterFunction(List<BindableService> services) {
+        routes.addAll(getServletRoutes(services));
     }
 
     @Override
     public void afterSingletonsInstantiated() {
-        init();
+        channel = getInProcessChannel();
     }
 
     @Override
     @Nonnull
     public Optional<HandlerFunction<ServerResponse>> route(@Nonnull ServerRequest request) {
-        // Check fast cache first
-        var req = new Util.QuickRoute(request.method(), request.path());
-        var r = fastCache.get(req);
-        if (r != null) {
-            request.attributes().put(MATCHING_ROUTE, r);
-            return Optional.of(this);
-        }
-
         for (Util.Route<ServerRequest> route : routes) {
-            if (route.predicate().test(request)) {
-                fastCache.put(req, route);
+            if (route.predicate().test(request)
+                    || route.additionalPredicates().stream().anyMatch(p -> p.test(request))) {
                 request.attributes().put(MATCHING_ROUTE, route);
                 return Optional.of(this);
             }
         }
-
         return Optional.empty();
     }
 
@@ -118,12 +106,57 @@ public class ServletTranscodingRouterFunction
         throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "Unsupported rpc method type: " + methodType);
     }
 
+    @SuppressWarnings("unchecked")
+    private static ClientCall<Object, Object> getCall(Channel channel, Route<ServerRequest> route) {
+        return (ClientCall<Object, Object>) channel.newCall(route.invokeMethod(), CallOptions.DEFAULT);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Transcoder getTranscoder(ServerRequest request) {
+        try {
+            return Transcoder.create(new Transcoder.Variable(
+                    copyToByteArray(request.servletRequest().getInputStream()),
+                    request.servletRequest().getParameterMap(),
+                    ((Map<String, String>)
+                            request.servletRequest().getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE))));
+        } catch (IOException e) {
+            throw new IllegalStateException("getInputStream failed", e);
+        }
+    }
+
+    private ServerResponse processUnaryCall(ServerRequest request, Route<ServerRequest> route) {
+        Transcoder transcoder = getTranscoder(request);
+
+        AtomicReference<Metadata> headers = new AtomicReference<>();
+        AtomicReference<Metadata> trailers = new AtomicReference<>();
+        Channel chan =
+                ClientInterceptors.intercept(channel, MetadataUtils.newCaptureMetadataInterceptor(headers, trailers));
+
+        ClientCall<Object, Object> call = getCall(chan, route);
+
+        Message responseMessage;
+        try {
+            responseMessage = (Message) ClientCalls.blockingUnaryCall(call, buildRequestMessage(transcoder, route));
+        } catch (StatusRuntimeException e) {
+            // TODO(Freeman): Not control by problemdetails.enabled, Spring bug?
+            throw new TranscodingRuntimeException(
+                    toHttpStatus(e.getStatus()), e.getLocalizedMessage(), toHttpHeaders(trailers.get()));
+        }
+
+        ServerResponse.BodyBuilder builder = ServerResponse.ok().headers(h -> h.addAll(toHttpHeaders(headers.get())));
+        String json = JsonUtil.toJson(transcoder.out(responseMessage, route.httpRule()));
+        if (isJson(json)) {
+            builder.contentType(MediaType.APPLICATION_JSON);
+        }
+        return builder.body(json);
+    }
+
     private ServerResponse processServerStreamingCall(ServerRequest request, Route<ServerRequest> route) {
         Transcoder transcoder = getTranscoder(request);
 
         ClientCall<Object, Object> call = getCall(channel, route);
 
-        Message req = Util.buildRequestMessage(transcoder, route);
+        Message req = buildRequestMessage(transcoder, route);
 
         return ServerResponse.sse(
                 (sse -> {
@@ -155,57 +188,5 @@ public class ServletTranscodingRouterFunction
                     });
                 }),
                 Duration.ZERO);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static ClientCall<Object, Object> getCall(Channel channel, Route<ServerRequest> route) {
-        return (ClientCall<Object, Object>) channel.newCall(route.invokeMethod(), CallOptions.DEFAULT);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Transcoder getTranscoder(ServerRequest request) {
-        try {
-            return new Transcoder(new Transcoder.Variable(
-                    copyToByteArray(request.servletRequest().getInputStream()),
-                    request.servletRequest().getParameterMap(),
-                    ((Map<String, String>)
-                            request.servletRequest().getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE))));
-        } catch (IOException e) {
-            throw new IllegalStateException("getInputStream failed", e);
-        }
-    }
-
-    private ServerResponse processUnaryCall(ServerRequest request, Route<ServerRequest> route) {
-        Transcoder transcoder = getTranscoder(request);
-
-        AtomicReference<Metadata> headers = new AtomicReference<>();
-        AtomicReference<Metadata> trailers = new AtomicReference<>();
-        Channel chan =
-                ClientInterceptors.intercept(channel, MetadataUtils.newCaptureMetadataInterceptor(headers, trailers));
-
-        ClientCall<Object, Object> call = getCall(chan, route);
-
-        Message responseMessage;
-        try {
-            responseMessage =
-                    (Message) ClientCalls.blockingUnaryCall(call, Util.buildRequestMessage(transcoder, route));
-        } catch (StatusRuntimeException e) {
-            // Not control by problemdetails.enabled, Spring bug?
-            throw new TranscodingRuntimeException(
-                    toHttpStatus(e.getStatus()), e.getLocalizedMessage(), toHttpHeaders(trailers.get()));
-        }
-
-        ServerResponse.BodyBuilder builder = ServerResponse.ok().headers(h -> h.addAll(toHttpHeaders(headers.get())));
-        String json = JsonUtil.toJson(transcoder.out(responseMessage, route.httpRule()));
-        if (isJson(json)) {
-            builder.contentType(MediaType.APPLICATION_JSON);
-        }
-        return builder.body(json);
-    }
-
-    private void init() {
-        routes.addAll(getServletRoutes(definitions));
-
-        channel = getInProcessChannel();
     }
 }

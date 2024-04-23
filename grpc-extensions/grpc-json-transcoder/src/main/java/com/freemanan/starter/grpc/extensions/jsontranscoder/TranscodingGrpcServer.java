@@ -1,6 +1,6 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder;
 
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.JsonTranscoderUtil.TRANSCODING_SERVER_IN_PROCESS_NAME;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.Util.TRANSCODING_SERVER_IN_PROCESS_NAME;
 
 import com.freemanan.starter.grpc.server.DummyGrpcServer;
 import com.freemanan.starter.grpc.server.GrpcServer;

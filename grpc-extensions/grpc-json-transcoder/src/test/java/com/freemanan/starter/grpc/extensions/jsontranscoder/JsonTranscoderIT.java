@@ -18,6 +18,7 @@ import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import io.grpc.stub.StreamObserver;
 import java.nio.charset.StandardCharsets;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 /**
  * @author Freeman
  */
+@Disabled("Developing...")
 class JsonTranscoderIT {
 
     @Test

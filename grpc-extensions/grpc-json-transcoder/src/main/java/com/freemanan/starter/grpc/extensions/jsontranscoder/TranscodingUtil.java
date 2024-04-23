@@ -8,14 +8,14 @@ import org.springframework.http.HttpStatus;
  * @author Freeman
  */
 @UtilityClass
-public class GrpcUtil {
+public class TranscodingUtil {
 
     /**
-     * Convert gRPC status to http status.
+     * Convert gRPC status to HTTP status.
      *
-     * @param grpcStatus grpc status
-     * @return http status
-     * @see <a href="https://chromium.googlesource.com/external/github.com/grpc/grpc/+/refs/tags/v1.21.4-pre1/doc/statuscodes.md">statuscodes</a>
+     * @param grpcStatus {@link Status}
+     * @return {@link HttpStatus}
+     * @see <a href="https://cloud.google.com/apis/design/errors#handling_errors">Handling Errors</a>
      */
     public static HttpStatus toHttpStatus(Status grpcStatus) {
         return switch (grpcStatus.getCode()) {

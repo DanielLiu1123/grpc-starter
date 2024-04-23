@@ -1,13 +1,23 @@
 package com.freemanan.starter.grpc.extensions.jsontranscoder;
 
-import static com.freemanan.starter.grpc.extensions.jsontranscoder.JsonTranscoderUtil.TRANSCODING_SERVER_IN_PROCESS_NAME;
-
 import com.google.api.AnnotationsProto;
 import com.google.api.HttpRule;
 import com.google.api.pathtemplate.PathTemplate;
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.BytesValue;
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.DoubleValue;
+import com.google.protobuf.FloatValue;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.UInt32Value;
+import com.google.protobuf.UInt64Value;
+import com.google.protobuf.Value;
+import io.grpc.BindableService;
+import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
@@ -15,17 +25,24 @@ import io.grpc.ServerMethodDefinition;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.protobuf.ProtoFileDescriptorSupplier;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import lombok.experimental.UtilityClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.ClassUtils;
@@ -36,9 +53,14 @@ import org.springframework.web.servlet.function.ServerRequest;
 /**
  * @author Freeman
  */
+@UtilityClass
 class Util {
+    private static final Logger log = LoggerFactory.getLogger(Util.class);
 
     static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE = Util.class + ".matchingPattern";
+
+    public static final String TRANSCODING_SERVER_IN_PROCESS_NAME =
+            UUID.randomUUID().toString();
 
     static final Map<Descriptors.MethodDescriptor, Message> methodCache = new ConcurrentReferenceHashMap<>();
 
@@ -125,13 +147,17 @@ class Util {
         };
     }
 
-    static List<Util.Route<ServerRequest>> getServletRoutes(List<ServerServiceDefinition> definitions) {
-        return getRoutes(definitions, ServletPredicate::new);
+    public static List<ServerServiceDefinition> listRoute(List<BindableService> services) {
+        return services.stream().map(BindableService::bindService).toList();
     }
 
-    static List<Util.Route<org.springframework.web.reactive.function.server.ServerRequest>> getReactiveRoutes(
-            List<ServerServiceDefinition> definitions) {
-        return getRoutes(definitions, ReactivePredicate::new);
+    public static List<Util.Route<ServerRequest>> getServletRoutes(List<BindableService> services) {
+        return getRoutes(listRoute(services), ServletPredicate::new);
+    }
+
+    public static List<Util.Route<org.springframework.web.reactive.function.server.ServerRequest>> getReactiveRoutes(
+            List<BindableService> services) {
+        return getRoutes(listRoute(services), ReactivePredicate::new);
     }
 
     static String snakeToPascal(String input) {
@@ -261,28 +287,117 @@ class Util {
                         || (string.startsWith("[") && string.endsWith("]")));
     }
 
-    record Route<T>(
-            HttpRule httpRule,
-            MethodDescriptor<?, ?> invokeMethod,
-            Descriptors.MethodDescriptor methodDescriptor,
-            Predicate<T> predicate,
-            List<Predicate<T>> additionalPredicates) {}
+    public static void shutdown(Channel channel, Duration timeout) {
+        if (!(channel instanceof ManagedChannel mc) || mc.isShutdown() || mc.isTerminated()) {
+            return;
+        }
 
-    record ServletPredicate(HttpMethod httpMethod, PathTemplate pathTemplate) implements Predicate<ServerRequest> {
+        long ms = timeout.toMillis();
+        // Close the gRPC managed-channel if not shut down already.
+        try {
+            mc.shutdown();
+            if (!mc.awaitTermination(ms, TimeUnit.MILLISECONDS)) {
+                log.warn("Graceful shutdown timed out: {}ms, channel: {}", ms, mc);
+            }
+        } catch (InterruptedException e) {
+            log.warn("Interrupted gracefully shutting down channel: {}", mc);
+            Thread.currentThread().interrupt();
+        }
 
-        @Override
-        public boolean test(ServerRequest request) {
-            return isMatch(request.method(), httpMethod, request.path(), pathTemplate, request.attributes());
+        // Forcefully shut down if still not terminated.
+        if (!mc.isTerminated()) {
+            try {
+                mc.shutdownNow();
+                if (!mc.awaitTermination(15, TimeUnit.SECONDS)) {
+                    log.warn("Forcefully shutdown timed out: 15s, channel: {}. ", mc);
+                }
+            } catch (InterruptedException e) {
+                log.warn("Interrupted forcefully shutting down channel: {}. ", mc);
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
-    record ReactivePredicate(HttpMethod httpMethod, PathTemplate pathTemplate)
-            implements Predicate<org.springframework.web.reactive.function.server.ServerRequest> {
-
-        @Override
-        public boolean test(org.springframework.web.reactive.function.server.ServerRequest request) {
-            return isMatch(request.method(), httpMethod, request.path(), pathTemplate, request.attributes());
+    /**
+     * Check if the protobuf message is a simple value.
+     *
+     * @param message protobuf message
+     * @return true if the message is simple value
+     */
+    public static boolean isSimpleValueMessage(Message message) {
+        if (isWrapperType(message.getClass())) {
+            return true;
         }
+        if (message instanceof Value value) {
+            Value.KindCase kind = value.getKindCase();
+            return kind == Value.KindCase.NULL_VALUE
+                    || kind == Value.KindCase.NUMBER_VALUE
+                    || kind == Value.KindCase.STRING_VALUE
+                    || kind == Value.KindCase.BOOL_VALUE;
+        }
+        return false;
+    }
+
+    public static BooleanString stringify(Message message) {
+        if (message instanceof BoolValue boolValue) {
+            return new BooleanString(true, String.valueOf(boolValue.getValue()));
+        }
+        if (message instanceof Int32Value int32Value) {
+            return new BooleanString(true, String.valueOf(int32Value.getValue()));
+        }
+        if (message instanceof Int64Value int64Value) {
+            return new BooleanString(true, String.valueOf(int64Value.getValue()));
+        }
+        if (message instanceof UInt32Value uInt32Value) {
+            return new BooleanString(true, String.valueOf(uInt32Value.getValue()));
+        }
+        if (message instanceof UInt64Value uInt64Value) {
+            return new BooleanString(true, String.valueOf(uInt64Value.getValue()));
+        }
+        if (message instanceof FloatValue floatValue) {
+            return new BooleanString(true, String.valueOf(floatValue.getValue()));
+        }
+        if (message instanceof DoubleValue doubleValue) {
+            return new BooleanString(true, String.valueOf(doubleValue.getValue()));
+        }
+        if (message instanceof StringValue stringValue) {
+            return new BooleanString(true, stringValue.getValue());
+        }
+        if (message instanceof BytesValue bytesValue) {
+            return new BooleanString(true, bytesValue.getValue().toStringUtf8());
+        }
+        if (message instanceof Value value) {
+            switch (value.getKindCase()) {
+                case NULL_VALUE -> {
+                    return new BooleanString(true, "null");
+                }
+                case NUMBER_VALUE -> {
+                    return new BooleanString(true, String.valueOf(value.getNumberValue()));
+                }
+                case STRING_VALUE -> {
+                    return new BooleanString(true, value.getStringValue());
+                }
+                case BOOL_VALUE -> {
+                    return new BooleanString(true, String.valueOf(value.getBoolValue()));
+                }
+                default -> {
+                    return new BooleanString(false, null);
+                }
+            }
+        }
+        return new BooleanString(false, null);
+    }
+
+    private static boolean isWrapperType(Class<?> clz) {
+        return BoolValue.class.isAssignableFrom(clz)
+                || Int32Value.class.isAssignableFrom(clz)
+                || Int64Value.class.isAssignableFrom(clz)
+                || UInt32Value.class.isAssignableFrom(clz)
+                || UInt64Value.class.isAssignableFrom(clz)
+                || FloatValue.class.isAssignableFrom(clz)
+                || DoubleValue.class.isAssignableFrom(clz)
+                || StringValue.class.isAssignableFrom(clz)
+                || BytesValue.class.isAssignableFrom(clz);
     }
 
     private static boolean isMatch(
@@ -306,5 +421,29 @@ class Util {
         return true;
     }
 
-    record QuickRoute(HttpMethod method, String path) {}
+    record Route<T>(
+            @Nonnull HttpRule httpRule,
+            @Nonnull MethodDescriptor<?, ?> invokeMethod,
+            @Nonnull Descriptors.MethodDescriptor methodDescriptor,
+            @Nonnull Predicate<T> predicate,
+            @Nonnull List<Predicate<T>> additionalPredicates) {}
+
+    record ServletPredicate(HttpMethod httpMethod, PathTemplate pathTemplate) implements Predicate<ServerRequest> {
+
+        @Override
+        public boolean test(ServerRequest request) {
+            return isMatch(request.method(), httpMethod, request.path(), pathTemplate, request.attributes());
+        }
+    }
+
+    record ReactivePredicate(HttpMethod httpMethod, PathTemplate pathTemplate)
+            implements Predicate<org.springframework.web.reactive.function.server.ServerRequest> {
+
+        @Override
+        public boolean test(org.springframework.web.reactive.function.server.ServerRequest request) {
+            return isMatch(request.method(), httpMethod, request.path(), pathTemplate, request.attributes());
+        }
+    }
+
+    record BooleanString(boolean isValueMessage, String stringValue) {}
 }

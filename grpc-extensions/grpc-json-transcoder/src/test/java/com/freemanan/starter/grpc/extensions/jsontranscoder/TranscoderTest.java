@@ -93,7 +93,7 @@ class TranscoderTest {
 
     private static transcoding.TranscoderTest.SimpleRequest buildRequest(
             Map<String, String> pathVariables, String body, Map<String, String[]> parameterMap) {
-        Transcoder transcoder = new Transcoder(
+        Transcoder transcoder = Transcoder.create(
                 new Transcoder.Variable(body != null ? body.getBytes(UTF_8) : null, parameterMap, pathVariables));
 
         // body is empty, body is ignored

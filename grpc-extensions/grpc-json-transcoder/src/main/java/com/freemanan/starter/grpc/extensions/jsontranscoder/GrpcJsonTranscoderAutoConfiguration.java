@@ -18,8 +18,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
 
@@ -31,12 +29,6 @@ import org.springframework.web.servlet.function.ServerResponse;
 @ConditionalOnProperty(prefix = GrpcJsonTranscoderProperties.PREFIX, name = "enabled", matchIfMissing = true)
 @EnableConfigurationProperties(GrpcJsonTranscoderProperties.class)
 public class GrpcJsonTranscoderAutoConfiguration {
-
-    //    @Bean
-    //    @ConditionalOnMissingBean
-    //    public GrpcHeaderConverter defaultGrpcHeaderConverter() {
-    //        return new DefaultGrpcHeaderConverter();
-    //    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -67,16 +59,6 @@ public class GrpcJsonTranscoderAutoConfiguration {
                         org.springframework.web.reactive.function.server.ServerResponse>
                 webFluxTranscodingRouterFunction(List<BindableService> services) {
             return new ReactiveTranscodingRouterFunction(services);
-        }
-
-        @Bean
-        public WebFluxConfigurer jsonTranscoderWebFluxConfigurer() {
-            return new WebFluxConfigurer() {
-                @Override
-                public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
-                    //                    configurer.customCodecs().register();
-                }
-            };
         }
     }
 }
