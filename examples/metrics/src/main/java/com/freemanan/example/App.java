@@ -1,6 +1,6 @@
 package com.freemanan.example;
 
-import com.freemanan.starter.grpc.client.EnableGrpcClients;
+import grpcstarter.client.EnableGrpcClients;
 import io.grpc.testing.protobuf.SimpleRequest;
 import io.grpc.testing.protobuf.SimpleResponse;
 import io.grpc.testing.protobuf.SimpleServiceGrpc;

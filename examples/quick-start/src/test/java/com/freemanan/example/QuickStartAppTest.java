@@ -6,8 +6,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import com.freemanan.foo.v1.api.Foo;
-import com.freemanan.starter.grpc.extensions.test.InProcessName;
-import com.freemanan.starter.grpc.extensions.test.StubUtil;
+import grpcstarter.extensions.test.InProcessName;
+import grpcstarter.extensions.test.StubUtil;
 import io.grpc.StatusRuntimeException;
 import io.grpc.testing.protobuf.SimpleRequest;
 import org.junit.jupiter.api.Test;

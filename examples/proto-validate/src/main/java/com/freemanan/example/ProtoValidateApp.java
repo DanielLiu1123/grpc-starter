@@ -1,6 +1,6 @@
 package com.freemanan.example;
 
-import com.freemanan.starter.grpc.client.EnableGrpcClients;
+import grpcstarter.client.EnableGrpcClients;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

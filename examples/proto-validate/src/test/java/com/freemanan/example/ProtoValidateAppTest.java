@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.freemanan.foo.v1.api.Foo;
-import com.freemanan.starter.grpc.extensions.test.InProcessName;
-import com.freemanan.starter.grpc.extensions.test.StubUtil;
+import grpcstarter.extensions.test.InProcessName;
+import grpcstarter.extensions.test.StubUtil;
 import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

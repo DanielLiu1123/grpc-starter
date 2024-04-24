@@ -1,6 +1,6 @@
 package com.freeman.example;
 
-import static com.freemanan.starter.grpc.server.GrpcContextKeys.ResponseMetadataModifier;
+import static grpcstarter.server.GrpcContextKeys.ResponseMetadataModifier;
 
 import io.grpc.Metadata;
 import io.grpc.Status;

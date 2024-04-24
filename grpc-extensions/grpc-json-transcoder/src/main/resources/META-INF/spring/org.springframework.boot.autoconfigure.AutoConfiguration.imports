@@ -1,1 +1,1 @@
-com.freemanan.starter.grpc.extensions.jsontranscoder.GrpcJsonTranscoderAutoConfiguration
+grpcstarter.extensions.transcoding.GrpcJsonTranscoderAutoConfiguration

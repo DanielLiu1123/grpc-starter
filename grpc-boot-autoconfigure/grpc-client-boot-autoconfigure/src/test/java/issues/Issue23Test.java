@@ -2,7 +2,7 @@ package issues;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.freemanan.starter.grpc.client.EnableGrpcClients;
+import grpcstarter.client.EnableGrpcClients;
 import io.grpc.health.v1.HealthGrpc;
 import io.grpc.testing.protobuf.SimpleServiceGrpc;
 import org.junit.jupiter.api.Test;

@@ -1,2 +1,2 @@
 org.springframework.boot.env.EnvironmentPostProcessor=\
-  com.freemanan.starter.grpc.extensions.test.GrpcTestEnvironmentPostProcessor
+  grpcstarter.extensions.test.GrpcTestEnvironmentPostProcessor

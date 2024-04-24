@@ -1,7 +1,7 @@
 package com.freemanan.example;
 
 import com.freemanan.foo.v1.api.FooServiceGrpc;
-import com.freemanan.starter.grpc.client.EnableGrpcClients;
+import grpcstarter.client.EnableGrpcClients;
 import io.grpc.health.v1.HealthGrpc;
 import io.grpc.reflection.v1alpha.ServerReflectionGrpc;
 import io.grpc.testing.protobuf.SimpleServiceGrpc;
