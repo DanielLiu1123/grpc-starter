@@ -13,12 +13,12 @@ public interface HeaderConverter {
      *
      * @param headers {@link HttpHeaders}
      */
-    Metadata toRequestMetadata(HttpHeaders headers);
+    Metadata toMetadata(HttpHeaders headers);
 
     /**
      * Convert gRPC metadata to http headers after the response received.
      *
      * @param headers {@link Metadata}
      */
-    HttpHeaders toResponseHeader(Metadata headers);
+    HttpHeaders toHttpHeaders(Metadata headers);
 }

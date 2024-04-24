@@ -28,7 +28,7 @@ public class DefaultHeaderConverter implements HeaderConverter {
     }
 
     @Override
-    public Metadata toRequestMetadata(HttpHeaders headers) {
+    public Metadata toMetadata(HttpHeaders headers) {
         // remove http internal headers
         new HashSet<>(headers.keySet()).stream().filter(removeHeaderPredicate()).forEach(headers::remove);
 
@@ -41,7 +41,7 @@ public class DefaultHeaderConverter implements HeaderConverter {
     }
 
     @Override
-    public HttpHeaders toResponseHeader(Metadata headers) {
+    public HttpHeaders toHttpHeaders(Metadata headers) {
         // remove grpc internal headers
         new HashSet<>(headers.keys())
                 .stream()
