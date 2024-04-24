@@ -1,4 +1,4 @@
-package com.freemanan.example.controller;
+package grpcstarter.example.controller;
 
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.protobuf.SimpleRequest;

@@ -24,6 +24,9 @@ import com.google.protobuf.util.JsonFormat;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
+/**
+ * {@link Util} tester.
+ */
 class UtilTest {
     /**
      * {@link Util#isSimpleValueMessage(Message)}

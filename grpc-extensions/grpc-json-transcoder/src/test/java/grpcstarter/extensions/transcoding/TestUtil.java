@@ -8,7 +8,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 /**
  * @author Freeman
  */
-public class U {
+class TestUtil {
 
     /**
      * @return a random port

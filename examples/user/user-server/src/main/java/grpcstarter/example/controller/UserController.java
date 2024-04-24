@@ -1,4 +1,4 @@
-package com.freemanan.example.controller;
+package grpcstarter.example.controller;
 
 import com.freemanan.user.v1.api.User;
 import com.freemanan.user.v1.api.UserServiceGrpc;

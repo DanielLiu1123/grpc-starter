@@ -1,7 +1,8 @@
-package com.freemanan.example.controller;
+package grpcstarter.examples.controller;
 
-import com.freemanan.foo.v1.api.Foo;
-import com.freemanan.foo.v1.api.FooServiceGrpc;
+import static grpcstarter.examples.protovalidate.FooOuterClass.Foo;
+
+import grpcstarter.examples.protovalidate.FooServiceGrpc;
 import io.grpc.stub.StreamObserver;
 import org.springframework.stereotype.Controller;
 

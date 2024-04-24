@@ -1,10 +1,10 @@
-package com.freemanan.example;
+package grpcstarter.examples;
 
-import static com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceBlockingStub;
+import static grpcstarter.examples.protovalidate.FooOuterClass.Foo;
+import static grpcstarter.examples.protovalidate.FooServiceGrpc.FooServiceBlockingStub;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import com.freemanan.foo.v1.api.Foo;
 import grpcstarter.extensions.test.InProcessName;
 import grpcstarter.extensions.test.StubUtil;
 import io.grpc.StatusRuntimeException;

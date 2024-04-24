@@ -43,12 +43,12 @@ class JsonTranscoderIT {
     @Test
     @ClasspathReplacer(@Action(WEB_FLUX_STARTER))
     void testWebFluxTranscoderJson() {
-        int port = U.randomPort();
+        int port = TestUtil.randomPort();
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
                 .run();
 
-        WebTestClient client = U.webclient(port);
+        WebTestClient client = TestUtil.webclient(port);
 
         // test native path
         WebTestClient.ResponseSpec resp = client.post()
@@ -78,12 +78,12 @@ class JsonTranscoderIT {
     @Test
     @ClasspathReplacer(@Action(WEB_FLUX_STARTER))
     void testWebFluxTranscoderJson_whenSimpleValue() {
-        int port = U.randomPort();
+        int port = TestUtil.randomPort();
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
                 .run();
 
-        WebTestClient client = U.webclient(port);
+        WebTestClient client = TestUtil.webclient(port);
 
         // wrapper type parses as JSON is simple value format
         // google.protobuf.StringValue convert to JSON, the result is "foo", not {"value":"foo"}
@@ -112,12 +112,12 @@ class JsonTranscoderIT {
     //    @Test
     @ClasspathReplacer(@Action(WEB_FLUX_STARTER))
     void testWebFluxExceptionHandling() {
-        int port = U.randomPort();
+        int port = TestUtil.randomPort();
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
                 .run();
 
-        WebTestClient client = U.webclient(port);
+        WebTestClient client = TestUtil.webclient(port);
 
         // test native path
         WebTestClient.ResponseSpec resp = client.post()
@@ -141,12 +141,12 @@ class JsonTranscoderIT {
     //    @Test
     @ClasspathReplacer(@Action(WEB_MVC_STARTER))
     void testWebMvcTranscoderJson() {
-        int port = U.randomPort();
+        int port = TestUtil.randomPort();
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
                 .run();
 
-        TestRestTemplate client = U.restTemplate();
+        TestRestTemplate client = TestUtil.restTemplate();
 
         // test native path
         ResponseEntity<String> resp = client.exchange(

@@ -1,13 +1,10 @@
 syntax = "proto3";
 
-package fm.foo.v1;
+package grpcstarter.examples.protovalidate;
 
 import "google/protobuf/empty.proto";
 import "buf/validate/validate.proto";
 import "google/api/annotations.proto";
-
-option java_multiple_files = true;
-option java_package = "com.freemanan.foo.v1.api";
 
 message Foo {
   string id = 1 [(buf.validate.field).cel = {
