@@ -57,7 +57,7 @@ import org.springframework.web.servlet.function.ServerRequest;
 class Util {
     private static final Logger log = LoggerFactory.getLogger(Util.class);
 
-    static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE = Util.class + ".matchingPattern";
+    public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE = Util.class + ".matchingPattern";
 
     public static final String TRANSCODING_SERVER_IN_PROCESS_NAME =
             UUID.randomUUID().toString();

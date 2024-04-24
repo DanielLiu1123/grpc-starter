@@ -32,6 +32,12 @@ public class GrpcJsonTranscoderAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public HeaderConverter defaultHeaderConverter() {
+        return new DefaultHeaderConverter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public TranscodingGrpcServer transcodingGrpcServer(
             GrpcServerProperties properties,
             ObjectProvider<BindableService> serviceProvider,

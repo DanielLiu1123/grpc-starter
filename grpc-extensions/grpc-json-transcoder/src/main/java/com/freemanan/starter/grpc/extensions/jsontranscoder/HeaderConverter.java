@@ -6,7 +6,7 @@ import org.springframework.http.HttpHeaders;
 /**
  * @author Freeman
  */
-public interface GrpcHeaderConverter {
+public interface HeaderConverter {
 
     /**
      * Convert http headers to gRPC metadata before the request sent.

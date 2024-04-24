@@ -18,12 +18,12 @@ import org.springframework.util.ReflectionUtils;
 /**
  * @author Freeman
  */
-public class DefaultGrpcHeaderConverter implements GrpcHeaderConverter {
+public class DefaultHeaderConverter implements HeaderConverter {
 
     private final Set<String> removeHeaders;
 
     @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
-    public DefaultGrpcHeaderConverter() {
+    public DefaultHeaderConverter() {
         this.removeHeaders = getRemoveHeaders();
     }
 
@@ -84,6 +84,9 @@ public class DefaultGrpcHeaderConverter implements GrpcHeaderConverter {
     }
 
     protected Predicate<String> removeMetadataPredicate() {
-        return key -> key.toLowerCase().startsWith("grpc-");
+        return key -> {
+            String k = key.toLowerCase();
+            return k.startsWith("grpc-") || k.endsWith(Metadata.BINARY_HEADER_SUFFIX);
+        };
     }
 }

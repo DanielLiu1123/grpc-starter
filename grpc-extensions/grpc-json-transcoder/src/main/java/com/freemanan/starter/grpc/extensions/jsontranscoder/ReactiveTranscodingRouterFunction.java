@@ -121,10 +121,7 @@ public class ReactiveTranscodingRouterFunction
                 .defaultIfEmpty(request.exchange().getResponse().bufferFactory().wrap(new byte[0]))
                 .flatMap(buf -> {
                     ClientCall<Object, Object> call = getCall(channel, route);
-                    Transcoder transcoder = Transcoder.create(new Transcoder.Variable(
-                            getBytes(buf),
-                            convert(request.queryParams()),
-                            request.exchange().getAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE)));
+                    Transcoder transcoder = getTranscoder(request, buf);
                     Message msg = buildRequestMessage(transcoder, route);
                     Flux<ServerSentEvent<String>> response =
                             Flux.create(sink -> ClientCalls.asyncServerStreamingCall(call, msg, new StreamObserver<>() {
@@ -155,6 +152,13 @@ public class ReactiveTranscodingRouterFunction
                 });
     }
 
+    private static Transcoder getTranscoder(ServerRequest request, DataBuffer buf) {
+        return Transcoder.create(new Transcoder.Variable(
+                getBytes(buf),
+                convert(request.queryParams()),
+                request.exchange().getAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE)));
+    }
+
     private Mono<ServerResponse> processUnaryCall(ServerRequest request, Route<ServerRequest> route) {
         return request.bodyToMono(DataBuffer.class)
                 .defaultIfEmpty(request.exchange().getResponse().bufferFactory().wrap(new byte[0]))
@@ -166,10 +170,7 @@ public class ReactiveTranscodingRouterFunction
 
                     ClientCall<Object, Object> call = getCall(chan, route);
 
-                    Transcoder transcoder = Transcoder.create(new Transcoder.Variable(
-                            getBytes(buf),
-                            convert(request.queryParams()),
-                            request.exchange().getAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE)));
+                    Transcoder transcoder = getTranscoder(request, buf);
                     Message msg = buildRequestMessage(transcoder, route);
                     return Mono.create(sink -> ClientCalls.asyncUnaryCall(call, msg, new StreamObserver<>() {
                         @Override

@@ -2,6 +2,7 @@ package com.freemanan.starter.grpc.extensions.jsontranscoder;
 
 import static com.freemanan.starter.grpc.extensions.jsontranscoder.TranscodingUtil.toHttpStatus;
 import static com.freemanan.starter.grpc.extensions.jsontranscoder.Util.Route;
+import static com.freemanan.starter.grpc.extensions.jsontranscoder.Util.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 import static com.freemanan.starter.grpc.extensions.jsontranscoder.Util.buildRequestMessage;
 import static com.freemanan.starter.grpc.extensions.jsontranscoder.Util.getInProcessChannel;
 import static com.freemanan.starter.grpc.extensions.jsontranscoder.Util.getServletRoutes;
@@ -41,7 +42,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.function.HandlerFunction;
 import org.springframework.web.servlet.function.RouterFunction;
-import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 
@@ -117,8 +117,7 @@ public class ServletTranscodingRouterFunction
             return Transcoder.create(new Transcoder.Variable(
                     copyToByteArray(request.servletRequest().getInputStream()),
                     request.servletRequest().getParameterMap(),
-                    ((Map<String, String>)
-                            request.servletRequest().getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE))));
+                    ((Map<String, String>) request.servletRequest().getAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE))));
         } catch (IOException e) {
             throw new IllegalStateException("getInputStream failed", e);
         }

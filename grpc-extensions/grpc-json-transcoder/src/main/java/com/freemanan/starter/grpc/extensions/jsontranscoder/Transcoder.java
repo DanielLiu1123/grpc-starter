@@ -155,7 +155,6 @@ class Transcoder {
             case STRING -> value;
             case BYTE_STRING -> ByteString.copyFrom(value.getBytes(UTF_8));
             case ENUM -> {
-                // if is a number format
                 if (value.isBlank()) {
                     yield field.getEnumType().getValues().get(0);
                 }
