@@ -6,7 +6,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 
 /**
  * Mark a gRPC service implementation.
@@ -20,7 +19,7 @@ import org.springframework.stereotype.Controller;
 @Component
 public @interface GrpcService {
     /**
-     * @see Controller#value()
+     * @see Component#value()
      */
     @AliasFor(annotation = Component.class)
     String value() default "";
