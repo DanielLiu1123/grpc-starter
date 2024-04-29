@@ -11,6 +11,7 @@ import com.google.protobuf.DoubleValue;
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
@@ -269,7 +270,8 @@ class Util {
                 .build();
     }
 
-    public static Message buildRequestMessage(Transcoder transcoder, Route<?> route) {
+    public static Message buildRequestMessage(Transcoder transcoder, Route<?> route)
+            throws InvalidProtocolBufferException {
         Message.Builder messageBuilder = methodCache
                 .computeIfAbsent(
                         route.methodDescriptor(),

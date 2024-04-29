@@ -8,9 +8,9 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 
 /**
- * Mark a gRPC service implementation.
+ * Mark a gRPC service implementation, an alias for {@link Component}.
  *
- * <p> This annotation is an alias for {@link Component}.
+ * <p> This annotation is optional, can be replaced by any {@link Component} based annotation.
  *
  * @author Freeman
  */

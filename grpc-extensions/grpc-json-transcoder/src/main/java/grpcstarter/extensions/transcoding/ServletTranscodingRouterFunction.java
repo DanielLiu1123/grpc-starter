@@ -8,10 +8,14 @@ import static grpcstarter.extensions.transcoding.Util.getInProcessChannel;
 import static grpcstarter.extensions.transcoding.Util.getServletRoutes;
 import static grpcstarter.extensions.transcoding.Util.isJson;
 import static grpcstarter.extensions.transcoding.Util.toHttpHeaders;
+import static io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING;
+import static io.grpc.MethodDescriptor.MethodType.UNARY;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
 import static org.springframework.util.StreamUtils.copyToByteArray;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import io.grpc.BindableService;
 import io.grpc.CallOptions;
@@ -34,8 +38,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.SneakyThrows;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -51,7 +53,6 @@ import org.springframework.web.servlet.function.ServerResponse;
  */
 public class ServletTranscodingRouterFunction
         implements RouterFunction<ServerResponse>, HandlerFunction<ServerResponse>, SmartInitializingSingleton {
-    private static final Logger log = LoggerFactory.getLogger(ServletTranscodingRouterFunction.class);
 
     private static final String MATCHING_ROUTE = ServletTranscodingRouterFunction.class + ".matchingRoute";
 
@@ -71,7 +72,7 @@ public class ServletTranscodingRouterFunction
     @Override
     @Nonnull
     public Optional<HandlerFunction<ServerResponse>> route(@Nonnull ServerRequest request) {
-        for (Util.Route<ServerRequest> route : routes) {
+        for (var route : routes) {
             if (route.predicate().test(request)
                     || route.additionalPredicates().stream().anyMatch(p -> p.test(request))) {
                 request.attributes().put(MATCHING_ROUTE, route);
@@ -87,16 +88,15 @@ public class ServletTranscodingRouterFunction
     @Override
     @SuppressWarnings("unchecked")
     public ServerResponse handle(@Nonnull ServerRequest request) throws Exception {
-        Util.Route<ServerRequest> route =
-                (Util.Route<ServerRequest>) request.attributes().get(MATCHING_ROUTE);
+        var route = (Util.Route<ServerRequest>) request.attributes().get(MATCHING_ROUTE);
 
         MethodDescriptor.MethodType methodType = route.invokeMethod().getType();
 
-        if (methodType == MethodDescriptor.MethodType.UNARY) {
+        if (methodType == UNARY) {
             return processUnaryCall(request, route);
         }
 
-        if (methodType == MethodDescriptor.MethodType.SERVER_STREAMING) {
+        if (methodType == SERVER_STREAMING) {
             if (!Objects.equals(request.method(), HttpMethod.GET)) {
                 throw new ResponseStatusException(METHOD_NOT_ALLOWED, "SSE only supports GET method");
             }
@@ -124,18 +124,16 @@ public class ServletTranscodingRouterFunction
     }
 
     private ServerResponse processUnaryCall(ServerRequest request, Route<ServerRequest> route) {
-        Transcoder transcoder = getTranscoder(request);
-
-        AtomicReference<Metadata> headers = new AtomicReference<>();
-        AtomicReference<Metadata> trailers = new AtomicReference<>();
-        Channel chan =
+        var headers = new AtomicReference<Metadata>();
+        var trailers = new AtomicReference<Metadata>();
+        var transcoder = getTranscoder(request);
+        var req = getMessage(route, transcoder);
+        var chan =
                 ClientInterceptors.intercept(channel, MetadataUtils.newCaptureMetadataInterceptor(headers, trailers));
-
-        ClientCall<Object, Object> call = getCall(chan, route);
-
+        var call = getCall(chan, route);
         Message responseMessage;
         try {
-            responseMessage = (Message) ClientCalls.blockingUnaryCall(call, buildRequestMessage(transcoder, route));
+            responseMessage = (Message) ClientCalls.blockingUnaryCall(call, req);
         } catch (StatusRuntimeException e) {
             // TODO(Freeman): Not control by problemdetails.enabled, Spring bug?
             throw new TranscodingRuntimeException(
@@ -151,12 +149,9 @@ public class ServletTranscodingRouterFunction
     }
 
     private ServerResponse processServerStreamingCall(ServerRequest request, Route<ServerRequest> route) {
-        Transcoder transcoder = getTranscoder(request);
-
-        ClientCall<Object, Object> call = getCall(channel, route);
-
-        Message req = buildRequestMessage(transcoder, route);
-
+        var transcoder = getTranscoder(request);
+        var req = getMessage(route, transcoder);
+        var call = getCall(channel, route);
         return ServerResponse.sse(
                 (sse -> {
                     // Cancel the call when SSE error occurs, possibly due to client disconnect
@@ -187,5 +182,13 @@ public class ServletTranscodingRouterFunction
                     });
                 }),
                 Duration.ZERO);
+    }
+
+    private static Message getMessage(Route<ServerRequest> route, Transcoder transcoder) {
+        try {
+            return buildRequestMessage(transcoder, route);
+        } catch (InvalidProtocolBufferException e) {
+            throw new ResponseStatusException(BAD_REQUEST, e.getLocalizedMessage(), e);
+        }
     }
 }

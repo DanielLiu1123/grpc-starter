@@ -31,7 +31,8 @@ class Transcoder {
         return new Transcoder(variable);
     }
 
-    public void into(@Nonnull Message.Builder messageBuilder, @Nonnull HttpRule httpRule) {
+    public void into(@Nonnull Message.Builder messageBuilder, @Nonnull HttpRule httpRule)
+            throws InvalidProtocolBufferException {
         // Note that when using `*` in the body mapping, it is not possible to
         // have HTTP parameters, as all fields not bound by the path end in
         // the body. This makes this option more rarely used in practice when
@@ -118,12 +119,8 @@ class Transcoder {
         return response;
     }
 
-    private static void merge(Message.Builder messageBuilder, String bodyString) {
-        try {
-            parser.merge(bodyString, messageBuilder);
-        } catch (InvalidProtocolBufferException e) {
-            throw new IllegalArgumentException("Merge JSON to message failed", e);
-        }
+    private static void merge(Message.Builder messageBuilder, String bodyString) throws InvalidProtocolBufferException {
+        parser.merge(bodyString, messageBuilder);
     }
 
     private static boolean noBuilder(Descriptors.FieldDescriptor field) {
@@ -158,17 +155,13 @@ class Transcoder {
                 if (value.isBlank()) {
                     yield field.getEnumType().getValues().get(0);
                 }
-                Descriptors.EnumValueDescriptor e = null;
                 if (Character.isDigit(value.charAt(0))) {
                     try {
-                        e = field.getEnumType().findValueByNumber(Integer.parseInt(value));
+                        yield field.getEnumType().findValueByNumber(Integer.parseInt(value));
                     } catch (NumberFormatException ignored) {
                     }
                 } else {
-                    e = field.getEnumType().findValueByName(value);
-                }
-                if (e != null) {
-                    yield e;
+                    yield field.getEnumType().findValueByName(value);
                 }
                 throw new IllegalArgumentException(
                         "Can't parse enum value '" + value + "' for field '" + field.getName() + "'");

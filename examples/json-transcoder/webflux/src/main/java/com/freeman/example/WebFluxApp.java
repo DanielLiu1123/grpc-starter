@@ -30,7 +30,7 @@ public class WebFluxApp extends SimpleServiceGrpc.SimpleServiceImplBase {
             throw new StatusRuntimeException(Status.INVALID_ARGUMENT, metadata);
         }
 
-        ResponseMetadataModifier.addConsumers(metadata -> {
+        ResponseMetadataModifier.addConsumer(metadata -> {
             metadata.put(Metadata.Key.of("custom", Metadata.ASCII_STRING_MARSHALLER), "custom value");
         });
         responseObserver.onNext(Simpleservice.SimpleResponse.newBuilder()

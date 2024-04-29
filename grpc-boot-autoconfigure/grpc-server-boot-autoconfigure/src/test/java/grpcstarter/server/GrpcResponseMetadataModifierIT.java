@@ -76,7 +76,7 @@ class GrpcResponseMetadataModifierIT {
                     .setResponseMessage(request.getRequestMessage())
                     .build();
 
-            ResponseMetadataModifier.addConsumers(
+            ResponseMetadataModifier.addConsumer(
                     metadata -> metadata.put(Metadata.Key.of("status", Metadata.ASCII_STRING_MARSHALLER), "ok"));
 
             responseObserver.onNext(response);

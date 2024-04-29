@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.google.api.HttpRule;
 import java.util.Map;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -91,14 +92,73 @@ class TranscoderTest {
                 .hasMessage("Can't parse enum value '3' for field 'enum'");
     }
 
+    @Test
+    void testComplexBody() {
+        var body =
+                """
+                {
+                    "requestMessage": "Hi",
+                    "some_message": "Hi",
+                    "nested": {
+                        "requestMessage": "Hi",
+                        "some_message": "Hi",
+                        "nested": {
+                            "requestMessage": "Hi",
+                            "some_message": "Hi",
+                            "repeated_string": ["a", "b"]
+                        }
+                    },
+                    "repeated_string": ["a", "b"],
+                    "repeated_message": [
+                        {
+                            "requestMessage": "Hi",
+                            "some_message": "Hi"
+                        },
+                        {
+                            "requestMessage": "Hi",
+                            "some_message": "Hi"
+                        }
+                    ],
+                    "enum": "V1",
+                    "int32_wrapper": 1
+                }""";
+
+        var request = buildRequest(
+                null, body, null, HttpRule.newBuilder().setBody("*").build());
+
+        assertThat(request.getRequestMessage()).isEqualTo("Hi");
+        assertThat(request.getSomeMessage()).isEqualTo("Hi");
+        assertThat(request.hasNested()).isTrue();
+        assertThat(request.getNested().getRequestMessage()).isEqualTo("Hi");
+        assertThat(request.getNested().getSomeMessage()).isEqualTo("Hi");
+        assertThat(request.getNested().hasNested()).isTrue();
+        assertThat(request.getNested().getNested().getRequestMessage()).isEqualTo("Hi");
+        assertThat(request.getNested().getNested().getSomeMessage()).isEqualTo("Hi");
+        assertThat(request.getNested().getNested().getRepeatedStringList()).containsExactly("a", "b");
+        assertThat(request.getRepeatedStringList()).containsExactly("a", "b");
+        assertThat(request.getRepeatedMessageList()).hasSize(2);
+        assertThat(request.getRepeatedMessage(0).getRequestMessage()).isEqualTo("Hi");
+        assertThat(request.getRepeatedMessage(0).getSomeMessage()).isEqualTo("Hi");
+        assertThat(request.getRepeatedMessage(1).getRequestMessage()).isEqualTo("Hi");
+        assertThat(request.getRepeatedMessage(1).getSomeMessage()).isEqualTo("Hi");
+        assertThat(request.getEnum()).isEqualTo(transcoding.TranscoderTest.SimpleRequest.Enum.V1);
+        assertThat(request.getInt32Wrapper().getValue()).isEqualTo(1);
+    }
+
     private static transcoding.TranscoderTest.SimpleRequest buildRequest(
             Map<String, String> pathVariables, String body, Map<String, String[]> parameterMap) {
+        return buildRequest(pathVariables, body, parameterMap, HttpRule.getDefaultInstance());
+    }
+
+    @SneakyThrows
+    private static transcoding.TranscoderTest.SimpleRequest buildRequest(
+            Map<String, String> pathVariables, String body, Map<String, String[]> parameterMap, HttpRule httpRule) {
         Transcoder transcoder = Transcoder.create(
                 new Transcoder.Variable(body != null ? body.getBytes(UTF_8) : null, parameterMap, pathVariables));
 
         // body is empty, body is ignored
         var builder = transcoding.TranscoderTest.SimpleRequest.newBuilder();
-        transcoder.into(builder, HttpRule.getDefaultInstance());
+        transcoder.into(builder, httpRule);
         return builder.build();
     }
 

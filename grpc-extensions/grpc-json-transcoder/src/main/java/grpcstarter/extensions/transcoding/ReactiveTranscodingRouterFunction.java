@@ -8,9 +8,13 @@ import static grpcstarter.extensions.transcoding.Util.getReactiveRoutes;
 import static grpcstarter.extensions.transcoding.Util.isJson;
 import static grpcstarter.extensions.transcoding.Util.shutdown;
 import static grpcstarter.extensions.transcoding.Util.toHttpHeaders;
+import static io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING;
+import static io.grpc.MethodDescriptor.MethodType.UNARY;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import grpcstarter.extensions.transcoding.Util.Route;
 import io.grpc.BindableService;
@@ -34,8 +38,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -59,7 +61,6 @@ public class ReactiveTranscodingRouterFunction
                 HandlerFunction<ServerResponse>,
                 SmartInitializingSingleton,
                 DisposableBean {
-    private static final Logger log = LoggerFactory.getLogger(ReactiveTranscodingRouterFunction.class);
 
     private static final String MATCHING_ROUTE = ReactiveTranscodingRouterFunction.class.getName() + ".matchingRoute";
 
@@ -79,9 +80,9 @@ public class ReactiveTranscodingRouterFunction
     @Override
     @Nonnull
     public Mono<HandlerFunction<ServerResponse>> route(@Nonnull ServerRequest request) {
-        for (Route<ServerRequest> route : routes) {
+        for (var route : routes) {
             if (route.predicate().test(request)
-                    || route.additionalPredicates().stream().allMatch(p -> p.test(request))) {
+                    || route.additionalPredicates().stream().anyMatch(p -> p.test(request))) {
                 request.attributes().put(MATCHING_ROUTE, route);
                 return Mono.just(this);
             }
@@ -97,11 +98,11 @@ public class ReactiveTranscodingRouterFunction
 
         MethodDescriptor.MethodType methodType = route.invokeMethod().getType();
 
-        if (methodType == MethodDescriptor.MethodType.UNARY) {
+        if (methodType == UNARY) {
             return processUnaryCall(request, route);
         }
 
-        if (methodType == MethodDescriptor.MethodType.SERVER_STREAMING) {
+        if (methodType == SERVER_STREAMING) {
             if (!Objects.equals(request.method(), HttpMethod.GET)) {
                 throw new ResponseStatusException(METHOD_NOT_ALLOWED, "SSE only supports GET method");
             }
@@ -120,11 +121,16 @@ public class ReactiveTranscodingRouterFunction
         return request.bodyToMono(DataBuffer.class)
                 .defaultIfEmpty(request.exchange().getResponse().bufferFactory().wrap(new byte[0]))
                 .flatMap(buf -> {
-                    ClientCall<Object, Object> call = getCall(channel, route);
-                    Transcoder transcoder = getTranscoder(request, buf);
-                    Message msg = buildRequestMessage(transcoder, route);
-                    Flux<ServerSentEvent<String>> response =
-                            Flux.create(sink -> ClientCalls.asyncServerStreamingCall(call, msg, new StreamObserver<>() {
+                    var transcoder = getTranscoder(request, buf);
+                    Message msg;
+                    try {
+                        msg = buildRequestMessage(transcoder, route);
+                    } catch (InvalidProtocolBufferException e) {
+                        return Mono.error(new ResponseStatusException(BAD_REQUEST, e.getLocalizedMessage(), e));
+                    }
+                    var call = getCall(channel, route);
+                    var response = Flux.<ServerSentEvent<String>>create(
+                            sink -> ClientCalls.asyncServerStreamingCall(call, msg, new StreamObserver<>() {
                                 @Override
                                 public void onNext(Object o) {
                                     String json = JsonUtil.toJson(transcoder.out((Message) o, route.httpRule()));
@@ -163,15 +169,18 @@ public class ReactiveTranscodingRouterFunction
         return request.bodyToMono(DataBuffer.class)
                 .defaultIfEmpty(request.exchange().getResponse().bufferFactory().wrap(new byte[0]))
                 .flatMap(buf -> {
-                    AtomicReference<Metadata> headers = new AtomicReference<>();
-                    AtomicReference<Metadata> trailers = new AtomicReference<>();
-                    Channel chan = ClientInterceptors.intercept(
+                    var transcoder = getTranscoder(request, buf);
+                    Message msg;
+                    try {
+                        msg = buildRequestMessage(transcoder, route);
+                    } catch (InvalidProtocolBufferException e) {
+                        return Mono.error(new ResponseStatusException(BAD_REQUEST, e.getLocalizedMessage(), e));
+                    }
+                    var headers = new AtomicReference<Metadata>();
+                    var trailers = new AtomicReference<Metadata>();
+                    var chan = ClientInterceptors.intercept(
                             channel, MetadataUtils.newCaptureMetadataInterceptor(headers, trailers));
-
-                    ClientCall<Object, Object> call = getCall(chan, route);
-
-                    Transcoder transcoder = getTranscoder(request, buf);
-                    Message msg = buildRequestMessage(transcoder, route);
+                    var call = getCall(chan, route);
                     return Mono.create(sink -> ClientCalls.asyncUnaryCall(call, msg, new StreamObserver<>() {
                         @Override
                         public void onNext(Object o) {

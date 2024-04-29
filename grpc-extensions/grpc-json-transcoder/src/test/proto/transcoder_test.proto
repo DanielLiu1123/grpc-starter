@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "google/api/annotations.proto";
+import "google/protobuf/wrappers.proto";
 
 package transcoding;
 
@@ -10,7 +11,10 @@ service SimpleService {
   rpc UnaryRpc (SimpleRequest) returns (SimpleResponse) {
     option (google.api.http) = {
       post: "/v1/unaryrpc",
-      body: "*"
+      body: "*",
+      additional_bindings: {
+        get: "/v1/unaryrpc/{requestMessage=*}"
+      }
     };
   }
 
@@ -25,13 +29,20 @@ service SimpleService {
 
 // A simple request message type for test.
 message SimpleRequest {
-  // An optional string message for test.
+  // An optional string message for test, camelCase naming.
   string requestMessage = 1;
+  // Underline naming
   string some_message = 2;
+  // Nested message
   SimpleRequest nested = 3;
+  // Repeated string
   repeated string repeated_string = 4;
+  // Repeated message
   repeated SimpleRequest repeated_message = 5;
+  // Enum
   Enum enum = 6;
+  // Wrappers
+  google.protobuf.Int32Value int32_wrapper = 7;
 
   enum Enum {
     ENUM_UNSPECIFIED = 0;

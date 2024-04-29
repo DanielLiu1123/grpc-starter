@@ -1,38 +1,30 @@
 package grpcstarter.extensions.transcoding;
 
 import static grpcstarter.extensions.transcoding.Deps.WEB_FLUX_STARTER;
-import static grpcstarter.extensions.transcoding.Deps.WEB_MVC_STARTER;
+import static grpcstarter.extensions.transcoding.TestUtil.randomPort;
+import static grpcstarter.extensions.transcoding.TestUtil.restTemplate;
+import static grpcstarter.extensions.transcoding.TestUtil.webclient;
+import static grpcstarter.server.GrpcContextKeys.ResponseMetadataModifier;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.boot.WebApplicationType.SERVLET;
+import static transcoding.TranscoderTest.SimpleRequest;
+import static transcoding.TranscoderTest.SimpleResponse;
 
 import com.freemanan.cr.core.anno.Action;
 import com.freemanan.cr.core.anno.ClasspathReplacer;
-import com.freemanan.sample.pet.v1.GetPetRequest;
-import com.freemanan.sample.pet.v1.Pet;
-import com.freemanan.sample.pet.v1.PetServiceGrpc;
-import com.google.protobuf.StringValue;
-import grpcstarter.server.GrpcService;
-import io.grpc.ForwardingServerCall;
 import io.grpc.Metadata;
-import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
-import io.grpc.ServerInterceptor;
 import io.grpc.stub.StreamObserver;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import transcoding.SimpleServiceGrpc;
 
 /**
  * @author Freeman
@@ -41,17 +33,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 class JsonTranscoderIT {
 
     @Test
-    @ClasspathReplacer(@Action(WEB_FLUX_STARTER))
     void testWebFluxTranscoderJson() {
-        int port = TestUtil.randomPort();
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        int port = randomPort();
+        var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
                 .run();
 
-        WebTestClient client = TestUtil.webclient(port);
+        var client = webclient(port);
 
         // test native path
-        WebTestClient.ResponseSpec resp = client.post()
+        var resp = client.post()
                 .uri("/sample.pet.v1.PetService/GetPet")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"name\":\"pet\"}")
@@ -78,18 +69,18 @@ class JsonTranscoderIT {
     @Test
     @ClasspathReplacer(@Action(WEB_FLUX_STARTER))
     void testWebFluxTranscoderJson_whenSimpleValue() {
-        int port = TestUtil.randomPort();
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        int port = randomPort();
+        var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
                 .run();
 
-        WebTestClient client = TestUtil.webclient(port);
+        var client = webclient(port);
 
         // wrapper type parses as JSON is simple value format
         // google.protobuf.StringValue convert to JSON, the result is "foo", not {"value":"foo"}
         // So, when convert JSON string to google.protobuf.StringValue, the input string must be "foo", not
         // {"value":"foo"}
-        WebTestClient.ResponseSpec resp = client.post()
+        var resp = client.post()
                 .uri("/sample.pet.v1.PetService/GetPetName")
                 .bodyValue("\"Freeman\"")
                 .exchange();
@@ -112,15 +103,15 @@ class JsonTranscoderIT {
     //    @Test
     @ClasspathReplacer(@Action(WEB_FLUX_STARTER))
     void testWebFluxExceptionHandling() {
-        int port = TestUtil.randomPort();
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        int port = randomPort();
+        var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
                 .run();
 
-        WebTestClient client = TestUtil.webclient(port);
+        var client = webclient(port);
 
         // test native path
-        WebTestClient.ResponseSpec resp = client.post()
+        var resp = client.post()
                 .uri("/sample.pet.v1.PetService/GetPet")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"name\":\"error\"}")
@@ -137,124 +128,106 @@ class JsonTranscoderIT {
     // Web Mvc
     // ===========================
 
-    // TODO(Freeman): uncomment this test case
-    //    @Test
-    @ClasspathReplacer(@Action(WEB_MVC_STARTER))
+    @Test
     void testWebMvcTranscoderJson() {
-        int port = TestUtil.randomPort();
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        int port = randomPort();
+        var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
+                .web(SERVLET)
                 .run();
 
-        TestRestTemplate client = TestUtil.restTemplate();
+        var client = restTemplate();
 
         // test native path
-        ResponseEntity<String> resp = client.exchange(
-                "http://localhost:" + port + "/sample.pet.v1.PetService/GetPet",
-                HttpMethod.POST,
-                new HttpEntity<>("{\"name\":\"pet\"}"),
-                String.class);
-        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-        assertThat(resp.getHeaders().get("request-id")).containsExactly("001");
-        assertThat(resp.getBody()).isNotBlank();
-        assertThat(resp.getBody().replaceAll("\\s+", "")).isEqualTo("{\"name\":\"pet\",\"age\":1}");
+        //        var resp = client.exchange(
+        //                "http://localhost:" + port + "/sample.pet.v1.PetService/GetPet",
+        //                HttpMethod.POST,
+        //                new HttpEntity<>("{\"name\":\"pet\"}"),
+        //                String.class);
+        //        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
+        //        assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+        //        assertThat(resp.getHeaders().get("request-id")).containsExactly("001");
+        //        assertThat(resp.getBody()).isNotBlank();
+        //        assertThat(resp.getBody().replaceAll("\\s+", "")).isEqualTo("{\"name\":\"pet\",\"age\":1}");
 
         // test path alias
-        resp = client.exchange(
-                "http://localhost:" + port + "/v1/pets/get",
+        var resp = client.exchange(
+                "http://localhost:" + port + "/v1/unaryrpc",
                 HttpMethod.POST,
-                new HttpEntity<>("{\"name\":\"pet\"}"),
+                new HttpEntity<>(
+                        """
+                        {
+                            "requestMessage": "Hi"
+                        }
+                        """),
                 String.class);
         assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
         assertThat(resp.getHeaders().get("request-id")).containsExactly("001");
         assertThat(resp.getBody()).isNotBlank();
-        assertThat(resp.getBody().replaceAll("\\s+", "")).isEqualTo("{\"name\":\"pet\",\"age\":1}");
+        assertThat(resp.getBody()).isEqualTo("""
+                {"responseMessage":"Hi, Hi"}""");
 
         // wrapper type parses as JSON is simple value format
         // google.protobuf.StringValue convert to JSON, the result is "foo", not {"value":"foo"}
-        // So, when convert JSON string to google.protobuf.StringValue, the input string must be "foo", not
-        // {"value":"foo"}
         resp = client.exchange(
-                "http://localhost:" + port + "/sample.pet.v1.PetService/GetPetName",
+                "http://localhost:" + port + "/v1/unaryrpc",
                 HttpMethod.POST,
-                new HttpEntity<>("\"Freeman\""),
+                new HttpEntity<>(
+                        """
+                        {
+                            "int32_wrapper": 1
+                        }
+                        """),
                 String.class);
         assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(resp.getHeaders().getContentType())
-                .isEqualTo(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8));
-        assertThat(resp.getBody()).isNotBlank();
-        assertThat(resp.getBody()).isEqualTo("\"Freeman\"");
 
         // test wrong format
         resp = client.exchange(
-                "http://localhost:" + port + "/sample.pet.v1.PetService/GetPetName",
+                "http://localhost:" + port + "/v1/unaryrpc",
                 HttpMethod.POST,
-                new HttpEntity<>("{\"value\":\"Freeman\"}"),
+                new HttpEntity<>(
+                        """
+                        {
+                            "int32_wrapper": {
+                                "value": 1
+                            }
+                        }
+                        """),
                 String.class);
         assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-
-        // test exception handling
-        //        resp = client.exchange(
-        //                "http://localhost:" + port + "/sample.pet.v1.PetService/GetPet",
-        //                HttpMethod.POST,
-        //                new HttpEntity<>("{\"name\":\"error\"}"),
-        //                String.class);
-        //        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        //        assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-        //        assertThat(resp.getHeaders()).doesNotContainKey("request-id");
-        //        assertThat(resp.getBody()).isEqualTo("{\"code\":2,\"data\":null,\"message\":\"UNKNOWN\"}");
 
         ctx.close();
     }
 
     @Configuration(proxyBeanMethods = false)
     @EnableAutoConfiguration
-    @GrpcService
-    @RestControllerAdvice
-    static class Cfg extends PetServiceGrpc.PetServiceImplBase implements ServerInterceptor {
+    static class Cfg extends SimpleServiceGrpc.SimpleServiceImplBase {
+
         @Override
-        @PostMapping("/v1/pets/get")
-        public void getPet(GetPetRequest request, StreamObserver<Pet> ro) {
-            if (request.getName().startsWith("err")) {
-                throw new IllegalArgumentException("invalid name: " + request.getName());
+        public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> ro) {
+            if (request.getRequestMessage().startsWith("err")) {
+                throw new IllegalArgumentException("invalid name: " + request.getRequestMessage());
             }
-            ro.onNext(Pet.newBuilder().setName(request.getName()).setAge(1).build());
+
+            ResponseMetadataModifier.addConsumer(
+                    metadata -> metadata.put(Metadata.Key.of("request-id", Metadata.ASCII_STRING_MARSHALLER), "001"));
+
+            ro.onNext(SimpleResponse.newBuilder()
+                    .setResponseMessage("Hi, " + request.getRequestMessage())
+                    .build());
             ro.onCompleted();
         }
 
         @Override
-        public void getPetName(StringValue request, StreamObserver<StringValue> ro) {
-            ro.onNext(StringValue.of(request.getValue()));
+        public void serverStreamingRpc(SimpleRequest request, StreamObserver<SimpleResponse> ro) {
+            ro.onNext(SimpleResponse.newBuilder()
+                    .setResponseMessage("Hi, " + request.getRequestMessage())
+                    .build());
+            ro.onNext(SimpleResponse.newBuilder()
+                    .setResponseMessage("Hi, " + request.getRequestMessage())
+                    .build());
             ro.onCompleted();
         }
-
-        @Override
-        public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
-                ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
-            ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT> c =
-                    new ForwardingServerCall.SimpleForwardingServerCall<>(call) {
-                        @Override
-                        public void sendHeaders(Metadata headers) {
-                            headers.put(Metadata.Key.of("request-id", Metadata.ASCII_STRING_MARSHALLER), "001");
-                            super.sendHeaders(headers);
-                        }
-                    };
-            return next.startCall(c, headers);
-        }
-
-        /**
-         * TODO(Freeman): why use './gradlew build' will occur ClassNotFound exception (org.springframework.http.HttpStatus)?
-         *  but use IDEA run test is ok.
-         */
-        //        @ExceptionHandler
-        //        public ResponseEntity<Map<String, Object>> handle(StatusRuntimeException e) {
-        //            Map<String, Object> map = new HashMap<>();
-        //            map.put("code", e.getStatus().getCode().value());
-        //            map.put("message", e.getMessage());
-        //            map.put("data", null);
-        //            return ResponseEntity.status(GrpcUtil.toHttpStatus(e.getStatus())).body(map);
-        //        }
     }
 }

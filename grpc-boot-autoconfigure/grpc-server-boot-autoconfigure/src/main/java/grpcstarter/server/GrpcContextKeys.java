@@ -42,7 +42,7 @@ public class GrpcContextKeys {
          *
          * @param consumer {@link Consumer} to modify response headers/trailers
          */
-        public static void addConsumers(Consumer<Metadata> consumer) {
+        public static void addConsumer(Consumer<Metadata> consumer) {
             ResponseMetadataModifier key = get();
             if (key != null) {
                 key.getConsumers().add(consumer);
