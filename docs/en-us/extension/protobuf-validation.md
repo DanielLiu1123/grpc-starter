@@ -24,7 +24,7 @@ user
 1. Add the dependency
 
     ```groovy
-    implementation("com.freemanan:grpc-starter-protovalidate")
+    implementation("io.github.danielliu1123:grpc-starter-protovalidate")
     ```
 
    > In most cases, you only need the API module to depend on the `grpc-starter-protovalidate` module.
@@ -59,7 +59,7 @@ user
 1. Add the dependency
 
     ```groovy
-    implementation("com.freemanan:grpc-starter-validation")
+    implementation("io.github.danielliu1123:grpc-starter-validation")
     ```
 
    > In most cases, you only need the API module to depend on the `grpc-starter-validation` module.

@@ -3,7 +3,7 @@
 1. Add the dependency:
 
     ```groovy
-    implementation 'com.freemanan:grpc-client-boot-starter'
+    implementation 'io.github.danielliu1123:grpc-client-boot-starter'
     ```
 
 2. Configure the scanning of gRPC stubs:

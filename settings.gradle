@@ -44,8 +44,8 @@ include(":examples:quick-start")
 include(":examples:refresh")
 include(":examples:tls")
 include(":examples:tracing")
-include(":examples:user:user-api")
-include(":examples:user:user-server")
+include(":examples:multi-module:api")
+include(":examples:multi-module:server")
 
 new File("${rootDir}/.githooks").eachFile(groovy.io.FileType.FILES) {
     def f = new File("${rootDir}/.git/hooks")

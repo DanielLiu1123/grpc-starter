@@ -3,7 +3,7 @@
 1. 引入依赖
 
     ```groovy
-    implementation 'com.freemanan:grpc-client-boot-starter'
+    implementation 'io.github.danielliu1123:grpc-client-boot-starter'
     ```
 
 2. 配置扫描 gRPC stubs

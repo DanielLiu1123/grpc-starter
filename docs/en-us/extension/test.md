@@ -7,7 +7,7 @@ The Test extension integrates with `SpringBootTest`.
 Add the dependency:
 
 ```groovy
-testImplementation("com.freemanan:grpc-starter-test")
+testImplementation("io.github.danielliu1123:grpc-starter-test")
 ```
 
 After adding the dependency, the gRPC server will communicate using in-process by default.

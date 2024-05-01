@@ -15,7 +15,7 @@ Tracing 扩展了 Spring Boot Actuator，为 gRPC 服务端和客户端提供了
 2. 引入依赖
 
    ```groovy
-   implementation("com.freemanan:grpc-starter-tracing")
+   implementation("io.github.danielliu1123:grpc-starter-tracing")
    // Micrometer 支持的 Tracing system 可以参考 https://micrometer.io/docs/tracing
    implementation("io.micrometer:micrometer-tracing-bridge-brave")
    ```

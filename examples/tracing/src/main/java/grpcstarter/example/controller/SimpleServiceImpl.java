@@ -1,6 +1,6 @@
 package grpcstarter.example.controller;
 
-import com.freemanan.example.api.SimpleApi;
+import grpcstarter.example.api.SimpleApi;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.protobuf.SimpleRequest;
 import io.grpc.testing.protobuf.SimpleResponse;

@@ -7,7 +7,7 @@ Test 扩展对 `SpringBootTest` 做了集成。
 添加依赖：
 
 ```groovy
-testImplementation("com.freemanan:grpc-starter-test")
+testImplementation("io.github.danielliu1123:grpc-starter-test")
 ```
 
 添加依赖后 gRPC server 默认会使用 in-process 进行通信，可以通过 `@InProcessName` 注解获取 in-process name。

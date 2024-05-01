@@ -9,7 +9,7 @@ Metrics 扩展了 Spring Boot Actuator，为 gRPC 服务端和客户端提供了
 1. 引入依赖
 
     ```groovy
-    implementation("com.freemanan:grpc-starter-metrics")
+    implementation("io.github.danielliu1123:grpc-starter-metrics")
     // Actuator 使用 Micrometer 作为指标采集门面，这里使用 Prometheus
     // Micrometer 支持的指标采集器可以参考 https://micrometer.io/docs/
     implementation("io.micrometer:micrometer-registry-prometheus")

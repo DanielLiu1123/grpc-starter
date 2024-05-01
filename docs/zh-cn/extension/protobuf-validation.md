@@ -22,7 +22,7 @@ user
 1. 添加依赖项
 
     ```groovy
-    implementation("com.freemanan:grpc-starter-protovalidate")
+    implementation("io.github.danielliu1123:grpc-starter-protovalidate")
     ```
 
    > 在大多数情况下，您只需要 API 模块依赖 `grpc-starter-protovalidate` 模块。
@@ -57,7 +57,7 @@ user
 1. 添加依赖项
 
     ```groovy
-    implementation("com.freemanan:grpc-starter-validation")
+    implementation("io.github.danielliu1123:grpc-starter-validation")
     ```
 
    > 在大多数情况下，您只需要 API 模块依赖 `grpc-starter-validation` 模块。

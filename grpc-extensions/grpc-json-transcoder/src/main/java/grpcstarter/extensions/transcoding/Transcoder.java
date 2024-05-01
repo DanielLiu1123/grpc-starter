@@ -157,11 +157,13 @@ class Transcoder {
                 }
                 if (Character.isDigit(value.charAt(0))) {
                     try {
-                        yield field.getEnumType().findValueByNumber(Integer.parseInt(value));
+                        var e = field.getEnumType().findValueByNumber(Integer.parseInt(value));
+                        if (e != null) yield e;
                     } catch (NumberFormatException ignored) {
                     }
                 } else {
-                    yield field.getEnumType().findValueByName(value);
+                    var e = field.getEnumType().findValueByName(value);
+                    if (e != null) yield e;
                 }
                 throw new IllegalArgumentException(
                         "Can't parse enum value '" + value + "' for field '" + field.getName() + "'");

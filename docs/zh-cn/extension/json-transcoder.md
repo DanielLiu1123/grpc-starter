@@ -7,8 +7,8 @@ JSON transcoder 扩展将 gRPC 服务转换为 HTTP/JSON 服务，**_只需要�
 1. 添加依赖
 
     ```groovy
-    implementation 'com.freemanan:grpc-boot-starter'
-    implementation 'com.freemanan:grpc-starter-web'
+    implementation 'io.github.danielliu1123:grpc-boot-starter'
+    implementation 'io.github.danielliu1123:grpc-starter-web'
     implementation 'io.grpc:grpc-testing-proto' // 为了演示，使用 gRPC 提供的 simple service
     ```
 

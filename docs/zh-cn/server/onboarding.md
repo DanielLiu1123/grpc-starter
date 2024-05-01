@@ -3,13 +3,13 @@
 添加依赖：
 
 ```groovy
-implementation 'com.freemanan:grpc-server-boot-starter'
+implementation 'io.github.danielliu1123:grpc-server-boot-starter'
 ```
 
 或者
 
 ```groovy
-implementation 'com.freemanan:grpc-boot-starter'
+implementation 'io.github.danielliu1123:grpc-boot-starter'
 ```
 
 > grpc-boot-starter 包含了 grpc-server-boot-starter 和 grpc-client-boot-starter
