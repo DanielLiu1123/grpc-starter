@@ -1,4 +1,6 @@
 grpc:
   test:
+    enabled: true
     server:
+      enabled: true
       port-type: in_process
