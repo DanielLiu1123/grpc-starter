@@ -340,54 +340,54 @@ class Util {
         return false;
     }
 
-    public static BooleanString stringify(Message message) {
+    public static T2<Boolean, String> stringify(Message message) {
         if (message instanceof BoolValue boolValue) {
-            return new BooleanString(true, String.valueOf(boolValue.getValue()));
+            return new T2<>(true, String.valueOf(boolValue.getValue()));
         }
         if (message instanceof Int32Value int32Value) {
-            return new BooleanString(true, String.valueOf(int32Value.getValue()));
+            return new T2<>(true, String.valueOf(int32Value.getValue()));
         }
         if (message instanceof Int64Value int64Value) {
-            return new BooleanString(true, String.valueOf(int64Value.getValue()));
+            return new T2<>(true, String.valueOf(int64Value.getValue()));
         }
         if (message instanceof UInt32Value uInt32Value) {
-            return new BooleanString(true, String.valueOf(uInt32Value.getValue()));
+            return new T2<>(true, String.valueOf(uInt32Value.getValue()));
         }
         if (message instanceof UInt64Value uInt64Value) {
-            return new BooleanString(true, String.valueOf(uInt64Value.getValue()));
+            return new T2<>(true, String.valueOf(uInt64Value.getValue()));
         }
         if (message instanceof FloatValue floatValue) {
-            return new BooleanString(true, String.valueOf(floatValue.getValue()));
+            return new T2<>(true, String.valueOf(floatValue.getValue()));
         }
         if (message instanceof DoubleValue doubleValue) {
-            return new BooleanString(true, String.valueOf(doubleValue.getValue()));
+            return new T2<>(true, String.valueOf(doubleValue.getValue()));
         }
         if (message instanceof StringValue stringValue) {
-            return new BooleanString(true, stringValue.getValue());
+            return new T2<>(true, stringValue.getValue());
         }
         if (message instanceof BytesValue bytesValue) {
-            return new BooleanString(true, bytesValue.getValue().toStringUtf8());
+            return new T2<>(true, bytesValue.getValue().toStringUtf8());
         }
         if (message instanceof Value value) {
             switch (value.getKindCase()) {
                 case NULL_VALUE -> {
-                    return new BooleanString(true, "null");
+                    return new T2<>(true, "null");
                 }
                 case NUMBER_VALUE -> {
-                    return new BooleanString(true, String.valueOf(value.getNumberValue()));
+                    return new T2<>(true, String.valueOf(value.getNumberValue()));
                 }
                 case STRING_VALUE -> {
-                    return new BooleanString(true, value.getStringValue());
+                    return new T2<>(true, value.getStringValue());
                 }
                 case BOOL_VALUE -> {
-                    return new BooleanString(true, String.valueOf(value.getBoolValue()));
+                    return new T2<>(true, String.valueOf(value.getBoolValue()));
                 }
                 default -> {
-                    return new BooleanString(false, null);
+                    return new T2<>(false, null);
                 }
             }
         }
-        return new BooleanString(false, null);
+        return new T2<>(false, null);
     }
 
     private static boolean isWrapperType(Class<?> clz) {
@@ -447,5 +447,5 @@ class Util {
         }
     }
 
-    record BooleanString(boolean isValueMessage, String stringValue) {}
+    record T2<T1, T2>(T1 v1, T2 v2) {}
 }

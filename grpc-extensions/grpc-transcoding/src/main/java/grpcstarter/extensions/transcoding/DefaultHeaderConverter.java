@@ -10,7 +10,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.ReflectionUtils;
@@ -30,7 +29,10 @@ public class DefaultHeaderConverter implements HeaderConverter {
     @Override
     public Metadata toMetadata(HttpHeaders headers) {
         // remove http internal headers
-        new HashSet<>(headers.keySet()).stream().filter(removeHeaderPredicate()).forEach(headers::remove);
+        new HashSet<>(headers.keySet())
+                .stream()
+                        .filter(key -> removeHeaders.stream().anyMatch(key::equalsIgnoreCase))
+                        .forEach(headers::remove);
 
         Metadata metadata = new Metadata();
         headers.forEach((k, values) -> {
@@ -45,7 +47,10 @@ public class DefaultHeaderConverter implements HeaderConverter {
         // remove grpc internal headers
         new HashSet<>(headers.keys())
                 .stream()
-                        .filter(removeMetadataPredicate())
+                        .filter(key -> {
+                            String k = key.toLowerCase();
+                            return k.startsWith("grpc-") || k.endsWith(Metadata.BINARY_HEADER_SUFFIX);
+                        })
                         .forEach(key -> headers.removeAll(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER)));
 
         // remove content-type
@@ -64,6 +69,7 @@ public class DefaultHeaderConverter implements HeaderConverter {
 
         // do not remove cookies
         result.removeIf(HttpHeaders.COOKIE::equalsIgnoreCase);
+        result.removeIf(HttpHeaders.AUTHORIZATION::equalsIgnoreCase);
         return result;
     }
 
@@ -77,16 +83,5 @@ public class DefaultHeaderConverter implements HeaderConverter {
                 .filter(Objects::nonNull)
                 .map(Object::toString)
                 .collect(Collectors.toSet());
-    }
-
-    protected Predicate<String> removeHeaderPredicate() {
-        return key -> removeHeaders.stream().anyMatch(key::equalsIgnoreCase);
-    }
-
-    protected Predicate<String> removeMetadataPredicate() {
-        return key -> {
-            String k = key.toLowerCase();
-            return k.startsWith("grpc-") || k.endsWith(Metadata.BINARY_HEADER_SUFFIX);
-        };
     }
 }

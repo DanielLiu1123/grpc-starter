@@ -29,7 +29,6 @@ class JsonUtil {
     private static final JsonFormat.Printer printer;
 
     static {
-        // Use Jackson2ObjectMapperBuilder to be consistent with Spring Boot behavior
         om = new Jackson2ObjectMapperBuilder()
                 .failOnEmptyBeans(false)
                 .modules(new SimpleModule().addSerializer(new ProtoMessageSerializer()))
@@ -49,8 +48,8 @@ class JsonUtil {
     public static String toJson(Object obj) {
         if (obj instanceof Message m) {
             var res = stringify(m);
-            if (res.isValueMessage()) {
-                return res.stringValue();
+            if (res.v1()) {
+                return res.v2();
             }
             try {
                 return printer.print(m);

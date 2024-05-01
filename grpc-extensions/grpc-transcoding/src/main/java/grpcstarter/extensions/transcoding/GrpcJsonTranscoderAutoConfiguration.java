@@ -18,8 +18,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.servlet.function.RouterFunction;
-import org.springframework.web.servlet.function.ServerResponse;
 
 /**
  * @author Freeman
@@ -51,7 +49,7 @@ public class GrpcJsonTranscoderAutoConfiguration {
     static class WebMvc {
 
         @Bean
-        public RouterFunction<ServerResponse> webMvcTranscodingRouterFunction(List<BindableService> services) {
+        public ServletTranscodingRouterFunction webMvcTranscodingRouterFunction(List<BindableService> services) {
             return new ServletTranscodingRouterFunction(services);
         }
     }
@@ -61,9 +59,7 @@ public class GrpcJsonTranscoderAutoConfiguration {
     static class WebFlux {
 
         @Bean
-        public org.springframework.web.reactive.function.server.RouterFunction<
-                        org.springframework.web.reactive.function.server.ServerResponse>
-                webFluxTranscodingRouterFunction(List<BindableService> services) {
+        public ReactiveTranscodingRouterFunction webFluxTranscodingRouterFunction(List<BindableService> services) {
             return new ReactiveTranscodingRouterFunction(services);
         }
     }
