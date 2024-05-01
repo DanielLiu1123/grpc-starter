@@ -27,7 +27,7 @@ public class GrpcTestEnvironmentPostProcessor implements EnvironmentPostProcesso
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        if (!SPRING_BOOT_TEST_PRESENT) {
+        if (!SPRING_BOOT_TEST_PRESENT || !GRPC_SERVER_STARTER_PRESENT) {
             return;
         }
 
@@ -49,27 +49,22 @@ public class GrpcTestEnvironmentPostProcessor implements EnvironmentPostProcesso
 
         Map<String, Object> configMap = new HashMap<>();
         switch (port) {
-            case IN_PROCESS:
-                if (GRPC_SERVER_STARTER_PRESENT) {
-                    String serverProperty = GrpcServerProperties.InProcess.PREFIX + ".name";
-                    if (!environment.containsProperty(serverProperty)) {
-                        // use in-process if not manually configured
-                        String name = UUID.randomUUID().toString();
-                        configMap.put(serverProperty, name);
-                    }
-                } else {
-                    throw new IllegalStateException("gRPC client or server starter not found");
+            case IN_PROCESS -> {
+                String serverProperty = GrpcServerProperties.InProcess.PREFIX + ".name";
+                if (!environment.containsProperty(serverProperty)) {
+                    // not manually configured
+                    String name = UUID.randomUUID().toString();
+                    configMap.put(serverProperty, name);
                 }
-                break;
-            case RANDOM_PORT:
+            }
+            case RANDOM_PORT -> {
                 String portProperty = GrpcServerProperties.PREFIX + ".port";
                 configMap.put(portProperty, 0);
-                break;
-            case DEFINED_PORT:
+            }
+            case DEFINED_PORT -> {
                 // do nothing
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown port type: " + port);
+            }
+            default -> throw new IllegalArgumentException("Unknown port type: " + port);
         }
 
         MapPropertySource ps = new MapPropertySource("grpc.extensions.test.property_source", configMap);

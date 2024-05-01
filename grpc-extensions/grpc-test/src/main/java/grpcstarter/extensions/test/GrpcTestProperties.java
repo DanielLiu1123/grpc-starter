@@ -31,8 +31,7 @@ public class GrpcTestProperties {
         /**
          * Port configuration, default is {@link PortType#IN_PROCESS}, which means start grpc server with in-process transport.
          *
-         * <p>
-         * NOTE: if {@code grpc-client-starter} is not in classpath, will fall back to {@link PortType#RANDOM_PORT}.
+         * @see PortType
          */
         private PortType portType = PortType.IN_PROCESS;
     }
