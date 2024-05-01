@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * <p> Example:
  *
  * <pre>{@code
- * @SpringBootTest
+ * @SpringBootTest(properties = "grpc.test.server.port-type=RANDOM_PORT")
  * class FooTest{
  *     @LocalGrpcPort
  *     int port;

@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import;
 public class GrpcServerAutoConfiguration {
 
     @Bean
-    //    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean
     public GrpcServer grpcServer(
             GrpcServerProperties properties,
             ObjectProvider<ServerBuilder<?>> serverBuilder,

@@ -3,8 +3,6 @@ package grpcstarter.extensions.transcoding;
 import static grpcstarter.extensions.transcoding.Util.TRANSCODING_SERVER_IN_PROCESS_NAME;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import grpcstarter.server.DummyGrpcServer;
-import grpcstarter.server.GrpcServer;
 import grpcstarter.server.GrpcServerCustomizer;
 import grpcstarter.server.GrpcServerProperties;
 import io.grpc.BindableService;
@@ -12,7 +10,6 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptor;
 import io.grpc.inprocess.InProcessServerBuilder;
-import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -21,6 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.unit.DataSize;
 
@@ -28,7 +26,7 @@ import org.springframework.util.unit.DataSize;
  * @author Freeman
  * @since 3.3.0
  */
-public class TranscodingGrpcServer implements GrpcServer {
+public class TranscodingGrpcServer implements SmartLifecycle {
     private static final Logger log = LoggerFactory.getLogger(TranscodingGrpcServer.class);
 
     private final Server server;
@@ -93,17 +91,6 @@ public class TranscodingGrpcServer implements GrpcServer {
             gracefulShutdown();
             throw new IllegalStateException(e);
         }
-    }
-
-    @Override
-    public int getPort() {
-        return DummyGrpcServer.DUMMY_PORT;
-    }
-
-    @Nullable
-    @Override
-    public Object getServer() {
-        return server;
     }
 
     @Override

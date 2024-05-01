@@ -1,3 +1,3 @@
 package grpcstarter.example;
 
-class AppTest {}
+class TracingAppTest {}

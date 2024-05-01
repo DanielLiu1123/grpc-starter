@@ -24,8 +24,8 @@ public class StubUtil {
      * Create a gRPC stub instance using in-process channel.
      *
      * @param inProcessName in-process server name
-     * @param stubClass    stub class
-     * @param <T>         stub type
+     * @param stubClass     stub class
+     * @param <T>           stub type
      * @return gRPC stub instance
      */
     @SuppressWarnings("unchecked")
@@ -43,10 +43,10 @@ public class StubUtil {
     private static String getStubMethodName(Class<?> stubClass) {
         if (stubClass.getName().endsWith(BLOCKING_STUB)) {
             return NEW_BLOCKING_STUB_METHOD;
-        } else if (stubClass.getName().endsWith(FUTURE_STUB)) {
-            return NEW_FUTURE_STUB_METHOD;
-        } else {
-            return NEW_STUB_METHOD;
         }
+        if (stubClass.getName().endsWith(FUTURE_STUB)) {
+            return NEW_FUTURE_STUB_METHOD;
+        }
+        return NEW_STUB_METHOD;
     }
 }

@@ -4,8 +4,10 @@ plugins {
 
 dependencies {
     implementation(project(":examples:grpc-sample-api"))
-    implementation(project(":grpc-starters:grpc-server-boot-starter"))
-    implementation(project(":grpc-starters:grpc-starter-web"))
+    implementation(project(":grpc-starters:grpc-server-boot-starter")){
+        exclude(group: 'io.grpc', module: "grpc-netty-shaded")
+    }
+    implementation(project(":grpc-starters:grpc-starter-transcoding-webflux"))
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

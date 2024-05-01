@@ -17,13 +17,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @EnableGrpcClients("io.grpc")
 @EnableExchangeClients
-public class App implements ApplicationRunner {
+public class TracingApp implements ApplicationRunner {
 
     @Autowired
     SimpleServiceGrpc.SimpleServiceBlockingStub stub;
 
     public static void main(String[] args) {
-        SpringApplication.run(App.class, args);
+        SpringApplication.run(TracingApp.class, args);
     }
 
     @Override

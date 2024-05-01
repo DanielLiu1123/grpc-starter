@@ -20,14 +20,14 @@ import org.springframework.util.ClassUtils;
  * @author Freeman
  */
 public class GrpcTestEnvironmentPostProcessor implements EnvironmentPostProcessor {
-    private static final boolean SPRING_BOOT_TEST_ENV =
+    private static final boolean SPRING_BOOT_TEST_PRESENT =
             ClassUtils.isPresent("org.springframework.boot.test.context.SpringBootTest", null);
-    private static final boolean GRPC_SERVER_STARTER_EXISTS =
+    private static final boolean GRPC_SERVER_STARTER_PRESENT =
             ClassUtils.isPresent("grpcstarter.server.GrpcServerProperties", null);
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        if (!SPRING_BOOT_TEST_ENV) {
+        if (!SPRING_BOOT_TEST_PRESENT) {
             return;
         }
 
@@ -50,7 +50,7 @@ public class GrpcTestEnvironmentPostProcessor implements EnvironmentPostProcesso
         Map<String, Object> configMap = new HashMap<>();
         switch (port) {
             case IN_PROCESS:
-                if (GRPC_SERVER_STARTER_EXISTS) {
+                if (GRPC_SERVER_STARTER_PRESENT) {
                     String serverProperty = GrpcServerProperties.InProcess.PREFIX + ".name";
                     if (!environment.containsProperty(serverProperty)) {
                         // use in-process if not manually configured

@@ -25,7 +25,7 @@ import org.springframework.util.ReflectionUtils;
 class GrpcTestBeanPostProcessor
         implements ApplicationListener<GrpcServerStartedEvent>, BeanPostProcessor, BeanFactoryAware, DisposableBean {
 
-    private final Map<Object, Boolean> beansToInject = new HashMap<>();
+    private final Map<Object, Boolean> beanToInjected = new HashMap<>();
 
     private BeanFactory beanFactory;
     private int port;
@@ -42,7 +42,7 @@ class GrpcTestBeanPostProcessor
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         boolean isTestInstance = isTestInstance(bean);
         if (isTestInstance || hasRelevantAnnotations(bean)) {
-            beansToInject.put(bean, false);
+            beanToInjected.put(bean, false);
             // This bean is test class instance, test class instance inject fields after Spring context initialization
             // see org.springframework.test.context.support.DependencyInjectionTestExecutionListener#injectDependencies
             if (isTestInstance) {
@@ -60,12 +60,12 @@ class GrpcTestBeanPostProcessor
                 .map(GrpcServerProperties.InProcess::getName)
                 .orElse(null);
 
-        beansToInject.keySet().forEach(this::injectFields);
+        beanToInjected.keySet().forEach(this::injectFields);
     }
 
     @Override
     public void destroy() {
-        beansToInject.clear();
+        beanToInjected.clear();
     }
 
     private boolean isTestInstance(Object bean) {
@@ -74,25 +74,32 @@ class GrpcTestBeanPostProcessor
 
     private boolean hasRelevantAnnotations(Object bean) {
         return Arrays.stream(AopProxyUtils.ultimateTargetClass(bean).getDeclaredFields())
-                .anyMatch(field -> AnnotationUtils.findAnnotation(field, InProcessName.class) != null
-                        || AnnotationUtils.findAnnotation(field, LocalGrpcPort.class) != null);
+                .anyMatch(field -> hasInProcessNameAnnotation(field) || hasLocalGrpcPortAnnotation(field));
     }
 
     private void injectFields(Object bean) {
-        if (Boolean.TRUE.equals(beansToInject.get(bean))) {
+        if (Boolean.TRUE.equals(beanToInjected.get(bean))) {
             // Already injected
             return;
         }
 
         ReflectionUtils.doWithFields(AopProxyUtils.ultimateTargetClass(bean), field -> {
-            if (AnnotationUtils.findAnnotation(field, InProcessName.class) != null) {
+            if (hasInProcessNameAnnotation(field)) {
                 injectInProcessName(bean, field);
-            } else if (AnnotationUtils.findAnnotation(field, LocalGrpcPort.class) != null) {
+            } else if (hasLocalGrpcPortAnnotation(field)) {
                 injectLocalGrpcPort(bean, field);
             }
         });
 
-        beansToInject.put(bean, true);
+        beanToInjected.put(bean, true);
+    }
+
+    private static boolean hasLocalGrpcPortAnnotation(Field field) {
+        return AnnotationUtils.findAnnotation(field, LocalGrpcPort.class) != null;
+    }
+
+    private static boolean hasInProcessNameAnnotation(Field field) {
+        return AnnotationUtils.findAnnotation(field, InProcessName.class) != null;
     }
 
     private void injectInProcessName(Object bean, Field field) {
