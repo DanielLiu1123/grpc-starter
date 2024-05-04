@@ -17,4 +17,6 @@ management:
   observations:
     key-values:
       app: ${spring.application.name:UNKNOWN}
+    annotations:
+      enabled: true
 debug: true

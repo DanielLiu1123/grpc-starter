@@ -1,7 +1,7 @@
 package grpcstarter.examples;
 
-import static grpcstarter.examples.protovalidate.FooOuterClass.Foo;
-import static grpcstarter.examples.protovalidate.FooServiceGrpc.FooServiceBlockingStub;
+import static foo.FooOuterClass.Foo;
+import static foo.FooServiceGrpc.FooServiceBlockingStub;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 

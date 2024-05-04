@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package grpcstarter.examples.protovalidate;
+package foo;
 
 import "google/protobuf/empty.proto";
 import "buf/validate/validate.proto";
@@ -23,10 +23,5 @@ message Foo {
 }
 
 service FooService {
-  rpc InsertFoo(Foo) returns (Foo) {
-    option(google.api.http) = {
-      post: "/v1/foo",
-      body: "*"
-    };
-  }
+  rpc InsertFoo (Foo) returns (Foo) {}
 }

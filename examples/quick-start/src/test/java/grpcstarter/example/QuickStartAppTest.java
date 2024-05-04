@@ -1,11 +1,11 @@
 package grpcstarter.example;
 
-import static com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceBlockingStub;
 import static io.grpc.testing.protobuf.SimpleServiceGrpc.SimpleServiceBlockingStub;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import com.freemanan.foo.v1.api.Foo;
+import foo.Foo;
+import foo.FooServiceGrpc.FooServiceBlockingStub;
 import grpcstarter.extensions.test.InProcessName;
 import grpcstarter.extensions.test.StubUtil;
 import io.grpc.StatusRuntimeException;

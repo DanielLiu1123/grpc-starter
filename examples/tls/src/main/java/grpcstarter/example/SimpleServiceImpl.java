@@ -10,7 +10,7 @@ import org.springframework.stereotype.Controller;
  * @author Freeman
  */
 @Controller
-public class SimpleServiceController extends SimpleServiceGrpc.SimpleServiceImplBase {
+public class SimpleServiceImpl extends SimpleServiceGrpc.SimpleServiceImplBase {
 
     @Override
     public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> responseObserver) {

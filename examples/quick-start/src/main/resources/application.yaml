@@ -7,7 +7,7 @@ grpc:
     channels:
       - authority: localhost:${grpc.server.port:9090}
         classes:
-          - com.freemanan.foo.v1.api.FooServiceGrpc.FooServiceBlockingStub
+          - foo.FooServiceGrpc.FooServiceBlockingStub
         stubs:
           - io.grpc.**.Health*Stub
         services:

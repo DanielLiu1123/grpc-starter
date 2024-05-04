@@ -1,15 +1,15 @@
 package grpcstarter.example;
 
-import com.freemanan.foo.v1.api.Foo;
-import com.freemanan.foo.v1.api.FooServiceGrpc;
+import foo.Foo;
+import foo.FooServiceGrpc;
+import grpcstarter.server.GrpcService;
 import io.grpc.stub.StreamObserver;
-import org.springframework.stereotype.Controller;
 
 /**
  * @author Freeman
  */
-@Controller
-public class FooController extends FooServiceGrpc.FooServiceImplBase {
+@GrpcService
+public class FooServiceImpl extends FooServiceGrpc.FooServiceImplBase {
 
     @Override
     public void create(Foo request, StreamObserver<Foo> responseObserver) {

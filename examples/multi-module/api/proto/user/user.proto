@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package user;
+
+import "buf/validate/validate.proto";
+
+option java_multiple_files = true;
+
+message CreateUserRequest {
+  string name = 1 [(buf.validate.field).string = {min_len: 1, max_len: 100}];
+}
+
+message User {
+  string id = 1;
+  string name = 2;
+}
+
+service UserService {
+  rpc CreateUser (CreateUserRequest) returns (User) {}
+}

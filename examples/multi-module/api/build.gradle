@@ -1,8 +1,8 @@
 dependencies {
-    implementation(project(":grpc-starters:grpc-starter-validation"))
+    implementation(project(":grpc-starters:grpc-starter-protovalidate"))
 }
 
-apply from: "${rootDir}/gradle/protobuf-with-pgv.gradle"
+apply from: "${rootDir}/gradle/protobuf.gradle"
 
 sourceSets {
     main {
