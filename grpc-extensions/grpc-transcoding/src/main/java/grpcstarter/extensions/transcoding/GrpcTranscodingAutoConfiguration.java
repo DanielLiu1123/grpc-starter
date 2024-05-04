@@ -38,10 +38,12 @@ public class GrpcTranscodingAutoConfiguration {
     @ConditionalOnMissingBean
     public TranscodingGrpcServer transcodingGrpcServer(
             GrpcServerProperties properties,
+            GrpcTranscodingProperties transcodingProperties,
             ObjectProvider<BindableService> serviceProvider,
             ObjectProvider<ServerInterceptor> interceptorProvider,
             ObjectProvider<GrpcServerCustomizer> customizers) {
-        return new TranscodingGrpcServer(properties, serviceProvider, interceptorProvider, customizers);
+        return new TranscodingGrpcServer(
+                properties, serviceProvider, interceptorProvider, customizers, transcodingProperties);
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -50,8 +52,8 @@ public class GrpcTranscodingAutoConfiguration {
 
         @Bean
         public ServletTranscodingRouterFunction webMvcTranscodingRouterFunction(
-                List<BindableService> services, HeaderConverter headerConverter) {
-            return new ServletTranscodingRouterFunction(services, headerConverter);
+                List<BindableService> services, HeaderConverter headerConverter, GrpcTranscodingProperties properties) {
+            return new ServletTranscodingRouterFunction(services, headerConverter, properties);
         }
     }
 
@@ -61,8 +63,8 @@ public class GrpcTranscodingAutoConfiguration {
 
         @Bean
         public ReactiveTranscodingRouterFunction webFluxTranscodingRouterFunction(
-                List<BindableService> services, HeaderConverter headerConverter) {
-            return new ReactiveTranscodingRouterFunction(services, headerConverter);
+                List<BindableService> services, HeaderConverter headerConverter, GrpcTranscodingProperties properties) {
+            return new ReactiveTranscodingRouterFunction(services, headerConverter, properties);
         }
     }
 }

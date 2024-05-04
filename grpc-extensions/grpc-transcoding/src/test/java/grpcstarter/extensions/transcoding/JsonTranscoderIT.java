@@ -2,10 +2,8 @@ package grpcstarter.extensions.transcoding;
 
 import static grpcstarter.extensions.transcoding.TestUtil.randomPort;
 import static grpcstarter.extensions.transcoding.TestUtil.restTemplate;
-import static grpcstarter.extensions.transcoding.TestUtil.webclient;
 import static grpcstarter.server.GrpcContextKeys.ResponseMetadataModifier;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.boot.WebApplicationType.SERVLET;
 import static transcoding.TranscoderTest.SimpleRequest;
 import static transcoding.TranscoderTest.SimpleResponse;
 
@@ -13,8 +11,9 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.grpc.Metadata;
 import io.grpc.stub.StreamObserver;
-import java.nio.charset.StandardCharsets;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Configuration;
@@ -25,116 +24,20 @@ import org.springframework.http.MediaType;
 import transcoding.SimpleServiceGrpc;
 import transcoding.TranscoderTest;
 
-/**
- * @author Freeman
- */
-// @Disabled("Developing...")
 class JsonTranscoderIT {
 
-    @Test
-    void testWebFluxTranscoderJson() {
+    @ParameterizedTest
+    @ValueSource(strings = {"SERVLET", "REACTIVE"})
+    void testTranscoderJson(String webType) {
         int port = randomPort();
         var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
-                .run();
-
-        var client = webclient(port);
-
-        // test native path
-        var resp = client.post()
-                .uri("/sample.pet.v1.PetService/GetPet")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue("{\"name\":\"pet\"}")
-                .exchange();
-        resp.expectStatus().isOk();
-        resp.expectHeader().contentType(MediaType.APPLICATION_JSON);
-        resp.expectHeader().valueEquals("request-id", "001");
-        resp.expectBody().json("{\"name\":\"pet\",\"age\":1}");
-
-        // test path alias
-        resp = client.post()
-                .uri("/v1/pets/get")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue("{\"name\":\"pet\"}")
-                .exchange();
-        resp.expectStatus().isOk();
-        resp.expectHeader().contentType(MediaType.APPLICATION_JSON);
-        resp.expectHeader().valueEquals("request-id", "001");
-        resp.expectBody().json("{\"name\":\"pet\",\"age\":1}");
-
-        ctx.close();
-    }
-
-    @Test
-    void testWebFluxTranscoderJson_whenSimpleValue() {
-        int port = randomPort();
-        var ctx = new SpringApplicationBuilder(Cfg.class)
-                .properties("server.port=" + port)
-                .run();
-
-        var client = webclient(port);
-
-        // wrapper type parses as JSON is simple value format
-        // google.protobuf.StringValue convert to JSON, the result is "foo", not {"value":"foo"}
-        // So, when convert JSON string to google.protobuf.StringValue, the input string must be "foo", not
-        // {"value":"foo"}
-        var resp = client.post()
-                .uri("/sample.pet.v1.PetService/GetPetName")
-                .bodyValue("\"Freeman\"")
-                .exchange();
-        resp.expectStatus().isOk();
-        resp.expectHeader().contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8));
-        resp.expectBody(String.class).isEqualTo("\"Freeman\"");
-
-        // test wrong format
-        resp = client.post()
-                .uri("/sample.pet.v1.PetService/GetPetName")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue("{\"value\":\"Freeman\"}")
-                .exchange();
-        resp.expectStatus().is4xxClientError();
-
-        ctx.close();
-    }
-
-    @Test
-    void testWebFluxExceptionHandling() {
-        int port = randomPort();
-        var ctx = new SpringApplicationBuilder(Cfg.class)
-                .properties("server.port=" + port)
-                .run();
-
-        var client = webclient(port);
-
-        // test native path
-        var resp = client.post()
-                .uri("/sample.pet.v1.PetService/GetPet")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue("{\"name\":\"error\"}")
-                .exchange();
-        resp.expectStatus().is5xxServerError();
-        resp.expectHeader().contentType(MediaType.APPLICATION_JSON);
-        resp.expectHeader().doesNotExist("request-id");
-        resp.expectBody().json("{\"code\":2,\"data\":null,\"message\":\"UNKNOWN\"}");
-
-        ctx.close();
-    }
-
-    // ===========================
-    // Web Mvc
-    // ===========================
-
-    @Test
-    void testWebMvcTranscoderJson() {
-        int port = randomPort();
-        var ctx = new SpringApplicationBuilder(Cfg.class)
-                .properties("server.port=" + port)
-                .web(SERVLET)
+                .web(WebApplicationType.valueOf(webType))
                 .run();
 
         var client = restTemplate();
 
-        // test full path
+        // full path
         var resp = client.exchange(
                 "http://localhost:" + port + "/transcoding.SimpleService/UnaryRpc",
                 HttpMethod.POST,
@@ -151,7 +54,7 @@ class JsonTranscoderIT {
         assertThat(resp.getBody()).isEqualTo("""
                 {"responseMessage":"Hi, Hi"}""");
 
-        // test path alias
+        // path alias
         resp = client.exchange(
                 "http://localhost:" + port + "/v1/unaryrpc",
                 HttpMethod.POST,
@@ -201,12 +104,13 @@ class JsonTranscoderIT {
         ctx.close();
     }
 
-    @Test
-    void testUseAnotherPackageRequestMessage() {
+    @ParameterizedTest
+    @ValueSource(strings = {"SERVLET", "REACTIVE"})
+    void testUseAnotherPackageRequestMessage(String webType) {
         int port = randomPort();
         var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
-                .web(SERVLET)
+                .web(WebApplicationType.valueOf(webType))
                 .run();
 
         var client = restTemplate();
@@ -222,12 +126,13 @@ class JsonTranscoderIT {
         ctx.close();
     }
 
-    @Test
-    void testUseSubMessageRequestRpc() {
+    @ParameterizedTest
+    @ValueSource(strings = {"SERVLET", "REACTIVE"})
+    void testUseSubMessageRequestRpc(String webType) {
         int port = randomPort();
         var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
-                .web(SERVLET)
+                .web(WebApplicationType.valueOf(webType))
                 .run();
 
         var client = restTemplate();
@@ -235,12 +140,12 @@ class JsonTranscoderIT {
         var resp = client.postForEntity(
                 "http://localhost:" + port + "/transcoding.SimpleService/UseSubMessageRequestRpc",
                 new HttpEntity<>("""
-                        {"message": "Hello"}"""),
+                        {"message":"Hello"}"""),
                 String.class);
         assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(resp.getHeaders().getContentType()).hasToString("application/json");
         assertThat(resp.getBody()).isEqualTo("""
-                        {"message":"Hello"}""");
+                {"message":"Hello"}""");
 
         ctx.close();
     }

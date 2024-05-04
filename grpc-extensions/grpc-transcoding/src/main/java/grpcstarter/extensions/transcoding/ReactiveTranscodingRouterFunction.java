@@ -67,17 +67,20 @@ public class ReactiveTranscodingRouterFunction
     private final Map<String, Route<ServerRequest>> methodNameRoutes = new HashMap<>();
     private final List<Route<ServerRequest>> routes = new ArrayList<>();
     private final HeaderConverter headerConverter;
+    private final GrpcTranscodingProperties properties;
 
     private Channel channel;
 
-    public ReactiveTranscodingRouterFunction(List<BindableService> services, HeaderConverter headerConverter) {
+    public ReactiveTranscodingRouterFunction(
+            List<BindableService> services, HeaderConverter headerConverter, GrpcTranscodingProperties properties) {
         getReactiveRoutes(services, methodNameRoutes, routes);
         this.headerConverter = headerConverter;
+        this.properties = properties;
     }
 
     @Override
     public void afterSingletonsInstantiated() {
-        channel = getInProcessChannel();
+        channel = getInProcessChannel(properties.getInProcessName());
     }
 
     @Override
@@ -134,12 +137,7 @@ public class ReactiveTranscodingRouterFunction
                 .defaultIfEmpty(request.exchange().getResponse().bufferFactory().wrap(new byte[0]))
                 .flatMap(buf -> {
                     var transcoder = getTranscoder(request, buf);
-                    Message msg;
-                    try {
-                        msg = buildRequestMessage(transcoder, route);
-                    } catch (InvalidProtocolBufferException e) {
-                        return Mono.error(new ResponseStatusException(BAD_REQUEST, e.getMessage(), e));
-                    }
+                    var msg = getMessage(route, transcoder);
                     // forwards http headers
                     var chan = ClientInterceptors.intercept(
                             channel,
@@ -187,12 +185,7 @@ public class ReactiveTranscodingRouterFunction
                 .defaultIfEmpty(request.exchange().getResponse().bufferFactory().wrap(new byte[0]))
                 .flatMap(buf -> {
                     var transcoder = getTranscoder(request, buf);
-                    Message msg;
-                    try {
-                        msg = buildRequestMessage(transcoder, route);
-                    } catch (InvalidProtocolBufferException e) {
-                        return Mono.error(new ResponseStatusException(BAD_REQUEST, e.getMessage(), e));
-                    }
+                    Message msg = getMessage(route, transcoder);
                     var headers = new AtomicReference<Metadata>();
                     var trailers = new AtomicReference<Metadata>();
                     var chan = ClientInterceptors.intercept(
@@ -210,11 +203,11 @@ public class ReactiveTranscodingRouterFunction
                                     h.addAll(headerConverter.toHttpHeaders(m));
                                 }
                             });
-                            var response = transcoder.out((Message) o, route.httpRule());
-                            if (canParseJson(response)) {
+                            var body = transcoder.out((Message) o, route.httpRule());
+                            if (canParseJson(body)) {
                                 builder.contentType(MediaType.APPLICATION_JSON);
                             }
-                            builder.body(Mono.just(JsonUtil.toJson(response)), String.class)
+                            builder.body(Mono.just(JsonUtil.toJson(body)), String.class)
                                     .subscribe(sink::success, sink::error);
                         }
 
@@ -237,6 +230,14 @@ public class ReactiveTranscodingRouterFunction
                         }
                     }));
                 });
+    }
+
+    private static Message getMessage(Route<?> route, Transcoder transcoder) {
+        try {
+            return buildRequestMessage(transcoder, route);
+        } catch (InvalidProtocolBufferException e) {
+            throw new ResponseStatusException(BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     private static byte[] getBytes(DataBuffer buf) {

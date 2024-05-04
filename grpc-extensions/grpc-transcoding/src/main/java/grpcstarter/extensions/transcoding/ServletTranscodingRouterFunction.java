@@ -5,8 +5,8 @@ import static grpcstarter.extensions.transcoding.TranscodingUtil.toHttpStatus;
 import static grpcstarter.extensions.transcoding.Util.Route;
 import static grpcstarter.extensions.transcoding.Util.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 import static grpcstarter.extensions.transcoding.Util.buildRequestMessage;
+import static grpcstarter.extensions.transcoding.Util.fillRoutes;
 import static grpcstarter.extensions.transcoding.Util.getInProcessChannel;
-import static grpcstarter.extensions.transcoding.Util.getServletRoutes;
 import static grpcstarter.extensions.transcoding.Util.trim;
 import static io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING;
 import static io.grpc.MethodDescriptor.MethodType.UNARY;
@@ -23,7 +23,6 @@ import io.grpc.Channel;
 import io.grpc.ClientCall;
 import io.grpc.ClientInterceptors;
 import io.grpc.Metadata;
-import io.grpc.MethodDescriptor;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCalls;
 import io.grpc.stub.MetadataUtils;
@@ -57,20 +56,29 @@ public class ServletTranscodingRouterFunction
 
     private static final String MATCHING_ROUTE = ServletTranscodingRouterFunction.class + ".matchingRoute";
 
+    /**
+     * grpc full method name -> route
+     *
+     * <p> e.g. "grpc.testing.SimpleService/UnaryRpc" -> Route
+     */
     private final Map<String, Route<ServerRequest>> methodNameRoutes = new HashMap<>();
+
     private final List<Route<ServerRequest>> routes = new ArrayList<>();
     private final HeaderConverter headerConverter;
+    private final GrpcTranscodingProperties properties;
 
     private Channel channel;
 
-    public ServletTranscodingRouterFunction(List<BindableService> services, HeaderConverter headerConverter) {
-        getServletRoutes(services, methodNameRoutes, routes);
+    public ServletTranscodingRouterFunction(
+            List<BindableService> services, HeaderConverter headerConverter, GrpcTranscodingProperties properties) {
+        fillRoutes(services, methodNameRoutes, routes);
         this.headerConverter = headerConverter;
+        this.properties = properties;
     }
 
     @Override
     public void afterSingletonsInstantiated() {
-        channel = getInProcessChannel();
+        channel = getInProcessChannel(properties.getInProcessName());
     }
 
     @Override
@@ -95,15 +103,13 @@ public class ServletTranscodingRouterFunction
         return Optional.empty();
     }
 
-    /**
-     * NOTE: This method can return null.
-     */
     @Override
+    @Nonnull
     @SuppressWarnings("unchecked")
     public ServerResponse handle(@Nonnull ServerRequest request) throws Exception {
         var route = (Util.Route<ServerRequest>) request.attributes().get(MATCHING_ROUTE);
 
-        MethodDescriptor.MethodType methodType = route.invokeMethod().getType();
+        var methodType = route.invokeMethod().getType();
 
         if (methodType == UNARY) {
             return processUnaryCall(request, route);
@@ -211,7 +217,7 @@ public class ServletTranscodingRouterFunction
                 Duration.ZERO);
     }
 
-    private static Message getMessage(Route<ServerRequest> route, Transcoder transcoder) {
+    private static Message getMessage(Route<?> route, Transcoder transcoder) {
         try {
             return buildRequestMessage(transcoder, route);
         } catch (InvalidProtocolBufferException e) {

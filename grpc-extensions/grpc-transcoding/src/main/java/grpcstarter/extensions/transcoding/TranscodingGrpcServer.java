@@ -1,7 +1,5 @@
 package grpcstarter.extensions.transcoding;
 
-import static grpcstarter.extensions.transcoding.Util.TRANSCODING_SERVER_IN_PROCESS_NAME;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import grpcstarter.server.GrpcServerCustomizer;
 import grpcstarter.server.GrpcServerProperties;
@@ -33,23 +31,28 @@ public class TranscodingGrpcServer implements SmartLifecycle {
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final CountDownLatch latch = new CountDownLatch(1);
     private final GrpcServerProperties properties;
+    private final GrpcTranscodingProperties transcodingProperties;
 
     @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public TranscodingGrpcServer(
             GrpcServerProperties properties,
             ObjectProvider<BindableService> serviceProvider,
             ObjectProvider<ServerInterceptor> interceptorProvider,
-            ObjectProvider<GrpcServerCustomizer> customizers) {
+            ObjectProvider<GrpcServerCustomizer> customizers,
+            GrpcTranscodingProperties transcodingProperties) {
         this.properties = properties;
-        this.server = buildGrpcServer(properties, serviceProvider, interceptorProvider, customizers);
+        this.transcodingProperties = transcodingProperties;
+        this.server =
+                buildGrpcServer(properties, transcodingProperties, serviceProvider, interceptorProvider, customizers);
     }
 
     private static Server buildGrpcServer(
             GrpcServerProperties properties,
+            GrpcTranscodingProperties transcodingProperties,
             ObjectProvider<BindableService> serviceProvider,
             ObjectProvider<ServerInterceptor> interceptorProvider,
             ObjectProvider<GrpcServerCustomizer> customizers) {
-        ServerBuilder<?> builder = InProcessServerBuilder.forName(TRANSCODING_SERVER_IN_PROCESS_NAME);
+        ServerBuilder<?> builder = InProcessServerBuilder.forName(transcodingProperties.getInProcessName());
 
         // add services
         serviceProvider.forEach(builder::addService);
@@ -83,7 +86,7 @@ public class TranscodingGrpcServer implements SmartLifecycle {
             server.start();
             isRunning.set(true);
             if (log.isInfoEnabled()) {
-                log.info("gRPC transcoding in-process server started: {}", TRANSCODING_SERVER_IN_PROCESS_NAME);
+                log.info("gRPC transcoding in-process server started: {}", transcodingProperties.getInProcessName());
             }
 
             waitUntilShutdown();

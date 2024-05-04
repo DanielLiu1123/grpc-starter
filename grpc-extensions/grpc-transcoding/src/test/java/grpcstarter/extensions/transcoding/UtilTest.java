@@ -7,7 +7,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.BytesValue;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.DoubleValue;
+import com.google.protobuf.Empty;
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
@@ -21,8 +23,10 @@ import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.Value;
 import com.google.protobuf.util.JsonFormat;
+import io.grpc.testing.protobuf.SimpleRequest;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
+import transcoding.TranscoderTest;
 
 /**
  * {@link Util} tester.
@@ -134,5 +138,40 @@ class UtilTest {
         assertThat(snakeToPascal("Ss_ss")).isEqualTo("SsSs");
         assertThat(snakeToPascal("SsSs")).isEqualTo("SsSs");
         assertThat(snakeToPascal("ssSs")).isEqualTo("SsSs");
+    }
+
+    /**
+     * {@link Util#getClassName(Descriptors.Descriptor)}
+     */
+    @Test
+    void testGetClassName() {
+        var descriptor = TranscoderTest.UseSubMessageRequestRpcRequest.SubMessage.getDescriptor();
+        assertThat(Util.getClassName(descriptor)).isEqualTo("UseSubMessageRequestRpcRequest$SubMessage");
+
+        descriptor = TranscoderTest.UseSubMessageRequestRpcRequest.getDescriptor();
+        assertThat(Util.getClassName(descriptor)).isEqualTo("UseSubMessageRequestRpcRequest");
+    }
+
+    /**
+     * {@link Util#getDefaultMessage(Descriptors.Descriptor)}
+     */
+    @Test
+    void testGetDefaultMessage() {
+        var descriptor = TranscoderTest.UseSubMessageRequestRpcRequest.SubMessage.getDescriptor();
+        assertThat(Util.getDefaultMessage(descriptor))
+                .isEqualTo(TranscoderTest.UseSubMessageRequestRpcRequest.SubMessage.getDefaultInstance());
+
+        descriptor = TranscoderTest.UseSubMessageRequestRpcRequest.getDescriptor();
+        assertThat(Util.getDefaultMessage(descriptor))
+                .isEqualTo(TranscoderTest.UseSubMessageRequestRpcRequest.getDefaultInstance());
+
+        descriptor = Empty.getDescriptor();
+        assertThat(Util.getDefaultMessage(descriptor)).isEqualTo(Empty.getDefaultInstance());
+
+        descriptor = Int32Value.getDescriptor();
+        assertThat(Util.getDefaultMessage(descriptor)).isEqualTo(Int32Value.getDefaultInstance());
+
+        descriptor = SimpleRequest.getDescriptor();
+        assertThat(Util.getDefaultMessage(descriptor)).isEqualTo(SimpleRequest.getDefaultInstance());
     }
 }

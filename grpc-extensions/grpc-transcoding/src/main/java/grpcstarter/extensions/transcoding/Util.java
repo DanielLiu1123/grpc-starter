@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -44,8 +43,8 @@ import lombok.experimental.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.function.ServerRequest;
 
 /**
@@ -57,12 +56,14 @@ class Util {
 
     public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE = Util.class + ".matchingPattern";
 
-    public static final String TRANSCODING_SERVER_IN_PROCESS_NAME =
-            UUID.randomUUID().toString();
+    /**
+     * Cache for the default message of the method input type.
+     *
+     * <p> The key is the full name of the method input type, the value is the default message instance.
+     */
+    static final Map<String, Message> methodCache = new ConcurrentReferenceHashMap<>();
 
-    static final Map<Descriptors.MethodDescriptor, Message> methodCache = new ConcurrentReferenceHashMap<>();
-
-    private static <T> List<Util.Route<T>> getRoutes(
+    private static <T> List<Util.Route<T>> fillRoutes(
             Map<String, Util.Route<T>> methodNameRoutes,
             List<Util.Route<T>> routes,
             List<ServerServiceDefinition> definitions,
@@ -89,7 +90,7 @@ class Util {
                         methodNameRoutes.put(
                                 invokeMethod.getFullMethodName(),
                                 new Route<>(
-                                        HttpRule.getDefaultInstance(),
+                                        HttpRule.newBuilder().setBody("*").build(),
                                         invokeMethod,
                                         methodDescriptor,
                                         t -> false,
@@ -163,18 +164,18 @@ class Util {
         return services.stream().map(BindableService::bindService).toList();
     }
 
-    public static List<Util.Route<ServerRequest>> getServletRoutes(
+    public static List<Util.Route<ServerRequest>> fillRoutes(
             List<BindableService> services,
             Map<String, Route<ServerRequest>> methodNameRoutes,
             List<Util.Route<ServerRequest>> routes) {
-        return getRoutes(methodNameRoutes, routes, listDefinition(services), ServletPredicate::new);
+        return fillRoutes(methodNameRoutes, routes, listDefinition(services), ServletPredicate::new);
     }
 
     public static List<Util.Route<org.springframework.web.reactive.function.server.ServerRequest>> getReactiveRoutes(
             List<BindableService> services,
             Map<String, Route<org.springframework.web.reactive.function.server.ServerRequest>> methodNameRoutes,
             List<Util.Route<org.springframework.web.reactive.function.server.ServerRequest>> routes) {
-        return getRoutes(methodNameRoutes, routes, listDefinition(services), ReactivePredicate::new);
+        return fillRoutes(methodNameRoutes, routes, listDefinition(services), ReactivePredicate::new);
     }
 
     static String snakeToPascal(String input) {
@@ -209,17 +210,18 @@ class Util {
         return null;
     }
 
-    private static Message getDefaultMessage(Descriptors.Descriptor descriptor) {
+    static Message getDefaultMessage(Descriptors.Descriptor descriptor) {
         DescriptorProtos.FileOptions options = descriptor.getFile().getOptions();
         String javaPackage = options.hasJavaPackage()
                 ? options.getJavaPackage()
                 : descriptor.getFile().getPackage();
         List<String> classNames = new ArrayList<>(2);
         if (options.getJavaMultipleFiles()) {
-            classNames.add(javaPackage + "." + descriptor.getName());
+            classNames.add(javaPackage + "." + Util.getClassName(descriptor));
         } else {
             if (options.hasJavaOuterClassname()) {
-                classNames.add(javaPackage + "." + options.getJavaOuterClassname() + "$" + descriptor.getName());
+                classNames.add(
+                        javaPackage + "." + options.getJavaOuterClassname() + "$" + Util.getClassName(descriptor));
             } else {
                 String name = descriptor.getFile().getName(); // "google/protobuf/empty.proto"
                 String fileName = name.substring(name.lastIndexOf('/') + 1); // "empty.proto"
@@ -232,19 +234,19 @@ class Util {
                         .formatted(
                                 javaPackage,
                                 outerClassName,
-                                descriptor.getName())); // "com.google.protobuf.EmptyOuterClass$Empty"
+                                getClassName(descriptor))); // "com.google.protobuf.EmptyOuterClass$Empty"
                 classNames.add("%s.%s$%s"
                         .formatted(
                                 javaPackage,
                                 outerClassName,
-                                descriptor.getName())); // "com.google.protobuf.Empty$Empty"
+                                getClassName(descriptor))); // "com.google.protobuf.Empty$Empty"
             }
         }
 
         Class<?> clazz = null;
         for (String className : classNames) {
             try {
-                clazz = ClassUtils.forName(className, null);
+                clazz = Class.forName(className);
                 break;
             } catch (ClassNotFoundException ignored) {
                 // no-op
@@ -264,17 +266,24 @@ class Util {
         }
     }
 
-    public static ManagedChannel getInProcessChannel() {
-        return InProcessChannelBuilder.forName(TRANSCODING_SERVER_IN_PROCESS_NAME)
-                .usePlaintext()
-                .build();
+    public static String getClassName(Descriptors.Descriptor descriptor) {
+        String className = "";
+        while (descriptor != null) {
+            className = descriptor.getName() + (StringUtils.hasText(className) ? "$" + className : "");
+            descriptor = descriptor.getContainingType();
+        }
+        return className;
+    }
+
+    public static ManagedChannel getInProcessChannel(String name) {
+        return InProcessChannelBuilder.forName(name).usePlaintext().build();
     }
 
     public static Message buildRequestMessage(Transcoder transcoder, Route<?> route)
             throws InvalidProtocolBufferException {
         Message.Builder messageBuilder = methodCache
                 .computeIfAbsent(
-                        route.methodDescriptor(),
+                        route.methodDescriptor().getInputType().getFullName(),
                         k -> getDefaultMessage(route.methodDescriptor().getInputType()))
                 .toBuilder();
 
@@ -406,7 +415,9 @@ class Util {
         }
 
         Map<String, String> result = pathTemplate.match(path);
-        if (result == null) return false;
+        if (result == null) {
+            return false;
+        }
 
         attributes.put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, result);
         return true;
@@ -454,6 +465,4 @@ class Util {
             return isMatch(request.method(), httpMethod, request.path(), pathTemplate, request.attributes());
         }
     }
-
-    record T2<T1, T2>(T1 v1, T2 v2) {}
 }
