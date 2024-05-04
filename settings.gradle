@@ -47,7 +47,7 @@ include(":examples:tracing")
 include(":examples:transcoding:webflux")
 include(":examples:transcoding:webmvc")
 
-java.util.Optional.of(new File("${rootDir}/.git/hooks")).filter { !it.exists() || !it.isDirectory() }.ifPresent {
+java.util.Optional.of(new File("${rootDir}/.git/hooks")).filter { it.exists() && it.isDirectory() }.ifPresent {
     new File("${rootDir}/.githooks").eachFile(groovy.io.FileType.FILES) {
         java.nio.file.Files.copy(it.toPath(), new File("${rootDir}/.git/hooks", it.name).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
     }
