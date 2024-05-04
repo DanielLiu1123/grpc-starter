@@ -2,7 +2,7 @@ dependencies {
     api("io.grpc:grpc-testing-proto")
     api("io.grpc:grpc-stub")
     api("io.grpc:grpc-protobuf")
-    compileOnly("javax.annotation:javax.annotation-api:${javaxValidationApiVersion}")
+    api("javax.annotation:javax.annotation-api:${javaxValidationApiVersion}")
 }
 
 apply from: "${rootDir}/gradle/deploy.gradle"
