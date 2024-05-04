@@ -1,13 +1,13 @@
 package grpcstarter.extensions.transcoding;
 
+import static grpcstarter.extensions.transcoding.JsonUtil.canParseJson;
 import static grpcstarter.extensions.transcoding.TranscodingUtil.toHttpStatus;
 import static grpcstarter.extensions.transcoding.Util.Route;
 import static grpcstarter.extensions.transcoding.Util.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 import static grpcstarter.extensions.transcoding.Util.buildRequestMessage;
 import static grpcstarter.extensions.transcoding.Util.getInProcessChannel;
 import static grpcstarter.extensions.transcoding.Util.getServletRoutes;
-import static grpcstarter.extensions.transcoding.Util.isJson;
-import static grpcstarter.extensions.transcoding.Util.toHttpHeaders;
+import static grpcstarter.extensions.transcoding.Util.trim;
 import static io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING;
 import static io.grpc.MethodDescriptor.MethodType.UNARY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -32,6 +32,7 @@ import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,12 +57,15 @@ public class ServletTranscodingRouterFunction
 
     private static final String MATCHING_ROUTE = ServletTranscodingRouterFunction.class + ".matchingRoute";
 
+    private final Map<String, Route<ServerRequest>> methodNameRoutes = new HashMap<>();
     private final List<Route<ServerRequest>> routes = new ArrayList<>();
+    private final HeaderConverter headerConverter;
 
     private Channel channel;
 
-    public ServletTranscodingRouterFunction(List<BindableService> services) {
-        routes.addAll(getServletRoutes(services));
+    public ServletTranscodingRouterFunction(List<BindableService> services, HeaderConverter headerConverter) {
+        getServletRoutes(services, methodNameRoutes, routes);
+        this.headerConverter = headerConverter;
     }
 
     @Override
@@ -72,6 +76,14 @@ public class ServletTranscodingRouterFunction
     @Override
     @Nonnull
     public Optional<HandlerFunction<ServerResponse>> route(@Nonnull ServerRequest request) {
+        if (Objects.equals(request.method(), HttpMethod.POST)) {
+            var route = methodNameRoutes.get(trim(request.path(), '/'));
+            if (route != null) {
+                request.attributes().put(MATCHING_ROUTE, route);
+                return Optional.of(this);
+            }
+        }
+
         for (var route : routes) {
             if (route.predicate().test(request)
                     || route.additionalPredicates().stream().anyMatch(p -> p.test(request))) {
@@ -79,6 +91,7 @@ public class ServletTranscodingRouterFunction
                 return Optional.of(this);
             }
         }
+
         return Optional.empty();
     }
 
@@ -128,30 +141,44 @@ public class ServletTranscodingRouterFunction
         var trailers = new AtomicReference<Metadata>();
         var transcoder = getTranscoder(request);
         var req = getMessage(route, transcoder);
-        var chan =
-                ClientInterceptors.intercept(channel, MetadataUtils.newCaptureMetadataInterceptor(headers, trailers));
+        var chan = ClientInterceptors.intercept(
+                channel,
+                MetadataUtils.newCaptureMetadataInterceptor(headers, trailers),
+                MetadataUtils.newAttachHeadersInterceptor(
+                        headerConverter.toMetadata(request.headers().asHttpHeaders())));
         var call = getCall(chan, route);
         Message responseMessage;
         try {
             responseMessage = (Message) ClientCalls.blockingUnaryCall(call, req);
         } catch (StatusRuntimeException e) {
             // TODO(Freeman): Not control by problemdetails.enabled, Spring bug?
+            Metadata t = trailers.get();
             throw new TranscodingRuntimeException(
-                    toHttpStatus(e.getStatus()), e.getLocalizedMessage(), toHttpHeaders(trailers.get()));
+                    toHttpStatus(e.getStatus()), e.getMessage(), t != null ? headerConverter.toHttpHeaders(t) : null);
         }
 
-        ServerResponse.BodyBuilder builder = ServerResponse.ok().headers(h -> h.addAll(toHttpHeaders(headers.get())));
-        String json = JsonUtil.toJson(transcoder.out(responseMessage, route.httpRule()));
-        if (isJson(json)) {
+        var builder = ServerResponse.ok().headers(h -> {
+            Metadata m = headers.get();
+            if (m != null) {
+                h.addAll(headerConverter.toHttpHeaders(m));
+            }
+        });
+        var body = transcoder.out(responseMessage, route.httpRule());
+        if (canParseJson(body)) {
             builder.contentType(MediaType.APPLICATION_JSON);
         }
-        return builder.body(json);
+        return builder.body(JsonUtil.toJson(body));
     }
 
     private ServerResponse processServerStreamingCall(ServerRequest request, Route<ServerRequest> route) {
         var transcoder = getTranscoder(request);
         var req = getMessage(route, transcoder);
-        var call = getCall(channel, route);
+        // forwards http headers
+        var chan = ClientInterceptors.intercept(
+                channel,
+                MetadataUtils.newAttachHeadersInterceptor(
+                        headerConverter.toMetadata(request.headers().asHttpHeaders())));
+        var call = getCall(chan, route);
         return ServerResponse.sse(
                 (sse -> {
                     // Cancel the call when SSE error occurs, possibly due to client disconnect
@@ -169,7 +196,7 @@ public class ServletTranscodingRouterFunction
                         public void onError(Throwable t) {
                             if (t instanceof StatusRuntimeException sre) {
                                 sse.error(new TranscodingRuntimeException(
-                                        toHttpStatus(sre.getStatus()), sre.getLocalizedMessage(), null));
+                                        toHttpStatus(sre.getStatus()), sre.getMessage(), null));
                             } else {
                                 sse.error(t);
                             }
@@ -188,7 +215,7 @@ public class ServletTranscodingRouterFunction
         try {
             return buildRequestMessage(transcoder, route);
         } catch (InvalidProtocolBufferException e) {
-            throw new ResponseStatusException(BAD_REQUEST, e.getLocalizedMessage(), e);
+            throw new ResponseStatusException(BAD_REQUEST, e.getMessage(), e);
         }
     }
 }

@@ -21,7 +21,7 @@ class ValidationExceptionUtil {
      * @return {@link StatusRuntimeException}
      */
     public static StatusRuntimeException asInternalException(ValidationException ex) {
-        return new StatusRuntimeException(Status.INTERNAL.withDescription(ex.getLocalizedMessage()));
+        return new StatusRuntimeException(Status.INTERNAL.withDescription(ex.getMessage()));
     }
 
     /**

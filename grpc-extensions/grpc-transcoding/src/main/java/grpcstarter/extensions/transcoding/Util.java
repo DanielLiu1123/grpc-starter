@@ -20,7 +20,6 @@ import com.google.protobuf.Value;
 import io.grpc.BindableService;
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
 import io.grpc.ServerMethodDefinition;
 import io.grpc.ServerServiceDefinition;
@@ -44,11 +43,9 @@ import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.function.ServerRequest;
 
 /**
@@ -66,31 +63,45 @@ class Util {
     static final Map<Descriptors.MethodDescriptor, Message> methodCache = new ConcurrentReferenceHashMap<>();
 
     private static <T> List<Util.Route<T>> getRoutes(
+            Map<String, Util.Route<T>> methodNameRoutes,
+            List<Util.Route<T>> routes,
             List<ServerServiceDefinition> definitions,
             BiFunction<HttpMethod, PathTemplate, Predicate<T>> predicateCreator) {
-        List<Util.Route<T>> routes = new ArrayList<>();
         for (ServerServiceDefinition ssd : definitions) {
             Descriptors.ServiceDescriptor serviceDescriptor = Util.getServiceDescriptor(ssd);
-            if (serviceDescriptor == null) continue;
+            if (serviceDescriptor == null) {
+                continue;
+            }
 
             Map<String, Descriptors.MethodDescriptor> methodNameToMethodDescriptor =
                     serviceDescriptor.getMethods().stream()
                             .collect(Collectors.toMap(
                                     com.google.protobuf.Descriptors.MethodDescriptor::getName, Function.identity()));
 
-            for (ServerMethodDefinition<?, ?> serverMethodDefinition : ssd.getMethods()) {
-                MethodDescriptor<?, ?> invokeMethod = serverMethodDefinition.getMethodDescriptor();
-                Descriptors.MethodDescriptor methodDescriptor =
-                        methodNameToMethodDescriptor.get(invokeMethod.getBareMethodName());
+            ssd.getMethods().stream()
+                    .map(ServerMethodDefinition::getMethodDescriptor)
+                    .forEach(invokeMethod -> {
+                        var methodDescriptor = methodNameToMethodDescriptor.get(invokeMethod.getBareMethodName());
+                        if (methodDescriptor == null) {
+                            return;
+                        }
 
-                if (methodDescriptor == null || !methodDescriptor.getOptions().hasExtension(AnnotationsProto.http)) {
-                    continue;
-                }
+                        methodNameRoutes.put(
+                                invokeMethod.getFullMethodName(),
+                                new Route<>(
+                                        HttpRule.getDefaultInstance(),
+                                        invokeMethod,
+                                        methodDescriptor,
+                                        t -> false,
+                                        List.of()));
 
-                HttpRule httpRule = methodDescriptor.getOptions().getExtension(AnnotationsProto.http);
-                Optional.ofNullable(createRouteWithBindings(httpRule, invokeMethod, methodDescriptor, predicateCreator))
-                        .ifPresent(routes::add);
-            }
+                        if (methodDescriptor.getOptions().hasExtension(AnnotationsProto.http)) {
+                            HttpRule httpRule = methodDescriptor.getOptions().getExtension(AnnotationsProto.http);
+                            Optional.ofNullable(createRouteWithBindings(
+                                            httpRule, invokeMethod, methodDescriptor, predicateCreator))
+                                    .ifPresent(routes::add);
+                        }
+                    });
         }
         return routes;
     }
@@ -148,17 +159,22 @@ class Util {
         };
     }
 
-    public static List<ServerServiceDefinition> listRoute(List<BindableService> services) {
+    public static List<ServerServiceDefinition> listDefinition(List<BindableService> services) {
         return services.stream().map(BindableService::bindService).toList();
     }
 
-    public static List<Util.Route<ServerRequest>> getServletRoutes(List<BindableService> services) {
-        return getRoutes(listRoute(services), ServletPredicate::new);
+    public static List<Util.Route<ServerRequest>> getServletRoutes(
+            List<BindableService> services,
+            Map<String, Route<ServerRequest>> methodNameRoutes,
+            List<Util.Route<ServerRequest>> routes) {
+        return getRoutes(methodNameRoutes, routes, listDefinition(services), ServletPredicate::new);
     }
 
     public static List<Util.Route<org.springframework.web.reactive.function.server.ServerRequest>> getReactiveRoutes(
-            List<BindableService> services) {
-        return getRoutes(listRoute(services), ReactivePredicate::new);
+            List<BindableService> services,
+            Map<String, Route<org.springframework.web.reactive.function.server.ServerRequest>> methodNameRoutes,
+            List<Util.Route<org.springframework.web.reactive.function.server.ServerRequest>> routes) {
+        return getRoutes(methodNameRoutes, routes, listDefinition(services), ReactivePredicate::new);
     }
 
     static String snakeToPascal(String input) {
@@ -177,22 +193,6 @@ class Util {
         }
 
         return result.toString();
-    }
-
-    static HttpHeaders toHttpHeaders(@Nullable Metadata headers) {
-        if (headers == null) return new HttpHeaders();
-
-        HttpHeaders result = new HttpHeaders();
-        for (String key : headers.keys()) {
-            if (key.startsWith("grpc-") || key.endsWith(Metadata.BINARY_HEADER_SUFFIX)) {
-                continue;
-            }
-            Iterable<String> iter = headers.getAll(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER));
-            if (iter != null) {
-                iter.forEach(value -> result.add(key, value));
-            }
-        }
-        return result;
     }
 
     @Nullable
@@ -283,12 +283,6 @@ class Util {
         return messageBuilder.build();
     }
 
-    public static boolean isJson(String string) {
-        return string != null
-                && ((string.startsWith("{") && string.endsWith("}"))
-                        || (string.startsWith("[") && string.endsWith("]")));
-    }
-
     public static void shutdown(Channel channel, Duration timeout) {
         if (!(channel instanceof ManagedChannel mc) || mc.isShutdown() || mc.isTerminated()) {
             return;
@@ -340,54 +334,50 @@ class Util {
         return false;
     }
 
-    public static T2<Boolean, String> stringify(Message message) {
+    /**
+     * Stringify the simple value message.
+     *
+     * @param message protobuf message
+     * @return string representation of the simple value message, {@code null} if the message is not simple value
+     */
+    public static String stringifySimpleValueMessage(Message message) {
         if (message instanceof BoolValue boolValue) {
-            return new T2<>(true, String.valueOf(boolValue.getValue()));
+            return String.valueOf(boolValue.getValue());
         }
         if (message instanceof Int32Value int32Value) {
-            return new T2<>(true, String.valueOf(int32Value.getValue()));
+            return String.valueOf(int32Value.getValue());
         }
         if (message instanceof Int64Value int64Value) {
-            return new T2<>(true, String.valueOf(int64Value.getValue()));
+            return String.valueOf(int64Value.getValue());
         }
         if (message instanceof UInt32Value uInt32Value) {
-            return new T2<>(true, String.valueOf(uInt32Value.getValue()));
+            return String.valueOf(uInt32Value.getValue());
         }
         if (message instanceof UInt64Value uInt64Value) {
-            return new T2<>(true, String.valueOf(uInt64Value.getValue()));
+            return String.valueOf(uInt64Value.getValue());
         }
         if (message instanceof FloatValue floatValue) {
-            return new T2<>(true, String.valueOf(floatValue.getValue()));
+            return String.valueOf(floatValue.getValue());
         }
         if (message instanceof DoubleValue doubleValue) {
-            return new T2<>(true, String.valueOf(doubleValue.getValue()));
+            return String.valueOf(doubleValue.getValue());
         }
         if (message instanceof StringValue stringValue) {
-            return new T2<>(true, stringValue.getValue());
+            return stringValue.getValue();
         }
         if (message instanceof BytesValue bytesValue) {
-            return new T2<>(true, bytesValue.getValue().toStringUtf8());
+            return bytesValue.getValue().toStringUtf8();
         }
         if (message instanceof Value value) {
-            switch (value.getKindCase()) {
-                case NULL_VALUE -> {
-                    return new T2<>(true, "null");
-                }
-                case NUMBER_VALUE -> {
-                    return new T2<>(true, String.valueOf(value.getNumberValue()));
-                }
-                case STRING_VALUE -> {
-                    return new T2<>(true, value.getStringValue());
-                }
-                case BOOL_VALUE -> {
-                    return new T2<>(true, String.valueOf(value.getBoolValue()));
-                }
-                default -> {
-                    return new T2<>(false, null);
-                }
-            }
+            return switch (value.getKindCase()) {
+                case NULL_VALUE -> "null";
+                case NUMBER_VALUE -> String.valueOf(value.getNumberValue());
+                case STRING_VALUE -> value.getStringValue();
+                case BOOL_VALUE -> String.valueOf(value.getBoolValue());
+                default -> null;
+            };
         }
-        return new T2<>(false, null);
+        return null;
     }
 
     private static boolean isWrapperType(Class<?> clz) {
@@ -405,13 +395,12 @@ class Util {
     private static boolean isMatch(
             HttpMethod requestMethod,
             HttpMethod httpMethod,
-            String path,
+            @Nonnull String path,
             PathTemplate pathTemplate,
             Map<String, Object> attributes) {
         if (!Objects.equals(requestMethod, httpMethod)) return false;
 
-        path = StringUtils.trimLeadingCharacter(path, '/');
-        path = StringUtils.trimTrailingCharacter(path, '/');
+        path = trim(path, '/');
         if (path.contains(":") && !pathTemplate.endsWithCustomVerb()) {
             return false;
         }
@@ -421,6 +410,25 @@ class Util {
 
         attributes.put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, result);
         return true;
+    }
+
+    static String trim(String str, char c) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+
+        int start = 0;
+        int end = str.length();
+
+        while (start < end && str.charAt(start) == c) {
+            start++;
+        }
+
+        while (end > start && str.charAt(end - 1) == c) {
+            end--;
+        }
+
+        return str.substring(start, end);
     }
 
     record Route<T>(

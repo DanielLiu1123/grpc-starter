@@ -2,6 +2,7 @@ syntax = "proto3";
 
 import "google/api/annotations.proto";
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
 
 package transcoding;
 
@@ -24,6 +25,12 @@ service SimpleService {
       get: "/v1/serverstreaming"
     };
   }
+
+  // Use another package in the request message.
+  rpc UseAnotherPackageRequestRpc (google.protobuf.Empty) returns (google.protobuf.StringValue) {}
+
+  // Use sub message in the request message.
+  rpc UseSubMessageRequestRpc (UseSubMessageRequestRpcRequest.SubMessage) returns (UseSubMessageRequestRpcResponse.SubMessage) {}
 
 }
 
@@ -55,4 +62,16 @@ message SimpleRequest {
 message SimpleResponse {
   // An optional string message for test.
   string responseMessage = 1;
+}
+
+message UseSubMessageRequestRpcRequest {
+  message SubMessage {
+    string message = 1;
+  }
+}
+
+message UseSubMessageRequestRpcResponse {
+  message SubMessage {
+    string message = 1;
+  }
 }

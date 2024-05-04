@@ -2,14 +2,12 @@ package grpcstarter.extensions.transcoding;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.grpc.Metadata;
-import io.grpc.internal.GrpcUtil;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.ReflectionUtils;
@@ -19,7 +17,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class DefaultHeaderConverter implements HeaderConverter {
 
-    private final Set<String> removeHeaders;
+    private final Set<String> removeHeaders; // lower case
 
     @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public DefaultHeaderConverter() {
@@ -28,52 +26,38 @@ public class DefaultHeaderConverter implements HeaderConverter {
 
     @Override
     public Metadata toMetadata(HttpHeaders headers) {
-        // remove http internal headers
-        new HashSet<>(headers.keySet())
-                .stream()
-                        .filter(key -> removeHeaders.stream().anyMatch(key::equalsIgnoreCase))
-                        .forEach(headers::remove);
-
         Metadata metadata = new Metadata();
         headers.forEach((k, values) -> {
-            Metadata.Key<String> key = Metadata.Key.of(k, Metadata.ASCII_STRING_MARSHALLER);
-            values.forEach(v -> metadata.put(key, v));
+            if (!removeHeaders.contains(k.toLowerCase())) {
+                values.forEach(v -> metadata.put(Metadata.Key.of(k, Metadata.ASCII_STRING_MARSHALLER), v));
+            }
         });
         return metadata;
     }
 
     @Override
     public HttpHeaders toHttpHeaders(Metadata headers) {
-        // remove grpc internal headers
-        new HashSet<>(headers.keys())
-                .stream()
-                        .filter(key -> {
-                            String k = key.toLowerCase();
-                            return k.startsWith("grpc-") || k.endsWith(Metadata.BINARY_HEADER_SUFFIX);
-                        })
-                        .forEach(key -> headers.removeAll(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER)));
-
-        // remove content-type
-        headers.removeAll(GrpcUtil.CONTENT_TYPE_KEY);
-
         HttpHeaders result = new HttpHeaders();
-        headers.keys().forEach(key -> Optional.ofNullable(
-                        headers.getAll(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER)))
-                .ifPresent(values -> values.forEach(value -> result.add(key, value))));
+        for (String key : headers.keys()) {
+            if (!removeHeaders.contains(key.toLowerCase())
+                    && !key.startsWith("grpc-")
+                    && !key.endsWith(Metadata.BINARY_HEADER_SUFFIX)) {
+                Optional.ofNullable(headers.getAll(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER)))
+                        .ifPresent(values -> values.forEach(value -> result.add(key, value)));
+            }
+        }
         return result;
     }
 
-    protected Set<String> getRemoveHeaders() {
-        Set<String> headerKeys = findPublicStaticFinalStringFieldNames(HttpHeaders.class);
-        Set<String> result = new TreeSet<>(headerKeys);
+    private Set<String> getRemoveHeaders() {
+        Set<String> result = new LinkedHashSet<>(findPublicStaticFinalStringFieldNames(HttpHeaders.class));
 
-        // do not remove cookies
-        result.removeIf(HttpHeaders.COOKIE::equalsIgnoreCase);
-        result.removeIf(HttpHeaders.AUTHORIZATION::equalsIgnoreCase);
+        result.removeIf(HttpHeaders.COOKIE::equalsIgnoreCase); // keep cookie
+        result.removeIf(HttpHeaders.AUTHORIZATION::equalsIgnoreCase); // keep authorization
         return result;
     }
 
-    protected static Set<String> findPublicStaticFinalStringFieldNames(Class<?> clazz) {
+    private static Set<String> findPublicStaticFinalStringFieldNames(Class<?> clazz) {
         return Arrays.stream(clazz.getDeclaredFields())
                 .filter(f -> Modifier.isPublic(f.getModifiers())
                         && Modifier.isStatic(f.getModifiers())
@@ -82,6 +66,7 @@ public class DefaultHeaderConverter implements HeaderConverter {
                 .map(f -> ReflectionUtils.getField(f, null))
                 .filter(Objects::nonNull)
                 .map(Object::toString)
+                .map(String::toLowerCase)
                 .collect(Collectors.toSet());
     }
 }

@@ -24,9 +24,9 @@ import org.springframework.http.HttpHeaders;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({Metadata.class, HttpHeaders.class})
-@ConditionalOnProperty(prefix = GrpcJsonTranscoderProperties.PREFIX, name = "enabled", matchIfMissing = true)
-@EnableConfigurationProperties(GrpcJsonTranscoderProperties.class)
-public class GrpcJsonTranscoderAutoConfiguration {
+@ConditionalOnProperty(prefix = GrpcTranscodingProperties.PREFIX, name = "enabled", matchIfMissing = true)
+@EnableConfigurationProperties(GrpcTranscodingProperties.class)
+public class GrpcTranscodingAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
@@ -49,8 +49,9 @@ public class GrpcJsonTranscoderAutoConfiguration {
     static class WebMvc {
 
         @Bean
-        public ServletTranscodingRouterFunction webMvcTranscodingRouterFunction(List<BindableService> services) {
-            return new ServletTranscodingRouterFunction(services);
+        public ServletTranscodingRouterFunction webMvcTranscodingRouterFunction(
+                List<BindableService> services, HeaderConverter headerConverter) {
+            return new ServletTranscodingRouterFunction(services, headerConverter);
         }
     }
 
@@ -59,8 +60,9 @@ public class GrpcJsonTranscoderAutoConfiguration {
     static class WebFlux {
 
         @Bean
-        public ReactiveTranscodingRouterFunction webFluxTranscodingRouterFunction(List<BindableService> services) {
-            return new ReactiveTranscodingRouterFunction(services);
+        public ReactiveTranscodingRouterFunction webFluxTranscodingRouterFunction(
+                List<BindableService> services, HeaderConverter headerConverter) {
+            return new ReactiveTranscodingRouterFunction(services, headerConverter);
         }
     }
 }

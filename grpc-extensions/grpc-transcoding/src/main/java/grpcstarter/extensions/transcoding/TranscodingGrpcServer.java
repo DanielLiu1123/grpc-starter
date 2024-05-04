@@ -83,7 +83,7 @@ public class TranscodingGrpcServer implements SmartLifecycle {
             server.start();
             isRunning.set(true);
             if (log.isInfoEnabled()) {
-                log.info("gRPC transcoding server started: {}", server);
+                log.info("gRPC transcoding in-process server started: {}", TRANSCODING_SERVER_IN_PROCESS_NAME);
             }
 
             waitUntilShutdown();
@@ -114,11 +114,11 @@ public class TranscodingGrpcServer implements SmartLifecycle {
                                 // wait here until terminating
                                 latch.await();
                             } catch (InterruptedException e) {
-                                log.warn("gRPC server await termination interrupted", e);
+                                log.warn("gRPC transcoding server await termination interrupted", e);
                                 Thread.currentThread().interrupt();
                             }
                         },
-                        "grpc-termination-awaiter")
+                        "grpc-transcoding-termination-awaiter")
                 .start();
     }
 

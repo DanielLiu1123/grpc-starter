@@ -1,1 +1,1 @@
-grpcstarter.extensions.transcoding.GrpcJsonTranscoderAutoConfiguration
+grpcstarter.extensions.transcoding.GrpcTranscodingAutoConfiguration

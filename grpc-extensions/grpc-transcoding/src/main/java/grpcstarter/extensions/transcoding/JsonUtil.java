@@ -1,6 +1,7 @@
 package grpcstarter.extensions.transcoding;
 
-import static grpcstarter.extensions.transcoding.Util.stringify;
+import static grpcstarter.extensions.transcoding.Util.isSimpleValueMessage;
+import static grpcstarter.extensions.transcoding.Util.stringifySimpleValueMessage;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -47,9 +48,8 @@ class JsonUtil {
      */
     public static String toJson(Object obj) {
         if (obj instanceof Message m) {
-            var res = stringify(m);
-            if (res.v1()) {
-                return res.v2();
+            if (isSimpleValueMessage(m)) {
+                return stringifySimpleValueMessage(m);
             }
             try {
                 return printer.print(m);
@@ -67,6 +67,13 @@ class JsonUtil {
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    public static boolean canParseJson(Object obj) {
+        if (obj instanceof Message m) {
+            return !isSimpleValueMessage(m);
+        }
+        return !BeanUtils.isSimpleValueType(obj.getClass());
     }
 
     private static final class ProtoMessageSerializer extends StdSerializer<MessageOrBuilder> {

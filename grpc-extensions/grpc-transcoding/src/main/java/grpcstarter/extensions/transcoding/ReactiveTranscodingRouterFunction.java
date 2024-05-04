@@ -1,13 +1,13 @@
 package grpcstarter.extensions.transcoding;
 
+import static grpcstarter.extensions.transcoding.JsonUtil.canParseJson;
 import static grpcstarter.extensions.transcoding.TranscodingUtil.toHttpStatus;
 import static grpcstarter.extensions.transcoding.Util.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 import static grpcstarter.extensions.transcoding.Util.buildRequestMessage;
 import static grpcstarter.extensions.transcoding.Util.getInProcessChannel;
 import static grpcstarter.extensions.transcoding.Util.getReactiveRoutes;
-import static grpcstarter.extensions.transcoding.Util.isJson;
 import static grpcstarter.extensions.transcoding.Util.shutdown;
-import static grpcstarter.extensions.transcoding.Util.toHttpHeaders;
+import static grpcstarter.extensions.transcoding.Util.trim;
 import static io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING;
 import static io.grpc.MethodDescriptor.MethodType.UNARY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -23,7 +23,6 @@ import io.grpc.Channel;
 import io.grpc.ClientCall;
 import io.grpc.ClientInterceptors;
 import io.grpc.Metadata;
-import io.grpc.MethodDescriptor;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCalls;
 import io.grpc.stub.MetadataUtils;
@@ -33,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -64,12 +64,15 @@ public class ReactiveTranscodingRouterFunction
 
     private static final String MATCHING_ROUTE = ReactiveTranscodingRouterFunction.class.getName() + ".matchingRoute";
 
+    private final Map<String, Route<ServerRequest>> methodNameRoutes = new HashMap<>();
     private final List<Route<ServerRequest>> routes = new ArrayList<>();
+    private final HeaderConverter headerConverter;
 
     private Channel channel;
 
-    public ReactiveTranscodingRouterFunction(List<BindableService> services) {
-        routes.addAll(getReactiveRoutes(services));
+    public ReactiveTranscodingRouterFunction(List<BindableService> services, HeaderConverter headerConverter) {
+        getReactiveRoutes(services, methodNameRoutes, routes);
+        this.headerConverter = headerConverter;
     }
 
     @Override
@@ -80,6 +83,14 @@ public class ReactiveTranscodingRouterFunction
     @Override
     @Nonnull
     public Mono<HandlerFunction<ServerResponse>> route(@Nonnull ServerRequest request) {
+        if (Objects.equals(request.method(), HttpMethod.POST)) {
+            var route = methodNameRoutes.get(trim(request.path(), '/'));
+            if (route != null) {
+                request.attributes().put(MATCHING_ROUTE, route);
+                return Mono.just(this);
+            }
+        }
+
         for (var route : routes) {
             if (route.predicate().test(request)
                     || route.additionalPredicates().stream().anyMatch(p -> p.test(request))) {
@@ -87,6 +98,7 @@ public class ReactiveTranscodingRouterFunction
                 return Mono.just(this);
             }
         }
+
         return Mono.empty();
     }
 
@@ -96,7 +108,7 @@ public class ReactiveTranscodingRouterFunction
     public Mono<ServerResponse> handle(@Nonnull ServerRequest request) {
         var route = (Route<ServerRequest>) request.attributes().get(MATCHING_ROUTE);
 
-        MethodDescriptor.MethodType methodType = route.invokeMethod().getType();
+        var methodType = route.invokeMethod().getType();
 
         if (methodType == UNARY) {
             return processUnaryCall(request, route);
@@ -126,9 +138,14 @@ public class ReactiveTranscodingRouterFunction
                     try {
                         msg = buildRequestMessage(transcoder, route);
                     } catch (InvalidProtocolBufferException e) {
-                        return Mono.error(new ResponseStatusException(BAD_REQUEST, e.getLocalizedMessage(), e));
+                        return Mono.error(new ResponseStatusException(BAD_REQUEST, e.getMessage(), e));
                     }
-                    var call = getCall(channel, route);
+                    // forwards http headers
+                    var chan = ClientInterceptors.intercept(
+                            channel,
+                            MetadataUtils.newAttachHeadersInterceptor(
+                                    headerConverter.toMetadata(request.headers().asHttpHeaders())));
+                    var call = getCall(chan, route);
                     var response = Flux.<ServerSentEvent<String>>create(
                             sink -> ClientCalls.asyncServerStreamingCall(call, msg, new StreamObserver<>() {
                                 @Override
@@ -143,7 +160,7 @@ public class ReactiveTranscodingRouterFunction
                                 public void onError(Throwable throwable) {
                                     if (throwable instanceof StatusRuntimeException sre) {
                                         sink.error(new TranscodingRuntimeException(
-                                                toHttpStatus(sre.getStatus()), sre.getLocalizedMessage(), null));
+                                                toHttpStatus(sre.getStatus()), sre.getMessage(), null));
                                     } else {
                                         sink.error(throwable);
                                     }
@@ -174,34 +191,41 @@ public class ReactiveTranscodingRouterFunction
                     try {
                         msg = buildRequestMessage(transcoder, route);
                     } catch (InvalidProtocolBufferException e) {
-                        return Mono.error(new ResponseStatusException(BAD_REQUEST, e.getLocalizedMessage(), e));
+                        return Mono.error(new ResponseStatusException(BAD_REQUEST, e.getMessage(), e));
                     }
                     var headers = new AtomicReference<Metadata>();
                     var trailers = new AtomicReference<Metadata>();
                     var chan = ClientInterceptors.intercept(
-                            channel, MetadataUtils.newCaptureMetadataInterceptor(headers, trailers));
+                            channel,
+                            MetadataUtils.newCaptureMetadataInterceptor(headers, trailers),
+                            MetadataUtils.newAttachHeadersInterceptor(
+                                    headerConverter.toMetadata(request.headers().asHttpHeaders())));
                     var call = getCall(chan, route);
                     return Mono.create(sink -> ClientCalls.asyncUnaryCall(call, msg, new StreamObserver<>() {
                         @Override
                         public void onNext(Object o) {
-                            String json = JsonUtil.toJson(transcoder.out((Message) o, route.httpRule()));
-
-                            ServerResponse.BodyBuilder builder =
-                                    ServerResponse.ok().headers(h -> h.addAll(toHttpHeaders(headers.get())));
-                            if (isJson(json)) {
+                            var builder = ServerResponse.ok().headers(h -> {
+                                Metadata m = headers.get();
+                                if (m != null) {
+                                    h.addAll(headerConverter.toHttpHeaders(m));
+                                }
+                            });
+                            var response = transcoder.out((Message) o, route.httpRule());
+                            if (canParseJson(response)) {
                                 builder.contentType(MediaType.APPLICATION_JSON);
                             }
-
-                            builder.body(Mono.just(json), String.class).subscribe(sink::success, sink::error);
+                            builder.body(Mono.just(JsonUtil.toJson(response)), String.class)
+                                    .subscribe(sink::success, sink::error);
                         }
 
                         @Override
                         public void onError(Throwable throwable) {
                             if (throwable instanceof StatusRuntimeException sre) {
+                                Metadata t = trailers.get();
                                 sink.error(new TranscodingRuntimeException(
                                         toHttpStatus(sre.getStatus()),
-                                        sre.getLocalizedMessage(),
-                                        toHttpHeaders(trailers.get())));
+                                        sre.getMessage(),
+                                        t != null ? headerConverter.toHttpHeaders(t) : null));
                             } else {
                                 sink.error(throwable);
                             }

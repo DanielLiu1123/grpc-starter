@@ -1,6 +1,5 @@
 package grpcstarter.extensions.transcoding;
 
-import static grpcstarter.extensions.transcoding.Deps.WEB_FLUX_STARTER;
 import static grpcstarter.extensions.transcoding.TestUtil.randomPort;
 import static grpcstarter.extensions.transcoding.TestUtil.restTemplate;
 import static grpcstarter.extensions.transcoding.TestUtil.webclient;
@@ -10,12 +9,11 @@ import static org.springframework.boot.WebApplicationType.SERVLET;
 import static transcoding.TranscoderTest.SimpleRequest;
 import static transcoding.TranscoderTest.SimpleResponse;
 
-import com.freemanan.cr.core.anno.Action;
-import com.freemanan.cr.core.anno.ClasspathReplacer;
+import com.google.protobuf.Empty;
+import com.google.protobuf.StringValue;
 import io.grpc.Metadata;
 import io.grpc.stub.StreamObserver;
 import java.nio.charset.StandardCharsets;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -25,11 +23,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import transcoding.SimpleServiceGrpc;
+import transcoding.TranscoderTest;
 
 /**
  * @author Freeman
  */
-@Disabled("Developing...")
+// @Disabled("Developing...")
 class JsonTranscoderIT {
 
     @Test
@@ -67,7 +66,6 @@ class JsonTranscoderIT {
     }
 
     @Test
-    @ClasspathReplacer(@Action(WEB_FLUX_STARTER))
     void testWebFluxTranscoderJson_whenSimpleValue() {
         int port = randomPort();
         var ctx = new SpringApplicationBuilder(Cfg.class)
@@ -99,9 +97,7 @@ class JsonTranscoderIT {
         ctx.close();
     }
 
-    // TODO(Freeman): uncomment this test case
-    //    @Test
-    @ClasspathReplacer(@Action(WEB_FLUX_STARTER))
+    @Test
     void testWebFluxExceptionHandling() {
         int port = randomPort();
         var ctx = new SpringApplicationBuilder(Cfg.class)
@@ -138,28 +134,33 @@ class JsonTranscoderIT {
 
         var client = restTemplate();
 
-        // test native path
-        //        var resp = client.exchange(
-        //                "http://localhost:" + port + "/sample.pet.v1.PetService/GetPet",
-        //                HttpMethod.POST,
-        //                new HttpEntity<>("{\"name\":\"pet\"}"),
-        //                String.class);
-        //        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
-        //        assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-        //        assertThat(resp.getHeaders().get("request-id")).containsExactly("001");
-        //        assertThat(resp.getBody()).isNotBlank();
-        //        assertThat(resp.getBody().replaceAll("\\s+", "")).isEqualTo("{\"name\":\"pet\",\"age\":1}");
+        // test full path
+        var resp = client.exchange(
+                "http://localhost:" + port + "/transcoding.SimpleService/UnaryRpc",
+                HttpMethod.POST,
+                new HttpEntity<>(
+                        """
+                                {
+                                    "requestMessage": "Hi"
+                                }
+                                """),
+                String.class);
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+        assertThat(resp.getBody()).isNotBlank();
+        assertThat(resp.getBody()).isEqualTo("""
+                {"responseMessage":"Hi, Hi"}""");
 
         // test path alias
-        var resp = client.exchange(
+        resp = client.exchange(
                 "http://localhost:" + port + "/v1/unaryrpc",
                 HttpMethod.POST,
                 new HttpEntity<>(
                         """
-                        {
-                            "requestMessage": "Hi"
-                        }
-                        """),
+                                {
+                                    "requestMessage": "Hi"
+                                }
+                                """),
                 String.class);
         assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
@@ -175,10 +176,10 @@ class JsonTranscoderIT {
                 HttpMethod.POST,
                 new HttpEntity<>(
                         """
-                        {
-                            "int32_wrapper": 1
-                        }
-                        """),
+                                {
+                                    "int32_wrapper": 1
+                                }
+                                """),
                 String.class);
         assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -188,14 +189,58 @@ class JsonTranscoderIT {
                 HttpMethod.POST,
                 new HttpEntity<>(
                         """
-                        {
-                            "int32_wrapper": {
-                                "value": 1
-                            }
-                        }
-                        """),
+                                {
+                                    "int32_wrapper": {
+                                        "value": 1
+                                    }
+                                }
+                                """),
                 String.class);
         assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
+        ctx.close();
+    }
+
+    @Test
+    void testUseAnotherPackageRequestMessage() {
+        int port = randomPort();
+        var ctx = new SpringApplicationBuilder(Cfg.class)
+                .properties("server.port=" + port)
+                .web(SERVLET)
+                .run();
+
+        var client = restTemplate();
+
+        var resp = client.postForEntity(
+                "http://localhost:" + port + "/transcoding.SimpleService/UseAnotherPackageRequestRpc",
+                null,
+                String.class);
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(resp.getHeaders().getContentType()).hasToString("text/plain;charset=UTF-8");
+        assertThat(resp.getBody()).isEqualTo("Hello");
+
+        ctx.close();
+    }
+
+    @Test
+    void testUseSubMessageRequestRpc() {
+        int port = randomPort();
+        var ctx = new SpringApplicationBuilder(Cfg.class)
+                .properties("server.port=" + port)
+                .web(SERVLET)
+                .run();
+
+        var client = restTemplate();
+
+        var resp = client.postForEntity(
+                "http://localhost:" + port + "/transcoding.SimpleService/UseSubMessageRequestRpc",
+                new HttpEntity<>("""
+                        {"message": "Hello"}"""),
+                String.class);
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(resp.getHeaders().getContentType()).hasToString("application/json");
+        assertThat(resp.getBody()).isEqualTo("""
+                        {"message":"Hello"}""");
 
         ctx.close();
     }
@@ -228,6 +273,22 @@ class JsonTranscoderIT {
                     .setResponseMessage("Hi, " + request.getRequestMessage())
                     .build());
             ro.onCompleted();
+        }
+
+        @Override
+        public void useAnotherPackageRequestRpc(Empty request, StreamObserver<StringValue> responseObserver) {
+            responseObserver.onNext(StringValue.of("Hello"));
+            responseObserver.onCompleted();
+        }
+
+        @Override
+        public void useSubMessageRequestRpc(
+                TranscoderTest.UseSubMessageRequestRpcRequest.SubMessage request,
+                StreamObserver<TranscoderTest.UseSubMessageRequestRpcResponse.SubMessage> responseObserver) {
+            responseObserver.onNext(TranscoderTest.UseSubMessageRequestRpcResponse.SubMessage.newBuilder()
+                    .setMessage("Hello")
+                    .build());
+            responseObserver.onCompleted();
         }
     }
 }
