@@ -1,5 +1,7 @@
 dependencies {
     api(project(":grpc-extensions:grpc-tracing"))
+    api("org.springframework.boot:spring-boot-starter-actuator")
+    api("io.micrometer:micrometer-tracing")
 
     optionalSupportApi("io.micrometer:micrometer-tracing-bridge-brave")
     optionalSupportApi("io.micrometer:micrometer-tracing-bridge-otel")

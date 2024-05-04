@@ -33,8 +33,6 @@ include(":grpc-starters:grpc-starter-tracing")
 include(":grpc-starters:grpc-starter-transcoding-webflux")
 include(":grpc-starters:grpc-starter-transcoding-webmvc")
 include(":grpc-starters:grpc-starter-validation")
-include(":grpc-starters:grpc-starter-web")
-include(":grpc-starters:grpc-starter-webflux")
 
 // examples, order by name
 include(":examples:grpc-sample-api")

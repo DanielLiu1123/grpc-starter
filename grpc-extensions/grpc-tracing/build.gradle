@@ -2,8 +2,8 @@ dependencies {
     compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
     compileOnly(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
 
-    api("org.springframework.boot:spring-boot-starter-actuator")
-    api("io.micrometer:micrometer-tracing")
+    compileOnly("org.springframework.boot:spring-boot-starter-actuator")
+    compileOnly("io.micrometer:micrometer-tracing")
 
     compileOnly("io.micrometer:micrometer-tracing-bridge-otel")
     compileOnly("io.micrometer:micrometer-tracing-bridge-brave")
@@ -12,6 +12,8 @@ dependencies {
 
     testImplementation(project(":grpc-starters:grpc-starter-test"))
     testImplementation(project(":grpc-starters:grpc-boot-starter"))
+    testImplementation("org.springframework.boot:spring-boot-starter-actuator")
+    testImplementation("io.micrometer:micrometer-tracing")
     testImplementation("com.freemanan:classpath-replacer-junit5:${classpathReplacerVersion}")
 }
 

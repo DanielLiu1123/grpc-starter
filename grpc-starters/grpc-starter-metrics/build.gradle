@@ -1,5 +1,6 @@
 dependencies {
     api(project(":grpc-extensions:grpc-metrics"))
+    api("org.springframework.boot:spring-boot-starter-actuator")
 
     optionalSupportApi("org.springframework.boot:spring-boot-starter-aop")
 
