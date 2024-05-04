@@ -11,8 +11,6 @@ import static grpcstarter.extensions.transcoding.Util.trim;
 import static io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING;
 import static io.grpc.MethodDescriptor.MethodType.UNARY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
 import static org.springframework.util.StreamUtils.copyToByteArray;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -106,7 +104,7 @@ public class ServletTranscodingRouterFunction
     @Override
     @Nonnull
     @SuppressWarnings("unchecked")
-    public ServerResponse handle(@Nonnull ServerRequest request) throws Exception {
+    public ServerResponse handle(@Nonnull ServerRequest request) {
         var route = (Util.Route<ServerRequest>) request.attributes().get(MATCHING_ROUTE);
 
         var methodType = route.invokeMethod().getType();
@@ -116,13 +114,10 @@ public class ServletTranscodingRouterFunction
         }
 
         if (methodType == SERVER_STREAMING) {
-            if (!Objects.equals(request.method(), HttpMethod.GET)) {
-                throw new ResponseStatusException(METHOD_NOT_ALLOWED, "SSE only supports GET method");
-            }
             return processServerStreamingCall(request, route);
         }
 
-        throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "Unsupported rpc method type: " + methodType);
+        throw new ResponseStatusException(BAD_REQUEST, "Unsupported rpc method type: " + methodType);
     }
 
     @SuppressWarnings("unchecked")
