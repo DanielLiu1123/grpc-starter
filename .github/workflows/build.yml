@@ -3,11 +3,13 @@ on:
   push:
     branches:
       - main
+      - 3.2.x
       - 3.1.x
       - 2.7.x
   pull_request:
     branches:
       - main
+      - 3.2.x
       - 3.1.x
       - 2.7.x
 jobs:
