@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package foo;
+
+import "buf/validate/validate.proto";
+
+option java_multiple_files = true;
+
+message Foo {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 10
+  }];
+  string name = 2 [(buf.validate.field).string = {pattern: "^[a-zA-Z0-9_]+$"}];
+}
+
+service FooService {
+  rpc Create(Foo) returns (Foo) {}
+}

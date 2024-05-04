@@ -8,21 +8,21 @@ pluginManagement {
 
 rootProject.name = 'grpc-starter'
 
-// core autoconfigure
+// core autoconfigure, order by name
 include(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure")
 include(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure")
 
-// extensions
-include(":grpc-extensions:grpc-json-transcoder")
+// extensions, order by name
 include(":grpc-extensions:grpc-metrics")
-include(":grpc-extensions:grpc-tracing")
 include(":grpc-extensions:grpc-test")
+include(":grpc-extensions:grpc-tracing")
+include(":grpc-extensions:grpc-transcoding")
 include(":grpc-extensions:grpc-validation")
 
 // bom
 include(":grpc-starter-dependencies")
 
-// starters
+// starters, order by name
 include(":grpc-starters:grpc-boot-starter")
 include(":grpc-starters:grpc-client-boot-starter")
 include(":grpc-starters:grpc-server-boot-starter")
@@ -30,19 +30,25 @@ include(":grpc-starters:grpc-starter-metrics")
 include(":grpc-starters:grpc-starter-protovalidate")
 include(":grpc-starters:grpc-starter-test")
 include(":grpc-starters:grpc-starter-tracing")
+include(":grpc-starters:grpc-starter-transcoding-webflux")
+include(":grpc-starters:grpc-starter-transcoding-webmvc")
 include(":grpc-starters:grpc-starter-validation")
-include(":grpc-starters:grpc-starter-web")
-include(":grpc-starters:grpc-starter-webflux")
 
-// examples
+// examples, order by name
 include(":examples:grpc-sample-api")
-include(":examples:json-transcoder:webflux")
-include(":examples:json-transcoder:webmvc")
 include(":examples:metrics")
+include(":examples:multi-module:api")
+include(":examples:multi-module:server")
 include(":examples:proto-validate")
 include(":examples:quick-start")
 include(":examples:refresh")
 include(":examples:tls")
 include(":examples:tracing")
-include(":examples:user:user-api")
-include(":examples:user:user-server")
+include(":examples:transcoding:webflux")
+include(":examples:transcoding:webmvc")
+
+java.util.Optional.of(new File("${rootDir}/.git/hooks")).filter { it.exists() && it.isDirectory() }.ifPresent {
+    new File("${rootDir}/.githooks").eachFile(groovy.io.FileType.FILES) {
+        java.nio.file.Files.copy(it.toPath(), new File("${rootDir}/.git/hooks", it.name).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+    }
+}

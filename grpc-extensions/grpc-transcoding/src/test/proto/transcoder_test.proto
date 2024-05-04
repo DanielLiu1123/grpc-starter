@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+
+package transcoding;
+
+// A simple service for test.
+service SimpleService {
+  // Simple unary RPC.
+  rpc UnaryRpc (SimpleRequest) returns (SimpleResponse) {
+    option (google.api.http) = {
+      post: "/v1/unaryrpc",
+      body: "*",
+      additional_bindings: {
+        get: "/v1/unaryrpc/{requestMessage=*}"
+      }
+    };
+  }
+
+  // Simple server-to-client streaming RPC.
+  rpc ServerStreamingRpc (SimpleRequest) returns (stream SimpleResponse) {
+    option (google.api.http) = {
+      get: "/v1/serverstreaming"
+    };
+  }
+
+  // Use another package in the request message.
+  rpc UseAnotherPackageRequestRpc (google.protobuf.Empty) returns (google.protobuf.StringValue) {}
+
+  // Use sub message in the request message.
+  rpc UseSubMessageRequestRpc (UseSubMessageRequestRpcRequest.SubMessage) returns (UseSubMessageRequestRpcResponse.SubMessage) {}
+
+}
+
+// A simple request message type for test.
+message SimpleRequest {
+  // An optional string message for test, camelCase naming.
+  string requestMessage = 1;
+  // Underline naming
+  string some_message = 2;
+  // Nested message
+  SimpleRequest nested = 3;
+  // Repeated string
+  repeated string repeated_string = 4;
+  // Repeated message
+  repeated SimpleRequest repeated_message = 5;
+  // Enum
+  Enum enum = 6;
+  // Wrappers
+  google.protobuf.Int32Value int32_wrapper = 7;
+
+  enum Enum {
+    ENUM_UNSPECIFIED = 0;
+    V1 = 1;
+    V2 = 2;
+  }
+}
+
+// A simple response message type for test.
+message SimpleResponse {
+  // An optional string message for test.
+  string responseMessage = 1;
+}
+
+message UseSubMessageRequestRpcRequest {
+  message SubMessage {
+    string message = 1;
+  }
+}
+
+message UseSubMessageRequestRpcResponse {
+  message SubMessage {
+    string message = 1;
+  }
+}

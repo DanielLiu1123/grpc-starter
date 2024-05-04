@@ -8,8 +8,8 @@ HTTP/JSON call methods with just one set of gRPC implementations.
 1. Add Dependencies
 
    ```groovy
-   implementation 'com.freemanan:grpc-boot-starter'
-   implementation 'com.freemanan:grpc-starter-web'
+   implementation 'io.github.danielliu1123:grpc-boot-starter'
+   implementation 'io.github.danielliu1123:grpc-starter-web'
    implementation 'io.grpc:grpc-testing-proto' // For demonstration purposes, using gRPC's simple service
    ```
 

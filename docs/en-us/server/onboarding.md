@@ -3,13 +3,13 @@
 Add dependencies:
 
 ```groovy
-implementation 'com.freemanan:grpc-server-boot-starter'
+implementation 'io.github.danielliu1123:grpc-server-boot-starter'
 ```
 
 or
 
 ```groovy
-implementation 'com.freemanan:grpc-boot-starter'
+implementation 'io.github.danielliu1123:grpc-boot-starter'
 ```
 
 > `grpc-boot-starter` includes `grpc-server-boot-starter` and `grpc-client-boot-starter`.

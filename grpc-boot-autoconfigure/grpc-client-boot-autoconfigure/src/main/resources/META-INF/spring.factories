@@ -1,2 +1,2 @@
 org.springframework.boot.diagnostics.FailureAnalyzer=\
-  com.freemanan.starter.grpc.client.exception.GrpcClientFailureAnalyzer
+  grpcstarter.client.exception.GrpcClientFailureAnalyzer

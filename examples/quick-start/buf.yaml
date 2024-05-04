@@ -1,5 +1,0 @@
-version: v1
-
-lint:
-  ignore:
-    - 'fm/foo/v1'

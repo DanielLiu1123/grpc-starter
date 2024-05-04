@@ -1,8 +1,0 @@
-plugins {
-    id 'org.springframework.boot'
-}
-
-dependencies {
-    implementation(project(":examples:user:user-api"))
-    implementation(project(":grpc-starters:grpc-server-boot-starter"))
-}

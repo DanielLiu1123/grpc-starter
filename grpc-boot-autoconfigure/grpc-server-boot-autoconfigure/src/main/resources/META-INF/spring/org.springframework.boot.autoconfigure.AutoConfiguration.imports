@@ -1,1 +1,1 @@
-com.freemanan.starter.grpc.server.GrpcServerAutoConfiguration
+grpcstarter.server.GrpcServerAutoConfiguration

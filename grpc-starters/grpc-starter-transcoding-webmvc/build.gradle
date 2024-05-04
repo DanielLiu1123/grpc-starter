@@ -1,0 +1,6 @@
+dependencies {
+    api(project(":grpc-extensions:grpc-transcoding"))
+    api("org.springframework.boot:spring-boot-starter-web")
+}
+
+apply from: "${rootDir}/gradle/deploy.gradle"

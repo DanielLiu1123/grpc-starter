@@ -1,9 +1,0 @@
-grpc:
-  server:
-    reflection:
-      enabled: true
-    exception-handling:
-      use-default: false
-server:
-  error:
-    include-message: always

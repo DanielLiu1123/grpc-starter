@@ -17,9 +17,4 @@ management:
     sampling:
       probability: 1.0
 
-http-exchange:
-  channels:
-    - base-url: http://localhost:${server.port:8080}
-      clients:
-        - '**.api.*Api'
 debug: true

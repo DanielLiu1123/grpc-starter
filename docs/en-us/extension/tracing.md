@@ -16,7 +16,7 @@ clients.
 2. Add dependencies
 
    ```groovy
-   implementation("com.freemanan:grpc-starter-tracing")
+   implementation("io.github.danielliu1123:grpc-starter-tracing")
    // You can refer to the list of tracing systems supported by Micrometer at https://micrometer.io/docs/tracing
    implementation("io.micrometer:micrometer-tracing-bridge-brave")
    ```

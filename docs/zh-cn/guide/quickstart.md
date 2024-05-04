@@ -5,8 +5,8 @@
 #### ** Gradle **
 
 ```groovy
-implementation platform('com.freemanan:grpc-starter-dependencies:3.2.4')
-implementation 'com.freemanan:grpc-boot-starter'
+implementation platform('io.github.danielliu1123:grpc-starter-dependencies:3.2.4')
+implementation 'io.github.danielliu1123:grpc-boot-starter'
 ```
 
 #### ** Maven **
@@ -16,7 +16,7 @@ implementation 'com.freemanan:grpc-boot-starter'
 <dependencyManagement>
   <dependencies>
     <dependency>
-      <groupId>com.freemanan</groupId>
+      <groupId>io.github.danielliu1123</groupId>
       <artifactId>grpc-starter-dependencies</artifactId>
       <version>3.2.4</version>
       <type>pom</type>
@@ -26,7 +26,7 @@ implementation 'com.freemanan:grpc-boot-starter'
 </dependencyManagement>
 
 <dependency>
-  <groupId>com.freemanan</groupId>
+  <groupId>io.github.danielliu1123</groupId>
   <artifactId>grpc-boot-starter</artifactId>
 </dependency>
 ```

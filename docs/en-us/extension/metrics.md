@@ -10,7 +10,7 @@ clients.
 1. Add dependencies
 
     ```groovy
-    implementation("com.freemanan:grpc-starter-metrics")
+    implementation("io.github.danielliu1123:grpc-starter-metrics")
     // Actuator uses Micrometer as the metrics collection facade, here we use Prometheus
     // You can refer to the list of metric collectors supported by Micrometer at https://micrometer.io/docs/
     implementation("io.micrometer:micrometer-registry-prometheus")

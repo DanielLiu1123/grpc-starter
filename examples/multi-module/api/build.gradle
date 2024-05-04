@@ -1,0 +1,13 @@
+dependencies {
+    implementation(project(":grpc-starters:grpc-starter-protovalidate"))
+}
+
+apply from: "${rootDir}/gradle/protobuf.gradle"
+
+sourceSets {
+    main {
+        proto {
+            srcDir "proto"
+        }
+    }
+}

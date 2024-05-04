@@ -1,0 +1,8 @@
+grpc:
+  server:
+    reflection:
+      enabled: true
+spring:
+  webflux:
+    problemdetails:
+      enabled: true
