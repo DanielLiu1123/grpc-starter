@@ -64,7 +64,13 @@ public class ReactiveTranscodingRouterFunction
 
     private static final String MATCHING_ROUTE = ReactiveTranscodingRouterFunction.class.getName() + ".matchingRoute";
 
+    /**
+     * grpc full method name -> route
+     *
+     * <p> e.g. "grpc.testing.SimpleService/UnaryRpc" -> Route
+     */
     private final Map<String, Route<ServerRequest>> methodNameRoutes = new HashMap<>();
+
     private final List<Route<ServerRequest>> routes = new ArrayList<>();
     private final HeaderConverter headerConverter;
     private final GrpcTranscodingProperties properties;
