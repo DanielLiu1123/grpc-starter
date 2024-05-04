@@ -44,11 +44,11 @@ implementation("io.github.danielliu1123:grpc-boot-starter")
 
 ```java
 @SpringBootApplication
-@EnableGrpcClients("io.grpc")
 public class SimpleApp extends SimpleServiceGrpc.SimpleServiceImplBase {
 
     public static void main(String[] args) {
         new SpringApplicationBuilder(SimpleApp.class)
+                .properties("grpc.client.base-packages=io.grpc")
                 .properties("grpc.client.authority=127.0.0.1:9090")
                 .run(args);
     }
