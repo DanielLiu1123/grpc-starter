@@ -2,9 +2,9 @@ package grpcstarter.client;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import com.freemanan.sample.pet.v1.PetServiceGrpc;
 import grpcstarter.server.GrpcServerProperties;
 import io.grpc.health.v1.HealthGrpc;
+import io.grpc.testing.protobuf.SimpleServiceGrpc;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,7 +29,7 @@ class GrpcClientIT {
                 .run();
 
         assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(PetServiceGrpc.PetServiceBlockingStub.class))
+        assertThatCode(() -> ctx.getBean(SimpleServiceGrpc.SimpleServiceStub.class))
                 .isInstanceOf(NoSuchBeanDefinitionException.class);
 
         ctx.close();
@@ -40,11 +40,11 @@ class GrpcClientIT {
         String name = UUID.randomUUID().toString();
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.InProcess.PREFIX + ".name=" + name)
-                .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=com")
+                .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=io")
                 .run();
 
         assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(PetServiceGrpc.PetServiceBlockingStub.class))
+        assertThatCode(() -> ctx.getBean(SimpleServiceGrpc.SimpleServiceStub.class))
                 .isInstanceOf(BeanCreationException.class)
                 .rootCause()
                 .hasMessageStartingWith("gRPC channel authority is not configured for stub");
@@ -58,11 +58,11 @@ class GrpcClientIT {
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.InProcess.PREFIX + ".name=" + name)
                 .properties(GrpcClientProperties.InProcess.PREFIX + ".name=" + name)
-                .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=com")
+                .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=io")
                 .run();
 
         assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(PetServiceGrpc.PetServiceBlockingStub.class))
+        assertThatCode(() -> ctx.getBean(SimpleServiceGrpc.SimpleServiceStub.class))
                 .doesNotThrowAnyException();
 
         ctx.close();
@@ -76,7 +76,7 @@ class GrpcClientIT {
                 .run();
 
         assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
-        assertThatCode(() -> ctx.getBean(PetServiceGrpc.PetServiceBlockingStub.class))
+        assertThatCode(() -> ctx.getBean(SimpleServiceGrpc.SimpleServiceStub.class))
                 .isInstanceOf(NoSuchBeanDefinitionException.class);
 
         ctx.close();
