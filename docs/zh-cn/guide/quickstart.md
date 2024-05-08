@@ -5,7 +5,7 @@
 #### ** Gradle **
 
 ```groovy
-implementation platform('io.github.danielliu1123:grpc-starter-dependencies:3.2.4')
+implementation platform('io.github.danielliu1123:grpc-starter-dependencies:3.2.5')
 implementation 'io.github.danielliu1123:grpc-boot-starter'
 ```
 
@@ -18,7 +18,7 @@ implementation 'io.github.danielliu1123:grpc-boot-starter'
     <dependency>
       <groupId>io.github.danielliu1123</groupId>
       <artifactId>grpc-starter-dependencies</artifactId>
-      <version>3.2.4</version>
+      <version>3.2.5</version>
       <type>pom</type>
       <scope>import</scope>
     </dependency>
