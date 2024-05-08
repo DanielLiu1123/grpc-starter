@@ -1,0 +1,38 @@
+---
+sidebar_position: 1
+---
+
+# Introduction
+
+`grpc-starters` provides a series of Spring Boot starters for the gRPC ecosystem, offering auto-configuration and
+highly extensible capabilities to enhance the integration between Spring Boot and gRPC.
+
+## Why another gRPC starter?
+
+现在已经有两个比较主流的 grpc spring boot starter：
+
+- https://github.com/grpc-ecosystem/grpc-spring
+- https://github.com/LogNet/grpc-spring-boot-starter
+
+为什么还要再造一个轮子呢？
+
+1. 对 grpc client 的自动装配做的不够优雅，没有完全遵循 spring 的 bean 生命周期，需要引入额外的注解，比如 `@GrpcClient`，我希望能够直接使用 `@Autowired` 注入 grpc client。
+2. grpc 周边生态集成的不够完善，比如 grpc http transcoding，protobuf validation，metrics，tracing，testing 等。
+3. 编写扩展困难，没有提供合适的扩展点。
+
+## Core Features
+
+- Client
+  - gRPC client auto-configuration, using `@Autowired` to inject gRPC clients directly, completely following the Spring Bean lifecycle.
+  - Dynamic refreshing, change gRPC client configuration at runtime without restarting the application.
+- Server
+  - gRPC server auto-configuration
+  - Exception handling
+  - Health check
+- Extensions
+  - gRPC HTTP transcoding, a single codebase to support both gRPC and HTTP/JSON.
+  - Protobuf validation, Protobuf message validation implemented by protovalidate/protoc-gen-validate.
+  - Metric, Spring Boot Actuator integration with gRPC service.
+  - Tracing, Spring Boot Actuator integration with gRPC server and client.
+  - Testing support, integration with `SpringBootTest`.
+
