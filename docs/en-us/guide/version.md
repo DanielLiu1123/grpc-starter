@@ -6,12 +6,12 @@ Mainly maintain the following versions:
   is [main](https://github.com/DanielLiu1123/grpc-starter/).
 
   3.x version is kept in sync with Spring Boot 3,
-  if you are using Spring Boot 3.2.x, then `grpc-boot-starter` 3.2.4 should be used.
+  if you are using Spring Boot 3.2.x, then `grpc-boot-starter` 3.2.5 should be used.
 
   | Spring Boot | grpc-boot-starter |
   |-------------|-------------------|
   | 3.1.x       | 3.1.8             |
-  | 3.2.x       | 3.2.4             |
+  | 3.2.x       | 3.2.5             |
 
 - 2.x
 
