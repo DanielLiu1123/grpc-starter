@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":examples:grpc-sample-api"))
+    implementation("io.grpc:grpc-testing-proto")
     implementation(project(":grpc-starters:grpc-server-boot-starter")){
         exclude(group: 'io.grpc', module: "grpc-netty-shaded")
     }

@@ -9,7 +9,7 @@ dependencies {
     optionalSupportApi("org.springframework.boot:spring-boot-starter-data-redis")
 
     testImplementation(project(":grpc-starters:grpc-starter-test"))
-    testImplementation(project(":examples:grpc-sample-api"))
+    testImplementation("io.grpc:grpc-testing-proto")
 }
 
 apply from: "${rootDir}/gradle/deploy.gradle"

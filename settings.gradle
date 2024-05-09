@@ -35,7 +35,6 @@ include(":grpc-starters:grpc-starter-transcoding-webmvc")
 include(":grpc-starters:grpc-starter-validation")
 
 // examples, order by name
-include(":examples:grpc-sample-api")
 include(":examples:metrics")
 include(":examples:multi-module:api")
 include(":examples:multi-module:server")

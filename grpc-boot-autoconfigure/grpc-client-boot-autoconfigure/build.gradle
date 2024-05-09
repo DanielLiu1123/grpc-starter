@@ -11,6 +11,7 @@ dependencies {
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
+    testImplementation("io.grpc:grpc-testing-proto")
     testImplementation(project(":grpc-starters:grpc-server-boot-starter"))
     testImplementation(project(":grpc-starters:grpc-starter-test"))
     testImplementation("org.springframework.cloud:spring-cloud-context")
