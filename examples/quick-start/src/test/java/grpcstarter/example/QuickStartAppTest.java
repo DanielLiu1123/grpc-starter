@@ -1,47 +1,32 @@
 package grpcstarter.example;
 
-import static io.grpc.testing.protobuf.SimpleServiceGrpc.SimpleServiceBlockingStub;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import foo.Foo;
-import foo.FooServiceGrpc.FooServiceBlockingStub;
 import grpcstarter.extensions.test.InProcessName;
 import grpcstarter.extensions.test.StubUtil;
-import io.grpc.StatusRuntimeException;
 import io.grpc.testing.protobuf.SimpleRequest;
+import io.grpc.testing.protobuf.SimpleServiceGrpc;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(
+        classes = QuickStartApp.class,
+        properties = {
+            "grpc.server.in-process.name=QuickStartAppTest",
+            "grpc.client.in-process.name=QuickStartAppTest",
+            "grpc.client.base-packages=io.grpc",
+        })
 class QuickStartAppTest {
 
     @InProcessName
     String name;
 
     @Test
-    void testCreateFoo() {
-        FooServiceBlockingStub stub = StubUtil.createStub(name, FooServiceBlockingStub.class);
-        Foo foo = stub.create(Foo.newBuilder().setId("001").setName("Freeman").build());
-        assertThat(foo.getId()).isEqualTo("001");
-        assertThat(foo.getName()).isEqualTo("Freeman");
-    }
+    void testQuickStart() {
+        var stub = StubUtil.createStub(name, SimpleServiceGrpc.SimpleServiceBlockingStub.class);
+        var response = stub.unaryRpc(
+                SimpleRequest.newBuilder().setRequestMessage("World!").build());
 
-    @Test
-    void testCreateFoo_whenServerErrorAndNoExceptionHandler_thenClientSideShouldGetUnknownCode() {
-        FooServiceBlockingStub stub = StubUtil.createStub(name, FooServiceBlockingStub.class);
-        Foo foo = Foo.newBuilder().setId("002").setName("Fre").build();
-        assertThatExceptionOfType(StatusRuntimeException.class)
-                .isThrownBy(() -> stub.create(foo))
-                .withMessageContaining("UNKNOWN");
-    }
-
-    @Test
-    void testUnaryRpc() {
-        SimpleServiceBlockingStub stub = StubUtil.createStub(name, SimpleServiceBlockingStub.class);
-        String responseMessage = stub.unaryRpc(
-                        SimpleRequest.newBuilder().setRequestMessage("Hello").build())
-                .getResponseMessage();
-        assertThat(responseMessage).isEqualTo("Hi, I got your message: Hello");
+        assertThat(response.getResponseMessage()).isEqualTo("Hello World!");
     }
 }

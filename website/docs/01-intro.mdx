@@ -4,35 +4,36 @@ sidebar_position: 1
 
 # Introduction
 
-`grpc-starters` provides a series of Spring Boot starters for the gRPC ecosystem, offering auto-configuration and
-highly extensible capabilities to enhance the integration between Spring Boot and gRPC.
+`grpc-starter` provides a series of Spring Boot starters for the gRPC ecosystem,
+offering auto-configuration and highly extensible capabilities to enhance the integration between Spring Boot and gRPC.
 
-## Why another gRPC starter?
+## Why Another gRPC Starter?
 
-现在已经有两个比较主流的 grpc spring boot starter：
+There are already two mainstream gRPC Spring Boot starters:
 
-- https://github.com/grpc-ecosystem/grpc-spring
-- https://github.com/LogNet/grpc-spring-boot-starter
+- [grpc-spring](https://github.com/grpc-ecosystem/grpc-spring)
+- [grpc-spring-boot-starter](https://github.com/LogNet/grpc-spring-boot-starter)
 
-为什么还要再造一个轮子呢？
+So, why create another one? Here are the main reasons:
 
-1. 对 grpc client 的自动装配做的不够优雅，没有完全遵循 spring 的 bean 生命周期，需要引入额外的注解，比如 `@GrpcClient`，我希望能够直接使用 `@Autowired` 注入 grpc client。
-2. grpc 周边生态集成的不够完善，比如 grpc http transcoding，protobuf validation，metrics，tracing，testing 等。
-3. 编写扩展困难，没有提供合适的扩展点。
+1. The auto-configuration for gRPC clients is not elegant enough; it does not fully follow the Spring bean lifecycle and requires additional annotations like `@GrpcClient`. We aim to use `@Autowired` directly to inject gRPC clients.
+2. The integration with the surrounding gRPC ecosystem is incomplete, lacking features like gRPC HTTP transcoding, protobuf validation, metrics, tracing, and testing.
+3. Writing extensions is challenging due to the lack of suitable extension points.
 
 ## Core Features
 
-- Client
-  - gRPC client auto-configuration, using `@Autowired` to inject gRPC clients directly, completely following the Spring Bean lifecycle.
-  - Dynamic refreshing, change gRPC client configuration at runtime without restarting the application.
-- Server
-  - gRPC server auto-configuration
-  - Exception handling
-  - Health check
-- Extensions
-  - gRPC HTTP transcoding, a single codebase to support both gRPC and HTTP/JSON.
-  - Protobuf validation, Protobuf message validation implemented by protovalidate/protoc-gen-validate.
-  - Metric, Spring Boot Actuator integration with gRPC service.
-  - Tracing, Spring Boot Actuator integration with gRPC server and client.
-  - Testing support, integration with `SpringBootTest`.
+### Client
+  - Auto-configures gRPC clients: allowing direct injection with `@Autowired` and fully respecting the Spring Bean lifecycle.
+  - Dynamic refreshing: Support to modify gRPC client configurations at runtime without restarting the application.
 
+### Server
+  - Auto-configures gRPC servers: write your gRPC service implementation and expose it as a Spring bean, we will take care of the rest.
+  - Exception handling: offering `@ExceptionHandler` like exception handling for gRPC server through `@GrpcAdvice`/`@GrpcExceptionHandler`.
+  - Health check.
+
+### Extensions
+  - gRPC HTTP transcoding: enabling a single codebase to support both gRPC and HTTP/JSON.
+  - Protobuf validation: integrating with protovalidate and protoc-gen-validate.
+  - Metrics: supporting metrics through Spring Boot Actuator.
+  - Tracing: supporting tracing through Spring Boot Actuator.
+  - Test: integrating with `SpringBootTest`.
