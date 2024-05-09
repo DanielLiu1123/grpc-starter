@@ -87,11 +87,11 @@ class Transcoder {
                 } else {
                     Descriptors.FieldDescriptor field =
                             messageBuilder.getDescriptorForType().findFieldByName(httpRule.getBody());
-                    if (noBuilder(field)) return;
-
-                    Message.Builder fieldBuilder = messageBuilder.getFieldBuilder(field);
-                    if (fieldBuilder != null) {
-                        merge(fieldBuilder, bodyString);
+                    if (!noBuilder(field)) {
+                        Message.Builder fieldBuilder = messageBuilder.getFieldBuilder(field);
+                        if (fieldBuilder != null) {
+                            merge(fieldBuilder, bodyString);
+                        }
                     }
                 }
             }
