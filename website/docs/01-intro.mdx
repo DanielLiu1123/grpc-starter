@@ -7,7 +7,7 @@ sidebar_position: 1
 `grpc-starter` provides a series of Spring Boot starters for the gRPC ecosystem,
 offering auto-configuration and highly extensible capabilities to enhance the integration between Spring Boot and gRPC.
 
-## Why Another gRPC Starter?
+## Why Another gRPC Starter
 
 There are already two mainstream gRPC Spring Boot starters:
 
@@ -32,8 +32,10 @@ So, why create another one? Here are the main reasons:
   - Health check.
 
 ### Extensions
-  - gRPC HTTP transcoding: enabling a single codebase to support both gRPC and HTTP/JSON.
-  - Protobuf validation: integrating with protovalidate and protoc-gen-validate.
-  - Metrics: supporting metrics through Spring Boot Actuator.
-  - Tracing: supporting tracing through Spring Boot Actuator.
-  - Test: integrating with `SpringBootTest`.
+  - **gRPC HTTP transcoding**: enabling a single codebase to support both gRPC and HTTP/JSON (like [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) but for Java).
+  - **Protobuf validation**: integrating with [protovalidate](https://github.com/bufbuild/protovalidate) and [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).
+  - **Metrics**: supporting metrics through Spring Boot Actuator.
+  - **Tracing**: supporting tracing through Spring Boot Actuator.
+  - **Test**: integrating with `SpringBootTest`.
+
+This framework is designed for extensibility, and you can easily extend it to suit your needs.
