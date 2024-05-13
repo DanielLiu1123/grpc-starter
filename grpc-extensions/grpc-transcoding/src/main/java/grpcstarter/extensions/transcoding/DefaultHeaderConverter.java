@@ -52,7 +52,6 @@ public class DefaultHeaderConverter implements HeaderConverter {
     private Set<String> getRemoveHeaders() {
         Set<String> result = new LinkedHashSet<>(findPublicStaticFinalStringFieldNames(HttpHeaders.class));
 
-        result.removeIf(HttpHeaders.COOKIE::equalsIgnoreCase); // keep cookie
         result.removeIf(HttpHeaders.AUTHORIZATION::equalsIgnoreCase); // keep authorization
         return result;
     }
