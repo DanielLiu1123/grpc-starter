@@ -4,3 +4,51 @@ sidebar_position: 10
 
 # Auto Configuration
 
+Steps to autoconfigure gRPC stubs:
+1. Configure the stub classes to be added as Spring Beans.
+2. Configure request addresses for stub classes.
+
+## Configure the Stub Classes
+
+You can configure stub classes in two ways:
+
+### `@EnableGrpcClients` annotation
+
+```java
+@EnableGrpcClients(basePackages = "io.grpc")
+```
+
+### Configuration
+
+```yaml
+grpc:
+  client:
+    base-packages: [ io.grpc ]
+```
+
+## Configure Request Addresses
+
+```yaml
+grpc:
+  client:
+    channels:
+      - authority: localhost:9090
+        stubs: [ io.grpc.*BlockingStub ]
+      - authority: localhost:9091
+        stubs: [ io.grpc.*FutureStub ]
+```
+
+## Other Configurations
+
+You can also configure properties like `deadline` for the channel.
+
+```yaml
+grpc:
+  client:
+    channels:
+      - authority: localhost:9090
+        stubs: [ io.grpc.*BlockingStub ]
+        deadline: 5000
+```
+
+Full configuration options can be found in the [reference](/docs/reference/configuration).
