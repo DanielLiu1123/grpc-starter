@@ -5,28 +5,55 @@ sidebar_position: 10
 # Auto Configuration
 
 Steps to autoconfigure gRPC stubs:
-1. Configure the stub classes to be added as Spring Beans.
-2. Configure request addresses for stub classes.
+1. Specify the stubs to be added as Spring Beans.
+2. Configure request addresses for stubs.
 
-## Configure the Stub Classes
+## Specify Stubs
 
-You can configure stub classes in two ways:
+You can configure stub classes in two ways.
 
-### `@EnableGrpcClients` annotation
+### @EnableGrpcClients
+
+`@EnableGrpcClients` can configure packages to scan or directly specify stub classes.
+
+Configure packages to scan with `basePackages`:
 
 ```java
 @EnableGrpcClients(basePackages = "io.grpc")
 ```
 
+Specify stub classes directly with `clients`:
+
+```java
+@EnableGrpcClients(clients = { SimpleServiceGrpc.SimpleServiceBlockingStub.class })
+```
+
+You can also combine both ways:
+
+```
+@EnableGrpcClients(basePackages = "io.grpc", clients = { SimpleServiceGrpc.SimpleServiceBlockingStub.class })
+```
+
+:::tip
+It's recommended to use `clients` to specify stub classes directly to avoid adding unnecessary beans into the container,
+which can improve startup speed.
+:::
+
 ### Configuration
+
+Similar to `@EnableGrpcClients`, you can also specify packages to scan or stub classes via configuration files.
 
 ```yaml
 grpc:
   client:
     base-packages: [ io.grpc ]
+    stubs: [ io.grpc.testing.protobuf.SimpleServiceGrpc.SimpleServiceBlockingStub ]
 ```
 
 ## Configure Request Addresses
+
+You can configure request addresses (authority) for different stub classes.
+Stubs configured with the same channel will reuse that channel.
 
 ```yaml
 grpc:
@@ -37,6 +64,42 @@ grpc:
       - authority: localhost:9091
         stubs: [ io.grpc.*FutureStub ]
 ```
+
+There are three ways to configure the stubs for a channel:
+
+- Specify the fully qualified class name of the stub using `classes`.
+
+    ```yaml
+    grpc:
+      client:
+        channels:
+          - authority: localhost:9090
+            classes: [ io.grpc.testing.protobuf.SimpleServiceGrpc.SimpleServiceBlockingStub ]
+    ```
+
+- Use `stubs` to specify stub names with Ant-style patterns.
+
+    ```yaml
+    grpc:
+      client:
+        channels:
+          - authority: localhost:9090
+            stubs: [ io.grpc.*BlockingStub ]
+    ```
+
+- Specify the service name using `services`, e.g. `io.grpc.health.v1.HealthGrpc#SERVICE_NAME`.
+
+    ```yaml
+    grpc:
+      client:
+        channels:
+          - authority: localhost:9090
+            services: [ grpc.testing.SimpleService ]
+    ```
+
+:::info
+The priority of the configuration methods is `classes` > `stubs` > `services`。
+:::
 
 ## Other Configurations
 
