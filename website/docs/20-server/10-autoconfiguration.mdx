@@ -4,3 +4,33 @@ sidebar_position: 10
 
 # Auto Configuration
 
+Start a gRPC server at *9090* with zero configuration.
+
+## Register Services
+
+You can register gRPC services by adding `@Component` based annotation to your service implementations.
+
+```java
+@Component
+public class SimpleServiceImpl extends SimpleServiceGrpc.SimpleServiceImplBase {
+    @Override
+    public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> responseObserver) {
+        var response = SimpleResponse.newBuilder().setResponseMessage("Hello " + request.getRequestMessage()).build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+}
+```
+
+## In-process Server
+
+gRPC server supports `in-process` transport, which is useful for testing scenarios.
+
+```yaml
+grpc:
+  server:
+    in-process:
+      name: whatever
+```
+
+

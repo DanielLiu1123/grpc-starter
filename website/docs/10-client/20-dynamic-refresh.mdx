@@ -1,0 +1,22 @@
+---
+sidebar_position: 20
+---
+
+# Dynamic Refresh
+
+This feature allows for the dynamic refreshing of gRPC stubs.
+You can place your configuration settings with the `grpc.client` prefix in any configuration center (like [Consul](https://github.com/hashicorp/consul), [Apollo](https://github.com/apolloconfig/apollo), [Nacos](https://github.com/alibaba/nacos), etc.).
+By changing these configurations (e.g. `authority`, `max-inbound-message-size`), gRPC stubs will automatically refresh without the need to restart your application.
+
+This feature is disabled by default, you can enable it by using the following configuration:
+
+```yaml
+grpc:
+  client:
+    refresh:
+      enabled: true
+```
+
+:::info
+This feature requires `spring-cloud-context` in the classpath and a `RefreshEvent` to be published.
+:::

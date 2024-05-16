@@ -1,0 +1,49 @@
+---
+sidebar_position: 20
+---
+
+# Extension Points
+
+## ClientInterceptor
+
+[`io.grpc.ClientInterceptor`](https://grpc.github.io/grpc-java/javadoc/io/grpc/ClientInterceptor.html) is an interceptor to intercept the lifecycle of a gRPC call.
+
+Register a `ClientInterceptor` for all gRPC stubs:
+
+```java
+@Component
+public class LoggingClientInterceptor implements ClientInterceptor {
+    private static final Logger log = LoggerFactory.getLogger(LoggingClientInterceptor.class);
+
+    @Override
+    public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(MethodDescriptor<ReqT, RespT> method, CallOptions callOptions, Channel next) {
+        return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(next.newCall(method, callOptions)) {
+            @Override
+            public void sendMessage(ReqT message) {
+                log.info("Sending message: {}", message);
+                super.sendMessage(message);
+            }
+        };
+    }
+}
+```
+
+Multiple `ClientInterceptor` will be called in the order defined by the Spring Bean's order, from smallest to largest.
+
+## GrpcChannelCustomizer
+
+`grpcstarter.client.GrpcChannelCustomizer` customize the `Channel` before it is created.
+
+Register a `GrpcChannelCustomizer` to set the retry attempts for the gRPC channels:
+
+```java
+@Component
+public class RetryGrpcChannelCustomizer implements GrpcChannelCustomizer {
+    @Override
+    public void customize(GrpcClientProperties.Channel channelConfig, ManagedChannelBuilder<?> channelBuilder) {
+        channelBuilder.enableRetry().maxRetryAttempts(3);
+    }
+}
+```
+
+Multiple `GrpcChannelCustomizer` will be called in the order defined by the Spring Bean's order, from smallest to largest.
