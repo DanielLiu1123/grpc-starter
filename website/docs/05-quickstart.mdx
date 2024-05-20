@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 5
 ---
 
 import Tabs from '@theme/Tabs';
@@ -69,7 +69,7 @@ public class QuickStartApp extends SimpleServiceGrpc.SimpleServiceImplBase {
     }
 
     @Bean
-    ApplicationRunner runner(SimpleServiceGrpc.SimpleServiceBlockingStub stub) {
+    ApplicationRunner runner(SimpleServiceGrpc.SimpleServiceBlockingStub stub) { // Inject gRPC stub
         return args -> {
             var response = stub.unaryRpc(SimpleRequest.newBuilder().setRequestMessage("World!").build());
             System.out.println(response.getResponseMessage());

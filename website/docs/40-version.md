@@ -1,11 +1,11 @@
 ---
-sidebar_position: 100
+sidebar_position: 40
 ---
 
 # Version Matrix
 
 [`grpc-starter-dependencies`](https://central.sonatype.com/artifact/io.github.danielliu1123/grpc-starter-dependencies)
-provides dependency management for grpc and protobuf, so you only need to use the version
+provides dependency management for gRPC and Protobuf, so you only need to use the version
 of `grpc-starter-dependencies` aligned with Spring Boot.
 
 | Spring Boot    | grpc-starter-dependencies | grpc-java | protobuf-java |

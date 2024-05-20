@@ -22,6 +22,11 @@ public class SimpleServiceImpl extends SimpleServiceGrpc.SimpleServiceImplBase {
 }
 ```
 
+:::info
+The framework provides a `@GrpcService` annotation to better distinguish bean types.
+But it is not necessary at all; you can use Spring's built-in `@Component`/`@Service`/`@Controller` instead.
+:::
+
 ## In-process Server
 
 gRPC server supports `in-process` transport, which is useful for testing scenarios.
@@ -33,4 +38,69 @@ grpc:
       name: whatever
 ```
 
+## Build-in Services
 
+[`io.grpc:grpc-services`](https://mvnrepository.com/artifact/io.grpc/grpc-services) provides a series of built-in services.
+
+### Health
+
+[`Health`](https://grpc.io/docs/guides/health-checking/) service is enabled by default.
+
+Use the following configuration to disable it:
+
+```yaml
+grpc:
+  server:
+    health:
+      enabled: false
+```
+
+You can customize the health check logic by implementing the `HealthChecker` interface.
+
+There are two build-in `HealthChecker` implementations, `DataSourceHealthChecker` and `RedisHealthChecker`.
+
+`DataSourceHealthChecker` is enabled by default when the `spring-boot-starter-jdbc` is on the classpath.
+
+`RedisHealthChecker` is enabled by default when the `spring-boot-starter-data-redis` is on the classpath.
+
+Use the following configuration to disable them:
+
+```yaml
+grpc:
+  server:
+    health:
+      datasource:
+        enabled: false
+      redis:
+        enabled: false
+```
+
+### Reflection
+
+[`Reflection`](https://grpc.io/docs/guides/reflection/) is disabled by default, it's often used in development and debugging scenarios.
+
+Use the following configuration to enable it:
+
+```yaml
+grpc:
+  server:
+    reflection:
+      enabled: true
+```
+
+### Channelz
+
+[`Channelz`](https://grpc.io/blog/a-short-introduction-to-channelz/) is disabled by default.
+
+Use the following configuration to enable it:
+
+```yaml
+grpc:
+  server:
+    channelz:
+      enabled: true
+```
+
+## Other Configurations
+
+Full configuration is available in the [`GrpcServerProperties`](/docs/reference/configuration).

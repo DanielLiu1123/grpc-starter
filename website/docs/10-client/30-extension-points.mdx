@@ -1,12 +1,12 @@
 ---
-sidebar_position: 20
+sidebar_position: 30
 ---
 
 # Extension Points
 
 ## ClientInterceptor
 
-[`io.grpc.ClientInterceptor`](https://grpc.github.io/grpc-java/javadoc/io/grpc/ClientInterceptor.html) is an interceptor to intercept the lifecycle of a gRPC call.
+[`io.grpc.ClientInterceptor`](https://grpc.github.io/grpc-java/javadoc/io/grpc/ClientInterceptor.html) is an interceptor to intercept the lifecycle of a gRPC call on the client side.
 
 Register a `ClientInterceptor` for all gRPC stubs:
 
@@ -32,7 +32,7 @@ Multiple `ClientInterceptor` will be called in the order defined by the Spring B
 
 ## GrpcChannelCustomizer
 
-`grpcstarter.client.GrpcChannelCustomizer` customize the `Channel` before it is created.
+`GrpcChannelCustomizer` customize the `Channel` before it is created.
 
 Register a `GrpcChannelCustomizer` to set the retry attempts for the gRPC channels:
 
