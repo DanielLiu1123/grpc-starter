@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.context.annotation.Bean;
 
 /**
  * @author Freeman
@@ -88,23 +87,5 @@ public class HealthServerInterceptor implements ServerInterceptor {
 
     protected static boolean isHealthCheckRequest(String fullMethodName) {
         return fullMethodName != null && fullMethodName.startsWith(HEALTH_REQUEST_PREFIX);
-    }
-}
-
-@Bean
-class LoggingServerInterceptor implements ServerInterceptor {
-    private static final Logger log = LoggerFactory.getLogger(LoggingServerInterceptor.class);
-
-    @Override
-    public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
-            ServerCall<ReqT, RespT> call, Metadata headers, ServerCallHandler<ReqT, RespT> next) {
-        return new ForwardingServerCallListener.SimpleForwardingServerCallListener<ReqT>(
-                next.startCall(call, headers)) {
-            @Override
-            public void onMessage(ReqT message) {
-                log.info("Received message: {}", message);
-                super.onMessage(message);
-            }
-        };
     }
 }
