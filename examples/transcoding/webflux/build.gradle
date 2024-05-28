@@ -10,7 +10,7 @@ dependencies {
     implementation(project(":grpc-starters:grpc-starter-transcoding-webflux"))
     runtimeOnly("io.grpc:grpc-netty")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
 }
 
 apply from: "${rootDir}/gradle/protobuf.gradle"
