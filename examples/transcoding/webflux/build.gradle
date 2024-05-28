@@ -7,8 +7,8 @@ dependencies {
     implementation(project(":grpc-starters:grpc-server-boot-starter")){
         exclude(group: 'io.grpc', module: "grpc-netty-shaded")
     }
-    implementation("io.grpc:grpc-netty")
     implementation(project(":grpc-starters:grpc-starter-transcoding-webflux"))
+    runtimeOnly("io.grpc:grpc-netty")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

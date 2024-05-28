@@ -2,7 +2,26 @@
 sidebar_position: 10
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Auto Configuration
+
+<Tabs>
+    <TabItem value="gradle" label="Gradle">
+        ```groovy
+        implementation("io.github.danielliu1123:grpc-client-boot-starter")
+        ```
+    </TabItem>
+    <TabItem value="maven" label="Maven">
+        ```xml
+        <dependency>
+            <groupId>io.github.danielliu1123</groupId>
+            <artifactId>grpc-client-boot-starter</artifactId>
+        </dependency>
+        ```
+    </TabItem>
+</Tabs>
 
 Steps to autoconfigure gRPC stubs:
 1. Specify the stubs to be added as Spring Beans.
@@ -69,32 +88,32 @@ There are three ways to configure the stubs for a channel:
 
 - Specify the fully qualified class name of the stub using `classes`.
 
-    ```yaml
-    grpc:
-      client:
-        channels:
-          - authority: localhost:9090
-            classes: [ io.grpc.testing.protobuf.SimpleServiceGrpc.SimpleServiceBlockingStub ]
+  ```yaml
+  grpc:
+    client:
+      channels:
+        - authority: localhost:9090
+          classes: [ io.grpc.testing.protobuf.SimpleServiceGrpc.SimpleServiceBlockingStub ]
     ```
 
 - Use `stubs` to specify stub names with Ant-style patterns.
 
-    ```yaml
-    grpc:
-      client:
-        channels:
-          - authority: localhost:9090
-            stubs: [ io.grpc.*BlockingStub ]
+  ```yaml
+  grpc:
+    client:
+      channels:
+        - authority: localhost:9090
+          stubs: [ io.grpc.*BlockingStub ]
     ```
 
 - Specify the service name using `services`, e.g. `io.grpc.health.v1.HealthGrpc#SERVICE_NAME`.
 
-    ```yaml
-    grpc:
-      client:
-        channels:
-          - authority: localhost:9090
-            services: [ grpc.testing.SimpleService ]
+  ```yaml
+  grpc:
+    client:
+      channels:
+        - authority: localhost:9090
+          services: [ grpc.testing.SimpleService ]
     ```
 
 :::info

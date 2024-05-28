@@ -2,7 +2,26 @@
 sidebar_position: 10
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Auto Configuration
+
+<Tabs>
+    <TabItem value="gradle" label="Gradle">
+        ```groovy
+        implementation("io.github.danielliu1123:grpc-server-boot-starter")
+        ```
+    </TabItem>
+    <TabItem value="maven" label="Maven">
+        ```xml
+        <dependency>
+            <groupId>io.github.danielliu1123</groupId>
+            <artifactId>grpc-server-boot-starter</artifactId>
+        </dependency>
+        ```
+    </TabItem>
+</Tabs>
 
 Start a gRPC server at *9090* with zero configuration.
 

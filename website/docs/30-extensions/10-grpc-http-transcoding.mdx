@@ -2,8 +2,81 @@
 sidebar_position: 10
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # gRPC HTTP transcoding
 
-A single codebase to support both gRPC and HTTP/JSON.
-This extension is like [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) but for Java.
+This extension is Java implementation of [gRPC HTTP transcoding](https://cloud.google.com/endpoints/docs/grpc/transcoding),
+like [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) in Go.
 
+<Tabs>
+    <TabItem value="webmvc" label="Web MVC">
+        <Tabs>
+            <TabItem value="gradle" label="Gradle">
+                ```groovy
+                implementation("io.github.danielliu1123:grpc-starter-transcoding-webmvc")
+                ```
+            </TabItem>
+            <TabItem value="maven" label="Maven">
+                ```xml
+                <dependency>
+                    <groupId>io.github.danielliu1123</groupId>
+                    <artifactId>grpc-starter-transcoding-webmvc</artifactId>
+                </dependency>
+                ```
+            </TabItem>
+        </Tabs>
+    </TabItem>
+    <TabItem value="webflux" label="WebFlux">
+        <Tabs>
+            <TabItem value="gradle" label="Gradle">
+                ```groovy
+                implementation("io.github.danielliu1123:grpc-server-boot-starter")){
+                    exclude(group: "io.grpc", module: "grpc-netty-shaded")
+                }
+                implementation("io.github.danielliu1123:grpc-starter-transcoding-webflux")
+                runtimeOnly("io.grpc:grpc-netty")
+                ```
+            </TabItem>
+            <TabItem value="maven" label="Maven">
+                ```xml
+                <dependency>
+                    <groupId>io.github.danielliu1123</groupId>
+                    <artifactId>grpc-server-boot-starter</artifactId>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>io.grpc</groupId>
+                            <artifactId>grpc-netty-shaded</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.danielliu1123</groupId>
+                    <artifactId>grpc-starter-transcoding-webflux</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-netty</artifactId>
+                    <scope>runtime</scope>
+                </dependency>
+                ```
+            </TabItem>
+        </Tabs>
+    </TabItem>
+</Tabs>
+
+:::tip
+Because both webflux and gRPC use netty, if you use the `grpc-netty-shaded` dependency, the final jar package will be larger (~9MB).
+Therefore, exclude the `grpc-netty-shaded` dependency and use the `grpc-netty` dependency instead.
+:::
+
+## Why Not Use Sidecar
+
+Why not just use a sidecar like [Envoy gRPC-JSON transcoder](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/grpc_json_transcoder_filter)
+to do the transcoding?
+
+- Sidecar is like a black box and is inconvenient for debugging and testing
+- Insufficient scalability and difficulty in customizing transcoding behavior
+
+##
