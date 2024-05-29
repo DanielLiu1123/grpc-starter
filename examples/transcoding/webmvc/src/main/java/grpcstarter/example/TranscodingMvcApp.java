@@ -41,7 +41,7 @@ public class TranscodingMvcApp extends SimpleServiceImplBase {
     public void serverStreamingRpc(SimpleRequest request, StreamObserver<Simpleservice.SimpleResponse> r) {
         for (int i = 0; i < 10; i++) {
             r.onNext(Simpleservice.SimpleResponse.newBuilder()
-                    .setResponseMessage("message " + i)
+                    .setResponseMessage("Hello %s %d".formatted(request.getRequestMessage(), i))
                     .build());
             Thread.sleep(1000);
         }

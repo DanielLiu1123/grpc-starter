@@ -1,6 +1,5 @@
 package grpcstarter.example;
 
-import static grpcstarter.server.GrpcContextKeys.ResponseMetadataModifier;
 import static transcoding.flux.SimpleServiceGrpc.SimpleServiceImplBase;
 import static transcoding.flux.Simpleservice.SimpleRequest;
 import static transcoding.flux.Simpleservice.SimpleResponse;
@@ -31,8 +30,6 @@ public class TranscodingWebFluxApp extends SimpleServiceImplBase {
             throw new StatusRuntimeException(Status.INVALID_ARGUMENT, metadata);
         }
 
-        ResponseMetadataModifier.addConsumer(
-                metadata -> metadata.put(Metadata.Key.of("custom", Metadata.ASCII_STRING_MARSHALLER), "custom value"));
         r.onNext(SimpleResponse.newBuilder()
                 .setResponseMessage("Hello " + request.getRequestMessage())
                 .build());
@@ -44,7 +41,7 @@ public class TranscodingWebFluxApp extends SimpleServiceImplBase {
     public void serverStreamingRpc(SimpleRequest request, StreamObserver<SimpleResponse> r) {
         for (int i = 0; i < 10; i++) {
             r.onNext(SimpleResponse.newBuilder()
-                    .setResponseMessage("message " + i)
+                    .setResponseMessage("Hello %s %d".formatted(request.getRequestMessage(), i))
                     .build());
             Thread.sleep(1000);
         }

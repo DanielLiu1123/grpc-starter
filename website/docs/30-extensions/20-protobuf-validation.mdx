@@ -2,5 +2,54 @@
 sidebar_position: 20
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Protobuf Validation
+
+This extension integrates [protovalidate](https://github.com/bufbuild/protovalidate-java) and [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).
+They are used to validate the Protobuf messages.
+
+## Dependencies
+
+<Tabs>
+    <TabItem value="protovalidate" label="protovalidate">
+        <Tabs>
+            <TabItem value="gradle" label="Gradle">
+                ```groovy
+                implementation("io.github.danielliu1123:grpc-starter-protovalidate")
+                ```
+            </TabItem>
+            <TabItem value="maven" label="Maven">
+                ```xml
+                <dependency>
+                    <groupId>io.github.danielliu1123</groupId>
+                    <artifactId>grpc-starter-protovalidate</artifactId>
+                </dependency>
+                ```
+            </TabItem>
+        </Tabs>
+    </TabItem>
+    <TabItem value="protoc-gen-validate" label="protoc-gen-validate">
+        <Tabs>
+            <TabItem value="gradle" label="Gradle">
+                ```groovy
+                implementation("io.github.danielliu1123:grpc-starter-validation")
+                ```
+            </TabItem>
+            <TabItem value="maven" label="Maven">
+                ```xml
+                <dependency>
+                    <groupId>io.github.danielliu1123</groupId>
+                    <artifactId>grpc-starter-validation</artifactId>
+                </dependency>
+                ```
+            </TabItem>
+        </Tabs>
+    </TabItem>
+</Tabs>
+
+##
+
+## Configurations
 

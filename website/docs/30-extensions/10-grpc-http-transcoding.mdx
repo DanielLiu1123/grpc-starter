@@ -10,7 +10,7 @@ import TabItem from '@theme/TabItem';
 This extension is Java implementation of [gRPC HTTP transcoding](https://cloud.google.com/endpoints/docs/grpc/transcoding),
 like [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) in Go.
 
-## Why Not Use Sidecar
+## Why Not Sidecar
 
 Why not just use a sidecar like [Envoy gRPC-JSON transcoder](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/grpc_json_transcoder_filter)
 to do the transcoding?
@@ -20,7 +20,7 @@ to do the transcoding?
 
 ## Dependencies
 
-Choose the appropriate dependencies based on your technology stack.
+Choose the appropriate dependencies based on your stack.
 
 <Tabs>
     <TabItem value="webmvc" label="Web MVC">
@@ -98,11 +98,9 @@ package transcoding.mvc;
 message SimpleRequest {
     string requestMessage = 1;
 }
-
 message SimpleResponse {
     string responseMessage = 1;
 }
-
 service SimpleService {
     rpc UnaryRpc (SimpleRequest) returns (SimpleResponse) {
         option (google.api.http) = {
@@ -115,22 +113,63 @@ service SimpleService {
     </code></pre>
 </details>
 
-**Access via HTTP:**
+**HTTP:**
 
 ```shell
 curl -X POST -d '{"requestMessage": "World"}' http://localhost:8080/transcoding.mvc.SimpleService/UnaryRpc
 curl -X POST -d '{"requestMessage": "World"}' http://localhost:8080/unary
 ```
 
-:::info
-The default mapping path is `POST /package.Service/MethodName` when the `google.api.http` option is not specified.
-:::
-
-**Access via gRPC:**
+**gRPC:**
 
 ```shell
 grpcurl -plaintext -d '{"requestMessage": "World"}' localhost:9090 transcoding.mvc.SimpleService/UnaryRpc
 ```
+
+:::info
+The default mapping path is `POST /<package>.<Service>/<MethodName>` (case-sensitive)
+when the `google.api.http` option is not specified.
+:::
+
+Source code is available at [webmvc](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/transcoding/webmvc).
+
+## Server Streaming
+
+Support server streaming API:
+
+```protobuf
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+package transcoding.mvc;
+
+message SimpleRequest {
+    string requestMessage = 1;
+}
+message SimpleResponse {
+    string responseMessage = 1;
+}
+service SimpleService {
+    rpc ServerStreamingRpc (SimpleRequest) returns (stream SimpleResponse) {
+        option (google.api.http) = {
+            get: "/serverstreaming"
+        };
+    }
+}
+```
+
+This API can be called by HTTP:
+
+```shell
+curl -X POST http://localhost:8080/transcoding.mvc.SimpleService/ServerStreamingRpc?requestMessage=World
+curl http://localhost:8080/serverstreaming?requestMessage=World
+```
+
+:::info
+The values of request message fields can be filled by path variables, request body and query parameters.
+If the same field exists, the priority is: **path variables > request body > query parameters**.
+:::
 
 ## Extension Points
 
@@ -141,9 +180,5 @@ grpcurl -plaintext -d '{"requestMessage": "World"}' localhost:9090 transcoding.m
 - Convert gRPC metadata to HTTP headers when transcode from gRPC to HTTP.
 
 The default implementation is `DefaultHeaderConverter`.
-
-When converting HTTP headers to gRPC metadata (request),
-it removes all http canonical headers (except Authorization) and leaves only custom headers.
-
-When converting gRPC metadata to HTTP headers (response),
-it removes all http canonical headers, headers with the prefix `grpc-`, headers with the suffix `-bin` and leaves only custom headers.
+- When converting HTTP headers to gRPC metadata (request), it removes all http canonical headers (except Authorization) and leaves only custom headers.
+- When converting gRPC metadata to HTTP headers (response), it removes all http canonical headers, headers with the prefix `grpc-`, headers with the suffix `-bin` and leaves only custom headers.
