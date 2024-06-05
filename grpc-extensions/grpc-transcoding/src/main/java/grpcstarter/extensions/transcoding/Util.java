@@ -276,6 +276,7 @@ class Util {
     }
 
     public static ManagedChannel getInProcessChannel(String name) {
+        // TODO(Freeman): set max message size?
         return InProcessChannelBuilder.forName(name).usePlaintext().build();
     }
 

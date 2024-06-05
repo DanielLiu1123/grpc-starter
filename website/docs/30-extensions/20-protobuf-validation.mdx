@@ -10,6 +10,10 @@ import TabItem from '@theme/TabItem';
 This extension integrates [protovalidate](https://github.com/bufbuild/protovalidate-java) and [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).
 They are used to validate the Protobuf messages.
 
+:::tip
+`protovalidate` is the successor to `protoc-gen-validate`, so it is recommended to use `protovalidate`.
+:::
+
 ## Dependencies
 
 <Tabs>
@@ -49,7 +53,111 @@ They are used to validate the Protobuf messages.
     </TabItem>
 </Tabs>
 
-##
+## Example
+
+<Tabs>
+    <TabItem value="protovalidate" label="protovalidate">
+        Reference [protovalidate example](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/protovalidate).
+
+        ```protobuf
+        syntax = "proto3";
+
+        package foo;
+
+        import "buf/validate/validate.proto";
+
+        message Foo {
+            string id = 1 [(buf.validate.field).cel = {
+                id: "id",
+                message: "id length must be at least 5 characters",
+                expression: "this.size() >= 5",
+            }];
+            string name = 2 [(buf.validate.field).string = {min_len: 5}];
+            repeated string hobbies = 3 [(buf.validate.field).repeated = {min_items: 1}];
+
+            option (buf.validate.message).cel = {
+                id: "foo",
+                message: "not a valid Foo",
+                expression: "this.name != 'programmer' && !('coding' in this.hobbies)",
+            };
+        }
+
+        service FooService {
+            rpc InsertFoo (Foo) returns (Foo) {}
+        }
+        ```
+    </TabItem>
+    <TabItem value="protoc-gen-validate" label="protoc-gen-validate">
+        Reference [validation example](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/validation).
+
+        ```protobuf
+        syntax = "proto3";
+
+        package foo;
+
+        import "validate/validate.proto";
+
+        message Foo {
+            string name = 2 [(validate.rules).string = {
+                min_len: 2
+                max_len: 10
+            }];
+            repeated string hobbies = 3 [(validate.rules).repeated = {
+                min_items: 1
+            }];
+        }
+
+        service FooService {
+            rpc InsertFoo (Foo) returns (Foo) {}
+        }
+        ```
+    </TabItem>
+</Tabs>
+
+These validation rules will be applied to the gRPC client and server by default.
+
+:::info
+For more information about the validation rules,
+see [protovalidate](https://github.com/bufbuild/protovalidate-java) and [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate)
+:::
 
 ## Configurations
 
+If you want to disable the validation, use the following configuration:
+
+```yaml
+grpc:
+  validation:
+    enabled: false # disable the validation for client and server
+```
+
+Only disable the validation for the client:
+
+```yaml
+grpc:
+  validation:
+    client:
+      enabled: false
+```
+
+Only disable the validation for the server:
+
+```yaml
+grpc:
+  validation:
+    server:
+      enabled: false
+```
+
+The verification processing is implemented through `ClientInterceptor` and `ServerInterceptor`.
+The order of interceptors can be customized.
+The default order is 0.
+
+```yaml
+grpc:
+  validation:
+    client:
+      order: 0
+    server:
+      order: 0
+```

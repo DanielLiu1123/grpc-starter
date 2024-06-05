@@ -10,6 +10,9 @@ import TabItem from '@theme/TabItem';
 This extension is Java implementation of [gRPC HTTP transcoding](https://cloud.google.com/endpoints/docs/grpc/transcoding),
 like [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) in Go.
 
+Read [google.api.http](https://github.com/googleapis/googleapis/blob/master/google/api/http.proto) specification
+to learn how to define the HTTP mapping.
+
 ## Why Not Sidecar
 
 Why not just use a sidecar like [Envoy gRPC-JSON transcoder](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/grpc_json_transcoder_filter)
@@ -45,8 +48,8 @@ Choose the appropriate dependencies based on your stack.
             <TabItem value="gradle" label="Gradle">
                 ```groovy
                 implementation("io.github.danielliu1123:grpc-server-boot-starter")){
-                exclude(group: "io.grpc", module: "grpc-netty-shaded")
-            }
+                    exclude(group: "io.grpc", module: "grpc-netty-shaded")
+                }
                 implementation("io.github.danielliu1123:grpc-starter-transcoding-webflux")
                 runtimeOnly("io.grpc:grpc-netty")
                 ```
@@ -85,9 +88,10 @@ Therefore, exclude the `grpc-netty-shaded` dependency and use the `grpc-netty` d
 
 ## Example
 
-<details>
-    <summary>simpleservice.proto</summary>
-    <pre><code>
+Transcoding is only support [unary](#unary) and [server streaming](#server-streaming) RPCs.
+
+### Unary
+
 ```protobuf
 syntax = "proto3";
 
@@ -110,8 +114,6 @@ service SimpleService {
     }
 }
 ```
-    </code></pre>
-</details>
 
 **HTTP:**
 
@@ -131,11 +133,12 @@ The default mapping path is `POST /<package>.<Service>/<MethodName>` (case-sensi
 when the `google.api.http` option is not specified.
 :::
 
-Source code is available at [webmvc](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/transcoding/webmvc).
+Reference [webmvc example](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/transcoding/webmvc).
 
-## Server Streaming
+### Server Streaming
 
-Support server streaming API:
+It is implemented using [SSE](https://html.spec.whatwg.org/multipage/server-sent-events.html) (Server-Sent Events),
+data will be returned in JSON format.
 
 ```protobuf
 syntax = "proto3";
@@ -159,12 +162,14 @@ service SimpleService {
 }
 ```
 
-This API can be called by HTTP:
+**HTTP:**
 
 ```shell
 curl -X POST http://localhost:8080/transcoding.mvc.SimpleService/ServerStreamingRpc?requestMessage=World
 curl http://localhost:8080/serverstreaming?requestMessage=World
 ```
+
+Reference [webmvc example](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/transcoding/webmvc).
 
 :::info
 The values of request message fields can be filled by path variables, request body and query parameters.
@@ -182,3 +187,51 @@ If the same field exists, the priority is: **path variables > request body > que
 The default implementation is `DefaultHeaderConverter`.
 - When converting HTTP headers to gRPC metadata (request), it removes all http canonical headers (except Authorization) and leaves only custom headers.
 - When converting gRPC metadata to HTTP headers (response), it removes all http canonical headers, headers with the prefix `grpc-`, headers with the suffix `-bin` and leaves only custom headers.
+
+Use custom `HeaderConverter` to replace the default implementation:
+
+```java
+@Component
+public class CustomHeaderConverter implements HeaderConverter {
+
+    @Override
+    public Metadata toMetadata(HttpHeaders headers) {
+        // convert HttpHeaders to Metadata
+    }
+
+    @Override
+    public HttpHeaders toHttpHeaders(Metadata headers) {
+        // convert Metadata to HttpHeaders
+    }
+}
+```
+
+## Configurations
+
+If you want to disable the transcoding, use the following configuration:
+
+```yaml
+grpc:
+  transcoding:
+    enabled: false
+```
+
+Custom gRPC transcoding in-process server name:
+
+```yaml
+grpc:
+  transcoding:
+    in-process-name: whatever
+```
+
+## How It Works
+
+1. When the application starts up,
+it will get all the protobuf configurations for HTTP mapping (google.api.http),
+and then register them into the internally implemented [`RouterFunction`](https://docs.spring.io/spring-framework/reference/web/webmvc-functional.html#webmvc-fn-overview).
+
+2. The application will start an in-process gRPC server specifically to handle transcoding requests.
+
+3. When an HTTP request comes in, the `RouterFunction` will find the corresponding gRPC service based on the request’s URL and method,
+then convert the HTTP request into a gRPC request,
+send it to the in-process gRPC server, and finally convert the gRPC response back into an HTTP response to return.
