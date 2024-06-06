@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Deploy to GitHub Pages
+    name: Build
     runs-on: ubuntu-latest
     defaults:
       run:
