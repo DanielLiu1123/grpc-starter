@@ -25,17 +25,21 @@ import TabItem from '@theme/TabItem';
     </TabItem>
 </Tabs>
 
-Steps to autoconfigure gRPC stubs:
-1. Specify the stubs to be added as Spring Beans.
-2. Configure request addresses for stubs.
+## Usage
 
-## Specify Stubs
+Steps to autoconfigure gRPC clients (stubs):
+1. Specify the clients to be added as Spring Beans.
+2. Configure request addresses for clients.
 
-You can configure stub classes in two ways.
+Then you can inject the clients using whatever method you prefer.
 
-### @EnableGrpcClients
+### Specify Stubs
 
-`@EnableGrpcClients` can configure packages to scan or directly specify stub classes.
+You can configure client classes in two ways.
+
+#### @EnableGrpcClients
+
+`@EnableGrpcClients` can configure packages to scan or directly specify client classes.
 
 Configure packages to scan with `basePackages`:
 
@@ -43,7 +47,7 @@ Configure packages to scan with `basePackages`:
 @EnableGrpcClients(basePackages = "io.grpc")
 ```
 
-Specify stub classes directly with `clients`:
+Specify client classes directly with `clients`:
 
 ```java
 @EnableGrpcClients(clients = { SimpleServiceGrpc.SimpleServiceBlockingStub.class })
@@ -56,13 +60,13 @@ You can also combine both ways:
 ```
 
 :::tip
-It's recommended to use `clients` to specify stub classes directly to avoid adding unnecessary beans into the container,
+It's recommended to use `clients` to specify client classes directly to avoid adding unnecessary beans into the container,
 which can improve startup speed.
 :::
 
-### Configuration
+#### Configuration
 
-Similar to `@EnableGrpcClients`, you can also specify packages to scan or stub classes via configuration files.
+Similar to `@EnableGrpcClients`, you can also specify packages to scan or client classes via configuration files.
 
 ```yaml
 grpc:
@@ -71,10 +75,10 @@ grpc:
     stubs: [ io.grpc.testing.protobuf.SimpleServiceGrpc.SimpleServiceBlockingStub ]
 ```
 
-## Configure Request Addresses
+### Configure Request Addresses
 
-You can configure request addresses (authority) for different stub classes.
-Stubs configured with the same channel will reuse that channel.
+You can configure different request addresses (authority) for different client classes,
+clients configured with the same channel will reuse that channel.
 
 ```yaml
 grpc:
@@ -86,9 +90,9 @@ grpc:
         stubs: [ io.grpc.*FutureStub ]
 ```
 
-There are three ways to configure the stubs for a channel:
+There are three ways to configure the clients for a channel:
 
-- Specify the fully qualified class name of the stub using `classes`.
+- Specify the fully qualified class name of the client using `classes`.
 
   ```yaml
   grpc:
@@ -98,7 +102,7 @@ There are three ways to configure the stubs for a channel:
           classes: [ io.grpc.testing.protobuf.SimpleServiceGrpc.SimpleServiceBlockingStub ]
     ```
 
-- Use `stubs` to specify stub names with Ant-style patterns.
+- Use `stubs` to specify client names with Ant-style patterns.
 
   ```yaml
   grpc:
@@ -122,9 +126,25 @@ There are three ways to configure the stubs for a channel:
 The priority of the configuration methods is `classes` > `stubs` > `services`。
 :::
 
+### Inject Client
+
+Inject the client using whatever method you prefer, constructor, `@Autowired`, setter...
+
+It's just like injecting any other Spring Bean, and respects the Spring Bean lifecycle.
+
+```java
+@Component
+class MyComponent {
+
+    @Autowired
+    private SimpleServiceGrpc.SimpleServiceBlockingStub stub;
+
+}
+```
+
 ## Configurations
 
-You can also configure properties like `deadline` for the channel.
+Configure `deadline` for the channel.
 
 ```yaml
 grpc:
