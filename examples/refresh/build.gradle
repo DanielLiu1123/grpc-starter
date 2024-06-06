@@ -1,7 +1,7 @@
 dependencies {
     implementation(project(":grpc-starters:grpc-boot-starter"))
     implementation("io.grpc:grpc-testing-proto")
-    implementation("org.springframework.cloud:spring-cloud-context")
+    implementation("org.springframework.cloud:spring-cloud-context:${springCloudContextVersion}")
 
     testImplementation(project(":grpc-starters:grpc-starter-test"))
 }

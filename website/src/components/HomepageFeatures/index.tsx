@@ -4,38 +4,33 @@ import styles from './styles.module.css';
 
 type FeatureItem = {
   title: string;
-  Svg: React.ComponentType<React.ComponentProps<'svg'>>;
+  Svg?: React.ComponentType<React.ComponentProps<'svg'>>;
   description: JSX.Element;
 };
 
 const FeatureList: FeatureItem[] = [
   {
     title: 'Easy to Use',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+          Out-of-the-box support for gRPC client/server auto-configuration.
+          Make the integration of gRPC with Spring Boot feel seamless and native.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    title: 'Integrate gRPC Cutting-edge Ecosystem',
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+          Provide missing gRPC HTTP/JSON transcoding functionality for Java ecosystem.
       </>
     ),
   },
   {
-    title: 'Powered by React',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'Designed for Extension',
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+          This framework is designed to be easily extended and customized.
       </>
     ),
   },
@@ -45,7 +40,7 @@ function Feature({title, Svg, description}: FeatureItem) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">
-        <Svg className={styles.featureSvg} role="img" />
+        {Svg && <Svg className={styles.featureSvg} role="img" />}
       </div>
       <div className="text--center padding-horiz--md">
         <Heading as="h3">{title}</Heading>
