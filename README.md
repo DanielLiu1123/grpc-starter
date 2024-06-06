@@ -1,18 +1,8 @@
-<div style="text-align: center">
-
-# gRPC Starter
-
-[![Build](https://img.shields.io/github/actions/workflow/status/DanielLiu1123/grpc-starter/build.yml?branch=main)](https://github.com/DanielLiu1123/grpc-starter/actions)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.danielliu1123/grpc-starter-dependencies?versionPrefix=3.)](https://central.sonatype.com/artifact/io.github.danielliu1123/grpc-starter-dependencies)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+# gRPC Starter [![Build](https://img.shields.io/github/actions/workflow/status/DanielLiu1123/grpc-starter/build.yml?branch=main)](https://github.com/DanielLiu1123/grpc-starter/actions) [![Maven Central](https://img.shields.io/maven-central/v/io.github.danielliu1123/grpc-starter-dependencies?versionPrefix=3.)](https://central.sonatype.com/artifact/io.github.danielliu1123/grpc-starter-dependencies) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 [Documentation](https://danielliu1123.github.io/grpc-starter/)
 
-</div>
-
-## Overview
-
-gRPC is a high-performance, multi-language RPC framework, with support for robust features like
+[gRPC](https://grpc.io/) is a high-performance, multi-language RPC framework, with support for robust features like
 high-performance, multi-language support, concise service definition, streaming.
 gRPC proves to be an ideal choice for building scalable and efficient microservice systems.
 
