@@ -1,5 +1,0 @@
-* [首页](/zh-cn/README.md)
-* [问题和反馈](https://github.com/DanielLiu1123/grpc-starter/issues)
-* 语言
-    * [English](/en-us/)
-    * [简体中文](/zh-cn/)

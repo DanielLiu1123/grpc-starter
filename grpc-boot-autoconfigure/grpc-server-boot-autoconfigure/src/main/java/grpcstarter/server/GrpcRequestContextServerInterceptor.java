@@ -79,7 +79,7 @@ public class GrpcRequestContextServerInterceptor implements ServerInterceptor, P
         private static void setResponseMetadata(Metadata headers) {
             ResponseMetadataModifier responseMetadataModifier = ResponseMetadataModifier.get();
             if (responseMetadataModifier != null) {
-                responseMetadataModifier.getConsumers().forEach(consumer -> consumer.accept(headers));
+                responseMetadataModifier.consumers.forEach(consumer -> consumer.accept(headers));
             }
         }
     }

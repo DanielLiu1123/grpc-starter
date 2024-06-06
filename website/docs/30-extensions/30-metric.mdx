@@ -1,0 +1,73 @@
+---
+sidebar_position: 30
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Metric
+
+This extension integrates `spring-boot-starter-actuator` to collect metrics for gRPC client and server.
+
+## Dependencies
+
+<Tabs>
+    <TabItem value="gradle" label="Gradle">
+        ```groovy
+        implementation("io.github.danielliu1123:grpc-starter-metrics")
+        ```
+    </TabItem>
+    <TabItem value="maven" label="Maven">
+        ```xml
+        <dependency>
+            <groupId>io.github.danielliu1123</groupId>
+            <artifactId>grpc-starter-metrics</artifactId>
+        </dependency>
+        ```
+    </TabItem>
+</Tabs>
+
+## Example
+
+Reference [metrics example](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/metrics).
+
+## Configurations
+
+If you want to disable the metrics, using the following configuration:
+
+```yaml
+grpc:
+  metrics:
+    enabled: false
+```
+
+Only disable the metrics for the client:
+
+```yaml
+grpc:
+  metrics:
+    client:
+      enabled: false
+```
+
+Only disable the metrics for the server:
+
+```yaml
+grpc:
+  metrics:
+    server:
+      enabled: false
+```
+
+The metrics processing is implemented through `ClientInterceptor` and `ServerInterceptor`.
+The order of interceptors can be customized.
+The default order is 0.
+
+```yaml
+grpc:
+  metrics:
+    client:
+      order: 0
+    server:
+      order: 0
+```

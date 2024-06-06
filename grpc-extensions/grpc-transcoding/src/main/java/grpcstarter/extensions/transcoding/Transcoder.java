@@ -42,33 +42,36 @@ class Transcoder {
         // Any fields in the request message which are not bound by the path template
         // automatically become HTTP query parameters if there is no HTTP request body.
 
-        Optional.ofNullable(variable.parameters()).orElseGet(Map::of).forEach((key, values) -> {
-            String[] fieldPath = key.split("\\.");
+        Map<String, String[]> parameters = variable.parameters();
+        if (parameters != null && !parameters.isEmpty()) {
+            parameters.forEach((key, values) -> {
+                String[] fieldPath = key.split("\\.");
 
-            // Navigate to the last field descriptor
-            Message.Builder lastBuilder = messageBuilder;
-            for (int i = 0; i < fieldPath.length - 1; i++) {
+                // Navigate to the last field descriptor
+                Message.Builder lastBuilder = messageBuilder;
+                for (int i = 0; i < fieldPath.length - 1; i++) {
+                    Descriptors.FieldDescriptor field =
+                            lastBuilder.getDescriptorForType().findFieldByName(fieldPath[i]);
+                    if (noBuilder(field)) return;
+
+                    lastBuilder = lastBuilder.getFieldBuilder(field);
+                }
+
                 Descriptors.FieldDescriptor field =
-                        lastBuilder.getDescriptorForType().findFieldByName(fieldPath[i]);
-                if (noBuilder(field)) return;
+                        lastBuilder.getDescriptorForType().findFieldByName(fieldPath[fieldPath.length - 1]);
+                if (!isValueType(field)) return;
 
-                lastBuilder = lastBuilder.getFieldBuilder(field);
-            }
-
-            Descriptors.FieldDescriptor field =
-                    lastBuilder.getDescriptorForType().findFieldByName(fieldPath[fieldPath.length - 1]);
-            if (!isValueType(field)) return;
-
-            if (field.isRepeated()) {
-                for (String value : values) {
-                    lastBuilder.addRepeatedField(field, parseValue(field, value));
+                if (field.isRepeated()) {
+                    for (String value : values) {
+                        lastBuilder.addRepeatedField(field, parseValue(field, value));
+                    }
+                } else {
+                    if (values.length > 0) {
+                        setValueField(lastBuilder, field, values[0]);
+                    }
                 }
-            } else {
-                if (values.length > 0) {
-                    setValueField(lastBuilder, field, values[0]);
-                }
-            }
-        });
+            });
+        }
 
         // The special name `*` can be used in the body mapping to define that
         // every field not bound by the path template should be mapped to the
@@ -84,11 +87,11 @@ class Transcoder {
                 } else {
                     Descriptors.FieldDescriptor field =
                             messageBuilder.getDescriptorForType().findFieldByName(httpRule.getBody());
-                    if (noBuilder(field)) return;
-
-                    Message.Builder fieldBuilder = messageBuilder.getFieldBuilder(field);
-                    if (fieldBuilder != null) {
-                        merge(fieldBuilder, bodyString);
+                    if (!noBuilder(field)) {
+                        Message.Builder fieldBuilder = messageBuilder.getFieldBuilder(field);
+                        if (fieldBuilder != null) {
+                            merge(fieldBuilder, bodyString);
+                        }
                     }
                 }
             }
@@ -100,12 +103,15 @@ class Transcoder {
 
         // The path variables **must not** refer to any repeated or mapped field,
         // because client libraries are not capable of handling such variable expansion.
-        Optional.ofNullable(variable.pathVariables()).orElseGet(Map::of).forEach((key, value) -> {
-            Descriptors.FieldDescriptor field =
-                    messageBuilder.getDescriptorForType().findFieldByName(key);
-            if (!isValueType(field)) return;
-            setValueField(messageBuilder, field, value);
-        });
+        Map<String, String> pathVariables = variable.pathVariables();
+        if (pathVariables != null && !pathVariables.isEmpty()) {
+            pathVariables.forEach((key, value) -> {
+                Descriptors.FieldDescriptor field =
+                        messageBuilder.getDescriptorForType().findFieldByName(key);
+                if (!isValueType(field)) return;
+                setValueField(messageBuilder, field, value);
+            });
+        }
     }
 
     public Object out(@Nonnull Message response, @Nonnull HttpRule httpRule) {

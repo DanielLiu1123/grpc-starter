@@ -1,0 +1,88 @@
+---
+sidebar_position: 5
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Quick Start
+
+## Dependencies
+
+This project offers a BOM (Bill of Materials) to manage the versions of the dependencies.
+
+:::info
+All dependencies will assume that `grpc-starter-dependencies` has been used, so all versions will be ignored.
+:::
+
+<Tabs>
+    <TabItem value="gradle" label="Gradle">
+        ```groovy
+        implementation(platform("io.github.danielliu1123:grpc-starter-dependencies:3.2.5"))
+        implementation("io.github.danielliu1123:grpc-boot-starter")
+        implementation("io.grpc:grpc-testing-proto")
+        ```
+    </TabItem>
+    <TabItem value="maven" label="Maven">
+        ```xml
+        <dependencies>
+            <dependency>
+                <groupId>io.github.danielliu1123</groupId>
+                <artifactId>grpc-boot-starter</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-testing-proto</artifactId>
+            </dependency>
+        </dependencies>
+        <dependencyManagement>
+            <dependencies>
+                <dependency>
+                    <groupId>io.github.danielliu1123</groupId>
+                    <artifactId>grpc-starter-dependencies</artifactId>
+                    <version>3.2.5</version>
+                    <type>pom</type>
+                    <scope>import</scope>
+                </dependency>
+            </dependencies>
+        </dependencyManagement>
+        ```
+    </TabItem>
+</Tabs>
+
+## Code Example
+
+```java
+@SpringBootApplication
+public class QuickStartApp extends SimpleServiceGrpc.SimpleServiceImplBase {
+
+    public static void main(String[] args) {
+        new SpringApplicationBuilder(QuickStartApp.class)
+                .properties("grpc.client.base-packages=io.grpc")
+                .properties("grpc.client.authority=127.0.0.1:9090")
+                .run(args);
+    }
+
+    @Override
+    public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> r) {
+        var response = SimpleResponse.newBuilder()
+                .setResponseMessage("Hello " + request.getRequestMessage())
+                .build();
+        r.onNext(response);
+        r.onCompleted();
+    }
+
+    @Bean
+    ApplicationRunner runner(SimpleServiceGrpc.SimpleServiceBlockingStub stub) { // Inject gRPC stub
+        return args -> {
+            var response = stub.unaryRpc(SimpleRequest.newBuilder().setRequestMessage("World!").build());
+            System.out.println(response.getResponseMessage());
+        };
+    }
+
+}
+```
+
+No additional annotations or classes are required! Run the application and you will see the `Hello World!`.
+
+Source code is available at [quick-start](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/quick-start).

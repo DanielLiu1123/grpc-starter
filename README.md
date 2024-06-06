@@ -26,7 +26,7 @@ This project provides out-of-the-box, highly scalable Spring Boot starters for t
 
 ***Extensions:***
 
-- [JSON transcoder](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/json-transcoder): A single codebase to simultaneously support both gRPC and HTTP/JSON.
+- [gRPC HTTP transcoding](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/json-transcoder): A single codebase to support both gRPC and HTTP/JSON.
 - [Protobuf validation](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/protobuf-validation): Protobuf message validation implemented by [protovalidate](https://github.com/bufbuild/protovalidate-java)/[protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).
 - [Metric](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/metrics): Spring Boot Actuator integration with gRPC service.
 - [Tracing](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/tracing): Spring Boot Actuator integration with gRPC server and client.
@@ -53,18 +53,18 @@ public class SimpleApp extends SimpleServiceGrpc.SimpleServiceImplBase {
     }
 
     @Override
-    public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> responseObserver) {
-        SimpleResponse response = SimpleResponse.newBuilder()
+    public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> r) {
+        var response = SimpleResponse.newBuilder()
                 .setResponseMessage("Hello " + request.getRequestMessage())
                 .build();
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
+        r.onNext(response);
+        r.onCompleted();
     }
 
     @Bean
     ApplicationRunner runner(SimpleServiceGrpc.SimpleServiceBlockingStub stub) {
         return args -> {
-            SimpleResponse response = stub.unaryRpc(SimpleRequest.newBuilder().setRequestMessage("World!").build());
+            var response = stub.unaryRpc(SimpleRequest.newBuilder().setRequestMessage("World!").build());
             System.out.println(response.getResponseMessage());
         };
     }

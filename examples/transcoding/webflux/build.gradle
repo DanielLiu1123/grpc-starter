@@ -3,14 +3,14 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":examples:grpc-sample-api"))
+    implementation("io.grpc:grpc-testing-proto")
     implementation(project(":grpc-starters:grpc-server-boot-starter")){
         exclude(group: 'io.grpc', module: "grpc-netty-shaded")
     }
-    implementation("io.grpc:grpc-netty")
     implementation(project(":grpc-starters:grpc-starter-transcoding-webflux"))
+    runtimeOnly("io.grpc:grpc-netty")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
 }
 
 apply from: "${rootDir}/gradle/protobuf.gradle"

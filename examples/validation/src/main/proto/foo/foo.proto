@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package foo;
+
+import "validate/validate.proto";
+
+message Foo {
+  string name = 2 [(validate.rules).string = {
+    min_len: 2
+    max_len: 10
+  }];
+  repeated string hobbies = 3 [(validate.rules).repeated = {
+    min_items: 1
+  }];
+}
+
+service FooService {
+  rpc InsertFoo (Foo) returns (Foo) {}
+}

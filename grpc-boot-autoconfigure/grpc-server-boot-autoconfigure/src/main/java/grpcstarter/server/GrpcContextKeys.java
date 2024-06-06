@@ -2,11 +2,11 @@ package grpcstarter.server;
 
 import io.grpc.Context;
 import io.grpc.Metadata;
-import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
-import lombok.Data;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -19,13 +19,11 @@ public class GrpcContextKeys {
     /**
      * Modify gRPC response metadata, e.g. add custom headers/trailers.
      */
-    @Data
     public static class ResponseMetadataModifier {
         static final Context.Key<ResponseMetadataModifier> INSTANCE =
                 Context.key("GrpcContextKeys.ResponseMetadataModifier");
 
-        @Nonnull
-        private final ArrayList<Consumer<Metadata>> consumers = new ArrayList<>();
+        final List<Consumer<Metadata>> consumers = Collections.synchronizedList(new ArrayList<>());
 
         /**
          * Get {@link ResponseMetadataModifier} bound to current gRPC request.
@@ -33,19 +31,21 @@ public class GrpcContextKeys {
          * @return {@link ResponseMetadataModifier} bound to current gRPC request
          */
         @Nullable
-        public static ResponseMetadataModifier get() {
+        static ResponseMetadataModifier get() {
             return INSTANCE.get();
         }
 
         /**
          * Add a consumer to modify response headers/trailers.
          *
+         * <p> This method is thread-safe.
+         *
          * @param consumer {@link Consumer} to modify response headers/trailers
          */
         public static void addConsumer(Consumer<Metadata> consumer) {
             ResponseMetadataModifier key = get();
             if (key != null) {
-                key.getConsumers().add(consumer);
+                key.consumers.add(consumer);
             }
         }
     }
