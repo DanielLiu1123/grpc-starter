@@ -28,7 +28,7 @@ Make the integration of Spring Boot and gRPC feel seamless and native.
     - [Exception handling](https://danielliu1123.github.io/grpc-starter/docs/server/exception-handing)
     - [Health check](https://danielliu1123.github.io/grpc-starter/docs/server/autoconfiguration#health)
 - gRPC client autoconfiguration
-    - [`@Autowired` support](http://localhost:3000/grpc-starter/docs/client/autoconfiguration#inject-client)
+    - [`@Autowired` support](https://danielliu1123.github.io/grpc-starter/docs/client/autoconfiguration#inject-client)
     - [Dynamic refreshing](https://danielliu1123.github.io/grpc-starter/docs/client/dynamic-refresh)
 
 ***Extensions:***

@@ -1,4 +1,4 @@
-# Contributing to HttpExchange Spring Boot Starter
+# Contributing to gRPC Starter
 
 Welcome to the grpc-starter project!
 We are excited to have you onboard and contribute to this project,
