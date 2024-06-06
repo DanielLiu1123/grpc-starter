@@ -1,16 +1,23 @@
+<div style="text-align: center">
+
 # gRPC Starter
 
 [![Build](https://img.shields.io/github/actions/workflow/status/DanielLiu1123/grpc-starter/build.yml?branch=main)](https://github.com/DanielLiu1123/grpc-starter/actions)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.danielliu1123/grpc-starter-dependencies?versionPrefix=3.)](https://central.sonatype.com/artifact/io.github.danielliu1123/grpc-starter-dependencies)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[Documentation](https://danielliu1123.github.io/grpc-starter)
+[Documentation](https://danielliu1123.github.io/grpc-starter/)
+
+</div>
 
 ## Overview
 
-This project provides out-of-the-box, highly scalable Spring Boot starters for the cutting-edge ecosystem of gRPC.
+gRPC is a high-performance, multi-language RPC framework, with support for robust features like
+high-performance, multi-language support, concise service definition, streaming.
+gRPC proves to be an ideal choice for building scalable and efficient microservice systems.
 
-**Make the integration of gRPC with Spring Boot feel seamless and native.**
+This project provides out-of-the-box, highly extensible Spring Boot starters for gRPC ecosystem.
+Make the integration of Spring Boot and gRPC feel seamless and native.
 
 ## Features
 
@@ -18,19 +25,19 @@ This project provides out-of-the-box, highly scalable Spring Boot starters for t
 
 - Dependencies management for gRPC related libraries
 - gRPC server autoconfiguration
-    - [Exception handling](https://danielliu1123.github.io/grpc-starter/#/en-us/server/exception-handling)
-    - [Health check](https://danielliu1123.github.io/grpc-starter/#/en-us/server/health-check)
+    - [Exception handling](https://danielliu1123.github.io/grpc-starter/docs/server/exception-handing)
+    - [Health check](https://danielliu1123.github.io/grpc-starter/docs/server/autoconfiguration#health)
 - gRPC client autoconfiguration
-    - [`@Autowired` support](https://danielliu1123.github.io/grpc-starter/#/en-us/client/onboarding)
-    - [Dynamic refreshing](https://danielliu1123.github.io/grpc-starter/#/en-us/client/dynamic-refresh)
+    - [`@Autowired` support](https://danielliu1123.github.io/grpc-starter/docs/client/autoconfiguration)
+    - [Dynamic refreshing](https://danielliu1123.github.io/grpc-starter/docs/client/dynamic-refresh)
 
 ***Extensions:***
 
-- [gRPC HTTP transcoding](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/json-transcoder): A single codebase to support both gRPC and HTTP/JSON.
-- [Protobuf validation](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/protobuf-validation): Protobuf message validation implemented by [protovalidate](https://github.com/bufbuild/protovalidate-java)/[protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).
-- [Metric](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/metrics): Spring Boot Actuator integration with gRPC service.
-- [Tracing](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/tracing): Spring Boot Actuator integration with gRPC server and client.
-- [Testing](https://danielliu1123.github.io/grpc-starter/#/en-us/extension/test): Integration with `SpringBootTest`.
+- [gRPC HTTP transcoding](https://danielliu1123.github.io/grpc-starter/docs/extensions/grpc-http-transcoding): A single codebase to support both gRPC and HTTP/JSON.
+- [Protobuf validation](https://danielliu1123.github.io/grpc-starter/docs/extensions/protobuf-validation): Protobuf message validation implemented by [protovalidate](https://github.com/bufbuild/protovalidate-java)/[protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).
+- [Metrics](https://danielliu1123.github.io/grpc-starter/docs/extensions/metrics): Spring Boot Actuator integration with gRPC service.
+- [Tracing](https://danielliu1123.github.io/grpc-starter/docs/extensions/tracing): Spring Boot Actuator integration with gRPC server and client.
+- [Testing](https://danielliu1123.github.io/grpc-starter/docs/extensions/test): Integration with `SpringBootTest`.
 
 ## Quick Start
 
@@ -38,8 +45,6 @@ This project provides out-of-the-box, highly scalable Spring Boot starters for t
 implementation(platform("io.github.danielliu1123:grpc-starter-dependencies:3.2.5"))
 implementation("io.github.danielliu1123:grpc-boot-starter")
 ```
-
-> From version 3.2.0, the groupId of the project has been changed to `io.github.danielliu1123` from `com.freemanan`.
 
 ```java
 @SpringBootApplication
@@ -72,33 +77,20 @@ public class SimpleApp extends SimpleServiceGrpc.SimpleServiceImplBase {
 }
 ```
 
-See the [example](examples/quick-start) project。
+Refer to [quick-start](examples/quick-start).
 
-## Version
+## Code of Conduct
 
-Mainly maintain the following versions:
+This project is governed by the [Code of Conduct](./CODE_OF_CONDUCT.md).
+By participating, you are expected to uphold this code of conduct.
+Please report unacceptable behavior to llw599502537@gmail.com.
 
-- 3.x
+## Contributing
 
-  Based on Spring Boot 3, baseline is JDK 17, the corresponding branch
-  is [main](https://github.com/DanielLiu1123/grpc-starter/).
+The [issue tracker](https://github.com/DanielLiu1123/grpc-starter/issues) is the preferred channel for bug reports,
+feature requests and submitting pull requests.
 
-  3.x version is kept in sync with Spring Boot 3,
-  if you are using Spring Boot 3.2.x, then `grpc-boot-starter` 3.2.5 should be used.
-
-  | Spring Boot | grpc-boot-starter |
-  |-------------|-------------------|
-  | 3.1.x       | 3.1.8             |
-  | 3.2.x       | 3.2.5             |
-
-- 2.x
-
-  Based on Spring Boot 2, baseline is JDK 8, the corresponding branch
-  is [2.x](https://github.com/DanielLiu1123/grpc-starter/tree/2.x)
-
-  | Spring Boot | grpc-boot-starter |
-  |-------------|-------------------|
-  | 2.x         | 2.1.6             |
+If you would like to contribute to the project, please refer to [Contributing](./CONTRIBUTING.md).
 
 ## License
 
