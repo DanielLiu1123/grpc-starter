@@ -2,7 +2,7 @@
 
 [Documentation](https://danielliu1123.github.io/grpc-starter/)
 
-[gRPC](https://grpc.io/) is a high-performance, multi-language RPC framework, with support for robust features like
+[gRPC](https://grpc.io/) is a RPC framework, with support for robust features like
 high-performance, multi-language support, concise service definition, streaming.
 gRPC proves to be an ideal choice for building scalable and efficient microservice systems.
 
