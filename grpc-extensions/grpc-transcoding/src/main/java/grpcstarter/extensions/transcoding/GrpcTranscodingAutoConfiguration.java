@@ -3,13 +3,11 @@ package grpcstarter.extensions.transcoding;
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.REACTIVE;
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.SERVLET;
 
-import grpcstarter.server.GrpcServerCustomizer;
+import grpcstarter.server.ConditionOnGrpcServerEnabled;
 import grpcstarter.server.GrpcServerProperties;
 import io.grpc.BindableService;
 import io.grpc.Metadata;
-import io.grpc.ServerInterceptor;
 import java.util.List;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -23,27 +21,16 @@ import org.springframework.http.HttpHeaders;
  * @author Freeman
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass({Metadata.class, HttpHeaders.class})
+@ConditionalOnClass({Metadata.class, HttpHeaders.class, GrpcServerProperties.class})
 @ConditionalOnProperty(prefix = GrpcTranscodingProperties.PREFIX, name = "enabled", matchIfMissing = true)
+@ConditionOnGrpcServerEnabled
 @EnableConfigurationProperties(GrpcTranscodingProperties.class)
 public class GrpcTranscodingAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public HeaderConverter defaultHeaderConverter() {
+    public HeaderConverter defaultGrpcTranscodingHeaderConverter() {
         return new DefaultHeaderConverter();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public TranscodingGrpcServer transcodingGrpcServer(
-            GrpcServerProperties properties,
-            GrpcTranscodingProperties transcodingProperties,
-            ObjectProvider<BindableService> serviceProvider,
-            ObjectProvider<ServerInterceptor> interceptorProvider,
-            ObjectProvider<GrpcServerCustomizer> customizers) {
-        return new TranscodingGrpcServer(
-                properties, serviceProvider, interceptorProvider, customizers, transcodingProperties);
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -52,8 +39,12 @@ public class GrpcTranscodingAutoConfiguration {
 
         @Bean
         public ServletTranscodingRouterFunction webMvcTranscodingRouterFunction(
-                List<BindableService> services, HeaderConverter headerConverter, GrpcTranscodingProperties properties) {
-            return new ServletTranscodingRouterFunction(services, headerConverter, properties);
+                List<BindableService> services,
+                HeaderConverter headerConverter,
+                GrpcTranscodingProperties grpcTranscodingProperties,
+                GrpcServerProperties grpcServerProperties) {
+            return new ServletTranscodingRouterFunction(
+                    services, headerConverter, grpcTranscodingProperties, grpcServerProperties);
         }
     }
 
@@ -63,8 +54,12 @@ public class GrpcTranscodingAutoConfiguration {
 
         @Bean
         public ReactiveTranscodingRouterFunction webFluxTranscodingRouterFunction(
-                List<BindableService> services, HeaderConverter headerConverter, GrpcTranscodingProperties properties) {
-            return new ReactiveTranscodingRouterFunction(services, headerConverter, properties);
+                List<BindableService> services,
+                HeaderConverter headerConverter,
+                GrpcTranscodingProperties grpcTranscodingProperties,
+                GrpcServerProperties grpcServerProperties) {
+            return new ReactiveTranscodingRouterFunction(
+                    services, headerConverter, grpcTranscodingProperties, grpcServerProperties);
         }
     }
 }

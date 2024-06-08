@@ -6,7 +6,8 @@ import static grpcstarter.extensions.transcoding.Util.Route;
 import static grpcstarter.extensions.transcoding.Util.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 import static grpcstarter.extensions.transcoding.Util.buildRequestMessage;
 import static grpcstarter.extensions.transcoding.Util.fillRoutes;
-import static grpcstarter.extensions.transcoding.Util.getInProcessChannel;
+import static grpcstarter.extensions.transcoding.Util.getTranscodingChannel;
+import static grpcstarter.extensions.transcoding.Util.shutdown;
 import static grpcstarter.extensions.transcoding.Util.trim;
 import static io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING;
 import static io.grpc.MethodDescriptor.MethodType.UNARY;
@@ -15,6 +16,7 @@ import static org.springframework.util.StreamUtils.copyToByteArray;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import grpcstarter.server.GrpcServerProperties;
 import io.grpc.BindableService;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
@@ -36,6 +38,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -50,7 +53,10 @@ import org.springframework.web.servlet.function.ServerResponse;
  * @since 3.3.0
  */
 public class ServletTranscodingRouterFunction
-        implements RouterFunction<ServerResponse>, HandlerFunction<ServerResponse>, SmartInitializingSingleton {
+        implements RouterFunction<ServerResponse>,
+                HandlerFunction<ServerResponse>,
+                SmartInitializingSingleton,
+                DisposableBean {
 
     private static final String MATCHING_ROUTE = ServletTranscodingRouterFunction.class + ".matchingRoute";
 
@@ -59,31 +65,36 @@ public class ServletTranscodingRouterFunction
      *
      * <p> e.g. "grpc.testing.SimpleService/UnaryRpc" -> Route
      */
-    private final Map<String, Route<ServerRequest>> methodNameRoutes = new HashMap<>();
+    private final Map<String, Route<ServerRequest>> fullMethodNameToRoute = new HashMap<>();
 
     private final List<Route<ServerRequest>> routes = new ArrayList<>();
     private final HeaderConverter headerConverter;
     private final GrpcTranscodingProperties properties;
+    private final GrpcServerProperties grpcServerProperties;
 
     private Channel channel;
 
     public ServletTranscodingRouterFunction(
-            List<BindableService> services, HeaderConverter headerConverter, GrpcTranscodingProperties properties) {
-        fillRoutes(services, methodNameRoutes, routes);
+            List<BindableService> services,
+            HeaderConverter headerConverter,
+            GrpcTranscodingProperties properties,
+            GrpcServerProperties grpcServerProperties) {
+        fillRoutes(services, fullMethodNameToRoute, routes);
         this.headerConverter = headerConverter;
         this.properties = properties;
+        this.grpcServerProperties = grpcServerProperties;
     }
 
     @Override
     public void afterSingletonsInstantiated() {
-        channel = getInProcessChannel(properties.getInProcessName());
+        channel = getTranscodingChannel(properties, grpcServerProperties);
     }
 
     @Override
     @Nonnull
     public Optional<HandlerFunction<ServerResponse>> route(@Nonnull ServerRequest request) {
         if (Objects.equals(request.method(), HttpMethod.POST)) {
-            var route = methodNameRoutes.get(trim(request.path(), '/'));
+            var route = fullMethodNameToRoute.get(trim(request.path(), '/'));
             if (route != null) {
                 request.attributes().put(MATCHING_ROUTE, route);
                 return Optional.of(this);
@@ -218,5 +229,10 @@ public class ServletTranscodingRouterFunction
         } catch (InvalidProtocolBufferException e) {
             throw new ResponseStatusException(BAD_REQUEST, e.getMessage(), e);
         }
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        shutdown(channel, Duration.ofSeconds(15));
     }
 }

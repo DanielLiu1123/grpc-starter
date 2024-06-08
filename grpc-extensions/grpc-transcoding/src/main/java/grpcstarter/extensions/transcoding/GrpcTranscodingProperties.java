@@ -1,6 +1,5 @@
 package grpcstarter.extensions.transcoding;
 
-import java.util.UUID;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -18,7 +17,7 @@ public class GrpcTranscodingProperties {
     private boolean enabled = true;
 
     /**
-     * In-process name for gRPC transcoding server, default is a random UUID.
+     * gRPC server endpoint, if not set, will use {@code localhost:${grpc.server.port}}.
      */
-    private String inProcessName = UUID.randomUUID().toString();
+    private String endpoint;
 }

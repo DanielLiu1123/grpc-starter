@@ -2,9 +2,9 @@
 
 [Documentation](https://danielliu1123.github.io/grpc-starter/)
 
-[gRPC](https://grpc.io/) is a RPC framework, with support for robust features like
-high-performance, multi-language support, concise service definition, streaming.
-gRPC proves to be an ideal choice for building scalable and efficient microservice systems.
+[gRPC](https://grpc.io/) is an RPC framework with robust features like high performance, 
+multi-language support, concise service definitions, and streaming. 
+It is an ideal choice for building scalable and efficient microservice systems.
 
 This project provides out-of-the-box, highly extensible Spring Boot starters for gRPC ecosystem.
 Make the integration of Spring Boot and gRPC feel seamless and native.

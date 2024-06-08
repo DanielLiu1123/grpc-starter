@@ -17,9 +17,11 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.Value;
+import grpcstarter.server.GrpcServerProperties;
 import io.grpc.BindableService;
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import io.grpc.MethodDescriptor;
 import io.grpc.ServerMethodDefinition;
 import io.grpc.ServerServiceDefinition;
@@ -45,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.servlet.function.ServerRequest;
 
 /**
@@ -55,6 +58,9 @@ class Util {
     private static final Logger log = LoggerFactory.getLogger(Util.class);
 
     public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE = Util.class + ".matchingPattern";
+
+    private static final HttpRule defaultHttpRule =
+            HttpRule.newBuilder().setBody("*").build();
 
     /**
      * Cache for the default message of the method input type.
@@ -89,12 +95,7 @@ class Util {
 
                         methodNameRoutes.put(
                                 invokeMethod.getFullMethodName(),
-                                new Route<>(
-                                        HttpRule.newBuilder().setBody("*").build(),
-                                        invokeMethod,
-                                        methodDescriptor,
-                                        t -> false,
-                                        List.of()));
+                                new Route<>(defaultHttpRule, invokeMethod, methodDescriptor, t -> false, List.of()));
 
                         if (methodDescriptor.getOptions().hasExtension(AnnotationsProto.http)) {
                             HttpRule httpRule = methodDescriptor.getOptions().getExtension(AnnotationsProto.http);
@@ -275,9 +276,39 @@ class Util {
         return className;
     }
 
-    public static ManagedChannel getInProcessChannel(String name) {
-        // TODO(Freeman): set max message size?
-        return InProcessChannelBuilder.forName(name).usePlaintext().build();
+    public static Channel getTranscodingChannel(
+            GrpcTranscodingProperties grpcTranscodingProperties, GrpcServerProperties grpcServerProperties) {
+        var inProcess = grpcServerProperties.getInProcess();
+        if (inProcess != null && StringUtils.hasText(inProcess.getName())) {
+            InProcessChannelBuilder b = InProcessChannelBuilder.forName(inProcess.getName());
+            return populateChannel(b, grpcServerProperties);
+        }
+
+        String endpoint = StringUtils.hasText(grpcTranscodingProperties.getEndpoint())
+                ? grpcTranscodingProperties.getEndpoint()
+                : "localhost:" + grpcServerProperties.getPort();
+        var b = ManagedChannelBuilder.forTarget(endpoint);
+        return populateChannel(b, grpcServerProperties);
+    }
+
+    private static Channel populateChannel(
+            ManagedChannelBuilder<? extends ManagedChannelBuilder<?>> channelBuilder,
+            GrpcServerProperties grpcServerProperties) {
+
+        Optional.ofNullable(grpcServerProperties.getMaxInboundMessageSize())
+                .map(DataSize::toBytes)
+                .map(Long::intValue)
+                .ifPresent(channelBuilder::maxInboundMessageSize);
+        Optional.ofNullable(grpcServerProperties.getMaxInboundMetadataSize())
+                .map(DataSize::toBytes)
+                .map(Long::intValue)
+                .ifPresent(channelBuilder::maxInboundMetadataSize);
+
+        if (grpcServerProperties.getTls() == null) {
+            channelBuilder.usePlaintext();
+        }
+
+        return channelBuilder.build();
     }
 
     public static Message buildRequestMessage(Transcoder transcoder, Route<?> route)
