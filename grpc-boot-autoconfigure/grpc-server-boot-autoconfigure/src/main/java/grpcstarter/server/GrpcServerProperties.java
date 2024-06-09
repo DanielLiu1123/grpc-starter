@@ -24,19 +24,19 @@ public class GrpcServerProperties {
     public static final String PREFIX = "grpc.server";
 
     /**
-     * Whether to enable gRPC server autoconfiguration, default {@code true}.
+     * Whether to enable gRPC server autoconfiguration, default true.
      */
     private boolean enabled = true;
     /**
-     * gRPC server port, default {@code 9090}, {@code 0} or negative number will use random port.
+     * gRPC server port, default 9090, 0 or negative numbers will use random port.
      */
     private int port = 9090;
     /**
-     * Graceful shutdown timeout, default {@code 30s}, if {@code 0} will wait forever util all active calls finished.
+     * Graceful shutdown timeout, default 30s, if 0 will wait forever util all active calls finished.
      */
     private long shutdownTimeout = 30000L;
     /**
-     * Whether to start a gRPC server when no service found, default {@code true}.
+     * Whether to start a gRPC server when no service found, default true.
      */
     private boolean enableEmptyServer = true;
     /**
@@ -56,13 +56,13 @@ public class GrpcServerProperties {
      */
     private ExceptionHandling exceptionHandling = new ExceptionHandling();
     /**
-     * The maximum message size allowed to be received on the server, default {@code 4MB}.
+     * The maximum message size allowed to be received on the server, default 4MB.
      *
      * @see GrpcUtil#DEFAULT_MAX_MESSAGE_SIZE
      */
     private DataSize maxInboundMessageSize;
     /**
-     * The maximum size of metadata allowed to be received, default {@code 8KB}.
+     * The maximum size of metadata allowed to be received, default 8KB.
      *
      * @see GrpcUtil#DEFAULT_MAX_HEADER_LIST_SIZE
      */
@@ -85,7 +85,7 @@ public class GrpcServerProperties {
         public static final String PREFIX = GrpcServerProperties.PREFIX + ".reflection";
 
         /**
-         * Whether to register reflection service, default {@code false}.
+         * Whether to register reflection service, default false.
          */
         private boolean enabled = false;
     }
@@ -95,7 +95,7 @@ public class GrpcServerProperties {
         public static final String PREFIX = GrpcServerProperties.PREFIX + ".health";
 
         /**
-         * Whether to enable health check, default {@code false}
+         * Whether to enable health check, default false.
          */
         private boolean enabled = true;
 
@@ -114,15 +114,15 @@ public class GrpcServerProperties {
             public static final String PREFIX = Health.PREFIX + ".datasource";
 
             /**
-             * Whether to enable datasource health check, default {@code true}.
+             * Whether to enable datasource health check, default true.
              */
             private boolean enabled = true;
             /**
-             * The service name that will be used for datasource health check, default {@code datasource}.
+             * The service name that will be used for datasource health check, default value is 'datasource'.
              */
             private String service = "datasource";
             /**
-             * The SQL query that will be used to validate datasource connection, default {@code SELECT 1}.
+             * The SQL query that will be used to validate datasource connection, default value is 'SELECT 1'.
              */
             private String validationQuery = "SELECT 1";
             /**
@@ -136,11 +136,11 @@ public class GrpcServerProperties {
             public static final String PREFIX = Health.PREFIX + ".redis";
 
             /**
-             * Whether to enable redis health check, default {@code true}.
+             * Whether to enable redis health check, default true.
              */
             private boolean enabled = true;
             /**
-             * The service name that will be used for redis health check, default {@code redis}.
+             * The service name that will be used for redis health check, default value is 'redis'.
              */
             private String service = "redis";
         }
@@ -151,11 +151,11 @@ public class GrpcServerProperties {
         public static final String PREFIX = GrpcServerProperties.PREFIX + ".channelz";
 
         /**
-         * Whether to register {@link ChannelzService}, default {@code false}.
+         * Whether to register {@link ChannelzService}, default false.
          */
         private boolean enabled = false;
         /**
-         * The maximum page size to return, default {@code 100}
+         * The maximum page size to return, default 100.
          *
          * @see AdminInterface
          */
@@ -167,21 +167,21 @@ public class GrpcServerProperties {
         public static final String PREFIX = GrpcServerProperties.PREFIX + ".exception-handling";
 
         /**
-         * Whether to enable exception handling, default {@code true}
+         * Whether to enable exception handling, default true.
          */
         private boolean enabled = true;
 
         /**
-         * Whether to enable {@link DefaultGrpcExceptionAdvice}, default {@code true}.
+         * Whether to enable {@link DefaultGrpcExceptionAdvice}, default true.
          *
-         * <p> {@link DefaultGrpcExceptionAdvice} will handle exceptions recognized by gRPC, including:
+         * <p> {@link DefaultGrpcExceptionAdvice} will handle exceptions recognized by gRPC, including: </p>
          * <ul>
          *     <li>{@link StatusRuntimeException}</li>
          *     <li>{@link StatusException}</li>
          * </ul>
          *
          * <p> When enabled, you can directly throw {@link StatusRuntimeException} or {@link StatusException} in service implementation,
-         * and the exception will be handled by {@link DefaultGrpcExceptionAdvice}.
+         * and the exception will be handled by {@link DefaultGrpcExceptionAdvice}. </p>
          *
          * <pre>{@code
          * @GrpcService
@@ -254,7 +254,7 @@ public class GrpcServerProperties {
         /**
          * The maximum length of response description.
          *
-         * <p> When the length of the description exceeds this value, it will be truncated.
+         * <p> When the length of the description exceeds this value, it will be truncated. </p>
          *
          * @since 3.2.3
          */
