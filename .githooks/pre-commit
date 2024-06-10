@@ -1,5 +1,23 @@
 #!/usr/bin/env bash
 
+# format code
 ./gradlew spotlessApply > /dev/null
+
+# generate configuration properties docs
+./gradlew classes > /dev/null
+./gradlew generateConfigurationPropertiesDocs > /dev/null
+
+# escape {} in md
+sed -i '' 's/{/\\{/g' build/configuration-properties.md
+
+# add sidebar_position
+sed -i '' '1i\
+---\
+sidebar_position: 40\
+---\
+\
+' build/configuration-properties.md
+
+cp -f build/configuration-properties.md website/docs/40-configuration-properties.md
 
 git add -u

@@ -208,7 +208,7 @@ public class CustomHeaderConverter implements HeaderConverter {
 
 ## Configurations
 
-If you want to disable the transcoding, use the following configuration:
+Disable transcoding:
 
 ```yaml
 grpc:
@@ -216,13 +216,16 @@ grpc:
     enabled: false
 ```
 
-Custom gRPC transcoding in-process server name:
+Custom gRPC server endpoint:
 
 ```yaml
 grpc:
   transcoding:
-    in-process-name: whatever
+    endpoint: localhost:9090
 ```
+
+In most cases, you do not need to manually configure this property,
+it will automatically find the gRPC server endpoint of the current application.
 
 ## How It Works
 
@@ -230,8 +233,8 @@ grpc:
 it will get all the protobuf configurations for HTTP mapping (google.api.http),
 and then register them into the internally implemented [`RouterFunction`](https://docs.spring.io/spring-framework/reference/web/webmvc-functional.html#webmvc-fn-overview).
 
-2. The application will start an in-process gRPC server specifically to handle transcoding requests.
-
-3. When an HTTP request comes in, the `RouterFunction` will find the corresponding gRPC service based on the request’s URL and method,
+2. When an HTTP request comes in, the `RouterFunction` will find the corresponding gRPC service based on the request’s URL and method,
 then convert the HTTP request into a gRPC request,
-send it to the in-process gRPC server, and finally convert the gRPC response back into an HTTP response to return.
+send it to the gRPC server endpoint, and finally convert the gRPC response back into an HTTP response to return.
+
+Refer to [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway?tab=readme-ov-file#about) for more details.

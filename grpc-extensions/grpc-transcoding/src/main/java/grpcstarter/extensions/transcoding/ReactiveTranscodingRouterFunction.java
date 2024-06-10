@@ -4,8 +4,8 @@ import static grpcstarter.extensions.transcoding.JsonUtil.canParseJson;
 import static grpcstarter.extensions.transcoding.TranscodingUtil.toHttpStatus;
 import static grpcstarter.extensions.transcoding.Util.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 import static grpcstarter.extensions.transcoding.Util.buildRequestMessage;
-import static grpcstarter.extensions.transcoding.Util.getInProcessChannel;
 import static grpcstarter.extensions.transcoding.Util.getReactiveRoutes;
+import static grpcstarter.extensions.transcoding.Util.getTranscodingChannel;
 import static grpcstarter.extensions.transcoding.Util.shutdown;
 import static grpcstarter.extensions.transcoding.Util.trim;
 import static io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING;
@@ -15,6 +15,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import grpcstarter.extensions.transcoding.Util.Route;
+import grpcstarter.server.GrpcServerProperties;
 import io.grpc.BindableService;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
@@ -67,31 +68,36 @@ public class ReactiveTranscodingRouterFunction
      *
      * <p> e.g. "grpc.testing.SimpleService/UnaryRpc" -> Route
      */
-    private final Map<String, Route<ServerRequest>> methodNameRoutes = new HashMap<>();
+    private final Map<String, Route<ServerRequest>> fullMethodNameToRoute = new HashMap<>();
 
     private final List<Route<ServerRequest>> routes = new ArrayList<>();
     private final HeaderConverter headerConverter;
     private final GrpcTranscodingProperties properties;
+    private final GrpcServerProperties grpcServerProperties;
 
     private Channel channel;
 
     public ReactiveTranscodingRouterFunction(
-            List<BindableService> services, HeaderConverter headerConverter, GrpcTranscodingProperties properties) {
-        getReactiveRoutes(services, methodNameRoutes, routes);
+            List<BindableService> services,
+            HeaderConverter headerConverter,
+            GrpcTranscodingProperties properties,
+            GrpcServerProperties grpcServerProperties) {
+        getReactiveRoutes(services, fullMethodNameToRoute, routes);
         this.headerConverter = headerConverter;
         this.properties = properties;
+        this.grpcServerProperties = grpcServerProperties;
     }
 
     @Override
     public void afterSingletonsInstantiated() {
-        channel = getInProcessChannel(properties.getInProcessName());
+        channel = getTranscodingChannel(properties, grpcServerProperties);
     }
 
     @Override
     @Nonnull
     public Mono<HandlerFunction<ServerResponse>> route(@Nonnull ServerRequest request) {
         if (Objects.equals(request.method(), HttpMethod.POST)) {
-            var route = methodNameRoutes.get(trim(request.path(), '/'));
+            var route = fullMethodNameToRoute.get(trim(request.path(), '/'));
             if (route != null) {
                 request.attributes().put(MATCHING_ROUTE, route);
                 return Mono.just(this);

@@ -34,24 +34,25 @@ public class GrpcClientProperties implements InitializingBean {
     public static final String PREFIX = "grpc.client";
 
     /**
-     * Whether to enable gRPC client autoconfiguration, default {@code true}.
+     * Whether to enable gRPC client autoconfiguration, default true.
      */
     private boolean enabled = true;
     /**
      * Default authority.
      *
-     * <p> e.g. {@code localhost:8080}
+     * <p> e.g. localhost:8080 </p>
      */
     private String authority;
     /**
      * Base packages to scan for gRPC stubs.
      *
-     * <p> This value will merge with {@link EnableGrpcClients#basePackages}, only takes effect if {@link EnableGrpcClients#basePackages} is not set.
-     * <p> The advantage of using configuration is no need to introduce external annotations.
+     * <p> This value will merge with {@link EnableGrpcClients#basePackages}, only takes effect if {@link EnableGrpcClients#basePackages} is not set. </p>
+     *
+     * <p> The advantage of using configuration is no need to introduce external annotations. </p>
      */
     private List<String> basePackages = new ArrayList<>();
     /**
-     * Default max inbound message size, default value is {@code 4MB}.
+     * Default max inbound message size, default value is 4MB.
      *
      * @see DataSize
      * @see GrpcUtil#DEFAULT_MAX_MESSAGE_SIZE
@@ -65,7 +66,7 @@ public class GrpcClientProperties implements InitializingBean {
      */
     private DataSize maxOutboundMessageSize;
     /**
-     * Default max metadata size, default value is {@code 8KB}.
+     * Default max metadata size, default value is 8KB.
      *
      * @see DataSize
      * @see GrpcUtil#DEFAULT_MAX_HEADER_LIST_SIZE
@@ -80,7 +81,7 @@ public class GrpcClientProperties implements InitializingBean {
      */
     private InProcess inProcess;
     /**
-     * Channel shutdown timeout in milliseconds, default value is {@code 5000}.
+     * Channel shutdown timeout in milliseconds, default value is 5000.
      */
     private Long shutdownTimeout = 5000L;
     /**
@@ -92,7 +93,7 @@ public class GrpcClientProperties implements InitializingBean {
      */
     private Retry retry;
     /**
-     * Deadline after in milliseconds, default value is {@code 5000}.
+     * Deadline after in milliseconds, default value is 5000.
      *
      * @see AbstractStub#withDeadline(Deadline)
      * @since 3.2.0
@@ -113,7 +114,7 @@ public class GrpcClientProperties implements InitializingBean {
      */
     private Refresh refresh = new Refresh();
     /**
-     * Whether to enable warn unused config, default {@code true}.
+     * Whether to enable warn unused config, default true.
      */
     private boolean warnUnusedConfigEnabled = true;
 
@@ -181,43 +182,43 @@ public class GrpcClientProperties implements InitializingBean {
         /**
          * gRPC stub classes to apply this channel.
          *
-         * <p> This is a more IDE-friendly alternative to {@link #services}/{@link #stubs}, using classes first if both set.
+         * <p> This is a more IDE-friendly alternative to {@link #services}/{@link #stubs}, using classes first if both set. </p>
          *
-         * <p> The priority is classes > {@link #stubs} > {@link #services}.
+         * <p> The priority is classes > {@link #stubs} > {@link #services}. </p>
          */
         @SuppressWarnings("rawtypes")
         private List<Class<? extends AbstractStub>> classes = new ArrayList<>();
         /**
          * gRPC stubs to apply this channel.
          *
-         * <p> Support Ant-style patterns.
+         * <p> Support Ant-style patterns. </p>
          *
-         * <p> e.g. {@link HealthGrpc.HealthBlockingStub} can be identified by
+         * <p> e.g. {@link HealthGrpc.HealthBlockingStub} can be identified by </p>
          * <ul>
-         *     <li> {@code io.grpc.health.v1.HealthGrpc.HealthBlockingStub} (Class canonical name) </li>
-         *     <li> {@code io.grpc.health.v1.HealthGrpc$HealthBlockingStub} (Class name) </li>
-         *     <li> {@code io.grpc.**.*BlockingStub} (<a href="https://stackoverflow.com/questions/2952196/ant-path-style-patterns">Ant style pattern</a>) </li>
+         *     <li> io.grpc.health.v1.HealthGrpc.HealthBlockingStub (Class canonical name) </li>
+         *     <li> io.grpc.health.v1.HealthGrpc$HealthBlockingStub (Class name) </li>
+         *     <li> io.grpc.**.*BlockingStub (<a href="https://stackoverflow.com/questions/2952196/ant-path-style-patterns">Ant style pattern</a>) </li>
          * </ul>
          *
-         * <p> This is a more flexible alternative to {@link #classes}, using {@link #classes} first if both set.
+         * <p> This is a more flexible alternative to {@link #classes}, using {@link #classes} first if both set. </p>
          *
-         * <p> The priority is {@link #classes} > stubs > {@link #services}.
+         * <p> The priority is {@link #classes} > stubs > {@link #services}. </p>
          */
         private List<String> stubs = new ArrayList<>();
         /**
          * gRPC service names to apply this channel.
          *
-         * <p> Support Ant-style patterns.
+         * <p> Support Ant-style patterns. </p>
          *
-         * <p> e.g. {@link HealthGrpc.HealthBlockingStub} can be identified by
+         * <p> e.g. {@link HealthGrpc.HealthBlockingStub} can be identified by </p>
          * <ul>
-         *     <li> {@code grpc.health.v1.Health} (SERVICE_NAME field in {@link HealthGrpc}) </li>
-         *     <li> {@code grpc.health.v*.**} (<a href="https://stackoverflow.com/questions/2952196/ant-path-style-patterns">Ant style pattern</a>) </li>
+         *     <li> grpc.health.v1.Health (SERVICE_NAME field in {@link HealthGrpc}) </li>
+         *     <li> grpc.health.v*.** (<a href="https://stackoverflow.com/questions/2952196/ant-path-style-patterns">Ant style pattern</a>) </li>
          * </ul>
          *
-         * <p> This is a more flexible alternative to {@link #classes}, using {@link #classes} first if both set.
+         * <p> This is a more flexible alternative to {@link #classes}, using {@link #classes} first if both set. </p>
          *
-         * <p> The priority is {@link #classes} > {@link #stubs} > services.
+         * <p> The priority is {@link #classes} > {@link #stubs} > services. </p>
          *
          * @see AntPathMatcher
          */
@@ -245,7 +246,7 @@ public class GrpcClientProperties implements InitializingBean {
         /**
          * In-process client name.
          *
-         * <p> If set, will create an in-process channel by default, usually for testing.
+         * <p> If set, will create an in-process channel by default, usually for testing. </p>
          */
         private String name;
     }
@@ -285,9 +286,9 @@ public class GrpcClientProperties implements InitializingBean {
         public static final String PREFIX = GrpcClientProperties.PREFIX + ".refresh";
 
         /**
-         * Whether to enable refresh grpc clients, default {@code false}.
+         * Whether to enable refresh grpc clients, default false.
          *
-         * <p> NOTE: this feature needs {@code spring-cloud-context} dependency in the classpath.
+         * <p> NOTE: this feature needs 'spring-cloud-context' dependency in the classpath. </p>
          */
         private boolean enabled = false;
     }
