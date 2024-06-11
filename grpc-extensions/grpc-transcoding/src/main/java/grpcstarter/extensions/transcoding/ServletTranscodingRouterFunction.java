@@ -17,6 +17,7 @@ import static org.springframework.util.StreamUtils.copyToByteArray;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import grpcstarter.server.GrpcServerProperties;
+import grpcstarter.server.GrpcServerStartedEvent;
 import io.grpc.BindableService;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
@@ -39,7 +40,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.context.ApplicationListener;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.server.ResponseStatusException;
@@ -55,8 +56,8 @@ import org.springframework.web.servlet.function.ServerResponse;
 public class ServletTranscodingRouterFunction
         implements RouterFunction<ServerResponse>,
                 HandlerFunction<ServerResponse>,
-                SmartInitializingSingleton,
-                DisposableBean {
+                DisposableBean,
+                ApplicationListener<GrpcServerStartedEvent> {
 
     private static final String MATCHING_ROUTE = ServletTranscodingRouterFunction.class + ".matchingRoute";
 
@@ -69,7 +70,7 @@ public class ServletTranscodingRouterFunction
 
     private final List<Route<ServerRequest>> routes = new ArrayList<>();
     private final HeaderConverter headerConverter;
-    private final GrpcTranscodingProperties properties;
+    private final GrpcTranscodingProperties grpcTranscodingProperties;
     private final GrpcServerProperties grpcServerProperties;
 
     private Channel channel;
@@ -77,17 +78,17 @@ public class ServletTranscodingRouterFunction
     public ServletTranscodingRouterFunction(
             List<BindableService> services,
             HeaderConverter headerConverter,
-            GrpcTranscodingProperties properties,
+            GrpcTranscodingProperties grpcTranscodingProperties,
             GrpcServerProperties grpcServerProperties) {
         fillRoutes(services, fullMethodNameToRoute, routes);
         this.headerConverter = headerConverter;
-        this.properties = properties;
+        this.grpcTranscodingProperties = grpcTranscodingProperties;
         this.grpcServerProperties = grpcServerProperties;
     }
 
     @Override
-    public void afterSingletonsInstantiated() {
-        channel = getTranscodingChannel(properties, grpcServerProperties);
+    public void onApplicationEvent(GrpcServerStartedEvent event) {
+        channel = getTranscodingChannel(event.getSource().getPort(), grpcTranscodingProperties, grpcServerProperties);
     }
 
     @Override

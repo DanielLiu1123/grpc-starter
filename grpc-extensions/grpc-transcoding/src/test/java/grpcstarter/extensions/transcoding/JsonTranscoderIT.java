@@ -11,6 +11,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.grpc.Metadata;
 import io.grpc.stub.StreamObserver;
+import java.util.UUID;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.WebApplicationType;
@@ -146,6 +147,68 @@ class JsonTranscoderIT {
         assertThat(resp.getHeaders().getContentType()).hasToString("application/json");
         assertThat(resp.getBody()).isEqualTo("""
                 {"message":"Hello"}""");
+
+        ctx.close();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"SERVLET", "REACTIVE"})
+    void testUseRandomPort_thenTranscodingWorks(String webType) {
+        int port = randomPort();
+        var ctx = new SpringApplicationBuilder(Cfg.class)
+                .properties("server.port=" + port)
+                .properties("grpc.server.port=0")
+                .web(WebApplicationType.valueOf(webType))
+                .run();
+
+        var client = restTemplate();
+
+        var resp = client.exchange(
+                "http://localhost:" + port + "/transcoding.SimpleService/UnaryRpc",
+                HttpMethod.POST,
+                new HttpEntity<>(
+                        """
+                                {
+                                    "requestMessage": "Hi"
+                                }
+                                """),
+                String.class);
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+        assertThat(resp.getBody()).isNotBlank();
+        assertThat(resp.getBody()).isEqualTo("""
+                {"responseMessage":"Hi, Hi"}""");
+
+        ctx.close();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"SERVLET", "REACTIVE"})
+    void testUseInProcess_thenTranscodingWorks(String webType) {
+        int port = randomPort();
+        var ctx = new SpringApplicationBuilder(Cfg.class)
+                .properties("server.port=" + port)
+                .properties("grpc.server.in-process.name=" + UUID.randomUUID())
+                .web(WebApplicationType.valueOf(webType))
+                .run();
+
+        var client = restTemplate();
+
+        var resp = client.exchange(
+                "http://localhost:" + port + "/transcoding.SimpleService/UnaryRpc",
+                HttpMethod.POST,
+                new HttpEntity<>(
+                        """
+                                {
+                                    "requestMessage": "Hi"
+                                }
+                                """),
+                String.class);
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+        assertThat(resp.getBody()).isNotBlank();
+        assertThat(resp.getBody()).isEqualTo("""
+                {"responseMessage":"Hi, Hi"}""");
 
         ctx.close();
     }
