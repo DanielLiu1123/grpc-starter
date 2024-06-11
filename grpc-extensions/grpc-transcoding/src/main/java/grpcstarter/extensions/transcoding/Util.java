@@ -277,21 +277,26 @@ class Util {
     }
 
     public static Channel getTranscodingChannel(
-            GrpcTranscodingProperties grpcTranscodingProperties, GrpcServerProperties grpcServerProperties) {
+            int port, GrpcTranscodingProperties grpcTranscodingProperties, GrpcServerProperties grpcServerProperties) {
         var inProcess = grpcServerProperties.getInProcess();
         if (inProcess != null && StringUtils.hasText(inProcess.getName())) {
-            InProcessChannelBuilder b = InProcessChannelBuilder.forName(inProcess.getName());
-            return populateChannel(b, grpcServerProperties);
+            var builder = InProcessChannelBuilder.forName(inProcess.getName());
+            populateChannel(builder, grpcServerProperties);
+            return builder.build();
         }
 
         String endpoint = StringUtils.hasText(grpcTranscodingProperties.getEndpoint())
                 ? grpcTranscodingProperties.getEndpoint()
-                : "localhost:" + grpcServerProperties.getPort();
-        var b = ManagedChannelBuilder.forTarget(endpoint);
-        return populateChannel(b, grpcServerProperties);
+                : "localhost:" + port;
+        var builder = ManagedChannelBuilder.forTarget(endpoint);
+        populateChannel(builder, grpcServerProperties);
+        if (grpcServerProperties.getTls() == null) {
+            builder.usePlaintext();
+        }
+        return builder.build();
     }
 
-    private static Channel populateChannel(
+    private static ManagedChannelBuilder<? extends ManagedChannelBuilder<?>> populateChannel(
             ManagedChannelBuilder<? extends ManagedChannelBuilder<?>> channelBuilder,
             GrpcServerProperties grpcServerProperties) {
 
@@ -304,11 +309,7 @@ class Util {
                 .map(Long::intValue)
                 .ifPresent(channelBuilder::maxInboundMetadataSize);
 
-        if (grpcServerProperties.getTls() == null) {
-            channelBuilder.usePlaintext();
-        }
-
-        return channelBuilder.build();
+        return channelBuilder;
     }
 
     public static Message buildRequestMessage(Transcoder transcoder, Route<?> route)
