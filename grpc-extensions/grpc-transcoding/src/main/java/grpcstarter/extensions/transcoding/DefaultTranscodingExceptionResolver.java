@@ -23,10 +23,14 @@ public class DefaultTranscodingExceptionResolver implements TranscodingException
 
     @Override
     public ServerResponse resolve(StatusRuntimeException exception) {
-        Metadata t = exception.getTrailers();
+        Metadata trailers = exception.getTrailers();
+
+        // Spring doesn't handle ResponseStatusException thrown by MVC HandlerFunction before 6.2.0
+        // see https://github.com/spring-projects/spring-framework/issues/32689
+        // see https://github.com/spring-projects/spring-framework/commit/52af43d6d2ffcd1a5145b423baa3fa8a70a71ed7
         throw new TranscodingRuntimeException(
                 toHttpStatus(exception.getStatus()),
                 exception.getMessage(),
-                t != null ? headerConverter.toHttpHeaders(t) : null);
+                trailers != null ? headerConverter.toHttpHeaders(trailers) : null);
     }
 }

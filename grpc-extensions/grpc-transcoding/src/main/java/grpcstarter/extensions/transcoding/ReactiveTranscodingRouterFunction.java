@@ -75,6 +75,7 @@ public class ReactiveTranscodingRouterFunction
     private final HeaderConverter headerConverter;
     private final GrpcTranscodingProperties grpcTranscodingProperties;
     private final GrpcServerProperties grpcServerProperties;
+    private final ReactiveTranscodingExceptionResolver transcodingExceptionResolver;
 
     private Channel channel;
 
@@ -82,11 +83,13 @@ public class ReactiveTranscodingRouterFunction
             List<BindableService> services,
             HeaderConverter headerConverter,
             GrpcTranscodingProperties grpcTranscodingProperties,
-            GrpcServerProperties grpcServerProperties) {
+            GrpcServerProperties grpcServerProperties,
+            ReactiveTranscodingExceptionResolver transcodingExceptionResolver) {
         getReactiveRoutes(services, fullMethodNameToRoute, routes);
         this.headerConverter = headerConverter;
         this.grpcTranscodingProperties = grpcTranscodingProperties;
         this.grpcServerProperties = grpcServerProperties;
+        this.transcodingExceptionResolver = transcodingExceptionResolver;
     }
 
     @Override
@@ -222,11 +225,7 @@ public class ReactiveTranscodingRouterFunction
                         @Override
                         public void onError(Throwable throwable) {
                             if (throwable instanceof StatusRuntimeException sre) {
-                                Metadata t = trailers.get();
-                                sink.error(new TranscodingRuntimeException(
-                                        toHttpStatus(sre.getStatus()),
-                                        sre.getMessage(),
-                                        t != null ? headerConverter.toHttpHeaders(t) : null));
+                                transcodingExceptionResolver.resolve(sink, sre);
                             } else {
                                 sink.error(throwable);
                             }

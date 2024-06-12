@@ -2,6 +2,7 @@ package grpcstarter.extensions.transcoding;
 
 import io.grpc.StatusRuntimeException;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.MonoSink;
 
 /**
  * Recover exception in Spring WebFlux when transcoding error occurs.
@@ -16,8 +17,8 @@ public interface ReactiveTranscodingExceptionResolver {
     /**
      * Resolve exception thrown by transcoding.
      *
+     * @param sink      sink to emit response
      * @param exception exception thrown by transcoding
-     * @return recovered response
      */
-    ServerResponse resolve(StatusRuntimeException exception);
+    void resolve(MonoSink<ServerResponse> sink, StatusRuntimeException exception);
 }

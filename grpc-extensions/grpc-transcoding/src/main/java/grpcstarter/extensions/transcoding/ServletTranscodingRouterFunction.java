@@ -72,6 +72,7 @@ public class ServletTranscodingRouterFunction
     private final HeaderConverter headerConverter;
     private final GrpcTranscodingProperties grpcTranscodingProperties;
     private final GrpcServerProperties grpcServerProperties;
+    private final TranscodingExceptionResolver transcodingExceptionResolver;
 
     private Channel channel;
 
@@ -79,11 +80,13 @@ public class ServletTranscodingRouterFunction
             List<BindableService> services,
             HeaderConverter headerConverter,
             GrpcTranscodingProperties grpcTranscodingProperties,
-            GrpcServerProperties grpcServerProperties) {
+            GrpcServerProperties grpcServerProperties,
+            TranscodingExceptionResolver transcodingExceptionResolver) {
         fillRoutes(services, fullMethodNameToRoute, routes);
         this.headerConverter = headerConverter;
         this.grpcTranscodingProperties = grpcTranscodingProperties;
         this.grpcServerProperties = grpcServerProperties;
+        this.transcodingExceptionResolver = transcodingExceptionResolver;
     }
 
     @Override
@@ -163,11 +166,8 @@ public class ServletTranscodingRouterFunction
         Message responseMessage;
         try {
             responseMessage = (Message) ClientCalls.blockingUnaryCall(call, req);
-        } catch (StatusRuntimeException e) {
-            // TODO(Freeman): Not control by problemdetails.enabled, Spring bug?
-            Metadata t = trailers.get();
-            throw new TranscodingRuntimeException(
-                    toHttpStatus(e.getStatus()), e.getMessage(), t != null ? headerConverter.toHttpHeaders(t) : null);
+        } catch (StatusRuntimeException sre) {
+            return transcodingExceptionResolver.resolve(sre);
         }
 
         var builder = ServerResponse.ok().headers(h -> {
