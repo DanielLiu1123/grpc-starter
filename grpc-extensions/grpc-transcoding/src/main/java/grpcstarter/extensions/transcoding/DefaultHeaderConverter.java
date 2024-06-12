@@ -13,7 +13,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.ReflectionUtils;
 
 /**
+ * Default implementation of {@link HeaderConverter}.
+ *
+ * <p> Remove standard headers in {@link HttpHeaders} when converting to {@link Metadata}/{@link HttpHeaders},
+ * except for {@link HttpHeaders#AUTHORIZATION}.
+ *
+ * <p> Keeping all custom headers.
+ *
  * @author Freeman
+ * @see <a href="https://github.com/grpc-ecosystem/grpc-gateway?tab=readme-ov-file#mapping-grpc-to-http">Mapping gRPC to HTTP - grpc-gateway</a>
  */
 public class DefaultHeaderConverter implements HeaderConverter {
 
