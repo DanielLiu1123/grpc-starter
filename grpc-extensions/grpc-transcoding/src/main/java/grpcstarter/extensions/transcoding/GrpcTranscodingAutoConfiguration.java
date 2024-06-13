@@ -45,13 +45,14 @@ public class GrpcTranscodingAutoConfiguration {
         }
 
         @Bean
-        public ServletTranscodingRouterFunction webMvcTranscodingRouterFunction(
+        @ConditionalOnMissingBean(ServletTranscoder.class)
+        public DefaultServletTranscoder grpcStarterDefaultServletTranscoder(
                 List<BindableService> services,
                 HeaderConverter headerConverter,
                 GrpcTranscodingProperties grpcTranscodingProperties,
                 GrpcServerProperties grpcServerProperties,
                 TranscodingExceptionResolver transcodingExceptionResolver) {
-            return new ServletTranscodingRouterFunction(
+            return new DefaultServletTranscoder(
                     services,
                     headerConverter,
                     grpcTranscodingProperties,
@@ -72,13 +73,14 @@ public class GrpcTranscodingAutoConfiguration {
         }
 
         @Bean
-        public ReactiveTranscodingRouterFunction webFluxTranscodingRouterFunction(
+        @ConditionalOnMissingBean(ReactiveTranscoder.class)
+        public DefaultReactiveTranscoder grpcStarterDefaultReactiveTranscoder(
                 List<BindableService> services,
                 HeaderConverter headerConverter,
                 GrpcTranscodingProperties grpcTranscodingProperties,
                 GrpcServerProperties grpcServerProperties,
                 ReactiveTranscodingExceptionResolver transcodingExceptionResolver) {
-            return new ReactiveTranscodingRouterFunction(
+            return new DefaultReactiveTranscoder(
                     services,
                     headerConverter,
                     grpcTranscodingProperties,

@@ -45,7 +45,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.reactive.function.server.HandlerFunction;
-import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ResponseStatusException;
@@ -56,13 +55,10 @@ import reactor.core.publisher.Mono;
  * @author Freeman
  * @since 3.3.0
  */
-public class ReactiveTranscodingRouterFunction
-        implements RouterFunction<ServerResponse>,
-                HandlerFunction<ServerResponse>,
-                ApplicationListener<GrpcServerStartedEvent>,
-                DisposableBean {
+public class DefaultReactiveTranscoder
+        implements ReactiveTranscoder, ApplicationListener<GrpcServerStartedEvent>, DisposableBean {
 
-    private static final String MATCHING_ROUTE = ReactiveTranscodingRouterFunction.class.getName() + ".matchingRoute";
+    private static final String MATCHING_ROUTE = DefaultReactiveTranscoder.class.getName() + ".matchingRoute";
 
     /**
      * grpc full method name -> route
@@ -79,7 +75,7 @@ public class ReactiveTranscodingRouterFunction
 
     private Channel channel;
 
-    public ReactiveTranscodingRouterFunction(
+    public DefaultReactiveTranscoder(
             List<BindableService> services,
             HeaderConverter headerConverter,
             GrpcTranscodingProperties grpcTranscodingProperties,

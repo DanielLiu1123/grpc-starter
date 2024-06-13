@@ -45,7 +45,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.function.HandlerFunction;
-import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 
@@ -53,13 +52,10 @@ import org.springframework.web.servlet.function.ServerResponse;
  * @author Freeman
  * @since 3.3.0
  */
-public class ServletTranscodingRouterFunction
-        implements RouterFunction<ServerResponse>,
-                HandlerFunction<ServerResponse>,
-                DisposableBean,
-                ApplicationListener<GrpcServerStartedEvent> {
+public class DefaultServletTranscoder
+        implements ServletTranscoder, DisposableBean, ApplicationListener<GrpcServerStartedEvent> {
 
-    private static final String MATCHING_ROUTE = ServletTranscodingRouterFunction.class + ".matchingRoute";
+    private static final String MATCHING_ROUTE = DefaultServletTranscoder.class + ".matchingRoute";
 
     /**
      * grpc full method name -> route
@@ -76,7 +72,7 @@ public class ServletTranscodingRouterFunction
 
     private Channel channel;
 
-    public ServletTranscodingRouterFunction(
+    public DefaultServletTranscoder(
             List<BindableService> services,
             HeaderConverter headerConverter,
             GrpcTranscodingProperties grpcTranscodingProperties,
