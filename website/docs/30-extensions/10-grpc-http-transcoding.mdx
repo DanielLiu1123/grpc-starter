@@ -206,6 +206,64 @@ public class CustomHeaderConverter implements HeaderConverter {
 }
 ```
 
+### Custom Transcoding Exception Handling
+
+Provides two interfaces [`TranscodingExceptionResolver`](#transcodingexceptionresolver) (Spring MVC)
+and [`ReactiveTranscodingExceptionHandler`](#reactivetranscodingexceptionhandler) (Spring WebFlux) for custom transcoding exception handling.
+
+The default implementations are [`DefaultTranscodingExceptionResolver`](https://github.com/DanielLiu1123/grpc-starter/blob/main/grpc-extensions/grpc-transcoding/src/main/java/grpcstarter/extensions/transcoding/DefaultTranscodingExceptionResolver.java)
+and [`DefaultReactiveTranscodingExceptionHandler`](https://github.com/DanielLiu1123/grpc-starter/blob/main/grpc-extensions/grpc-transcoding/src/main/java/grpcstarter/extensions/transcoding/DefaultReactiveTranscodingExceptionResolver.java).
+
+The logic of the default implementation is:
+when an exception occurs, gRPC status code will be converted to http status code,
+and then throw `TranscodingRuntimeException`,
+which will then be captured and handled by Spring MVC/Flux.
+
+:::tip
+If you want Spring to handle `ResponseStatusException`,
+you need to set `spring.{mvc,webflux}.problemdetails.enabled` to `true`.
+:::
+
+#### TranscodingExceptionResolver
+
+Customize a `TranscodingExceptionResolver` to replace the default implementation:
+
+```java
+@Component
+public class MyTranscodingExceptionResolver implements TranscodingExceptionResolver {
+
+    @Override
+    public ServerResponse resolve(StatusRuntimeException exception) {
+        // do your custom logic here ...
+    }
+}
+```
+
+:::warning
+Spring MVC does not handle `ResponseStatusException` thrown by `HandlerFunction` before Spring `6.2.0`.
+Refer to [spring-projects/spring-framework#32689](https://github.com/spring-projects/spring-framework/issues/32689).
+:::
+
+#### ReactiveTranscodingExceptionHandler
+
+Customize a `ReactiveTranscodingExceptionHandler` to replace the default implementation:
+
+```java
+public class MyReactiveTranscodingExceptionResolver implements ReactiveTranscodingExceptionResolver {
+
+    @Override
+    public void resolve(MonoSink<ServerResponse> sink, StatusRuntimeException exception) {
+        // do your custom logic here ...
+
+        // return a exception response
+        // sink.error(new MyException());
+
+        // return a normal response
+        // ServerResponse.ok().bodyValue("Ops!").subscribe(sink::success);
+    }
+}
+```
+
 ## Configurations
 
 Disable transcoding:
