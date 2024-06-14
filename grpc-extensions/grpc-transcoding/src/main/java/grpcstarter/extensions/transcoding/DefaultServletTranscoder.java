@@ -45,7 +45,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.function.HandlerFunction;
-import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 
@@ -53,13 +52,10 @@ import org.springframework.web.servlet.function.ServerResponse;
  * @author Freeman
  * @since 3.3.0
  */
-public class ServletTranscodingRouterFunction
-        implements RouterFunction<ServerResponse>,
-                HandlerFunction<ServerResponse>,
-                DisposableBean,
-                ApplicationListener<GrpcServerStartedEvent> {
+public class DefaultServletTranscoder
+        implements ServletTranscoder, DisposableBean, ApplicationListener<GrpcServerStartedEvent> {
 
-    private static final String MATCHING_ROUTE = ServletTranscodingRouterFunction.class + ".matchingRoute";
+    private static final String MATCHING_ROUTE = DefaultServletTranscoder.class + ".matchingRoute";
 
     /**
      * grpc full method name -> route
@@ -72,18 +68,21 @@ public class ServletTranscodingRouterFunction
     private final HeaderConverter headerConverter;
     private final GrpcTranscodingProperties grpcTranscodingProperties;
     private final GrpcServerProperties grpcServerProperties;
+    private final TranscodingExceptionResolver transcodingExceptionResolver;
 
     private Channel channel;
 
-    public ServletTranscodingRouterFunction(
+    public DefaultServletTranscoder(
             List<BindableService> services,
             HeaderConverter headerConverter,
             GrpcTranscodingProperties grpcTranscodingProperties,
-            GrpcServerProperties grpcServerProperties) {
+            GrpcServerProperties grpcServerProperties,
+            TranscodingExceptionResolver transcodingExceptionResolver) {
         fillRoutes(services, fullMethodNameToRoute, routes);
         this.headerConverter = headerConverter;
         this.grpcTranscodingProperties = grpcTranscodingProperties;
         this.grpcServerProperties = grpcServerProperties;
+        this.transcodingExceptionResolver = transcodingExceptionResolver;
     }
 
     @Override
@@ -163,11 +162,8 @@ public class ServletTranscodingRouterFunction
         Message responseMessage;
         try {
             responseMessage = (Message) ClientCalls.blockingUnaryCall(call, req);
-        } catch (StatusRuntimeException e) {
-            // TODO(Freeman): Not control by problemdetails.enabled, Spring bug?
-            Metadata t = trailers.get();
-            throw new TranscodingRuntimeException(
-                    toHttpStatus(e.getStatus()), e.getMessage(), t != null ? headerConverter.toHttpHeaders(t) : null);
+        } catch (StatusRuntimeException sre) {
+            return transcodingExceptionResolver.resolve(sre);
         }
 
         var builder = ServerResponse.ok().headers(h -> {

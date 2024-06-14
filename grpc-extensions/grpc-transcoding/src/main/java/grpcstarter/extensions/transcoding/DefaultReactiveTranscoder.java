@@ -45,7 +45,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.reactive.function.server.HandlerFunction;
-import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ResponseStatusException;
@@ -56,13 +55,10 @@ import reactor.core.publisher.Mono;
  * @author Freeman
  * @since 3.3.0
  */
-public class ReactiveTranscodingRouterFunction
-        implements RouterFunction<ServerResponse>,
-                HandlerFunction<ServerResponse>,
-                ApplicationListener<GrpcServerStartedEvent>,
-                DisposableBean {
+public class DefaultReactiveTranscoder
+        implements ReactiveTranscoder, ApplicationListener<GrpcServerStartedEvent>, DisposableBean {
 
-    private static final String MATCHING_ROUTE = ReactiveTranscodingRouterFunction.class.getName() + ".matchingRoute";
+    private static final String MATCHING_ROUTE = DefaultReactiveTranscoder.class.getName() + ".matchingRoute";
 
     /**
      * grpc full method name -> route
@@ -75,18 +71,21 @@ public class ReactiveTranscodingRouterFunction
     private final HeaderConverter headerConverter;
     private final GrpcTranscodingProperties grpcTranscodingProperties;
     private final GrpcServerProperties grpcServerProperties;
+    private final ReactiveTranscodingExceptionResolver transcodingExceptionResolver;
 
     private Channel channel;
 
-    public ReactiveTranscodingRouterFunction(
+    public DefaultReactiveTranscoder(
             List<BindableService> services,
             HeaderConverter headerConverter,
             GrpcTranscodingProperties grpcTranscodingProperties,
-            GrpcServerProperties grpcServerProperties) {
+            GrpcServerProperties grpcServerProperties,
+            ReactiveTranscodingExceptionResolver transcodingExceptionResolver) {
         getReactiveRoutes(services, fullMethodNameToRoute, routes);
         this.headerConverter = headerConverter;
         this.grpcTranscodingProperties = grpcTranscodingProperties;
         this.grpcServerProperties = grpcServerProperties;
+        this.transcodingExceptionResolver = transcodingExceptionResolver;
     }
 
     @Override
@@ -222,11 +221,7 @@ public class ReactiveTranscodingRouterFunction
                         @Override
                         public void onError(Throwable throwable) {
                             if (throwable instanceof StatusRuntimeException sre) {
-                                Metadata t = trailers.get();
-                                sink.error(new TranscodingRuntimeException(
-                                        toHttpStatus(sre.getStatus()),
-                                        sre.getMessage(),
-                                        t != null ? headerConverter.toHttpHeaders(t) : null));
+                                transcodingExceptionResolver.resolve(sink, sre);
                             } else {
                                 sink.error(throwable);
                             }
