@@ -58,10 +58,10 @@ publishing {
                 username System.getenv('OSSRH_USER')
                 password System.getenv('OSSRH_PASSWORD')
             }
-            if (version.endsWith('-SNAPSHOT')) {
-                url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-            } else {
+            if (isRelease) {
                 url 'https://s01.oss.sonatype.org/content/repositories/releases/'
+            } else {
+                url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
             }
         }
     }

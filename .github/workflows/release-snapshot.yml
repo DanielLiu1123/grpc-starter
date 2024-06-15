@@ -1,4 +1,4 @@
-name: Build
+name: Release Snapshot
 on:
   push:
     branches:
