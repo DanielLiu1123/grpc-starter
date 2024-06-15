@@ -118,7 +118,6 @@ service SimpleService {
 **HTTP:**
 
 ```shell
-curl -X POST -d '{"requestMessage": "World"}' http://localhost:8080/transcoding.mvc.SimpleService/UnaryRpc
 curl -X POST -d '{"requestMessage": "World"}' http://localhost:8080/unary
 ```
 
@@ -129,8 +128,8 @@ grpcurl -plaintext -d '{"requestMessage": "World"}' localhost:9090 transcoding.m
 ```
 
 :::info
-The default mapping path is `POST /<package>.<Service>/<MethodName>` (case-sensitive)
-when the `google.api.http` option is not specified.
+When `grpc.transcoding.auto-mapping` is `true`(default value) and `google.api.http` option is not specified,
+the default mapping path is `POST /<package>.<Service>/<MethodName>` (case-sensitive).
 :::
 
 Refer to [webmvc example](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/transcoding/webmvc).
@@ -165,8 +164,13 @@ service SimpleService {
 **HTTP:**
 
 ```shell
-curl -X POST http://localhost:8080/transcoding.mvc.SimpleService/ServerStreamingRpc?requestMessage=World
 curl http://localhost:8080/serverstreaming?requestMessage=World
+```
+
+**gRPC:**
+
+```shell
+grpcurl -plaintext -d '{"requestMessage": "World"}' localhost:9090 transcoding.mvc.SimpleService/ServerStreamingRpc
 ```
 
 Refer to [webmvc example](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/transcoding/webmvc).
@@ -272,6 +276,14 @@ Disable transcoding:
 grpc:
   transcoding:
     enabled: false
+```
+
+Disable auto-mapping:
+
+```yaml
+grpc:
+  transcoding:
+    auto-mapping: false
 ```
 
 Custom gRPC server endpoint:
