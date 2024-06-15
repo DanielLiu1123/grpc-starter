@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+package transcoding;
+
+message AddWhiteSpaceRequest {
+}
+
+message AddWhiteSpaceResponse {
+  string text = 1;
+}
+
+service AddWhiteSpaceService {
+  rpc AddWhiteSpace(AddWhiteSpaceRequest) returns (AddWhiteSpaceResponse) {}
+}

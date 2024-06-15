@@ -3,11 +3,13 @@ package grpcstarter.extensions.transcoding;
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.REACTIVE;
 import static org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication.Type.SERVLET;
 
+import com.google.protobuf.util.JsonFormat;
 import grpcstarter.server.ConditionOnGrpcServerEnabled;
 import grpcstarter.server.GrpcServerProperties;
 import io.grpc.BindableService;
 import io.grpc.Metadata;
 import java.util.List;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -25,7 +27,34 @@ import org.springframework.http.HttpHeaders;
 @ConditionOnGrpcServerEnabled
 @ConditionalOnProperty(prefix = GrpcTranscodingProperties.PREFIX, name = "enabled", matchIfMissing = true)
 @EnableConfigurationProperties(GrpcTranscodingProperties.class)
-public class GrpcTranscodingAutoConfiguration {
+public class GrpcTranscodingAutoConfiguration implements SmartInitializingSingleton {
+
+    private final GrpcTranscodingProperties transcodingProperties;
+
+    public GrpcTranscodingAutoConfiguration(GrpcTranscodingProperties transcodingProperties) {
+        this.transcodingProperties = transcodingProperties;
+    }
+
+    @Override
+    public void afterSingletonsInstantiated() {
+        setPrinter();
+    }
+
+    private void setPrinter() {
+        var printer = JsonFormat.printer();
+
+        var printOptions = transcodingProperties.getPrintOptions();
+        if (printOptions != null) {
+            if (!printOptions.isAddWhitespace()) {
+                printer = printer.omittingInsignificantWhitespace();
+            }
+            if (printOptions.isAlwaysPrintEnumsAsInts()) {
+                printer = printer.printingEnumsAsInts();
+            }
+        }
+
+        JsonUtil.setPrinter(printer);
+    }
 
     @Bean
     @ConditionalOnMissingBean

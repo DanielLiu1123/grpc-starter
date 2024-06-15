@@ -65,9 +65,10 @@ public class DefaultReactiveTranscoder
      *
      * <p> e.g. "grpc.testing.SimpleService/UnaryRpc" -> Route
      */
-    private final Map<String, Route<ServerRequest>> fullMethodNameToRoute = new HashMap<>();
+    private final Map<String, Route<ServerRequest>> autoMappingRoutes = new HashMap<>();
 
-    private final List<Route<ServerRequest>> routes = new ArrayList<>();
+    private final List<Route<ServerRequest>> customRoutes = new ArrayList<>();
+
     private final HeaderConverter headerConverter;
     private final GrpcTranscodingProperties grpcTranscodingProperties;
     private final GrpcServerProperties grpcServerProperties;
@@ -81,7 +82,7 @@ public class DefaultReactiveTranscoder
             GrpcTranscodingProperties grpcTranscodingProperties,
             GrpcServerProperties grpcServerProperties,
             ReactiveTranscodingExceptionResolver transcodingExceptionResolver) {
-        getReactiveRoutes(services, fullMethodNameToRoute, routes);
+        getReactiveRoutes(services, autoMappingRoutes, customRoutes, grpcTranscodingProperties);
         this.headerConverter = headerConverter;
         this.grpcTranscodingProperties = grpcTranscodingProperties;
         this.grpcServerProperties = grpcServerProperties;
@@ -97,14 +98,14 @@ public class DefaultReactiveTranscoder
     @Nonnull
     public Mono<HandlerFunction<ServerResponse>> route(@Nonnull ServerRequest request) {
         if (Objects.equals(request.method(), HttpMethod.POST)) {
-            var route = fullMethodNameToRoute.get(trim(request.path(), '/'));
+            var route = autoMappingRoutes.get(trim(request.path(), '/'));
             if (route != null) {
                 request.attributes().put(MATCHING_ROUTE, route);
                 return Mono.just(this);
             }
         }
 
-        for (var route : routes) {
+        for (var route : customRoutes) {
             if (route.predicate().test(request)
                     || route.additionalPredicates().stream().anyMatch(p -> p.test(request))) {
                 request.attributes().put(MATCHING_ROUTE, route);

@@ -70,10 +70,11 @@ class Util {
     static final Map<String, Message> methodCache = new ConcurrentReferenceHashMap<>();
 
     private static <T> List<Util.Route<T>> fillRoutes(
-            Map<String, Util.Route<T>> methodNameRoutes,
-            List<Util.Route<T>> routes,
+            Map<String, Util.Route<T>> autoMappingRoutes,
+            List<Util.Route<T>> customRoutes,
             List<ServerServiceDefinition> definitions,
-            BiFunction<HttpMethod, PathTemplate, Predicate<T>> predicateCreator) {
+            BiFunction<HttpMethod, PathTemplate, Predicate<T>> predicateCreator,
+            GrpcTranscodingProperties grpcTranscodingProperties) {
         for (ServerServiceDefinition ssd : definitions) {
             Descriptors.ServiceDescriptor serviceDescriptor = Util.getServiceDescriptor(ssd);
             if (serviceDescriptor == null) {
@@ -93,19 +94,21 @@ class Util {
                             return;
                         }
 
-                        methodNameRoutes.put(
-                                invokeMethod.getFullMethodName(),
-                                new Route<>(defaultHttpRule, invokeMethod, methodDescriptor, t -> false, List.of()));
-
-                        if (methodDescriptor.getOptions().hasExtension(AnnotationsProto.http)) {
+                        boolean hasHttpExtension = methodDescriptor.getOptions().hasExtension(AnnotationsProto.http);
+                        if (hasHttpExtension) {
                             HttpRule httpRule = methodDescriptor.getOptions().getExtension(AnnotationsProto.http);
                             Optional.ofNullable(createRouteWithBindings(
                                             httpRule, invokeMethod, methodDescriptor, predicateCreator))
-                                    .ifPresent(routes::add);
+                                    .ifPresent(customRoutes::add);
+                        } else if (grpcTranscodingProperties.isAutoMapping()) {
+                            autoMappingRoutes.put(
+                                    invokeMethod.getFullMethodName(),
+                                    new Route<>(
+                                            defaultHttpRule, invokeMethod, methodDescriptor, t -> false, List.of()));
                         }
                     });
         }
-        return routes;
+        return customRoutes;
     }
 
     @Nullable
@@ -167,16 +170,28 @@ class Util {
 
     public static List<Util.Route<ServerRequest>> fillRoutes(
             List<BindableService> services,
-            Map<String, Route<ServerRequest>> methodNameRoutes,
-            List<Util.Route<ServerRequest>> routes) {
-        return fillRoutes(methodNameRoutes, routes, listDefinition(services), ServletPredicate::new);
+            Map<String, Route<ServerRequest>> autoMappingRoutes,
+            List<Util.Route<ServerRequest>> customRoutes,
+            GrpcTranscodingProperties grpcTranscodingProperties) {
+        return fillRoutes(
+                autoMappingRoutes,
+                customRoutes,
+                listDefinition(services),
+                ServletPredicate::new,
+                grpcTranscodingProperties);
     }
 
     public static List<Util.Route<org.springframework.web.reactive.function.server.ServerRequest>> getReactiveRoutes(
             List<BindableService> services,
-            Map<String, Route<org.springframework.web.reactive.function.server.ServerRequest>> methodNameRoutes,
-            List<Util.Route<org.springframework.web.reactive.function.server.ServerRequest>> routes) {
-        return fillRoutes(methodNameRoutes, routes, listDefinition(services), ReactivePredicate::new);
+            Map<String, Route<org.springframework.web.reactive.function.server.ServerRequest>> autoMappingRoutes,
+            List<Util.Route<org.springframework.web.reactive.function.server.ServerRequest>> customRoutes,
+            GrpcTranscodingProperties grpcTranscodingProperties) {
+        return fillRoutes(
+                autoMappingRoutes,
+                customRoutes,
+                listDefinition(services),
+                ReactivePredicate::new,
+                grpcTranscodingProperties);
     }
 
     static String snakeToPascal(String input) {

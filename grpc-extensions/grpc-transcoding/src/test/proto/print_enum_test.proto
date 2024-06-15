@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package transcoding;
+
+message PrintEnumRequest {
+}
+
+message PrintEnumResponse {
+  Enum enum = 1;
+  enum Enum {
+    ENUM_UNSPECIFIED = 0;
+    V1 = 1;
+    V2 = 2;
+  }
+}
+
+service PrintEnumService {
+  rpc PrintEnum(PrintEnumRequest) returns (PrintEnumResponse) {}
+}

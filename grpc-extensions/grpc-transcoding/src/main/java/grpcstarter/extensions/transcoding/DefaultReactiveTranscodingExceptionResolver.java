@@ -23,6 +23,10 @@ public class DefaultReactiveTranscodingExceptionResolver implements ReactiveTran
 
     @Override
     public void resolve(MonoSink<ServerResponse> sink, StatusRuntimeException exception) {
+
+        // Do NOT log the exception here,
+        // because if a server-side exception occurs, the gRPC server should have already logged it.
+
         var trailers = exception.getTrailers();
         var e = new TranscodingRuntimeException(
                 toHttpStatus(exception.getStatus()),
