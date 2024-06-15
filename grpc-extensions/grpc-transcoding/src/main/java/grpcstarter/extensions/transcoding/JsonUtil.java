@@ -27,21 +27,20 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 class JsonUtil {
 
     private static final ObjectMapper om;
-    private static final JsonFormat.Printer printer;
+    private static JsonFormat.Printer printer;
 
     static {
         om = new Jackson2ObjectMapperBuilder()
                 .failOnEmptyBeans(false)
                 .modules(new SimpleModule().addSerializer(new ProtoMessageSerializer()))
                 .build();
-        printer = JsonFormat.printer().omittingInsignificantWhitespace();
     }
 
     /**
      * Convert the Java bean or Protobuf {@link Message} to JSON string.
      *
      * <p> For Java Bean: include all fields, even if they are null.
-     * <p> For Protobuf {@link Message}: use {@link JsonFormat.Printer#print(MessageOrBuilder)}'s default behavior, default value will be omitted.
+     * <p> For Protobuf {@link Message}: use {@link #printer} to print.
      *
      * @param obj the object/{@link Message} to encode
      * @return json string
@@ -52,7 +51,7 @@ class JsonUtil {
                 return stringifySimpleValueMessage(m);
             }
             try {
-                return printer.print(m);
+                return getPrinter().print(m);
             } catch (InvalidProtocolBufferException e) {
                 throw new IllegalArgumentException(e);
             }
@@ -76,6 +75,17 @@ class JsonUtil {
         return !BeanUtils.isSimpleValueType(obj.getClass());
     }
 
+    public static void setPrinter(JsonFormat.Printer printer) {
+        JsonUtil.printer = printer;
+    }
+
+    private static JsonFormat.Printer getPrinter() {
+        if (printer == null) {
+            printer = JsonFormat.printer().omittingInsignificantWhitespace();
+        }
+        return printer;
+    }
+
     private static final class ProtoMessageSerializer extends StdSerializer<MessageOrBuilder> {
 
         private ProtoMessageSerializer() {
@@ -85,7 +95,7 @@ class JsonUtil {
         @Override
         public void serialize(MessageOrBuilder value, JsonGenerator gen, SerializerProvider serializers)
                 throws IOException {
-            gen.writeRawValue(printer.print(value));
+            gen.writeRawValue(getPrinter().print(value));
         }
     }
 }

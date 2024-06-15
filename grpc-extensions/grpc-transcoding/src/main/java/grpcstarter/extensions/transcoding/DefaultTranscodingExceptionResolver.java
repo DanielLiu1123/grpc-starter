@@ -23,6 +23,10 @@ public class DefaultTranscodingExceptionResolver implements TranscodingException
 
     @Override
     public ServerResponse resolve(StatusRuntimeException exception) {
+
+        // Do NOT log the exception here,
+        // because if a server-side exception occurs, the gRPC server should have already logged it.
+
         Metadata trailers = exception.getTrailers();
 
         // Spring doesn't handle ResponseStatusException thrown by MVC HandlerFunction before 6.2.0

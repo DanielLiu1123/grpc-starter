@@ -38,9 +38,9 @@ class JsonTranscoderIT {
 
         var client = restTemplate();
 
-        // full path
+        // path alias
         var resp = client.exchange(
-                "http://localhost:" + port + "/transcoding.SimpleService/UnaryRpc",
+                "http://localhost:" + port + "/v1/unaryrpc",
                 HttpMethod.POST,
                 new HttpEntity<>(
                         """
@@ -51,21 +51,13 @@ class JsonTranscoderIT {
                 String.class);
         assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+        assertThat(resp.getHeaders().get("request-id")).containsExactly("001");
         assertThat(resp.getBody()).isNotBlank();
         assertThat(resp.getBody()).isEqualTo("""
                 {"responseMessage":"Hi, Hi"}""");
 
-        // path alias
-        resp = client.exchange(
-                "http://localhost:" + port + "/v1/unaryrpc",
-                HttpMethod.POST,
-                new HttpEntity<>(
-                        """
-                                {
-                                    "requestMessage": "Hi"
-                                }
-                                """),
-                String.class);
+        // Additional path alias
+        resp = client.exchange("http://localhost:" + port + "/v1/unaryrpc/Hi", HttpMethod.GET, null, String.class);
         assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
         assertThat(resp.getHeaders().get("request-id")).containsExactly("001");
@@ -164,7 +156,7 @@ class JsonTranscoderIT {
         var client = restTemplate();
 
         var resp = client.exchange(
-                "http://localhost:" + port + "/transcoding.SimpleService/UnaryRpc",
+                "http://localhost:" + port + "/v1/unaryrpc",
                 HttpMethod.POST,
                 new HttpEntity<>(
                         """
@@ -195,7 +187,7 @@ class JsonTranscoderIT {
         var client = restTemplate();
 
         var resp = client.exchange(
-                "http://localhost:" + port + "/transcoding.SimpleService/UnaryRpc",
+                "http://localhost:" + port + "/v1/unaryrpc",
                 HttpMethod.POST,
                 new HttpEntity<>(
                         """

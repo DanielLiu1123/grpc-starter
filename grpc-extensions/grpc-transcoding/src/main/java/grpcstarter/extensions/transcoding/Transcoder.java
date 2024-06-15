@@ -19,7 +19,7 @@ import java.util.Optional;
  */
 class Transcoder {
 
-    private static final JsonFormat.Parser parser = JsonFormat.parser().ignoringUnknownFields();
+    private static JsonFormat.Parser parser;
 
     private final Variable variable;
 
@@ -126,7 +126,7 @@ class Transcoder {
     }
 
     private static void merge(Message.Builder messageBuilder, String bodyString) throws InvalidProtocolBufferException {
-        parser.merge(bodyString, messageBuilder);
+        getParser().merge(bodyString, messageBuilder);
     }
 
     private static boolean noBuilder(Descriptors.FieldDescriptor field) {
@@ -177,6 +177,13 @@ class Transcoder {
             case MESSAGE -> throw new IllegalArgumentException(
                     "Direct parsing to message type not supported, field " + field.getName());
         };
+    }
+
+    private static JsonFormat.Parser getParser() {
+        if (parser == null) {
+            parser = JsonFormat.parser().ignoringUnknownFields();
+        }
+        return parser;
     }
 
     public record Variable(byte[] body, Map<String, String[]> parameters, Map<String, String> pathVariables) {}
