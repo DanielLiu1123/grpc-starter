@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        mavenLocal()
+        mavenCentral()
     }
     dependencies {
         classpath "org.rodnansol:spring-configuration-property-documenter-gradle-plugin:${springConfigurationPropertyDocumenterVersion}"
@@ -29,7 +29,7 @@ allprojects {
     }
 
     java {
-        registerFeature("optionalSuppor") {
+        registerFeature("optionalSupport") {
             usingSourceSet(sourceSets.optionalSupport)
         }
     }
