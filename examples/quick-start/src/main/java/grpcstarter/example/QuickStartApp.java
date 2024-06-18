@@ -1,39 +1,39 @@
 package grpcstarter.example;
 
-import io.grpc.stub.StreamObserver;
-import io.grpc.testing.protobuf.SimpleRequest;
-import io.grpc.testing.protobuf.SimpleResponse;
-import io.grpc.testing.protobuf.SimpleServiceGrpc;
-import org.springframework.boot.ApplicationRunner;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.annotation.Bean;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
-public class QuickStartApp extends SimpleServiceGrpc.SimpleServiceImplBase {
+public class QuickStartApp {
 
     public static void main(String[] args) {
-        new SpringApplicationBuilder(QuickStartApp.class)
-                .properties("grpc.client.base-packages=io.grpc")
-                .properties("grpc.client.authority=127.0.0.1:9090")
-                .run(args);
+        SpringApplication.run(QuickStartApp.class, args);
     }
 
-    @Override
-    public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> r) {
-        var response = SimpleResponse.newBuilder()
-                .setResponseMessage("Hello " + request.getRequestMessage())
-                .build();
-        r.onNext(response);
-        r.onCompleted();
+    @RestController
+    static class FruitController {
+
+        @GetMapping("/apple")
+        public List<Apple> apple() {
+            return List.of();
+        }
+
+        record Apple(int id, String name) {}
     }
 
-    @Bean
-    ApplicationRunner runner(SimpleServiceGrpc.SimpleServiceBlockingStub stub) {
-        return args -> {
-            var response = stub.unaryRpc(
-                    SimpleRequest.newBuilder().setRequestMessage("World!").build());
-            System.out.println(response.getResponseMessage());
-        };
+    @RestController
+    static class PhoneController {
+
+        @GetMapping("/iphone")
+        public List<Apple> iphone() {
+            return List.of();
+        }
+
+        @Schema(name = "PhoneController.Apple")
+        record Apple(int id, String version) {}
     }
 }
