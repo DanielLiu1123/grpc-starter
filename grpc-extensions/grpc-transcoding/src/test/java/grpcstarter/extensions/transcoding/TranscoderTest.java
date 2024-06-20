@@ -28,6 +28,20 @@ class TranscoderTest {
         assertThat(request.getSomeMessage()).isEqualTo("x2"); // body is ignored when httpRule body is empty
         assertThat(request.getRequestMessage()).isEqualTo("y3");
         assertThat(request.hasNested()).isFalse();
+
+        request = buildRequest(
+                Map.of("requestMessage", "y3"),
+                """
+                {"some_message": "x1", "requestMessage": "y1"}
+                """,
+                Map.of(
+                        "some_message", new String[] {"x2"},
+                        "requestMessage", new String[] {"y2"}),
+                HttpRule.newBuilder().setBody("*").build());
+
+        assertThat(request.getSomeMessage()).isEqualTo("x1"); // body is used when httpRule body is *
+        assertThat(request.getRequestMessage()).isEqualTo("y3");
+        assertThat(request.hasNested()).isFalse();
     }
 
     @Test

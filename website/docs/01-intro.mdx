@@ -17,7 +17,7 @@ There are already two gRPC Spring Boot starters:
 So, why create another one? Here are the main reasons:
 
 1. The autoconfiguration for gRPC clients is not elegant enough; it does not fully follow the Spring bean lifecycle and requires additional annotations like `@GrpcClient`. We aim to use `@Autowired` directly to inject gRPC clients.
-2. The integration with the surrounding gRPC ecosystem is incomplete, lacking features like gRPC HTTP transcoding, protobuf validation, test support, etc.
+2. The integration with the surrounding gRPC ecosystem is incomplete, lacking features like gRPC HTTP transcoding, Protobuf validation, test support, etc.
 3. Writing extensions is challenging due to the lack of suitable extension points.
 
 ## Core Features
@@ -62,8 +62,7 @@ This framework is designed for extensibility, and you can easily extend it to su
 │   ├── grpc-starter-protovalidate          # Protobuf validation starter, implemented by protovalidate
 │   ├── grpc-starter-test                   # Test starter
 │   ├── grpc-starter-tracing                # Tracing starter
-│   ├── grpc-starter-transcoding-webflux    # HTTP transcoding starter for WebFlux
-│   ├── grpc-starter-transcoding-webmvc     # HTTP transcoding starter for WebMVC
+│   ├── grpc-starter-transcoding            # HTTP transcoding starter for WebMVC/WebFlux
 │   └── grpc-starter-validation             # Protobuf validation starter, implemented by protoc-gen-validate
 └── website                                 # Documentation, powered by Docusaurus
 ```

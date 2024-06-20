@@ -1,6 +1,5 @@
 dependencies {
     api(project(":grpc-extensions:grpc-transcoding"))
-    api("org.springframework.boot:spring-boot-starter-webflux")
 }
 
 apply from: "${rootDir}/gradle/deploy.gradle"

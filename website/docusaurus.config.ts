@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'gRPC Starter',
   tagline: 'Spring Boot starters for gRPC cutting-edge ecosystem',
-  // favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
   url: 'https://danielliu1123.github.io',
@@ -59,10 +59,10 @@ const config: Config = {
     // image: 'img/docusaurus-social-card.jpg',
     navbar: {
       title: 'Home',
-      // logo: {
-      //   alt: 'My Site Logo',
-      //   src: 'img/logo.svg',
-      // },
+      logo: {
+        alt: 'gRPC Starter',
+        src: 'img/logo.png',
+      },
       items: [
         {
           type: 'docSidebar',
