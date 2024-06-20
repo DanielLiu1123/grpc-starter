@@ -30,12 +30,17 @@ Choose the appropriate dependencies based on your stack.
         <Tabs>
             <TabItem value="gradle" label="Gradle">
                 ```groovy
+                implementation("io.github.danielliu1123:grpc-server-boot-starter")
                 implementation("io.github.danielliu1123:grpc-starter-transcoding")
                 implementation("org.springframework.boot:spring-boot-starter-web")
                 ```
             </TabItem>
             <TabItem value="maven" label="Maven">
                 ```xml
+                <dependency>
+                    <groupId>io.github.danielliu1123</groupId>
+                    <artifactId>grpc-server-boot-starter</artifactId>
+                </dependency>
                 <dependency>
                     <groupId>io.github.danielliu1123</groupId>
                     <artifactId>grpc-starter-transcoding</artifactId>
