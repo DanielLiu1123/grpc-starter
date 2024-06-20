@@ -33,6 +33,31 @@ class Transcoder {
 
     public void into(@Nonnull Message.Builder messageBuilder, @Nonnull HttpRule httpRule)
             throws InvalidProtocolBufferException {
+
+        // The special name `*` can be used in the body mapping to define that
+        // every field not bound by the path template should be mapped to the
+        // request body.
+
+        if (!httpRule.getBody().isBlank()) {
+            var bodyStringOpt = Optional.ofNullable(variable.body())
+                    .map(e -> new String(e, UTF_8))
+                    .filter(e -> !e.isBlank());
+            if (bodyStringOpt.isPresent()) {
+                if (Objects.equals(httpRule.getBody(), "*")) {
+                    merge(messageBuilder, bodyStringOpt.get());
+                } else {
+                    Descriptors.FieldDescriptor field =
+                            messageBuilder.getDescriptorForType().findFieldByName(httpRule.getBody());
+                    if (hasBuilder(field)) {
+                        Message.Builder fieldBuilder = messageBuilder.getFieldBuilder(field);
+                        if (fieldBuilder != null) {
+                            merge(fieldBuilder, bodyStringOpt.get());
+                        }
+                    }
+                }
+            }
+        }
+
         // Note that when using `*` in the body mapping, it is not possible to
         // have HTTP parameters, as all fields not bound by the path end in
         // the body. This makes this option more rarely used in practice when
@@ -42,9 +67,14 @@ class Transcoder {
         // Any fields in the request message which are not bound by the path template
         // automatically become HTTP query parameters if there is no HTTP request body.
 
+        // Using parameters when the body is not set.
+
         Map<String, String[]> parameters = variable.parameters();
         if (parameters != null && !parameters.isEmpty()) {
-            parameters.forEach((key, values) -> {
+            for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
+                String key = entry.getKey();
+                String[] values = entry.getValue();
+
                 String[] fieldPath = key.split("\\.");
 
                 // Navigate to the last field descriptor
@@ -52,45 +82,21 @@ class Transcoder {
                 for (int i = 0; i < fieldPath.length - 1; i++) {
                     Descriptors.FieldDescriptor field =
                             lastBuilder.getDescriptorForType().findFieldByName(fieldPath[i]);
-                    if (noBuilder(field)) return;
-
-                    lastBuilder = lastBuilder.getFieldBuilder(field);
+                    if (hasBuilder(field)) {
+                        lastBuilder = lastBuilder.getFieldBuilder(field);
+                    }
                 }
 
                 Descriptors.FieldDescriptor field =
                         lastBuilder.getDescriptorForType().findFieldByName(fieldPath[fieldPath.length - 1]);
-                if (!isValueType(field)) return;
-
-                if (field.isRepeated()) {
-                    for (String value : values) {
-                        lastBuilder.addRepeatedField(field, parseValue(field, value));
-                    }
-                } else {
-                    if (values.length > 0) {
-                        setValueField(lastBuilder, field, values[0]);
-                    }
-                }
-            });
-        }
-
-        // The special name `*` can be used in the body mapping to define that
-        // every field not bound by the path template should be mapped to the
-        // request body.
-
-        if (!httpRule.getBody().isBlank()) {
-            String bodyString = Optional.ofNullable(variable.body())
-                    .map(e -> new String(e, UTF_8))
-                    .orElse("");
-            if (!bodyString.isBlank()) {
-                if (Objects.equals(httpRule.getBody(), "*")) {
-                    merge(messageBuilder, bodyString);
-                } else {
-                    Descriptors.FieldDescriptor field =
-                            messageBuilder.getDescriptorForType().findFieldByName(httpRule.getBody());
-                    if (!noBuilder(field)) {
-                        Message.Builder fieldBuilder = messageBuilder.getFieldBuilder(field);
-                        if (fieldBuilder != null) {
-                            merge(fieldBuilder, bodyString);
+                if (isValueType(field)) {
+                    if (field.isRepeated()) {
+                        for (String value : values) {
+                            lastBuilder.addRepeatedField(field, parseValue(field, value));
+                        }
+                    } else {
+                        if (values.length > 0 && !lastBuilder.hasField(field) /* not set by request body */) {
+                            setValueField(lastBuilder, field, values[0]);
                         }
                     }
                 }
@@ -105,12 +111,15 @@ class Transcoder {
         // because client libraries are not capable of handling such variable expansion.
         Map<String, String> pathVariables = variable.pathVariables();
         if (pathVariables != null && !pathVariables.isEmpty()) {
-            pathVariables.forEach((key, value) -> {
+            for (Map.Entry<String, String> entry : pathVariables.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
                 Descriptors.FieldDescriptor field =
                         messageBuilder.getDescriptorForType().findFieldByName(key);
-                if (!isValueType(field)) return;
-                setValueField(messageBuilder, field, value);
-            });
+                if (isValueType(field)) {
+                    setValueField(messageBuilder, field, value);
+                }
+            }
         }
     }
 
@@ -129,8 +138,8 @@ class Transcoder {
         getParser().merge(bodyString, messageBuilder);
     }
 
-    private static boolean noBuilder(Descriptors.FieldDescriptor field) {
-        return field == null || field.isRepeated() || field.isMapField() || field.getType() != Type.MESSAGE;
+    private static boolean hasBuilder(Descriptors.FieldDescriptor field) {
+        return field != null && !field.isRepeated() && !field.isMapField() && field.getType() == Type.MESSAGE;
     }
 
     private static void setValueField(Message.Builder lastBuilder, Descriptors.FieldDescriptor field, String values) {
