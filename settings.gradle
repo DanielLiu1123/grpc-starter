@@ -30,8 +30,7 @@ include(":grpc-starters:grpc-starter-metrics")
 include(":grpc-starters:grpc-starter-protovalidate")
 include(":grpc-starters:grpc-starter-test")
 include(":grpc-starters:grpc-starter-tracing")
-include(":grpc-starters:grpc-starter-transcoding-webflux")
-include(":grpc-starters:grpc-starter-transcoding-webmvc")
+include(":grpc-starters:grpc-starter-transcoding")
 include(":grpc-starters:grpc-starter-validation")
 
 // examples, order by name
