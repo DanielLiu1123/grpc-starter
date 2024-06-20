@@ -30,14 +30,24 @@ Choose the appropriate dependencies based on your stack.
         <Tabs>
             <TabItem value="gradle" label="Gradle">
                 ```groovy
-                implementation("io.github.danielliu1123:grpc-starter-transcoding-webmvc")
+                implementation("io.github.danielliu1123:grpc-server-boot-starter")
+                implementation("io.github.danielliu1123:grpc-starter-transcoding")
+                implementation("org.springframework.boot:spring-boot-starter-web")
                 ```
             </TabItem>
             <TabItem value="maven" label="Maven">
                 ```xml
                 <dependency>
                     <groupId>io.github.danielliu1123</groupId>
-                    <artifactId>grpc-starter-transcoding-webmvc</artifactId>
+                    <artifactId>grpc-server-boot-starter</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.danielliu1123</groupId>
+                    <artifactId>grpc-starter-transcoding</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
                 </dependency>
                 ```
             </TabItem>
@@ -50,7 +60,8 @@ Choose the appropriate dependencies based on your stack.
                 implementation("io.github.danielliu1123:grpc-server-boot-starter")){
                     exclude(group: "io.grpc", module: "grpc-netty-shaded")
                 }
-                implementation("io.github.danielliu1123:grpc-starter-transcoding-webflux")
+                implementation("io.github.danielliu1123:grpc-starter-transcoding")
+                implementation("org.springframework.boot:spring-boot-starter-webflux")
                 runtimeOnly("io.grpc:grpc-netty")
                 ```
             </TabItem>
@@ -68,7 +79,11 @@ Choose the appropriate dependencies based on your stack.
                 </dependency>
                 <dependency>
                     <groupId>io.github.danielliu1123</groupId>
-                    <artifactId>grpc-starter-transcoding-webflux</artifactId>
+                    <artifactId>grpc-starter-transcoding</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-webflux</artifactId>
                 </dependency>
                 <dependency>
                     <groupId>io.grpc</groupId>
