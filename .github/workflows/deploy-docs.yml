@@ -9,7 +9,6 @@ on:
 
 jobs:
   deploy-docs:
-    name: Build
     runs-on: ubuntu-latest
     defaults:
       run:
