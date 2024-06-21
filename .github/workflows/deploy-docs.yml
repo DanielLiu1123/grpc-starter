@@ -8,7 +8,8 @@ on:
       - main
 
 jobs:
-  deploy-docs:
+  build:
+    name: Build
     runs-on: ubuntu-latest
     defaults:
       run:
