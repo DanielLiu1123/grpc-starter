@@ -23,7 +23,7 @@ import org.springframework.util.ObjectUtils;
  * @author Freeman
  */
 @Getter
-public class GrpcExceptionHandlerMethod {
+class GrpcExceptionHandlerMethod {
 
     private final Object bean;
     private final Integer beanOrder;
