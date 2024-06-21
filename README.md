@@ -32,7 +32,7 @@ Make the integration of Spring Boot and gRPC feel seamless and native.
 ## Quick Start
 
 ```groovy
-implementation(platform("io.github.danielliu1123:grpc-starter-dependencies:3.3.0-RC2"))
+implementation(platform("io.github.danielliu1123:grpc-starter-dependencies:3.3.0"))
 implementation("io.github.danielliu1123:grpc-boot-starter")
 ```
 
