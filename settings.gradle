@@ -43,6 +43,8 @@ include(":examples:refresh")
 include(":examples:tls")
 include(":examples:tracing")
 include(":examples:validation")
+include(":examples:transcoding:best-practice:bp-api")
+include(":examples:transcoding:best-practice:bp-server")
 include(":examples:transcoding:webflux")
 include(":examples:transcoding:webmvc")
 

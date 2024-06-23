@@ -1,0 +1,12 @@
+dependencies {
+    api("io.grpc:grpc-protobuf")
+    api(project(":grpc-starters:grpc-starter-protovalidate"))
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs "generated/java"
+        }
+    }
+}

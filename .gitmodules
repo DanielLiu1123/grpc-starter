@@ -1,0 +1,6 @@
+[submodule "examples/transcoding/best-practice/bp-api/third_party/protovalidate"]
+	path = examples/transcoding/best-practice/bp-api/third_party/protovalidate
+	url = https://github.com/bufbuild/protovalidate
+[submodule "examples/transcoding/best-practice/bp-api/third_party/googleapis"]
+	path = examples/transcoding/best-practice/bp-api/third_party/googleapis
+	url = https://github.com/googleapis/googleapis

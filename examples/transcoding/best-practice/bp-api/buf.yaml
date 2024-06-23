@@ -1,0 +1,11 @@
+# https://buf.build/docs/configuration/v2/buf-yaml
+
+version: v2
+modules:
+  - path: api
+deps:
+  - buf.build/googleapis/googleapis
+  - buf.build/bufbuild/protovalidate
+lint:
+  use:
+    - DEFAULT
