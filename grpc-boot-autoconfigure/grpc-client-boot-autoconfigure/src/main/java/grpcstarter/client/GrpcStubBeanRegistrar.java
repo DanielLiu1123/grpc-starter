@@ -78,7 +78,7 @@ class GrpcStubBeanRegistrar {
         } catch (BeanDefinitionOverrideException ignore) {
             // clients are included in base packages
             log.warn(
-                    "Your gRPC stub '{}' is included in base packages, you can remove it from 'clients' property.",
+                    "gRPC stub '{}' is included in base packages, you can remove it from 'clients' property.",
                     className);
         }
     }
