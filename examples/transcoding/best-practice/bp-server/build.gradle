@@ -1,0 +1,14 @@
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation("io.grpc:grpc-testing-proto")
+    implementation(project(":examples:transcoding:best-practice:bp-api"))
+
+    implementation(project(":grpc-starters:grpc-server-boot-starter"))
+    implementation(project(":grpc-starters:grpc-starter-transcoding"))
+    implementation("org.springframework.boot:spring-boot-starter-web")
+
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
+}
