@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation("io.grpc:grpc-testing-proto")
     implementation(project(":examples:transcoding:best-practice:bp-api"))
 
     implementation(project(":grpc-starters:grpc-server-boot-starter"))

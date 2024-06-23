@@ -4,6 +4,8 @@ import io.grpc.stub.StreamObserver;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import user.v1.DeleteUserRequest;
+import user.v1.DeleteUserResponse;
 import user.v1.GetUserRequest;
 import user.v1.GetUserResponse;
 import user.v1.User;
@@ -15,7 +17,6 @@ public class BestPracticeApp {
     public static void main(String[] args) {
         SpringApplication.run(BestPracticeApp.class, args);
     }
-
 
     @Bean
     UserServiceGrpc.UserServiceImplBase userServiceImpl() {
@@ -36,7 +37,12 @@ public class BestPracticeApp {
                         .build());
                 responseObserver.onCompleted();
             }
+
+            @Override
+            public void deleteUser(DeleteUserRequest request, StreamObserver<DeleteUserResponse> responseObserver) {
+                responseObserver.onNext(DeleteUserResponse.getDefaultInstance());
+                responseObserver.onCompleted();
+            }
         };
     }
-
 }
