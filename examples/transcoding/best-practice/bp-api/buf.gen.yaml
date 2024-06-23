@@ -2,13 +2,13 @@ version: v2
 plugins:
   # Java
   - remote: buf.build/grpc/java:v1.64.0
-    out: gen/java
+    out: generated/java
   - remote: buf.build/protocolbuffers/java:v25.1
-    out: gen/java
+    out: generated/java
 
   # OpenAPI
   - local: protoc-gen-openapi
-    out: gen/openapi
+    out: generated/openapi
     opt:
       - fq_schema_naming=true
       - enum_type=string

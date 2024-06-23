@@ -6,7 +6,7 @@ dependencies {
 sourceSets {
     main {
         java {
-            srcDirs "gen/java"
+            srcDirs "generated/java"
         }
     }
 }

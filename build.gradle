@@ -77,7 +77,7 @@ allprojects {
             endWithNewline()
             palantirJavaFormat()
 
-            targetExclude "build/generated/**"
+            targetExclude "**/generated/**"
 
             custom("Refuse wildcard imports", {
                 if (it =~ /\nimport .*\*;/) {
