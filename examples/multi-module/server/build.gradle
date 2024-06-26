@@ -10,27 +10,18 @@ dependencies {
 apply from: "${rootDir}/gradle/protobuf.gradle"
 
 def protocVersion = "3.25.1"
+def grpcVersion = "1.58.0"
 
 tasks.register("gen") {
-    dependsOn extractIncludeProto
+    def cmd = "bash ${rootDir}/gradle/gen.sh ${layout.buildDirectory.get().asFile.absolutePath} ${protocVersion} ${grpcVersion}"
+    println cmd
+    def p = cmd.execute()
 
-    doLast {
-        // check if protoc is already installed
-        if (!new File("${System.getProperty("user.home")}/.moego/protoc-${protocVersion}").exists()) {
-            // download and install protoc
-            "curl --create-dirs -o ${System.getProperty("user.home")}/.moego/protoc-${protocVersion} -L https://repo1.maven.org/maven2/com/google/protobuf/protoc/${protocVersion}/protoc-${protocVersion}-osx-aarch_64.exe".execute()
-            "chmod +x ${System.getProperty("user.home")}/.moego/protoc-${protocVersion}".execute()
-        }
-
-        "mkdir -p ${layout.buildDirectory.get().asFile.absolutePath}/generated/java".execute()
-
-        def string = "${System.getProperty("user.home")}/.moego/protoc-${protocVersion} -I=${layout.buildDirectory.get().asFile.absolutePath}/extracted-include-protos/main --java_out=${layout.buildDirectory.get().asFile.absolutePath}/generated/java ${layout.buildDirectory.get().asFile.absolutePath}/extracted-include-protos/main/**/*.proto"
-        println string
-        def p = string.execute()
-        p.consumeProcessOutput(System.out, System.err)
-        p.waitFor()
-    }
+    p.consumeProcessOutput(System.out, System.err)
 }
+
+gen.dependsOn extractIncludeProto
+compileJava.dependsOn gen
 
 sourceSets {
     main {

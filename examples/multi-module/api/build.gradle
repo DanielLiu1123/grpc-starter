@@ -1,5 +1,5 @@
 dependencies {
-    implementation(project(":grpc-starters:grpc-starter-protovalidate"))
+    api(project(":grpc-starters:grpc-starter-protovalidate"))
 }
 
 sourceSets {
