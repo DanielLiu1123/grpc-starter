@@ -43,7 +43,6 @@ dependencies {
         // grpc related dependencies
         api("com.google.api:api-common:${googleApiCommonVersion}")
         api("com.google.api.grpc:proto-google-common-protos:${protoGoogleCommonProtosVersion}")
-        api("javax.annotation:javax.annotation-api:${javaxValidationApiVersion}")
     }
 
     api(platform("io.grpc:grpc-bom:${grpcVersion}"))

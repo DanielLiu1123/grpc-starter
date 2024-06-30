@@ -15,6 +15,11 @@ of `grpc-starter-dependencies` aligned with Spring Boot.
 | 3.1.x          | 3.1.8                     | 1.59.1    | 3.25.1        |      
 | 2.x (>= 2.4.0) | 2.1.6                     | 1.59.1    | 3.25.1        |
 
+:::tip
+If you want to find the versions of `grpc-java` and `protobuf-java` used by `grpc-starter-dependencies`, 
+you can check [grpc-starter-dependencies](https://central.sonatype.com/artifact/io.github.danielliu1123/grpc-starter-dependencies).
+:::
+
 ## Release Notes to be Noticed
 
 - 3.3.1
