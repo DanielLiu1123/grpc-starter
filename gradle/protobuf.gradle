@@ -11,7 +11,9 @@ protobuf {
     }
     generateProtoTasks {
         all()*.plugins {
-            grpc {}
+            grpc {
+                option '@generated=omit'
+            }
         }
     }
 }

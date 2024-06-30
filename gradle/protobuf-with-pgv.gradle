@@ -14,8 +14,12 @@ protobuf {
     }
     generateProtoTasks {
         all()*.plugins {
-            grpc {}
-            javapgv { option "lang=java" }
+            grpc {
+                option '@generated=omit'
+            }
+            javapgv {
+                option "lang=java"
+            }
         }
     }
 }

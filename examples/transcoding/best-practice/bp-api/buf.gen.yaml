@@ -3,6 +3,8 @@ plugins:
   # Java
   - remote: buf.build/grpc/java:v1.64.0
     out: generated/java
+    opt:
+      - '@generated=omit'
   - remote: buf.build/protocolbuffers/java:v25.1
     out: generated/java
 

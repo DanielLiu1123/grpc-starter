@@ -4,7 +4,6 @@ dependencies {
 
     api("io.grpc:grpc-stub")
     api("io.grpc:grpc-protobuf")
-    api("javax.annotation:javax.annotation-api:${javaxValidationApiVersion}") // necessary for Java 9+, @javax.annotation.Generated
 
     compileOnly("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
     compileOnly("build.buf:protovalidate:${protovalidateVersion}")
