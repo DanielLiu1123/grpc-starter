@@ -1,7 +1,7 @@
 version: v2
 plugins:
   # Java
-  - remote: buf.build/grpc/java:v1.64.0
+  - remote: buf.build/grpc/java:v1.65.0
     out: generated/java
     opt:
       - '@generated=omit'
