@@ -7,6 +7,10 @@ sourceSets {
     main {
         java {
             srcDirs "generated/java"
+            // Put the proto files into the jar
+            resources {
+                srcDir "api"
+            }
         }
     }
 }
