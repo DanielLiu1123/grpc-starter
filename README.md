@@ -34,6 +34,7 @@ Make the integration of Spring Boot and gRPC feel seamless and native.
 ```groovy
 implementation(platform("io.github.danielliu1123:grpc-starter-dependencies:3.3.1"))
 implementation("io.github.danielliu1123:grpc-boot-starter")
+implementation("io.grpc:grpc-testing-proto")
 ```
 
 ```java
