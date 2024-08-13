@@ -1,9 +1,8 @@
 package grpcstarter.server.feature.reflection;
 
 import grpcstarter.server.GrpcServerProperties;
-import io.grpc.BindableService;
-import io.grpc.protobuf.services.ProtoReflectionService;
-import io.grpc.reflection.v1alpha.ServerReflectionGrpc;
+import io.grpc.protobuf.services.ProtoReflectionServiceV1;
+import io.grpc.reflection.v1.ServerReflectionGrpc;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -19,8 +18,8 @@ import org.springframework.context.annotation.Configuration;
 public class Reflection {
 
     @Bean
-    @ConditionalOnMissingBean(ServerReflectionGrpc.ServerReflectionImplBase.class)
-    public BindableService grpcReflectionService() {
-        return ProtoReflectionService.newInstance();
+    @ConditionalOnMissingBean
+    public ServerReflectionGrpc.ServerReflectionImplBase grpcReflectionService() {
+        return (ServerReflectionGrpc.ServerReflectionImplBase) ProtoReflectionServiceV1.newInstance();
     }
 }
