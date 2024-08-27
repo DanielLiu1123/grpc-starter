@@ -1,32 +1,26 @@
 package grpcstarter.example;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
-import grpcstarter.extensions.test.InProcessName;
-import grpcstarter.extensions.test.StubUtil;
-import io.grpc.testing.protobuf.SimpleRequest;
-import io.grpc.testing.protobuf.SimpleServiceGrpc;
+import grpcstarter.example.entity.Pet;
+import grpcstarter.example.entity.Status;
+import grpcstarter.example.mapper.PetMapper;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(
-        classes = QuickStartApp.class,
-        properties = {
-            "grpc.server.in-process.name=QuickStartAppTest",
-            "grpc.client.in-process.name=QuickStartAppTest",
-            "grpc.client.base-packages=io.grpc",
-        })
+@SpringBootTest
 class QuickStartAppTest {
 
-    @InProcessName
-    String name;
+    @Autowired
+    PetMapper mapper;
 
     @Test
-    void testQuickStart() {
-        var stub = StubUtil.createStub(name, SimpleServiceGrpc.SimpleServiceBlockingStub.class);
-        var response = stub.unaryRpc(
-                SimpleRequest.newBuilder().setRequestMessage("World!").build());
+    void testInsert_whenUsingEnumOrdinalTypeHandler_thenOK() {
+        var pet = new Pet();
+        pet.setName("test");
+        pet.setStatus(Status.NORMAL);
 
-        assertThat(response.getResponseMessage()).isEqualTo("Hello World!");
+        assertThatCode(() -> mapper.insertSelective(pet)).doesNotThrowAnyException();
     }
 }
