@@ -28,7 +28,7 @@ jobs:
           echo "current_version=$current_version" >> $GITHUB_ENV
           echo "latest_version=$latest_version" >> $GITHUB_ENV
           
-          if [ "$current_version" == "$latest_version" ]; then
+          if [[ "$current_version" == "$latest_version" ]]; then
             echo "Spring Boot version is up to date"
             exit 0
           fi
