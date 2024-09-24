@@ -4,41 +4,40 @@ sidebar_position: 1
 
 # Introduction
 
-`grpc-starter` provides a series of Spring Boot starters for the gRPC ecosystem,
-offering autoconfiguration and highly extensible capabilities to enhance the integration between Spring Boot and gRPC.
+`grpc-starter` is a comprehensive suite of Spring Boot starters designed for the gRPC ecosystem. It offers seamless autoconfiguration and highly extensible capabilities to enhance the integration between Spring Boot and gRPC.
 
-## Why Another gRPC Starter
+## Why Choose grpc-starter?
 
-There are already two gRPC Spring Boot starters:
+While there are existing gRPC Spring Boot starters such as:
 
 - [grpc-spring](https://github.com/grpc-ecosystem/grpc-spring)
 - [grpc-spring-boot-starter](https://github.com/LogNet/grpc-spring-boot-starter)
 
-So, why create another one? Here are the main reasons:
+`grpc-starter` was created to address several limitations and provide additional features:
 
-1. The autoconfiguration for gRPC clients is not elegant enough; it does not fully follow the Spring bean lifecycle and requires additional annotations like `@GrpcClient`. We aim to use `@Autowired` directly to inject gRPC clients.
-2. The integration with the surrounding gRPC ecosystem is incomplete, lacking features like gRPC HTTP transcoding, Protobuf validation, test support, etc.
-3. Writing extensions is challenging due to the lack of suitable extension points.
+1. **Elegant Client Autoconfiguration**: Unlike other starters that require additional annotations like `@GrpcClient`, `grpc-starter` allows direct injection of gRPC clients using `@Autowired`, fully adhering to the Spring bean lifecycle.
+2. **Comprehensive Ecosystem Integration**: It includes features like gRPC HTTP transcoding, Protobuf validation, and test support, which are often missing in other starters.
+3. **Ease of Extension**: It provides suitable extension points, making it easier to write and integrate custom extensions.
 
 ## Core Features
 
 ### Client
-  - Autoconfigure gRPC clients: allowing direct injection with `@Autowired` and fully respecting the Spring Bean lifecycle.
-  - Dynamic refreshing: Support to modify gRPC client configurations at runtime without restarting the application.
+- **Autoconfiguration**: Automatically configure gRPC clients, allowing direct injection with `@Autowired` while fully respecting the Spring Bean lifecycle.
+- **Dynamic Refreshing**: Modify gRPC client configurations at runtime without restarting the application.
 
 ### Server
-  - Autoconfigure gRPC servers: write your gRPC service implementation and expose it as a Spring bean, we will take care of the rest.
-  - Exception handling: offering `@ExceptionHandler` like exception handling for gRPC server through `@GrpcAdvice`/`@GrpcExceptionHandler`.
-  - Health check.
+- **Autoconfiguration**: Write your gRPC service implementation and expose it as a Spring bean. The framework handles the rest.
+- **Exception Handling**: Provides `@ExceptionHandler`-like exception handling for gRPC servers through `@GrpcAdvice` and `@GrpcExceptionHandler`.
+- **Health Check**: Built-in health check support for gRPC servers.
 
 ### Extensions
-  - **gRPC HTTP transcoding**: enabling a single codebase to support both gRPC and HTTP/JSON (like [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) but for Java).
-  - **Protobuf validation**: integrating with [protovalidate](https://github.com/bufbuild/protovalidate) and [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).
-  - **Metrics**: supporting metrics through Spring Boot Actuator.
-  - **Tracing**: supporting tracing through Spring Boot Actuator.
-  - **Test**: integrating with `SpringBootTest`.
+- **gRPC HTTP Transcoding**: Enable a single codebase to support both gRPC and HTTP/JSON, similar to [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) but for Java.
+- **Protobuf Validation**: Integrate with [protovalidate](https://github.com/bufbuild/protovalidate) and [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate) for Protobuf message validation.
+- **Metrics**: Support for metrics through Spring Boot Actuator.
+- **Tracing**: Support for tracing through Spring Boot Actuator.
+- **Testing**: Integration with `SpringBootTest` for comprehensive testing support.
 
-This framework is designed for extensibility, and you can easily extend it to suit your needs.
+This framework is designed with extensibility in mind, allowing you to easily extend it to meet your specific needs.
 
 ## Project Structure
 

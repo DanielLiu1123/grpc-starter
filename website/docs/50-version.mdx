@@ -4,9 +4,8 @@ sidebar_position: 50
 
 # Version
 
-[`grpc-starter-dependencies`](https://central.sonatype.com/artifact/io.github.danielliu1123/grpc-starter-dependencies)
-provides dependency management for gRPC and Protobuf, so you only need to use the version
-of `grpc-starter-dependencies` aligned with Spring Boot.
+The `grpc-starter-dependencies` project simplifies dependency management for gRPC and Protobuf by aligning its versions with Spring Boot. 
+This ensures compatibility and reduces the need for manual version management.
 
 | Spring Boot    | grpc-starter-dependencies | grpc-java | protobuf-java |
 |----------------|---------------------------|-----------|---------------|
@@ -15,25 +14,24 @@ of `grpc-starter-dependencies` aligned with Spring Boot.
 | 3.1.x          | 3.1.8                     | 1.59.1    | 3.25.1        |      
 | 2.x (>= 2.4.0) | 2.1.6                     | 1.59.1    | 3.25.1        |
 
-If you want to find the versions of `grpc-java` and `protobuf-java` used by `grpc-starter-dependencies`,
-you can check [grpc-starter-dependencies](https://central.sonatype.com/artifact/io.github.danielliu1123/grpc-starter-dependencies).
+To find the specific versions of `grpc-java` and `protobuf-java` used by `grpc-starter-dependencies`, 
+visit the [grpc-starter-dependencies](https://central.sonatype.com/artifact/io.github.danielliu1123/grpc-starter-dependencies) page.
 
 :::tip
-The version of `grpc-starter-dependencies` is aligned with Spring Boot,
-we check the latest version of Spring Boot daily and release the corresponding version.
+The `grpc-starter-dependencies` version is kept in sync with the latest Spring Boot releases. 
+We monitor Spring Boot updates daily and release corresponding versions to ensure compatibility.
 :::
 
-## Release Notes to be Noticed
+## Important Release Notes
 
-- [3.3.1](https://github.com/DanielLiu1123/grpc-starter/releases/tag/v3.3.1)
+### Version 3.3.1
 
-  - Removed `javax.annotation:javax.annotation-api` dependency.
+- **Dependency Removal**: The `javax.annotation:javax.annotation-api` dependency has been removed.
+- **Configuration Guide**: Instructions on configuring gRPC to avoid generating the `javax.annotation.Generated` annotation:
+  - [Maven Configuration](https://github.com/DanielLiu1123/grpc-starter-maven-demo/blob/main/pom.xml#L92)
+  - [Gradle Configuration](https://github.com/DanielLiu1123/grpc-starter/blob/main/gradle/protobuf.gradle#L15)
+  - [Buf Configuration](https://github.com/DanielLiu1123/grpc-starter/blob/main/examples/transcoding/best-practice/bp-api/buf.gen.yaml#L7)
 
-  - How to configure gRPC to not generate `javax.annotation.Generated` annotation:
-    - [Maven](https://github.com/DanielLiu1123/grpc-starter-maven-demo/blob/main/pom.xml#L92)
-    - [Gradle](https://github.com/DanielLiu1123/grpc-starter/blob/main/gradle/protobuf.gradle#L15)
-    - [Buf](https://github.com/DanielLiu1123/grpc-starter/blob/main/examples/transcoding/best-practice/bp-api/buf.gen.yaml#L7)
+### Version 3.2.0
 
-- 3.2.0
-
-  - The groupId has been changed to `io.github.danielliu1123` from `com.freemanan`.
+- **Group ID Change**: The groupId has been updated from `com.freemanan` to `io.github.danielliu1123`.

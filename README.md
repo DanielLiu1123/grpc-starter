@@ -1,17 +1,14 @@
 # <img src="website/static/img/logo.png" width="80" height="80"> gRPC Starter [![Build](https://img.shields.io/github/actions/workflow/status/DanielLiu1123/grpc-starter/build.yml?branch=main)](https://github.com/DanielLiu1123/grpc-starter/actions) [![Maven Central](https://img.shields.io/maven-central/v/io.github.danielliu1123/grpc-starter-dependencies?versionPrefix=3.)](https://central.sonatype.com/artifact/io.github.danielliu1123/grpc-starter-dependencies) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[gRPC](https://grpc.io/) is an RPC framework with robust features like high performance, 
-multi-language support, concise service definitions, and streaming. 
-It is an ideal choice for building scalable and efficient microservice systems.
+[gRPC](https://grpc.io/) is a high-performance RPC framework that supports multiple languages, concise service definitions, and streaming. It is an ideal choice for building scalable and efficient microservice systems.
 
-This project provides out-of-the-box, highly extensible Spring Boot starters for gRPC ecosystem.
-Make the integration of Spring Boot and gRPC feel seamless and native.
+This project provides out-of-the-box, highly extensible Spring Boot starters for the gRPC ecosystem, making the integration of Spring Boot and gRPC seamless and native.
 
 ## Features
 
-***Core:***
+### Core:
 
-- Dependencies management for gRPC related libraries
+- Dependency management for gRPC-related libraries
 - gRPC server autoconfiguration
     - [Exception handling](https://danielliu1123.github.io/grpc-starter/docs/server/exception-handing)
     - [Health check](https://danielliu1123.github.io/grpc-starter/docs/server/autoconfiguration#health)
@@ -19,12 +16,12 @@ Make the integration of Spring Boot and gRPC feel seamless and native.
     - [`@Autowired` support](https://danielliu1123.github.io/grpc-starter/docs/client/autoconfiguration#inject-client)
     - [Dynamic refreshing](https://danielliu1123.github.io/grpc-starter/docs/client/dynamic-refresh)
 
-***Extensions:***
+### Extensions:
 
-- [gRPC HTTP transcoding](https://danielliu1123.github.io/grpc-starter/docs/extensions/grpc-http-transcoding): A single codebase to support both gRPC and HTTP/JSON.
-- [Protobuf validation](https://danielliu1123.github.io/grpc-starter/docs/extensions/protobuf-validation): Protobuf message validation implemented by [protovalidate](https://github.com/bufbuild/protovalidate-java)/[protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).
-- [Metrics](https://danielliu1123.github.io/grpc-starter/docs/extensions/metrics): Spring Boot Actuator integration with gRPC service.
-- [Tracing](https://danielliu1123.github.io/grpc-starter/docs/extensions/tracing): Spring Boot Actuator integration with gRPC server and client.
+- [gRPC HTTP transcoding](https://danielliu1123.github.io/grpc-starter/docs/extensions/grpc-http-transcoding): Support both gRPC and HTTP/JSON with a single codebase.
+- [Protobuf validation](https://danielliu1123.github.io/grpc-starter/docs/extensions/protobuf-validation): Protobuf message validation using [protovalidate](https://github.com/bufbuild/protovalidate-java) and [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).
+- [Metrics](https://danielliu1123.github.io/grpc-starter/docs/extensions/metrics): Integrate Spring Boot Actuator with gRPC services.
+- [Tracing](https://danielliu1123.github.io/grpc-starter/docs/extensions/tracing): Integrate Spring Boot Actuator with gRPC server and client.
 - [Testing](https://danielliu1123.github.io/grpc-starter/docs/extensions/test): Integration with `SpringBootTest`.
 
 ## Quick Start
@@ -80,8 +77,7 @@ Please report unacceptable behavior to llw599502537@gmail.com.
 
 ## Contributing
 
-The [issue tracker](https://github.com/DanielLiu1123/grpc-starter/issues) is the preferred channel for bug reports,
-feature requests and submitting pull requests.
+Use the [issue tracker](https://github.com/DanielLiu1123/grpc-starter/issues) for bug reports, feature requests, and submitting pull requests.
 
 If you would like to contribute to the project, please refer to [Contributing](./CONTRIBUTING.md).
 
