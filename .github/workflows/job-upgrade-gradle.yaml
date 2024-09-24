@@ -1,0 +1,49 @@
+name: Upgrade Gradle Version
+
+on:
+  schedule:
+    - cron: '10 4 * * *'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  upgrade-gradle:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Upgrade Gradle
+        id: upgrade_gradle
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+        run: |
+          latest_version=$(curl -s 'https://services.gradle.org/versions/current' | grep '"version"' | sed 's/.*"version" *: *"\([^"]*\)".*/\1/')
+          echo "Latest Gradle version: $latest_version"
+          
+          current_version=$(grep 'distributionUrl' gradle/wrapper/gradle-wrapper.properties | sed 's/.*gradle-\(.*\)-bin.*/\1/')
+          echo "Current Gradle version: $current_version"
+          
+          echo "current_version=$current_version" >> $GITHUB_ENV
+          echo "latest_version=$latest_version" >> $GITHUB_ENV
+          
+          if [[ "$current_version" == "$latest_version" ]]; then
+            echo "Gradle version is up to date"
+            exit 0
+          fi
+          
+          ./gradlew wrapper --gradle-version $latest_version
+
+      - name: Create Pull Request
+        if: env.latest_version != env.current_version
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "Update Gradle version to ${{ env.latest_version }}"
+          title: "Update Gradle version to ${{ env.latest_version }}"
+          body: ""
+          branch: upgrade-gradle-version-${{ env.latest_version }}
