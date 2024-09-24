@@ -16,12 +16,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Upgrade Gradle
-        id: upgrade_gradle
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'corretto'
+
+      - name: Upgrade Gradle
+        id: upgrade_gradle
         run: |
           latest_version=$(curl -s 'https://services.gradle.org/versions/current' | grep '"version"' | sed 's/.*"version" *: *"\([^"]*\)".*/\1/')
           echo "Latest Gradle version: $latest_version"
