@@ -7,12 +7,13 @@ import TabItem from '@theme/TabItem';
 
 # Quick Start
 
-## Dependencies
+## Managing Dependencies
 
-This project offers a BOM (Bill of Materials) to manage the versions of the dependencies.
+To simplify dependency management, this project provides a BOM (Bill of Materials). 
+The BOM ensures that all dependencies are compatible and their versions are managed centrally.
 
 :::info
-All dependencies will assume that `grpc-starter-dependencies` has been used, so all versions will be ignored.
+When using `grpc-starter-dependencies`, you do not need to specify versions for the dependencies listed in the BOM. The BOM will handle the versioning for you.
 :::
 
 <Tabs>
@@ -83,12 +84,12 @@ public class QuickStartApp extends SimpleServiceGrpc.SimpleServiceImplBase {
 }
 ```
 
-No additional annotations or classes are required! Run the application and you will see the `Hello World!`.
+No additional annotations or classes are required! Simply run the application and you will see the `Hello World!` output.
 
-Source code is available at [quick-start](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/quick-start).
+You can find the source code at [quick-start](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/quick-start).
 
 :::tip
-How to setup Protobuf plugin: <br/>
-For Gradle: [multi-module-example](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/multi-module). <br/>
-For Maven: [grpc-starter-maven-demo](https://github.com/DanielLiu1123/grpc-starter-maven-demo).
+Setting up the Protobuf plugin: <br/>
+For Gradle: Refer to the [multi-module-example](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/multi-module). <br/>
+For Maven: Refer to the [grpc-starter-maven-demo](https://github.com/DanielLiu1123/grpc-starter-maven-demo).
 :::

@@ -4,9 +4,10 @@ sidebar_position: 20
 
 # Dynamic Refresh
 
-This feature allows for the dynamic refreshing of gRPC stubs.
-You can place your configuration settings with the `grpc.client` prefix in any configuration center (like [Consul](https://github.com/hashicorp/consul), [Apollo](https://github.com/apolloconfig/apollo), [Nacos](https://github.com/alibaba/nacos), etc.).
-By changing these configurations (e.g. `authority`, `max-inbound-message-size`), gRPC stubs will automatically refresh without the need to restart your application.
+The dynamic refresh feature enables the automatic updating of gRPC stubs without restarting your application. 
+Configuration settings prefixed with `grpc.client` can be placed in any configuration center, 
+such as [Consul](https://github.com/hashicorp/consul), [Apollo](https://github.com/apolloconfig/apollo), or [Nacos](https://github.com/alibaba/nacos). 
+When these configurations (e.g., `authority`, `max-inbound-message-size`) are modified, the gRPC stubs will refresh automatically.
 
 This feature is disabled by default, you can enable it by using the following configuration:
 
