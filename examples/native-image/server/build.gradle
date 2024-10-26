@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    // Do NOT use shared libraries, as it is not supported by GraalVM native-image
+    // Do NOT use shaded libraries, as it is not supported by GraalVM native-image
     implementation(project(":grpc-starters:grpc-server-boot-starter")){
         exclude(group: 'io.grpc', module: "grpc-netty-shaded")
     }
