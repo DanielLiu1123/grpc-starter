@@ -13,6 +13,7 @@ plugins {
     id "com.diffplug.spotless" version "${spotlessVersion}" apply false
     id "com.github.spotbugs" version "${spotbugsVersion}" apply false
     id "com.google.protobuf" version "${protobufGradlePluginVersion}" apply false
+    id "org.graalvm.buildtools.native" version "${graalvmBuildToolsVersion}" apply false
 }
 
 allprojects {

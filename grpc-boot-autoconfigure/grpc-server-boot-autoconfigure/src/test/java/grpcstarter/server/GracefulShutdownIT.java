@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.fail;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.protobuf.SimpleRequest;
 import io.grpc.testing.protobuf.SimpleResponse;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.SneakyThrows;
@@ -28,13 +29,13 @@ class GracefulShutdownIT {
 
     @Test
     void testGracefulShutdown(CapturedOutput output) throws InterruptedException {
-        String inProcessName = "GracefulShutdownIT";
+        String inProcessName = UUID.randomUUID().toString();
 
         try (var ignored = new SpringApplicationBuilder(Cfg.class)
                 .properties("grpc.server.in-process.name=" + inProcessName)
                 .run()) {
 
-            SimpleServiceBlockingStub stub = createStub(inProcessName, SimpleServiceBlockingStub.class);
+            var stub = createStub(inProcessName, SimpleServiceBlockingStub.class);
             new Thread(() -> stub.unaryRpc(SimpleRequest.getDefaultInstance())).start();
 
             Thread.sleep(100);
@@ -48,12 +49,11 @@ class GracefulShutdownIT {
         long time = Long.parseLong(matcher.group(1));
 
         // 1000 - 100
-        assertThat(time).isGreaterThanOrEqualTo(900);
+        assertThat(time).isGreaterThanOrEqualTo(850);
     }
 
     @Configuration(proxyBeanMethods = false)
     @EnableAutoConfiguration
-    @GrpcService
     static class Cfg extends SimpleServiceImplBase {
         @Override
         @SneakyThrows

@@ -1,0 +1,30 @@
+plugins {
+    id "org.springframework.boot"
+    id "org.graalvm.buildtools.native"
+}
+
+dependencies {
+    // Do NOT use shaded libraries, as it is not supported by GraalVM native-image.
+    // Netty supports GraalVM native-image, but grpc-netty-shaded does not.
+    // Let grpc-netty-shaded support GraalVM native-image is not in the scope of this project.
+    // grpc-netty-shaded is needed to solve this problem.
+    implementation(project(":grpc-starters:grpc-server-boot-starter")){
+        exclude(group: 'io.grpc', module: "grpc-netty-shaded")
+    }
+    runtimeOnly("io.grpc:grpc-netty")
+
+    implementation("io.grpc:grpc-testing-proto")
+
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
+}
+
+// https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html#configuration-options
+graalvmNative {
+    testSupport = false
+    binaries {
+        main {
+            verbose = true
+            sharedLibrary = false
+        }
+    }
+}
