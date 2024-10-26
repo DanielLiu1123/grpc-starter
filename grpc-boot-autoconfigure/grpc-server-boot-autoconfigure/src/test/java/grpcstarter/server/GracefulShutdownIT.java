@@ -29,17 +29,16 @@ class GracefulShutdownIT {
     @Test
     void testGracefulShutdown(CapturedOutput output) throws InterruptedException {
         String inProcessName = "GracefulShutdownIT";
-        var ctx = new SpringApplicationBuilder(Cfg.class)
+
+        try (var ignored = new SpringApplicationBuilder(Cfg.class)
                 .properties("grpc.server.in-process.name=" + inProcessName)
-                .run();
+                .run()) {
 
-        SimpleServiceBlockingStub stub = createStub(inProcessName, SimpleServiceBlockingStub.class);
-        new Thread(() -> stub.unaryRpc(SimpleRequest.getDefaultInstance())).start();
+            SimpleServiceBlockingStub stub = createStub(inProcessName, SimpleServiceBlockingStub.class);
+            new Thread(() -> stub.unaryRpc(SimpleRequest.getDefaultInstance())).start();
 
-        Thread.sleep(100);
-
-        // Stop the server
-        ctx.close();
+            Thread.sleep(100);
+        }
 
         Matcher matcher =
                 Pattern.compile("gRPC server graceful shutdown in (\\d+) ms").matcher(output.getOut());

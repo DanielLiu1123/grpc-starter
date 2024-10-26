@@ -34,41 +34,41 @@ class HealthIT {
     @Test
     void testExternalHealthChecker() {
         String name = UUID.randomUUID().toString();
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        try (ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.InProcess.PREFIX + ".name=" + name)
-                .run();
+                .run()) {
 
-        List<HealthChecker> checkers =
-                ctx.getBeanProvider(HealthChecker.class).orderedStream().collect(Collectors.toList());
+            List<HealthChecker> checkers =
+                    ctx.getBeanProvider(HealthChecker.class).orderedStream().collect(Collectors.toList());
 
-        assertThat(checkers).hasSize(1);
-        assertThat(checkers.get(0).service()).isEqualTo("foo");
+            assertThat(checkers).hasSize(1);
+            assertThat(checkers.get(0).service()).isEqualTo("foo");
 
-        ManagedChannel chan =
-                InProcessChannelBuilder.forName(name).directExecutor().build();
-        HealthGrpc.HealthBlockingStub stub = HealthGrpc.newBlockingStub(chan);
+            ManagedChannel chan =
+                    InProcessChannelBuilder.forName(name).directExecutor().build();
+            HealthGrpc.HealthBlockingStub stub = HealthGrpc.newBlockingStub(chan);
 
-        // check existing service
-        HealthCheckResponse resp =
-                stub.check(HealthCheckRequest.newBuilder().setService("foo").build());
-        assertThat(resp.getStatus()).isEqualTo(ServingStatus.SERVING);
+            // check existing service
+            HealthCheckResponse resp =
+                    stub.check(HealthCheckRequest.newBuilder().setService("foo").build());
+            assertThat(resp.getStatus()).isEqualTo(ServingStatus.SERVING);
 
-        // check unknown service
-        HealthCheckRequest req1 =
-                HealthCheckRequest.newBuilder().setService("bar").build();
-        assertThatExceptionOfType(StatusRuntimeException.class)
-                .isThrownBy(() -> stub.check(req1))
-                .withMessage("NOT_FOUND: unknown service bar");
+            // check unknown service
+            HealthCheckRequest req1 =
+                    HealthCheckRequest.newBuilder().setService("bar").build();
+            assertThatExceptionOfType(StatusRuntimeException.class)
+                    .isThrownBy(() -> stub.check(req1))
+                    .withMessage("NOT_FOUND: unknown service bar");
 
-        // service is case-sensitive
-        HealthCheckRequest req2 =
-                HealthCheckRequest.newBuilder().setService("Foo").build();
-        assertThatExceptionOfType(StatusRuntimeException.class)
-                .isThrownBy(() -> stub.check(req2))
-                .withMessage("NOT_FOUND: unknown service Foo");
+            // service is case-sensitive
+            HealthCheckRequest req2 =
+                    HealthCheckRequest.newBuilder().setService("Foo").build();
+            assertThatExceptionOfType(StatusRuntimeException.class)
+                    .isThrownBy(() -> stub.check(req2))
+                    .withMessage("NOT_FOUND: unknown service Foo");
 
-        chan.shutdown();
-        ctx.close();
+            chan.shutdown();
+        }
     }
 
     @Test

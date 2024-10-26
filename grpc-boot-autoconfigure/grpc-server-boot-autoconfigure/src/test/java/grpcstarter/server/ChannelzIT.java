@@ -19,27 +19,26 @@ class ChannelzIT {
     @Test
     void testDisabledByDefault() {
         String name = UUID.randomUUID().toString();
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        try (ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.InProcess.PREFIX + ".name=" + name)
-                .run();
+                .run()) {
 
-        assertThatCode(() -> ctx.getBean(ChannelzGrpc.ChannelzImplBase.class))
-                .isInstanceOf(NoSuchBeanDefinitionException.class);
-
-        ctx.close();
+            assertThatCode(() -> ctx.getBean(ChannelzGrpc.ChannelzImplBase.class))
+                    .isInstanceOf(NoSuchBeanDefinitionException.class);
+        }
     }
 
     @Test
     void testEnableChannelz() {
         String name = UUID.randomUUID().toString();
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        try (ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.InProcess.PREFIX + ".name=" + name)
                 .properties(GrpcServerProperties.Channelz.PREFIX + ".enabled=true")
-                .run();
+                .run()) {
 
-        assertThatCode(() -> ctx.getBean(ChannelzGrpc.ChannelzImplBase.class)).doesNotThrowAnyException();
-
-        ctx.close();
+            assertThatCode(() -> ctx.getBean(ChannelzGrpc.ChannelzImplBase.class))
+                    .doesNotThrowAnyException();
+        }
     }
 
     @Configuration(proxyBeanMethods = false)
