@@ -69,4 +69,10 @@ public class GrpcClientAutoConfiguration implements DisposableBean {
     public void destroy() {
         Cache.clear();
     }
+
+    // Native image support
+    @Bean
+    static GrpcClientBeanFactoryInitializationAotProcessor grpcClientBeanFactoryInitializationAotProcessor() {
+        return new GrpcClientBeanFactoryInitializationAotProcessor();
+    }
 }

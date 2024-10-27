@@ -21,5 +21,8 @@ jobs:
           distribution: 'corretto'
           cache: 'gradle'
 
+      - name: Build
+        run: ./gradlew build --no-daemon --stacktrace
+
       - name: Release Snapshot
         run: OSSRH_USER=${{ secrets.OSSRH_USER }} OSSRH_PASSWORD=${{ secrets.OSSRH_PASSWORD }} ./gradlew publish

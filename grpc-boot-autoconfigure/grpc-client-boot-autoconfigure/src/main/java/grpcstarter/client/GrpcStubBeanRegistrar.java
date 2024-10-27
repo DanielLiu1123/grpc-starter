@@ -6,16 +6,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.SneakyThrows;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
@@ -26,7 +20,6 @@ import org.springframework.util.ObjectUtils;
  * @author Freeman
  */
 class GrpcStubBeanRegistrar {
-    private static final Logger log = LoggerFactory.getLogger(GrpcStubBeanRegistrar.class);
 
     private static final Set<BeanDefinitionRegistry> registries = ConcurrentHashMap.newKeySet();
 
@@ -65,22 +58,7 @@ class GrpcStubBeanRegistrar {
 
         Assert.isInstanceOf(BeanFactory.class, registry, "BeanDefinitionRegistry must be instance of BeanFactory");
 
-        GrpcClientCreator creator = new GrpcClientCreator((BeanFactory) registry, clz);
-
-        AbstractBeanDefinition abd = BeanDefinitionBuilder.genericBeanDefinition(clz, creator::create)
-                .getBeanDefinition();
-
-        abd.setLazyInit(true);
-        abd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-
-        try {
-            BeanDefinitionReaderUtils.registerBeanDefinition(new BeanDefinitionHolder(abd, className), registry);
-        } catch (BeanDefinitionOverrideException ignore) {
-            // clients are included in base packages
-            log.warn(
-                    "gRPC stub '{}' is included in base packages, you can remove it from 'clients' property.",
-                    className);
-        }
+        GrpcClientUtil.registerGrpcClientBean((DefaultListableBeanFactory) registry, clz);
     }
 
     /**
