@@ -1,4 +1,4 @@
-# Native image client example
+# Native image example
 
 ## Build
 
