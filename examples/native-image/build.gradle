@@ -8,7 +8,7 @@ dependencies {
     // Netty supports GraalVM native-image, but grpc-netty-shaded does not.
     // Let grpc-netty-shaded support GraalVM native-image is not in the scope of this project.
     // grpc-netty-shaded is needed to solve this problem.
-    implementation(project(":grpc-starters:grpc-server-boot-starter")){
+    implementation(project(":grpc-starters:grpc-boot-starter")){
         exclude(group: 'io.grpc', module: "grpc-netty-shaded")
     }
     runtimeOnly("io.grpc:grpc-netty")

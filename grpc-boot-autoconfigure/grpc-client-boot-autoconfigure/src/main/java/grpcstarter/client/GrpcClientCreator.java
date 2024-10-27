@@ -23,13 +23,13 @@ import org.springframework.util.unit.DataSize;
  * @author Freeman
  */
 class GrpcClientCreator {
-    private static final String NEW_BLOCKING_STUB_METHOD = "newBlockingStub";
-    private static final String NEW_FUTURE_STUB_METHOD = "newFutureStub";
-    private static final String NEW_STUB_METHOD = "newStub";
+    static final String NEW_BLOCKING_STUB_METHOD = "newBlockingStub";
+    static final String NEW_FUTURE_STUB_METHOD = "newFutureStub";
+    static final String NEW_STUB_METHOD = "newStub";
     private static final String BLOCKING_STUB = "BlockingStub";
     private static final String FUTURE_STUB = "FutureStub";
 
-    private static final boolean SPRING_CLOUD_CONTEXT_PRESENT =
+    static final boolean SPRING_CLOUD_CONTEXT_PRESENT =
             ClassUtils.isPresent("org.springframework.cloud.context.scope.refresh.RefreshScope", null);
 
     private final BeanFactory beanFactory;
@@ -43,11 +43,12 @@ class GrpcClientCreator {
     /**
      * Create a gRPC stub instance.
      *
-     * @param <T> stub type
+     * @param supportRefresh whether to support refresh scope
+     * @param <T>            stub type
      * @return gRPC stub instance
      */
     @SuppressWarnings({"unchecked"})
-    public <T> T create() {
+    public <T> T create(boolean supportRefresh) {
         Method stubMethod =
                 ReflectionUtils.findMethod(stubClass.getEnclosingClass(), getStubMethodName(stubClass), Channel.class);
         Assert.notNull(stubMethod, "stubMethod must not be null");
@@ -57,11 +58,14 @@ class GrpcClientCreator {
                 .getBeanDefinition();
         abd.setLazyInit(true);
 
+        GrpcClientProperties properties = beanFactory.getBean(GrpcClientProperties.class);
+
         String channelBeanName = "grpc-channel-" + UUID.randomUUID();
         BeanDefinitionHolder holder = new BeanDefinitionHolder(abd, channelBeanName);
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-        GrpcClientProperties properties = beanFactory.getBean(GrpcClientProperties.class);
-        if (SPRING_CLOUD_CONTEXT_PRESENT && properties.getRefresh().isEnabled()) {
+        if (supportRefresh
+                && SPRING_CLOUD_CONTEXT_PRESENT
+                && properties.getRefresh().isEnabled()) {
             abd.setScope("refresh");
             holder = ScopedProxyUtils.createScopedProxy(holder, registry, true);
         }
