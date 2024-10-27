@@ -31,7 +31,7 @@ jobs:
           fi
 
       - name: Build
-        run: ./gradlew build --no-daemon --stacktrace
+        run: ./gradlew build --no-daemon --stacktrace --info
 
       - name: Decrypt secring.gpg
         run: openssl enc -aes-256-cbc -d -pbkdf2 -in private.key.bin -out private.key -pass pass:${{ secrets.privateKeyPassword }}

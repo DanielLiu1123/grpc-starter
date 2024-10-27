@@ -49,7 +49,7 @@ class GracefulShutdownIT {
         long time = Long.parseLong(matcher.group(1));
 
         // 1000 - 100
-        assertThat(time).isGreaterThanOrEqualTo(850);
+        assertThat(time).isGreaterThanOrEqualTo(900);
     }
 
     @Configuration(proxyBeanMethods = false)

@@ -28,7 +28,7 @@ jobs:
           cache: 'gradle'
 
       - name: Build with Gradle
-        run: ./gradlew build --no-daemon --stacktrace
+        run: ./gradlew build --no-daemon --stacktrace --info
 
   native-image-build:
     runs-on: ubuntu-latest
