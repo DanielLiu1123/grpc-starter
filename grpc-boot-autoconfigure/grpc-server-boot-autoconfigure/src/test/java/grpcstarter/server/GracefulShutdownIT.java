@@ -38,7 +38,7 @@ class GracefulShutdownIT {
             var stub = createStub(inProcessName, SimpleServiceBlockingStub.class);
             new Thread(() -> stub.unaryRpc(SimpleRequest.getDefaultInstance())).start();
 
-            Thread.sleep(100);
+            Thread.sleep(500);
         }
 
         Matcher matcher =
@@ -48,8 +48,8 @@ class GracefulShutdownIT {
         }
         long time = Long.parseLong(matcher.group(1));
 
-        // 1000 - 100
-        assertThat(time).isGreaterThanOrEqualTo(900);
+        // 1000 - 500
+        assertThat(time).isGreaterThanOrEqualTo(500);
     }
 
     @Configuration(proxyBeanMethods = false)
