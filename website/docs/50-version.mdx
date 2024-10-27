@@ -24,7 +24,12 @@ We monitor Spring Boot updates daily and release corresponding versions to ensur
 
 ## Important Release Notes
 
-### Version 3.3.1
+### 3.3.5.1
+
+- **Native Image Support**: Support native image compilation with GraalVM.
+  - Refer to [native-image example](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/native-image)
+
+### 3.3.1
 
 - **Dependency Removal**: The `javax.annotation:javax.annotation-api` dependency has been removed.
 - **Configuration Guide**: Instructions on configuring gRPC to avoid generating the `javax.annotation.Generated` annotation:
@@ -32,6 +37,6 @@ We monitor Spring Boot updates daily and release corresponding versions to ensur
   - [Gradle Configuration](https://github.com/DanielLiu1123/grpc-starter/blob/main/gradle/protobuf.gradle#L15)
   - [Buf Configuration](https://github.com/DanielLiu1123/grpc-starter/blob/main/examples/transcoding/best-practice/bp-api/buf.gen.yaml#L7)
 
-### Version 3.2.0
+### 3.2.0
 
 - **Group ID Change**: The groupId has been updated from `com.freemanan` to `io.github.danielliu1123`.

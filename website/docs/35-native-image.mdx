@@ -1,0 +1,20 @@
+---
+sidebar_position: 35
+---
+
+# Native Image
+
+**Starting with version [3.3.5.1](https://github.com/DanielLiu1123/grpc-starter/releases/tag/v3.3.5.1)**, this project supports native image compilation using GraalVM.
+This feature lets you compile your gRPC services into native executables that run without a JVM.
+
+## Example
+
+Refer to the [native-image example](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/native-image).
+
+:::warning
+Netty supports GraalVM native-image, but grpc-netty-shaded does not.
+So, don’t use shaded Netty in your project if you want to compile it into a native image.
+
+Adding GraalVM native-image support to grpc-netty-shaded is not part of this project.
+grpc-netty-shaded needs to resolve this problem.
+:::
