@@ -15,9 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -67,10 +67,11 @@ public class TranscodingWebFluxApp extends SimpleServiceImplBase {
     }
 
     @Bean
-    ApplicationRunner runner(WebClient.Builder builder, Environment env) {
-        var port = env.getProperty("server.port", int.class, 8080);
+    ApplicationRunner runner(WebClient.Builder builder, ReactiveWebServerApplicationContext ctx) {
         return args -> {
-            var client = builder.baseUrl("http://localhost:" + port).build();
+            var client = builder.baseUrl(
+                            "http://localhost:" + ctx.getWebServer().getPort())
+                    .build();
 
             var response = client.post()
                     .uri("/unary")
