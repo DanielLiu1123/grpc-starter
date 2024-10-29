@@ -58,14 +58,14 @@ public class DefaultHeaderConverter implements HeaderConverter {
     }
 
     private Set<String> getRemoveHeaders() {
-        Set<String> result = new LinkedHashSet<>(findPublicStaticFinalStringFieldNames(HttpHeaders.class));
+        Set<String> result = new LinkedHashSet<>(getHttpHeaders());
 
         result.removeIf(HttpHeaders.AUTHORIZATION::equalsIgnoreCase); // keep authorization
         return result;
     }
 
-    private static Set<String> findPublicStaticFinalStringFieldNames(Class<?> clazz) {
-        return Arrays.stream(clazz.getDeclaredFields())
+    private static Set<String> getHttpHeaders() {
+        return Arrays.stream(HttpHeaders.class.getDeclaredFields())
                 .filter(f -> Modifier.isPublic(f.getModifiers())
                         && Modifier.isStatic(f.getModifiers())
                         && Modifier.isFinal(f.getModifiers())

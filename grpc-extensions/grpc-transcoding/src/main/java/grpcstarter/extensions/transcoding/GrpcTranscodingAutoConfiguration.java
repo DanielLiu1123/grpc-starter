@@ -117,4 +117,10 @@ public class GrpcTranscodingAutoConfiguration implements SmartInitializingSingle
                     transcodingExceptionResolver);
         }
     }
+
+    // AOT support
+    @Bean
+    static GrpcTranscodingBeanFactoryInitializationAotProcessor grpcTranscodingBeanFactoryInitializationAotProcessor() {
+        return new GrpcTranscodingBeanFactoryInitializationAotProcessor();
+    }
 }
