@@ -1,14 +1,29 @@
 plugins {
-    id 'org.springframework.boot'
+    id "org.springframework.boot"
+    id "org.graalvm.buildtools.native"
 }
 
 dependencies {
     implementation("io.grpc:grpc-testing-proto")
-    implementation(project(":grpc-starters:grpc-server-boot-starter"))
+    implementation(project(":grpc-starters:grpc-server-boot-starter")){
+        exclude(group: 'io.grpc', module: "grpc-netty-shaded")
+    }
     implementation(project(":grpc-starters:grpc-starter-transcoding"))
     implementation("org.springframework.boot:spring-boot-starter-web")
+    runtimeOnly("io.grpc:grpc-netty")
 
     testImplementation(project(":grpc-starters:grpc-starter-test"))
 }
 
 apply from: "${rootDir}/gradle/protobuf.gradle"
+
+// https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html#configuration-options
+graalvmNative {
+    testSupport = false
+    binaries {
+        main {
+            verbose = true
+            sharedLibrary = false
+        }
+    }
+}
