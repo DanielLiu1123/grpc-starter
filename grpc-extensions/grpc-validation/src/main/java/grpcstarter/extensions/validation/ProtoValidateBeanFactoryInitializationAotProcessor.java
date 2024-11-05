@@ -1,10 +1,17 @@
 package grpcstarter.extensions.validation;
 
+import build.buf.validate.ValidateProto;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Duration;
+import com.google.protobuf.DynamicMessage;
 import com.google.protobuf.Empty;
+import com.google.protobuf.ListValue;
 import com.google.protobuf.Message;
+import com.google.protobuf.NullValue;
+import com.google.protobuf.ProtocolMessageEnum;
+import com.google.protobuf.Struct;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.Value;
 import com.google.rpc.BadRequest;
@@ -20,13 +27,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.projectnessie.cel.common.ULong;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -35,6 +46,8 @@ import org.springframework.util.ReflectionUtils;
  * @author Freeman
  */
 class ProtoValidateBeanFactoryInitializationAotProcessor implements BeanFactoryInitializationAotProcessor {
+
+    private final ClassPathScanningCandidateComponentProvider scanner = getScanner();
 
     @Nullable
     @Override
@@ -46,13 +59,46 @@ class ProtoValidateBeanFactoryInitializationAotProcessor implements BeanFactoryI
             // grpcstarter.extensions.validation.ValidationExceptionUtil.asInvalidArgumentException
             registerReflectionForClassAndInnerClasses(reflection, BadRequest.class);
 
+            // This will increase the packaging size about 2MB.
+            // I don't know why this type is needed, don't want to spend much time to figure it out :)
+            registerReflectionForClassAndInnerClasses(reflection, DescriptorProtos.class);
+
+            // protovalidate
+            var protovalidateMessages = scanner.findCandidateComponents(ValidateProto.class.getPackageName());
+            for (var clz : protovalidateMessages) {
+                try {
+                    var clazz = Class.forName(clz.getBeanClassName());
+                    registerReflectionForClassAndInnerClasses(reflection, clazz);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
             // see org.projectnessie.cel.common.types.pb.Db
             registerReflectionForClassAndInnerClasses(reflection, Any.class);
+            registerReflectionForClassAndInnerClasses(reflection, Any[].class);
             registerReflectionForClassAndInnerClasses(reflection, Duration.class);
+            registerReflectionForClassAndInnerClasses(reflection, Duration[].class);
             registerReflectionForClassAndInnerClasses(reflection, Empty.class);
+            registerReflectionForClassAndInnerClasses(reflection, Empty[].class);
             registerReflectionForClassAndInnerClasses(reflection, Timestamp.class);
+            registerReflectionForClassAndInnerClasses(reflection, Timestamp[].class);
             registerReflectionForClassAndInnerClasses(reflection, Value.class);
+            registerReflectionForClassAndInnerClasses(reflection, Value[].class);
             registerReflectionForClassAndInnerClasses(reflection, BoolValue.class);
+            registerReflectionForClassAndInnerClasses(reflection, BoolValue[].class);
+
+            registerReflectionForClassAndInnerClasses(reflection, Struct.class);
+            registerReflectionForClassAndInnerClasses(reflection, Struct[].class);
+            registerReflectionForClassAndInnerClasses(reflection, ListValue.class);
+            registerReflectionForClassAndInnerClasses(reflection, ListValue[].class);
+            registerReflectionForClassAndInnerClasses(reflection, NullValue.class);
+            registerReflectionForClassAndInnerClasses(reflection, NullValue[].class);
+
+            registerReflectionForClassAndInnerClasses(reflection, DynamicMessage.class);
+            registerReflectionForClassAndInnerClasses(reflection, DynamicMessage[].class);
+
+            registerReflectionForClassAndInnerClasses(reflection, ULong[].class);
 
             // request + response messages
             var messageClasses = listGrpcServiceDefinition(beanFactory).values().stream()
@@ -63,8 +109,7 @@ class ProtoValidateBeanFactoryInitializationAotProcessor implements BeanFactoryI
                     .collect(Collectors.toCollection(HashSet::new));
 
             for (var messageClass : messageClasses) {
-                reflection.registerType(
-                        messageClass, MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_METHODS);
+                registerReflectionForClassAndInnerClasses(reflection, messageClass);
             }
         };
     }
@@ -121,6 +166,29 @@ class ProtoValidateBeanFactoryInitializationAotProcessor implements BeanFactoryI
 
         for (var declaredClass : clz.getDeclaredClasses()) {
             registerReflectionForClassAndInnerClasses(reflection, declaredClass);
+        }
+    }
+
+    private static ClassPathScanningCandidateComponentProvider getScanner() {
+        var scanner = new ClassPathScanningCandidateComponentProvider(false) {
+            @Override
+            protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+                return true;
+            }
+        };
+        scanner.addIncludeFilter((metadataReader, metadataReaderFactory) -> isProtobufMessage(metadataReader));
+        return scanner;
+    }
+
+    private static boolean isProtobufMessage(MetadataReader metadataReader) {
+        var classname = metadataReader.getClassMetadata().getClassName();
+        try {
+            var clz = Class.forName(classname);
+            return Message.class.isAssignableFrom(clz)
+                    || Message.Builder.class.isAssignableFrom(clz)
+                    || ProtocolMessageEnum.class.isAssignableFrom(clz);
+        } catch (Throwable e) {
+            return false;
         }
     }
 }
