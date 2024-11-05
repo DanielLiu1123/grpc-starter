@@ -6,7 +6,6 @@ import grpcstarter.server.GrpcServer;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -34,11 +33,12 @@ public class ValidationApp extends FooServiceGrpc.FooServiceImplBase {
     }
 
     @Bean
-    ApplicationRunner runner(GrpcServer server, @Value("${CI:false}") boolean ci) {
+    ApplicationRunner runner(GrpcServer server) {
         return args -> {
-            if (!ci) {
+            if (server.getPort() <= 0) {
                 return;
             }
+
             var channel = ManagedChannelBuilder.forAddress("localhost", server.getPort())
                     .usePlaintext()
                     .build();
