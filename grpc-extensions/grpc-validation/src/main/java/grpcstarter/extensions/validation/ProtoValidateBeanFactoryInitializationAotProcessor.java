@@ -106,7 +106,7 @@ class ProtoValidateBeanFactoryInitializationAotProcessor implements BeanFactoryI
                     .map(ResolvableType::resolve)
                     .map(ProtoValidateBeanFactoryInitializationAotProcessor::getAllProtobufMessageTypes)
                     .flatMap(Set::stream)
-                    .collect(Collectors.toCollection(HashSet::new));
+                    .collect(Collectors.toSet());
 
             for (var messageClass : messageClasses) {
                 registerReflectionForClassAndInnerClasses(reflection, messageClass);
