@@ -48,7 +48,7 @@ class ProtoValidateAppTest {
                         .addHobbies("movies")
                         .build()))
                 .isInstanceOf(StatusRuntimeException.class)
-                .hasMessage("INVALID_ARGUMENT: not a valid Foo, id: id length must be at least 5 characters");
+                .hasMessage("INVALID_ARGUMENT: not a valid Foo, id: at least 5 characters");
 
         assertThatCode(() -> stub.insertFoo(Foo.newBuilder()
                         .setId("") // invalid
@@ -56,7 +56,7 @@ class ProtoValidateAppTest {
                         .addHobbies("coding") // invalid
                         .build()))
                 .isInstanceOf(StatusRuntimeException.class)
-                .hasMessage("INVALID_ARGUMENT: not a valid Foo, id: id length must be at least 5 characters");
+                .hasMessage("INVALID_ARGUMENT: not a valid Foo, id: at least 5 characters");
 
         assertThatCode(() -> stub.insertFoo(Foo.newBuilder()
                         .setId("11111")

@@ -54,6 +54,8 @@ class GrpcClientBeanFactoryInitializationAotProcessor
                     .toMethodReference();
             beanFactoryInitializationCode.addInitializer(methodReference);
 
+            var reflection = generationContext.getRuntimeHints().reflection();
+
             // Register reflection metadata for gRPC client beans
             for (var entry : beanNameToBeanDefinition.entrySet()) {
                 var beanDefinition = entry.getValue();
@@ -66,8 +68,6 @@ class GrpcClientBeanFactoryInitializationAotProcessor
                 if (grpcClass == null) {
                     continue;
                 }
-
-                var reflection = generationContext.getRuntimeHints().reflection();
 
                 reflection.registerType(grpcClass, builder -> {
 
