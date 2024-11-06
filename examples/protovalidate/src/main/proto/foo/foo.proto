@@ -9,7 +9,7 @@ import "google/api/annotations.proto";
 message Foo {
   string id = 1 [(buf.validate.field).cel = {
     id: "id",
-    message: "id length must be at least 5 characters",
+    message: "at least 5 characters",
     expression: "this.size() >= 5",
   }];
   string name = 2 [(buf.validate.field).string = {min_len: 5}];

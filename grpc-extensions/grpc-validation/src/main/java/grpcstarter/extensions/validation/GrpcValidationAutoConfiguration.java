@@ -65,6 +65,13 @@ public class GrpcValidationAutoConfiguration {
                         new ReflectiveValidatorIndex(), properties.getServer().getOrder());
             }
         }
+
+        // AOT support
+        @Bean
+        static ProtoGenValidateBeanFactoryInitializationAotProcessor
+                protoGenValidateBeanFactoryInitializationAotProcessor() {
+            return new ProtoGenValidateBeanFactoryInitializationAotProcessor();
+        }
     }
 
     /**
@@ -106,6 +113,12 @@ public class GrpcValidationAutoConfiguration {
                 return new ProtoValidateServerInterceptor(
                         new Validator(), properties.getServer().getOrder());
             }
+        }
+
+        // AOT support
+        @Bean
+        static ProtoValidateBeanFactoryInitializationAotProcessor protoValidateBeanFactoryInitializationAotProcessor() {
+            return new ProtoValidateBeanFactoryInitializationAotProcessor();
         }
     }
 }

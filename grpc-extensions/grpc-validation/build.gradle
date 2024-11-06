@@ -7,6 +7,7 @@ dependencies {
 
     compileOnly("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
     compileOnly("build.buf:protovalidate:${protovalidateVersion}")
+    compileOnly("org.projectnessie.cel:cel-core:0.4.4") // register reflection for ULong[]
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
