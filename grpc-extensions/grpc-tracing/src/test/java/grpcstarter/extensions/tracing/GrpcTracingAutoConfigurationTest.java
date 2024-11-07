@@ -25,20 +25,19 @@ class GrpcTracingAutoConfigurationTest {
 
     @Test
     void testTracingBeans_whenAllConditionsMatched() {
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        try (ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("grpc.server.in-process.name=" + UUID.randomUUID())
-                .run();
+                .run()) {
 
-        assertThatCode(() -> ctx.getBean(GrpcTracingAutoConfiguration.Server.class))
-                .doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(OrderedObservationGrpcServerInterceptor.class))
-                .doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(GrpcTracingAutoConfiguration.Client.class))
-                .doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(OrderedObservationGrpcClientInterceptor.class))
-                .doesNotThrowAnyException();
-
-        ctx.close();
+            assertThatCode(() -> ctx.getBean(GrpcTracingAutoConfiguration.Server.class))
+                    .doesNotThrowAnyException();
+            assertThatCode(() -> ctx.getBean(OrderedObservationGrpcServerInterceptor.class))
+                    .doesNotThrowAnyException();
+            assertThatCode(() -> ctx.getBean(GrpcTracingAutoConfiguration.Client.class))
+                    .doesNotThrowAnyException();
+            assertThatCode(() -> ctx.getBean(OrderedObservationGrpcClientInterceptor.class))
+                    .doesNotThrowAnyException();
+        }
     }
 
     @Test
@@ -53,12 +52,11 @@ class GrpcTracingAutoConfigurationTest {
         @Action(verb = Verb.EXCLUDE, value = "grpc-server-boot-autoconfigure-*.jar"),
     })
     void tracingServerNotEnabled_whenGrpcServerNotOnClasspath() {
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class).run();
+        try (ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class).run()) {
 
-        assertThatCode(() -> ctx.getBean(GrpcTracingAutoConfiguration.Server.class))
-                .isInstanceOf(NoSuchBeanDefinitionException.class);
-
-        ctx.close();
+            assertThatCode(() -> ctx.getBean(GrpcTracingAutoConfiguration.Server.class))
+                    .isInstanceOf(NoSuchBeanDefinitionException.class);
+        }
     }
 
     @Test
@@ -66,14 +64,13 @@ class GrpcTracingAutoConfigurationTest {
         @Action(verb = Verb.EXCLUDE, value = "grpc-client-boot-autoconfigure-*.jar"),
     })
     void tracingClientNotEnabled_whenGrpcClientNotOnClasspath() {
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        try (ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("grpc.server.in-process.name=" + UUID.randomUUID())
-                .run();
+                .run()) {
 
-        assertThatCode(() -> ctx.getBean(GrpcTracingAutoConfiguration.Client.class))
-                .isInstanceOf(NoSuchBeanDefinitionException.class);
-
-        ctx.close();
+            assertThatCode(() -> ctx.getBean(GrpcTracingAutoConfiguration.Client.class))
+                    .isInstanceOf(NoSuchBeanDefinitionException.class);
+        }
     }
 
     @Configuration(proxyBeanMethods = false)
