@@ -7,7 +7,6 @@ import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
@@ -47,7 +46,6 @@ public final class GrpcClientUtil {
                 .getBeanDefinition();
 
         abd.setLazyInit(true);
-        abd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
         abd.setAttribute(GrpcClientBeanFactoryInitializationAotProcessor.IS_CREATED_BY_FRAMEWORK, true);
 
         // TODO(Freeman): set as fallback bean in spring boot 3.4.0
