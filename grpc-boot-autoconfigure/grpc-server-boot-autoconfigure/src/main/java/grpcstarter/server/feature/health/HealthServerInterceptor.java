@@ -28,6 +28,10 @@ public class HealthServerInterceptor implements ServerInterceptor {
 
     private static final String HEALTH_REQUEST_PREFIX = HealthGrpc.SERVICE_NAME + "/";
 
+    private static final String STARTUP = "startup";
+    private static final String READINESS = "readiness";
+    private static final String LIVENESS = "liveness";
+
     private final HealthStatusManager healthManager;
     private final Map<String, HealthChecker> serviceToChecker;
 
@@ -69,8 +73,10 @@ public class HealthServerInterceptor implements ServerInterceptor {
         boolean allHealthy = true;
         for (Map.Entry<String, HealthChecker> en : serviceToChecker.entrySet()) {
             String service = en.getKey();
-            if (Objects.equals(message.getService(), SERVICE_NAME_ALL_SERVICES)
-                    || Objects.equals(message.getService(), service)) {
+            if (Objects.equals(message.getService(), service)
+                    || Objects.equals(message.getService(), SERVICE_NAME_ALL_SERVICES)
+                    || Objects.equals(message.getService(), STARTUP)
+                    || Objects.equals(message.getService(), READINESS)) {
                 HealthChecker checker = en.getValue();
                 if (checker.check()) {
                     healthManager.setStatus(service, HealthCheckResponse.ServingStatus.SERVING);
