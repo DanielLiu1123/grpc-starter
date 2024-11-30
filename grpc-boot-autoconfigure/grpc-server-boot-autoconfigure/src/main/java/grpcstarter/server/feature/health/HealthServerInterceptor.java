@@ -70,13 +70,14 @@ public class HealthServerInterceptor implements ServerInterceptor {
     }
 
     protected void changeServiceHealthStatus(HealthCheckRequest message) {
+        if (Objects.equals(message.getService(), LIVENESS)) {
+            healthManager.setStatus(LIVENESS, HealthCheckResponse.ServingStatus.SERVING);
+            return;
+        }
         boolean allHealthy = true;
         for (Map.Entry<String, HealthChecker> en : serviceToChecker.entrySet()) {
             String service = en.getKey();
-            if (Objects.equals(message.getService(), service)
-                    || Objects.equals(message.getService(), SERVICE_NAME_ALL_SERVICES)
-                    || Objects.equals(message.getService(), STARTUP)
-                    || Objects.equals(message.getService(), READINESS)) {
+            if (needCheck(message, service)) {
                 HealthChecker checker = en.getValue();
                 if (checker.check()) {
                     healthManager.setStatus(service, HealthCheckResponse.ServingStatus.SERVING);
@@ -89,6 +90,15 @@ public class HealthServerInterceptor implements ServerInterceptor {
         HealthCheckResponse.ServingStatus status =
                 allHealthy ? HealthCheckResponse.ServingStatus.SERVING : HealthCheckResponse.ServingStatus.NOT_SERVING;
         healthManager.setStatus(SERVICE_NAME_ALL_SERVICES, status);
+        healthManager.setStatus(STARTUP, status);
+        healthManager.setStatus(READINESS, status);
+    }
+
+    private static boolean needCheck(HealthCheckRequest message, String service) {
+        return Objects.equals(message.getService(), service)
+                || Objects.equals(message.getService(), SERVICE_NAME_ALL_SERVICES)
+                || Objects.equals(message.getService(), STARTUP)
+                || Objects.equals(message.getService(), READINESS);
     }
 
     protected static boolean isHealthCheckRequest(String fullMethodName) {
