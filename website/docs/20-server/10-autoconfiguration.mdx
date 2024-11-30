@@ -76,13 +76,12 @@ grpc:
       enabled: false
 ```
 
-You can customize the health check logic by implementing the `HealthChecker` interface.
+You can customize the health check logic by implementing the [`HealthChecker`](https://github.com/DanielLiu1123/grpc-starter/blob/main/grpc-boot-autoconfigure/grpc-server-boot-autoconfigure/src/main/java/grpcstarter/server/feature/health/HealthChecker.java) interface.
 
-There are two build-in `HealthChecker` implementations, `DataSourceHealthChecker` and `RedisHealthChecker`.
+There are some build-in `HealthChecker` implementations:
 
-`DataSourceHealthChecker` is enabled by default when the `spring-boot-starter-jdbc` is on the classpath.
-
-`RedisHealthChecker` is enabled by default when the `spring-boot-starter-data-redis` is on the classpath.
+- [`DataSourceHealthChecker`](https://github.com/DanielLiu1123/grpc-starter/blob/main/grpc-boot-autoconfigure/grpc-server-boot-autoconfigure/src/main/java/grpcstarter/server/feature/health/datasource/DataSourceHealthChecker.java) is enabled by default when the `spring-boot-starter-jdbc` is on the classpath.
+- [`RedisHealthChecker`](https://github.com/DanielLiu1123/grpc-starter/blob/main/grpc-boot-autoconfigure/grpc-server-boot-autoconfigure/src/main/java/grpcstarter/server/feature/health/redis/RedisHealthChecker.java) is enabled by default when the `spring-boot-starter-data-redis` is on the classpath.
 
 Use the following configuration to disable them:
 
@@ -94,6 +93,30 @@ grpc:
         enabled: false
       redis:
         enabled: false
+```
+
+Starting from version 3.4.0, to better support [Kubernetes Probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/),
+three special services were introduced: `startup`, `readiness`, and `liveness`.
+
+For `startup` and `readiness`, the system will return the `SERVING` status only when all `HealthChecker`s pass their checks (return `true`), as they rely on the state of external services.
+
+For `liveness`, it always returns the `SERVING` status, as it does not rely on the state of external services.
+
+This is suitable for most applications.
+If you need more customization, you can implement the [`health`](https://github.com/grpc/grpc/blob/master/src/proto/grpc/health/v1/health.proto) service yourself:
+
+```java
+@Component
+public class HealthService extends HealthGrpc.HealthImplBase {
+    @Override
+    public void check(HealthCheckRequest request, StreamObserver<HealthCheckResponse> responseObserver) {
+        // Your custom health check logic
+        var result = HealthCheckResponse.ServingStatus.SERVING;
+        responseObserver.onNext(
+                HealthCheckResponse.newBuilder().setStatus(result).build());
+        responseObserver.onCompleted();
+    }
+}
 ```
 
 ### Reflection

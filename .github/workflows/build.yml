@@ -3,12 +3,14 @@ on:
   push:
     branches:
       - main
+      - 3.3.x
       - 3.2.x
       - 3.1.x
       - 2.7.x
   pull_request:
     branches:
       - main
+      - 3.3.x
       - 3.2.x
       - 3.1.x
       - 2.7.x
@@ -30,21 +32,22 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build --no-daemon --stacktrace --info
 
-  native-image-build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-
-      - name: Setup GraalVM
-        uses: graalvm/setup-graalvm@v1
-        with:
-          java-version: '17'
-          distribution: 'graalvm'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          native-image-job-reports: 'true'
-
-      - name: Build native image
-        run: |
-          ./gradlew nativeRun --no-daemon --stacktrace
+# After 3.4.0, this job will fail, grpc and netty are really not GraalVM-ready.
+#  native-image-build:
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 45
+#    steps:
+#      - name: Check out the repo
+#        uses: actions/checkout@v4
+#
+#      - name: Setup GraalVM
+#        uses: graalvm/setup-graalvm@v1
+#        with:
+#          java-version: '17'
+#          distribution: 'graalvm'
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
+#          native-image-job-reports: 'true'
+#
+#      - name: Build native image
+#        run: |
+#          ./gradlew nativeRun --no-daemon --stacktrace

@@ -122,11 +122,7 @@ public class GrpcServerProperties {
              */
             private String service = "datasource";
             /**
-             * The SQL query that will be used to validate datasource connection, default value is 'SELECT 1'.
-             */
-            private String validationQuery = "SELECT 1";
-            /**
-             * {@link #validationQuery} timeout, unit seconds.
+             * The timeout in seconds for {@link java.sql.Connection#isValid(int)}, use 0 if not set.
              */
             private Integer timeout;
         }

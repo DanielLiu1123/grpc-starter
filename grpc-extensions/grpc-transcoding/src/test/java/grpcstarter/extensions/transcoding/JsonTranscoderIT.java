@@ -33,6 +33,7 @@ class JsonTranscoderIT {
         int port = randomPort();
         var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
+                .properties("grpc.server.port=0")
                 .web(WebApplicationType.valueOf(webType))
                 .run();
 
@@ -103,6 +104,7 @@ class JsonTranscoderIT {
         int port = randomPort();
         var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
+                .properties("grpc.server.port=0")
                 .web(WebApplicationType.valueOf(webType))
                 .run();
 
@@ -125,6 +127,7 @@ class JsonTranscoderIT {
         int port = randomPort();
         var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
+                .properties("grpc.server.port=0")
                 .web(WebApplicationType.valueOf(webType))
                 .run();
 

@@ -2,8 +2,7 @@ package grpcstarter.server.feature.health.datasource;
 
 import grpcstarter.server.GrpcServerProperties;
 import grpcstarter.server.feature.health.HealthChecker;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,18 +36,21 @@ public class DataSourceHealthChecker implements HealthChecker, BeanFactoryAware,
     @Override
     public boolean check() {
         for (DataSource dataSource : dataSources) {
-            try (Connection conn = dataSource.getConnection();
-                    PreparedStatement statement = conn.prepareStatement(config.getValidationQuery())) {
-                if (config.getTimeout() != null) {
-                    statement.setQueryTimeout(config.getTimeout());
-                }
-                statement.execute();
-            } catch (Exception e) {
-                log.warn("DataSource health check failed!", e);
+            if (!isDataSourceHealthy(dataSource)) {
                 return false;
             }
         }
         return true;
+    }
+
+    private boolean isDataSourceHealthy(DataSource dataSource) {
+        try (var conn = dataSource.getConnection()) {
+            int timeout = config.getTimeout() != null ? config.getTimeout() : 0;
+            return conn.isValid(timeout);
+        } catch (SQLException e) {
+            log.warn("DataSource health check failed for DataSource: {}", dataSource, e);
+            return false;
+        }
     }
 
     @Override
