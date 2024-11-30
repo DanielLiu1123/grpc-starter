@@ -6,14 +6,14 @@ dependencies {
 
     compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
     // dynamic refresh configuration for grpc clients
-    compileOnly("org.springframework.cloud:spring-cloud-context:${springCloudContextVersion}")
+    compileOnly("org.springframework.cloud:spring-cloud-context:${springCloudCommonsVersion}")
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation("io.grpc:grpc-testing-proto")
     testImplementation(project(":grpc-starters:grpc-server-boot-starter"))
     testImplementation(project(":grpc-starters:grpc-starter-test"))
-    testImplementation("org.springframework.cloud:spring-cloud-context:${springCloudContextVersion}")
+    testImplementation("org.springframework.cloud:spring-cloud-context:${springCloudCommonsVersion}")
 }
 
 apply from: "${rootDir}/gradle/deploy.gradle"

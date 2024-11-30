@@ -40,6 +40,7 @@ allprojects {
         maven { url "https://repo.spring.io/snapshot" }
         maven { url "https://repo.spring.io/milestone" }
     }
+
     compileJava {
         options.encoding = "UTF-8"
         options.compilerArgs << "-parameters"
@@ -48,9 +49,18 @@ allprojects {
         options.encoding = "UTF-8"
         options.compilerArgs << "-parameters"
     }
+
     test {
+        systemProperties("spring.cloud.compatibility-verifier.enabled": "false")
         useJUnitPlatform()
     }
+
+    afterEvaluate {
+        tasks.findByName("bootRun")?.configure {
+            systemProperty("spring.cloud.compatibility-verifier.enabled", "false")
+        }
+    }
+
     // dependency management
     apply plugin: "io.spring.dependency-management"
     dependencyManagement {
@@ -60,6 +70,7 @@ allprojects {
             mavenBom "io.grpc:grpc-bom:${grpcVersion}"
         }
     }
+
     dependencies {
         compileOnly("org.projectlombok:lombok")
         annotationProcessor("org.projectlombok:lombok")
@@ -67,6 +78,7 @@ allprojects {
         testAnnotationProcessor("org.projectlombok:lombok")
         compileOnly("com.github.spotbugs:spotbugs-annotations:${spotbugsAnnotationsVersion}")
     }
+
     // spotless
     apply plugin: "com.diffplug.spotless"
     spotless {
