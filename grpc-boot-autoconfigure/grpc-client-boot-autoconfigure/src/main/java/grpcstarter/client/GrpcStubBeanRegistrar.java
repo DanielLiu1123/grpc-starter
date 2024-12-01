@@ -12,7 +12,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.core.ResolvableType;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 
@@ -20,8 +19,8 @@ import org.springframework.core.type.classreading.MetadataReader;
  * @author Freeman
  */
 class GrpcStubBeanRegistrar {
-
     private static final Logger log = LoggerFactory.getLogger(GrpcStubBeanRegistrar.class);
+
     private final ClassPathScanningCandidateComponentProvider scanner = getScanner();
     private final BeanDefinitionRegistry registry;
 
@@ -40,12 +39,9 @@ class GrpcStubBeanRegistrar {
         for (String pkg : basePackages) {
             Set<BeanDefinition> beanDefinitions = scanner.findCandidateComponents(pkg);
             for (BeanDefinition bd : beanDefinitions) {
-                var type = bd.getResolvableType();
-                if (!ResolvableType.NONE.equalsType(type)) {
-                    var clz = type.resolve();
-                    if (clz != null) {
-                        registerGrpcStubBean(clz);
-                    }
+                var clz = Util.getBeanDefinitionClass(bd);
+                if (clz != null) {
+                    registerGrpcStubBean(clz);
                 }
             }
         }
@@ -62,7 +58,7 @@ class GrpcStubBeanRegistrar {
             throw new IllegalArgumentException("registry must be instance of DefaultListableBeanFactory");
         }
 
-        initClassNameToBeanDefinitions(dlb);
+        initClassToBeanDefinitions(dlb);
 
         if (classToBeanDefinitions.containsKey(clz)) {
             if (log.isDebugEnabled()) {
@@ -74,19 +70,16 @@ class GrpcStubBeanRegistrar {
         GrpcClientUtil.registerGrpcClientBean(dlb, clz);
     }
 
-    private void initClassNameToBeanDefinitions(DefaultListableBeanFactory bf) {
+    private void initClassToBeanDefinitions(DefaultListableBeanFactory bf) {
         if (classToBeanDefinitions == null) {
             classToBeanDefinitions = new HashMap<>();
             for (var beanDefinitionName : bf.getBeanDefinitionNames()) {
                 var beanDefinition = bf.getBeanDefinition(beanDefinitionName);
-                var type = beanDefinition.getResolvableType();
-                if (!ResolvableType.NONE.equalsType(type)) {
-                    Class<?> clz = type.resolve();
-                    if (clz != null) {
-                        classToBeanDefinitions
-                                .computeIfAbsent(clz, k -> new ArrayList<>())
-                                .add(beanDefinition);
-                    }
+                var clz = Util.getBeanDefinitionClass(beanDefinition);
+                if (clz != null) {
+                    classToBeanDefinitions
+                            .computeIfAbsent(clz, k -> new ArrayList<>())
+                            .add(beanDefinition);
                 }
             }
         }
