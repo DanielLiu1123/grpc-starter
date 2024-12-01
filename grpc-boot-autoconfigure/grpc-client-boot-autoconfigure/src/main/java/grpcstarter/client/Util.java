@@ -137,6 +137,8 @@ class Util {
         if (beanDefinition instanceof AnnotatedBeanDefinition abd) {
             var metadata = abd.getFactoryMethodMetadata();
             if (metadata != null) {
+                // Maybe there has @Conditional on the method,
+                // Class may not present.
                 return forName(metadata.getReturnTypeName());
             }
         }
@@ -151,11 +153,12 @@ class Util {
         return rt.resolve();
     }
 
+    @Nullable
     public static Class<?> forName(String beanClassName) {
         try {
             return Class.forName(beanClassName);
         } catch (ClassNotFoundException e) {
-            throw new IllegalStateException(e);
+            return null;
         }
     }
 }
