@@ -1,79 +1,92 @@
 package grpcstarter.client;
 
 import io.grpc.stub.AbstractStub;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import lombok.SneakyThrows;
-import org.springframework.beans.factory.BeanFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * @author Freeman
  */
 class GrpcStubBeanRegistrar {
 
-    private static final Set<BeanDefinitionRegistry> registries = ConcurrentHashMap.newKeySet();
-
-    private final ClassPathScanningCandidateComponentProvider scanner;
-    private final GrpcClientProperties properties;
+    private static final Logger log = LoggerFactory.getLogger(GrpcStubBeanRegistrar.class);
+    private final ClassPathScanningCandidateComponentProvider scanner = getScanner();
     private final BeanDefinitionRegistry registry;
 
-    public GrpcStubBeanRegistrar(GrpcClientProperties properties, BeanDefinitionRegistry registry) {
-        this(properties, registry, getScanner());
-    }
+    private Map<Class<?>, List<BeanDefinition>> classToBeanDefinitions;
 
-    public GrpcStubBeanRegistrar(
-            GrpcClientProperties properties,
-            BeanDefinitionRegistry registry,
-            ClassPathScanningCandidateComponentProvider scanner) {
-        this.properties = properties;
+    public GrpcStubBeanRegistrar(BeanDefinitionRegistry registry) {
         this.registry = registry;
-        this.scanner = scanner;
-        registries.add(registry);
     }
 
     /**
-     * Register gRPC stub beans for base packages, using {@link GrpcClientProperties#getBasePackages()} if not specified.
+     * Register gRPC stub beans for base packages.
      *
      * @param basePackages base packages to scan
      */
     public void register(String... basePackages) {
-        List<String> packages =
-                ObjectUtils.isEmpty(basePackages) ? properties.getBasePackages() : Arrays.asList(basePackages);
-        registerBeans4BasePackages(packages);
-    }
-
-    @SneakyThrows
-    public void registerGrpcStubBean(String className) {
-        Class<?> clz = Class.forName(className);
-
-        Assert.isInstanceOf(BeanFactory.class, registry, "BeanDefinitionRegistry must be instance of BeanFactory");
-
-        GrpcClientUtil.registerGrpcClientBean((DefaultListableBeanFactory) registry, clz);
-    }
-
-    /**
-     * @return whether this {@link BeanDefinitionRegistry} has been registered
-     */
-    public static boolean hasRegistered(BeanDefinitionRegistry registry) {
-        return registries.contains(registry);
-    }
-
-    private void registerBeans4BasePackages(List<String> basePackages) {
         for (String pkg : basePackages) {
             Set<BeanDefinition> beanDefinitions = scanner.findCandidateComponents(pkg);
             for (BeanDefinition bd : beanDefinitions) {
-                if (bd.getBeanClassName() != null) {
-                    registerGrpcStubBean(bd.getBeanClassName());
+                var type = bd.getResolvableType();
+                if (!ResolvableType.NONE.equalsType(type)) {
+                    var clz = type.resolve();
+                    if (clz != null) {
+                        registerGrpcStubBean(clz);
+                    }
+                }
+            }
+        }
+    }
+
+    public void register(Class<?>... clients) {
+        for (var client : clients) {
+            registerGrpcStubBean(client);
+        }
+    }
+
+    private void registerGrpcStubBean(Class<?> clz) {
+        if (!(registry instanceof DefaultListableBeanFactory dlb)) {
+            throw new IllegalArgumentException("registry must be instance of DefaultListableBeanFactory");
+        }
+
+        initClassNameToBeanDefinitions(dlb);
+
+        if (classToBeanDefinitions.containsKey(clz)) {
+            if (log.isDebugEnabled()) {
+                log.debug("gRPC client bean '{}' is already registered, skip auto registration", clz.getName());
+            }
+            return;
+        }
+
+        GrpcClientUtil.registerGrpcClientBean(dlb, clz);
+    }
+
+    private void initClassNameToBeanDefinitions(DefaultListableBeanFactory bf) {
+        if (classToBeanDefinitions == null) {
+            classToBeanDefinitions = new HashMap<>();
+            for (var beanDefinitionName : bf.getBeanDefinitionNames()) {
+                var beanDefinition = bf.getBeanDefinition(beanDefinitionName);
+                var type = beanDefinition.getResolvableType();
+                if (!ResolvableType.NONE.equalsType(type)) {
+                    Class<?> clz = type.resolve();
+                    if (clz != null) {
+                        classToBeanDefinitions
+                                .computeIfAbsent(clz, k -> new ArrayList<>())
+                                .add(beanDefinition);
+                    }
                 }
             }
         }

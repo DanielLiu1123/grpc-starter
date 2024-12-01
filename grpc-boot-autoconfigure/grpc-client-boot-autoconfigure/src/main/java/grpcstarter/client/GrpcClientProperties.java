@@ -46,11 +46,24 @@ public class GrpcClientProperties implements InitializingBean {
     /**
      * Base packages to scan for gRPC stubs.
      *
-     * <p> This value will merge with {@link EnableGrpcClients#basePackages}, only takes effect if {@link EnableGrpcClients#basePackages} is not set. </p>
+     * <p> This value will merge with {@link EnableGrpcClients#basePackages}.
      *
      * <p> The advantage of using configuration is no need to introduce external annotations. </p>
      */
     private List<String> basePackages = new ArrayList<>();
+    /**
+     * The clients used to register as Spring beans.
+     *
+     * <p> This value will merge with {@link EnableGrpcClients#clients}.
+     *
+     * <p> `clients` and {@link #basePackages} represent two different configuration methods.
+     * {@link #basePackages} is through package scanning, and `clients` is through class name.
+     *
+     * <p> The `clients` configuration can avoid classpath scanning,
+     * resulting in faster startup, and it has better IDE support.
+     */
+    @SuppressWarnings("rawtypes")
+    private List<Class<? extends AbstractStub>> clients = new ArrayList<>();
     /**
      * Default max inbound message size, default value is 4MB.
      *
