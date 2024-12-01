@@ -32,7 +32,7 @@ Multiple `ClientInterceptor` will be called in the order defined by the Spring B
 
 ## GrpcChannelCustomizer
 
-`GrpcChannelCustomizer` customize the `Channel` before it is created.
+[`GrpcChannelCustomizer`](https://github.com/DanielLiu1123/grpc-starter/blob/main/grpc-boot-autoconfigure/grpc-client-boot-autoconfigure/src/main/java/grpcstarter/client/GrpcChannelCustomizer.java) customize the `Channel` before it is created.
 
 Register a `GrpcChannelCustomizer` to set the retry attempts for the gRPC channels:
 
@@ -47,3 +47,23 @@ public class RetryGrpcChannelCustomizer implements GrpcChannelCustomizer {
 ```
 
 Multiple `GrpcChannelCustomizer` will be called in the order defined by the Spring Bean's order, from smallest to largest.
+
+## Deep Customization
+
+If you're not happy with the autoconfigured gRPC client bean,
+you can configure it using the Spring original approach (`@Bean`).
+
+If you manually create the gRPC client bean, the autoconfigured gRPC client bean will not be created.
+
+```java
+@Configuration
+class GrpcClientConfiguration {
+    @Bean
+    public SimpleServiceGrpc.SimpleServiceBlockingStub simpleServiceBlockingStub() {
+        var channel = ManagedChannelBuilder.forAddress("localhost", 9090)
+                .usePlaintext()
+                .build();
+        return SimpleServiceGrpc.newBlockingStub(channel);
+    }
+}
+```
