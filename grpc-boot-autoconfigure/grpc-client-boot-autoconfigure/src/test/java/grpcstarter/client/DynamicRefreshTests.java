@@ -1,6 +1,7 @@
 package grpcstarter.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.util.TestSocketUtils.findAvailableTcpPort;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -8,8 +9,6 @@ import io.grpc.stub.StreamObserver;
 import io.grpc.testing.protobuf.SimpleRequest;
 import io.grpc.testing.protobuf.SimpleResponse;
 import io.grpc.testing.protobuf.SimpleServiceGrpc;
-import java.net.ServerSocket;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,8 +23,8 @@ import org.springframework.context.annotation.Configuration;
  */
 class DynamicRefreshTests {
 
-    static int port1 = getRandomPort();
-    static int port2 = getRandomPort();
+    static int port1 = findAvailableTcpPort();
+    static int port2 = findAvailableTcpPort();
     static Server server1;
     static Server server2;
 
@@ -88,12 +87,5 @@ class DynamicRefreshTests {
                     }
                 })
                 .build();
-    }
-
-    @SneakyThrows
-    private static int getRandomPort() {
-        try (ServerSocket ss = new ServerSocket(0)) {
-            return ss.getLocalPort();
-        }
     }
 }
