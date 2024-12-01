@@ -47,8 +47,7 @@ public final class GrpcClientUtil {
 
         abd.setLazyInit(true);
         abd.setAttribute(GrpcClientBeanFactoryInitializationAotProcessor.IS_CREATED_BY_FRAMEWORK, true);
-
-        // TODO(Freeman): set as fallback bean in spring boot 3.4.0
+        abd.setResourceDescription("registered by grpc-client-boot-starter");
 
         try {
             BeanDefinitionReaderUtils.registerBeanDefinition(new BeanDefinitionHolder(abd, className), beanFactory);

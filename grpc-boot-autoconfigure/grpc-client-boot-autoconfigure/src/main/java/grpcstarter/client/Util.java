@@ -1,6 +1,7 @@
 package grpcstarter.client;
 
 import io.grpc.ManagedChannel;
+import jakarta.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.time.Duration;
 import java.util.Optional;
@@ -8,7 +9,10 @@ import java.util.concurrent.TimeUnit;
 import lombok.experimental.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
@@ -117,6 +121,41 @@ class Util {
                 log.warn("Interrupted forcefully shutting down channel: {}. ", channel);
                 Thread.currentThread().interrupt();
             }
+        }
+    }
+
+    /**
+     * Get class of bean definition.
+     *
+     * @param beanDefinition bean definition
+     * @return class of bean definition
+     */
+    @Nullable
+    public static Class<?> getBeanDefinitionClass(BeanDefinition beanDefinition) {
+        // try to get class from factory method metadata
+        // @Configuration + @Bean
+        if (beanDefinition instanceof AnnotatedBeanDefinition abd) {
+            var metadata = abd.getFactoryMethodMetadata();
+            if (metadata != null) {
+                return forName(metadata.getReturnTypeName());
+            }
+        }
+        var rt = beanDefinition.getResolvableType();
+        if (ResolvableType.NONE.equalsType(rt)) {
+            var beanClassName = beanDefinition.getBeanClassName();
+            if (beanClassName == null) {
+                return null;
+            }
+            return forName(beanClassName);
+        }
+        return rt.resolve();
+    }
+
+    public static Class<?> forName(String beanClassName) {
+        try {
+            return Class.forName(beanClassName);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException(e);
         }
     }
 }

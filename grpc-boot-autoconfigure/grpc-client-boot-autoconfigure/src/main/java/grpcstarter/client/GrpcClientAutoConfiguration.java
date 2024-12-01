@@ -68,6 +68,7 @@ public class GrpcClientAutoConfiguration implements DisposableBean {
     @Override
     public void destroy() {
         Cache.clear();
+        GrpcStubBeanDefinitionRegistry.scanInfo.clear();
     }
 
     // Native image support
