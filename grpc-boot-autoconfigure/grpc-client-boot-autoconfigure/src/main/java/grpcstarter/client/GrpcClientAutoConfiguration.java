@@ -4,12 +4,15 @@ import static grpcstarter.client.Checker.checkUnusedConfig;
 
 import grpcstarter.server.GrpcServerShutdownEvent;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,7 +25,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 @ConditionOnGrpcClientEnabled
 @EnableConfigurationProperties(GrpcClientProperties.class)
-public class GrpcClientAutoConfiguration implements DisposableBean {
+public class GrpcClientAutoConfiguration implements DisposableBean, ApplicationListener<ApplicationReadyEvent> {
+
+    @Override
+    public void onApplicationEvent(ApplicationReadyEvent event) {
+        var bf = event.getApplicationContext().getBeanFactory();
+        if (bf instanceof BeanDefinitionRegistry bdr) {
+            GrpcStubBeanRegistrar.clearBeanDefinitionCache(bdr);
+        }
+    }
 
     @Bean
     static GrpcStubBeanDefinitionRegistry grpcStubBeanDefinitionRegistry() {

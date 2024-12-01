@@ -24,7 +24,8 @@ class GrpcStubBeanRegistrar {
     private final ClassPathScanningCandidateComponentProvider scanner = getScanner();
     private final BeanDefinitionRegistry registry;
 
-    private Map<Class<?>, List<BeanDefinition>> classToBeanDefinitions;
+    private static final HashMap<BeanDefinitionRegistry, Map<Class<?>, List<BeanDefinition>>> beanDefinitionMap =
+            new HashMap<>();
 
     public GrpcStubBeanRegistrar(BeanDefinitionRegistry registry) {
         this.registry = registry;
@@ -58,9 +59,9 @@ class GrpcStubBeanRegistrar {
             throw new IllegalArgumentException("registry must be instance of DefaultListableBeanFactory");
         }
 
-        initClassToBeanDefinitions(dlb);
+        addBeanDefinitionCache(dlb);
 
-        if (classToBeanDefinitions.containsKey(clz)) {
+        if (hasManualRegistered(dlb, clz)) {
             if (log.isDebugEnabled()) {
                 log.debug("gRPC client bean '{}' is already registered, skip auto registration", clz.getName());
             }
@@ -70,17 +71,25 @@ class GrpcStubBeanRegistrar {
         GrpcClientUtil.registerGrpcClientBean(dlb, clz);
     }
 
-    private void initClassToBeanDefinitions(DefaultListableBeanFactory bf) {
-        if (classToBeanDefinitions == null) {
-            classToBeanDefinitions = new HashMap<>();
-            for (var beanDefinitionName : bf.getBeanDefinitionNames()) {
-                var beanDefinition = bf.getBeanDefinition(beanDefinitionName);
-                var clz = Util.getBeanDefinitionClass(beanDefinition);
-                if (clz != null) {
-                    classToBeanDefinitions
-                            .computeIfAbsent(clz, k -> new ArrayList<>())
-                            .add(beanDefinition);
-                }
+    private static boolean hasManualRegistered(BeanDefinitionRegistry registry, Class<?> clz) {
+        return !beanDefinitionMap
+                .getOrDefault(registry, Map.of())
+                .getOrDefault(clz, List.of())
+                .isEmpty();
+    }
+
+    private static void addBeanDefinitionCache(DefaultListableBeanFactory bf) {
+        if (beanDefinitionMap.containsKey(bf)) {
+            return;
+        }
+        for (var beanDefinitionName : bf.getBeanDefinitionNames()) {
+            var beanDefinition = bf.getBeanDefinition(beanDefinitionName);
+            var clz = Util.getBeanDefinitionClass(beanDefinition);
+            if (clz != null) {
+                beanDefinitionMap
+                        .computeIfAbsent(bf, k -> new HashMap<>())
+                        .computeIfAbsent(clz, k -> new ArrayList<>())
+                        .add(beanDefinition);
             }
         }
     }
@@ -108,5 +117,9 @@ class GrpcStubBeanRegistrar {
             // ignore
         }
         return false;
+    }
+
+    static void clearBeanDefinitionCache(BeanDefinitionRegistry registry) {
+        beanDefinitionMap.remove(registry); // Only used in startup phase
     }
 }
