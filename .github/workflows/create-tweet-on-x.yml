@@ -1,0 +1,31 @@
+name: Create Tweet on X
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  tweet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Create Tweet on X
+        run: |
+          go install github.com/DanielLiu1123/xcli/cmd/xcli@latest
+          
+          RELEASE_NAME="${{ github.event.release.name }}"
+          RELEASE_TAG="${{ github.event.release.tag_name }}"
+          REPO_NAME="${{ github.repository }}"
+          
+          TWEET_TEXT=$(printf "🎉 New Release for ${REPO_NAME}!\n\n🔖 Version: ${RELEASE_NAME}\n\n🔗 Check it out: https://github.com/${REPO_NAME}/releases/tag/${RELEASE_TAG}")
+          
+          echo "Tweeting content:"
+          echo "${TWEET_TEXT}"
+          
+          xcli tweet create --text="${TWEET_TEXT}" \
+                            --api-key="${{ secrets.X_API_KEY }}" \
+                            --api-secret="${{ secrets.X_API_SECRET }}" \
+                            --access-token="${{ secrets.X_ACCESS_TOKEN }}" \
+                            --access-secret="${{ secrets.X_ACCESS_SECRET }}"
