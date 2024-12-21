@@ -14,22 +14,30 @@ import org.springframework.context.annotation.Configuration;
  * @author Freeman
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(ServerReflectionGrpc.ServerReflectionImplBase.class)
 @ConditionalOnProperty(prefix = GrpcServerProperties.Reflection.PREFIX, name = "enabled")
 public class Reflection {
 
-    @Bean
-    @ConditionalOnMissingBean
-    public ServerReflectionGrpc.ServerReflectionImplBase grpcReflectionService() {
-        return (ServerReflectionGrpc.ServerReflectionImplBase) ProtoReflectionServiceV1.newInstance();
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(ProtoReflectionServiceV1.class)
+    static class V1 {
+        @Bean
+        @ConditionalOnMissingBean
+        public ServerReflectionGrpc.ServerReflectionImplBase grpcReflectionService() {
+            return (ServerReflectionGrpc.ServerReflectionImplBase) ProtoReflectionServiceV1.newInstance();
+        }
     }
 
-    /**
-     * For backward compatibility.
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public ProtoReflectionService legacyGrpcReflectionService() {
-        return (ProtoReflectionService) ProtoReflectionService.newInstance();
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(ProtoReflectionService.class)
+    static class V1Alpha {
+        /**
+         * For backward compatibility, many tools still use this API, such as grpcurl, postman, etc.
+         */
+        @Bean
+        @ConditionalOnMissingBean
+        @SuppressWarnings("deprecation")
+        public ProtoReflectionService legacyGrpcReflectionService() {
+            return (ProtoReflectionService) ProtoReflectionService.newInstance();
+        }
     }
 }
