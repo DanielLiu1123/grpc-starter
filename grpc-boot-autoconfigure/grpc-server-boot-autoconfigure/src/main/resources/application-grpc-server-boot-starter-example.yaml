@@ -12,7 +12,6 @@ grpc:
       datasource:
         enabled: true                           # whether to enable datasource health check
         service: ds                             # datasource service name
-        validation-query: SELECT 1              # datasource validation query
         timeout: 2                              # datasource health check timeout, unit: second
       redis:
         service: redis                          # redis service name
