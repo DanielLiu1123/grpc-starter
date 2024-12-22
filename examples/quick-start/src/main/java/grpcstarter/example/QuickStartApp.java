@@ -1,39 +1,45 @@
 package grpcstarter.example;
 
-import io.grpc.stub.StreamObserver;
 import io.grpc.testing.protobuf.SimpleRequest;
-import io.grpc.testing.protobuf.SimpleResponse;
 import io.grpc.testing.protobuf.SimpleServiceGrpc;
+import order.v1.GetOrdersByUserIdRequest;
+import order.v1.OrderServiceGrpc;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
+import user.v1.GetUserRequest;
+import user.v1.UserServiceGrpc;
 
 @SpringBootApplication
-public class QuickStartApp extends SimpleServiceGrpc.SimpleServiceImplBase {
+public class QuickStartApp {
 
     public static void main(String[] args) {
-        new SpringApplicationBuilder(QuickStartApp.class)
-                .properties("grpc.client.base-packages=io.grpc")
-                .properties("grpc.client.authority=127.0.0.1:9090")
-                .run(args);
-    }
-
-    @Override
-    public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> r) {
-        var response = SimpleResponse.newBuilder()
-                .setResponseMessage("Hello " + request.getRequestMessage())
-                .build();
-        r.onNext(response);
-        r.onCompleted();
+        SpringApplication.run(QuickStartApp.class, args);
     }
 
     @Bean
-    ApplicationRunner runner(SimpleServiceGrpc.SimpleServiceBlockingStub stub) {
+    ApplicationRunner runner(
+            SimpleServiceGrpc.SimpleServiceBlockingStub simpleStub,
+            UserServiceGrpc.UserServiceBlockingStub userStub,
+            OrderServiceGrpc.OrderServiceBlockingStub orderStub) {
         return args -> {
-            var response = stub.unaryRpc(
-                    SimpleRequest.newBuilder().setRequestMessage("World!").build());
-            System.out.println(response.getResponseMessage());
+            var responseMessage = simpleStub
+                    .unaryRpc(SimpleRequest.newBuilder()
+                            .setRequestMessage("World!")
+                            .build())
+                    .getResponseMessage();
+            System.out.println("Response message: " + responseMessage);
+
+            var user = userStub.getUser(GetUserRequest.newBuilder().setId("1").build())
+                    .getUser();
+            System.out.println("User: " + user);
+
+            var orders = orderStub
+                    .getOrdersByUserId(
+                            GetOrdersByUserIdRequest.newBuilder().setUserId("1").build())
+                    .getOrdersList();
+            System.out.println("Orders: " + orders);
         };
     }
 }

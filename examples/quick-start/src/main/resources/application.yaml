@@ -1,4 +1,12 @@
 grpc:
   server:
+    port: 9090
     reflection:
       enabled: true
+  client:
+    base-packages: [ io.grpc.testing, user.v1, order.v1 ]
+    channels:
+      - authority: localhost:${grpc.server.port}
+        stubs: [ io.grpc.testing.** ]
+      - authority: 127.0.0.1:${grpc.server.port}
+        stubs: [ user.v1.**, order.v1.** ]

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package order.v1;
+
+option java_multiple_files = true;
+
+message Order {
+  string id = 1;
+  string user_id = 2;
+  double price = 3;
+}
+
+message GetOrdersByUserIdRequest {
+  string user_id = 1;
+}
+
+message GetOrdersByUserIdResponse {
+  repeated Order orders = 1;
+}
+
+service OrderService {
+  rpc GetOrdersByUserId(GetOrdersByUserIdRequest) returns (GetOrdersByUserIdResponse) {}
+}

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package user.v1;
+
+option java_multiple_files = true;
+
+message User {
+  string id = 1;
+  string name = 2;
+}
+
+message GetUserRequest {
+  string id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+service UserService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+}
