@@ -19,7 +19,7 @@ jobs:
           REPO_NAME="${{ github.repository }}"
           REPO_DESCRIPTION="${{ github.event.repository.description }}"
           
-          TWEET_TEXT=$(printf "🎉 %s has released %s!\n\n%s: %s\n\n🔗 Check it out: %s" \
+          TWEET_TEXT=$(printf "🎉 %s has released %s!\n\n%s: %s\n\n#Java #Spring #SpringBoot #gRPC\n\n🔗 Check it out: %s" \
             "${REPO_NAME}" \
             "${RELEASE_TAG}" \
             "${REPO_NAME#*/}" \
