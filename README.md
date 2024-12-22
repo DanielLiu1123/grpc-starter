@@ -14,12 +14,12 @@ implementation("io.grpc:grpc-testing-proto")
 
 ```java
 @SpringBootApplication
-public class SimpleApp extends SimpleServiceGrpc.SimpleServiceImplBase {
+public class QuickStartApp extends SimpleServiceGrpc.SimpleServiceImplBase {
 
     public static void main(String[] args) {
-        new SpringApplicationBuilder(SimpleApp.class)
-                .properties("grpc.client.base-packages=io.grpc")
-                .properties("grpc.client.authority=127.0.0.1:9090")
+        new SpringApplicationBuilder(QuickStartApp.class)
+                .properties("grpc.client.base-packages=io.grpc") // scan packages for gRPC clients
+                .properties("grpc.client.authority=127.0.0.1:9090") // default authority for gRPC clients
                 .run(args);
     }
 
@@ -33,13 +33,12 @@ public class SimpleApp extends SimpleServiceGrpc.SimpleServiceImplBase {
     }
 
     @Bean
-    ApplicationRunner runner(SimpleServiceGrpc.SimpleServiceBlockingStub stub) {
+    ApplicationRunner runner(SimpleServiceGrpc.SimpleServiceBlockingStub stub) { // inject gRPC client
         return args -> {
             var response = stub.unaryRpc(SimpleRequest.newBuilder().setRequestMessage("World!").build());
             System.out.println(response.getResponseMessage());
         };
     }
-
 }
 ```
 
