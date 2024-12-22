@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.grpc.protobuf.services.ProtoReflectionService;
 import io.grpc.reflection.v1.ServerReflectionGrpc;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 /**
@@ -23,16 +25,10 @@ class ReflectionTest {
         });
     }
 
-    @Test
-    void whenDisabled_thenNoReflectionBeans() {
-        // disabled by default
-        runner.run(ctx -> {
-            assertThat(ctx).doesNotHaveBean(ServerReflectionGrpc.ServerReflectionImplBase.class);
-            assertThat(ctx).doesNotHaveBean(ProtoReflectionService.class);
-        });
-
-        // explicitly disabled
-        runner.withPropertyValues("grpc.server.reflection.enabled=false").run(ctx -> {
+    @ParameterizedTest
+    @ValueSource(strings = {"" /*disabled by default*/, "grpc.server.reflection.enabled=false" /*explicitly disabled*/})
+    void whenDisabled_thenNoReflectionBeans(String property) {
+        runner.withPropertyValues(property).run(ctx -> {
             assertThat(ctx).doesNotHaveBean(ServerReflectionGrpc.ServerReflectionImplBase.class);
             assertThat(ctx).doesNotHaveBean(ProtoReflectionService.class);
         });
