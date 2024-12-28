@@ -74,6 +74,9 @@ class ProtoValidateBeanFactoryInitializationAotProcessor implements BeanFactoryI
                 }
             }
 
+            // fixes 'Generated message class "com.google.api.expr.v1alpha1.Type" missing method "getDyn"'
+            registerReflectionForClassAndInnerClasses(reflection, com.google.api.expr.v1alpha1.Type.class);
+
             // see org.projectnessie.cel.common.types.pb.Db
             registerReflectionForClassAndInnerClasses(reflection, Any.class);
             registerReflectionForClassAndInnerClasses(reflection, Any[].class);
