@@ -38,6 +38,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -75,7 +76,7 @@ class ProtoValidateBeanFactoryInitializationAotProcessor implements BeanFactoryI
             }
 
             // fixes 'Generated message class "com.google.api.expr.v1alpha1.Type" missing method "getDyn"'
-            registerReflectionForClassAndInnerClasses(reflection, com.google.api.expr.v1alpha1.Type.class);
+            registerReflectionForClassAndInnerClasses(reflection, "com.google.api.expr.v1alpha1.Type");
 
             // see org.projectnessie.cel.common.types.pb.Db
             registerReflectionForClassAndInnerClasses(reflection, Any.class);
@@ -170,6 +171,13 @@ class ProtoValidateBeanFactoryInitializationAotProcessor implements BeanFactoryI
         for (var declaredClass : clz.getDeclaredClasses()) {
             registerReflectionForClassAndInnerClasses(reflection, declaredClass);
         }
+    }
+
+    private static void registerReflectionForClassAndInnerClasses(ReflectionHints reflection, String className) {
+        if (!ClassUtils.isPresent(className, null)) {
+            return;
+        }
+        registerReflectionForClassAndInnerClasses(reflection, ClassUtils.resolveClassName(className, null));
     }
 
     private static ClassPathScanningCandidateComponentProvider getScanner() {
