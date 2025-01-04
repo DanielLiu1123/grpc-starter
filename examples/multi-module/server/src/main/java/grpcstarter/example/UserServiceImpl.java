@@ -2,20 +2,19 @@ package grpcstarter.example;
 
 import io.grpc.stub.StreamObserver;
 import org.springframework.stereotype.Controller;
-import user.CreateUserRequest;
+import user.GetUserRequest;
+import user.GetUserResponse;
 import user.User;
 import user.UserServiceGrpc;
 
-/**
- * @author Freeman
- */
 @Controller
 public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
 
     @Override
-    public void createUser(CreateUserRequest request, StreamObserver<User> responseObserver) {
-        User user = User.newBuilder().setId("100").setName(request.getName()).build();
-        responseObserver.onNext(user);
+    public void getUser(GetUserRequest request, StreamObserver<GetUserResponse> responseObserver) {
+        var user = User.newBuilder().setId(request.getId()).setName("Freeman").build();
+        var response = GetUserResponse.newBuilder().setUser(user).build();
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 }

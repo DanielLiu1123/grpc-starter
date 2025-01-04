@@ -36,6 +36,7 @@ include(":grpc-starters:grpc-starter-validation")
 // examples, order by name
 include(":examples:metrics")
 include(":examples:multi-module:api")
+include(":examples:multi-module:client")
 include(":examples:multi-module:server")
 include(":examples:native-image")
 include(":examples:protovalidate")
