@@ -1,4 +1,3 @@
 grpc:
   server:
-    reflection:
-      enabled: true
+    port: 9099

@@ -6,15 +6,19 @@ import "buf/validate/validate.proto";
 
 option java_multiple_files = true;
 
-message CreateUserRequest {
-  string name = 1 [(buf.validate.field).string = {min_len: 1, max_len: 100}];
-}
-
 message User {
   string id = 1;
   string name = 2;
 }
 
+message GetUserRequest {
+  string id = 1 [(buf.validate.field) = {string: {min_len: 1, max_len: 10}}];
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
 service UserService {
-  rpc CreateUser (CreateUserRequest) returns (User) {}
+  rpc GetUser (GetUserRequest) returns (GetUserResponse);
 }

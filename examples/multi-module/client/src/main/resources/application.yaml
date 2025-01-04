@@ -1,0 +1,4 @@
+grpc:
+  client:
+    authority: localhost:9099
+    base-packages: [ user ]
