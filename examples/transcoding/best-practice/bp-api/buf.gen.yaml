@@ -11,6 +11,7 @@ plugins:
   # OpenAPI
   - local: protoc-gen-openapi
     out: generated/openapi
+    strategy: all
     opt:
       - fq_schema_naming=true
       - enum_type=string
