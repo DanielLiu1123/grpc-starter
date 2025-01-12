@@ -2,6 +2,10 @@
 
 Using [buf](https://buf.build/) to manage proto files.
 
+```shell
+brew install buf
+```
+
 [protoc-gen-openapi](https://github.com/google/gnostic/blob/main/cmd/protoc-gen-openapi/README.md) is not in the [Buf Schema Registry](https://buf.build/plugins), 
 so it can't use it directly with buf [remote plugin](https://buf.build/docs/generate/overview#generating-with-remote-plugins).
 
@@ -28,5 +32,6 @@ To use `protoc-gen-openapi` with buf, you can use the following steps:
 ## Generate Code
 
 ```bash
-cd examples/transcoding/best-practice/bp-api && buf generate
+cd examples/transcoding/best-practice/bp-api
+buf generate
 ```
