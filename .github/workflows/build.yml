@@ -35,7 +35,6 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build --no-daemon --stacktrace --info
 
-# After 3.4.0, this job will fail, grpc and netty are really not GraalVM-ready.
   native-image-build:
     runs-on: ubuntu-latest
     timeout-minutes: 45
