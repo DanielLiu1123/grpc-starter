@@ -38,6 +38,10 @@ public class GrpcTestProperties {
 
     public enum PortType {
         /**
+         * NONE means not start grpc server.
+         */
+        NONE,
+        /**
          * Start grpc server with in-process transport.
          */
         IN_PROCESS,

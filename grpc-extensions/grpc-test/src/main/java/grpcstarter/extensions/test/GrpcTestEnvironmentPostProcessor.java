@@ -64,6 +64,11 @@ public class GrpcTestEnvironmentPostProcessor implements EnvironmentPostProcesso
             case DEFINED_PORT -> {
                 // do nothing
             }
+            case NONE -> {
+                // set grpc.server.enabled=false to disable grpc server
+                String enabledProperty = GrpcServerProperties.PREFIX + ".enabled";
+                configMap.put(enabledProperty, false);
+            }
             default -> throw new IllegalArgumentException("Unknown port type: " + port);
         }
 
