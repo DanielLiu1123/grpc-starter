@@ -51,18 +51,21 @@ public final class UserOuterClass {
     java.lang.String[] descriptorData = {
       "\n\022user/v1/user.proto\022\007user.v1\032\034google/ap" +
       "i/annotations.proto\032\033buf/validate/valida" +
-      "te.proto\"*\n\004User\022\016\n\002id\030\001 \001(\003R\002id\022\022\n\004name" +
-      "\030\002 \001(\tR\004name\")\n\016GetUserRequest\022\027\n\002id\030\001 \001" +
-      "(\003B\007\272H\004\"\002(\000R\002id\"4\n\017GetUserResponse\022!\n\004us" +
-      "er\030\001 \001(\0132\r.user.v1.UserR\004user\",\n\021DeleteU" +
-      "serRequest\022\027\n\002id\030\001 \001(\003B\007\272H\004\"\002(\000R\002id\"\024\n\022D" +
-      "eleteUserResponse2\302\001\n\013UserService\022T\n\007Get" +
-      "User\022\027.user.v1.GetUserRequest\032\030.user.v1." +
-      "GetUserResponse\"\026\202\323\344\223\002\020\022\016/v1/users/{id}\022" +
-      "]\n\nDeleteUser\022\032.user.v1.DeleteUserReques" +
-      "t\032\033.user.v1.DeleteUserResponse\"\026\202\323\344\223\002\020*\016" +
-      "/v1/users/{id}B(P\001Z$github.com/your/repo" +
-      "/user/v1;user_v1b\006proto3"
+      "te.proto\"\220\001\n\004User\022\016\n\002id\030\001 \001(\003R\002id\022\022\n\004nam" +
+      "e\030\002 \001(\tR\004name\022,\n\006gender\030\003 \001(\0162\024.user.v1." +
+      "User.GenderR\006gender\"6\n\006Gender\022\026\n\022GENDER_" +
+      "UNSPECIFIED\020\000\022\010\n\004MALE\020\001\022\n\n\006FEMALE\020\002\")\n\016G" +
+      "etUserRequest\022\027\n\002id\030\001 \001(\003B\007\272H\004\"\002(\000R\002id\"4" +
+      "\n\017GetUserResponse\022!\n\004user\030\001 \001(\0132\r.user.v" +
+      "1.UserR\004user\",\n\021DeleteUserRequest\022\027\n\002id\030" +
+      "\001 \001(\003B\007\272H\004\"\002(\000R\002id\"\024\n\022DeleteUserResponse" +
+      "2\302\001\n\013UserService\022T\n\007GetUser\022\027.user.v1.Ge" +
+      "tUserRequest\032\030.user.v1.GetUserResponse\"\026" +
+      "\202\323\344\223\002\020\022\016/v1/users/{id}\022]\n\nDeleteUser\022\032.u" +
+      "ser.v1.DeleteUserRequest\032\033.user.v1.Delet" +
+      "eUserResponse\"\026\202\323\344\223\002\020*\016/v1/users/{id}B(P" +
+      "\001Z$github.com/your/repo/user/v1;user_v1b" +
+      "\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -75,7 +78,7 @@ public final class UserOuterClass {
     internal_static_user_v1_User_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_user_v1_User_descriptor,
-        new java.lang.String[] { "Id", "Name", });
+        new java.lang.String[] { "Id", "Name", "Gender", });
     internal_static_user_v1_GetUserRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_user_v1_GetUserRequest_fieldAccessorTable = new

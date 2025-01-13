@@ -33,6 +33,7 @@ public class BestPracticeApp {
                         .setUser(User.newBuilder()
                                 .setId(request.getId())
                                 .setName("user-" + request.getId())
+                                .setGender(User.Gender.MALE)
                                 .build())
                         .build());
                 responseObserver.onCompleted();

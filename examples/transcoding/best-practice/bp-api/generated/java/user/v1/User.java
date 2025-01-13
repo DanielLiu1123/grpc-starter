@@ -18,6 +18,7 @@ private static final long serialVersionUID = 0L;
   }
   private User() {
     name_ = "";
+    gender_ = 0;
   }
 
   @java.lang.Override
@@ -38,6 +39,123 @@ private static final long serialVersionUID = 0L;
     return user.v1.UserOuterClass.internal_static_user_v1_User_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
             user.v1.User.class, user.v1.User.Builder.class);
+  }
+
+  /**
+   * Protobuf enum {@code user.v1.User.Gender}
+   */
+  public enum Gender
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>GENDER_UNSPECIFIED = 0;</code>
+     */
+    GENDER_UNSPECIFIED(0),
+    /**
+     * <code>MALE = 1;</code>
+     */
+    MALE(1),
+    /**
+     * <code>FEMALE = 2;</code>
+     */
+    FEMALE(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>GENDER_UNSPECIFIED = 0;</code>
+     */
+    public static final int GENDER_UNSPECIFIED_VALUE = 0;
+    /**
+     * <code>MALE = 1;</code>
+     */
+    public static final int MALE_VALUE = 1;
+    /**
+     * <code>FEMALE = 2;</code>
+     */
+    public static final int FEMALE_VALUE = 2;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Gender valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static Gender forNumber(int value) {
+      switch (value) {
+        case 0: return GENDER_UNSPECIFIED;
+        case 1: return MALE;
+        case 2: return FEMALE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Gender>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Gender> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Gender>() {
+            public Gender findValueByNumber(int number) {
+              return Gender.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return user.v1.User.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final Gender[] VALUES = values();
+
+    public static Gender valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private Gender(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:user.v1.User.Gender)
   }
 
   public static final int ID_FIELD_NUMBER = 1;
@@ -90,6 +208,24 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int GENDER_FIELD_NUMBER = 3;
+  private int gender_ = 0;
+  /**
+   * <code>.user.v1.User.Gender gender = 3 [json_name = "gender"];</code>
+   * @return The enum numeric value on the wire for gender.
+   */
+  @java.lang.Override public int getGenderValue() {
+    return gender_;
+  }
+  /**
+   * <code>.user.v1.User.Gender gender = 3 [json_name = "gender"];</code>
+   * @return The gender.
+   */
+  @java.lang.Override public user.v1.User.Gender getGender() {
+    user.v1.User.Gender result = user.v1.User.Gender.forNumber(gender_);
+    return result == null ? user.v1.User.Gender.UNRECOGNIZED : result;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -110,6 +246,9 @@ private static final long serialVersionUID = 0L;
     if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
     }
+    if (gender_ != user.v1.User.Gender.GENDER_UNSPECIFIED.getNumber()) {
+      output.writeEnum(3, gender_);
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -125,6 +264,10 @@ private static final long serialVersionUID = 0L;
     }
     if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
+    }
+    if (gender_ != user.v1.User.Gender.GENDER_UNSPECIFIED.getNumber()) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeEnumSize(3, gender_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -145,6 +288,7 @@ private static final long serialVersionUID = 0L;
         != other.getId()) return false;
     if (!getName()
         .equals(other.getName())) return false;
+    if (gender_ != other.gender_) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -161,6 +305,8 @@ private static final long serialVersionUID = 0L;
         getId());
     hash = (37 * hash) + NAME_FIELD_NUMBER;
     hash = (53 * hash) + getName().hashCode();
+    hash = (37 * hash) + GENDER_FIELD_NUMBER;
+    hash = (53 * hash) + gender_;
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -294,6 +440,7 @@ private static final long serialVersionUID = 0L;
       bitField0_ = 0;
       id_ = 0L;
       name_ = "";
+      gender_ = 0;
       return this;
     }
 
@@ -332,6 +479,9 @@ private static final long serialVersionUID = 0L;
       }
       if (((from_bitField0_ & 0x00000002) != 0)) {
         result.name_ = name_;
+      }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.gender_ = gender_;
       }
     }
 
@@ -387,6 +537,9 @@ private static final long serialVersionUID = 0L;
         bitField0_ |= 0x00000002;
         onChanged();
       }
+      if (other.gender_ != 0) {
+        setGenderValue(other.getGenderValue());
+      }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
@@ -423,6 +576,11 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000002;
               break;
             } // case 18
+            case 24: {
+              gender_ = input.readEnum();
+              bitField0_ |= 0x00000004;
+              break;
+            } // case 24
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -540,6 +698,59 @@ private static final long serialVersionUID = 0L;
       checkByteStringIsUtf8(value);
       name_ = value;
       bitField0_ |= 0x00000002;
+      onChanged();
+      return this;
+    }
+
+    private int gender_ = 0;
+    /**
+     * <code>.user.v1.User.Gender gender = 3 [json_name = "gender"];</code>
+     * @return The enum numeric value on the wire for gender.
+     */
+    @java.lang.Override public int getGenderValue() {
+      return gender_;
+    }
+    /**
+     * <code>.user.v1.User.Gender gender = 3 [json_name = "gender"];</code>
+     * @param value The enum numeric value on the wire for gender to set.
+     * @return This builder for chaining.
+     */
+    public Builder setGenderValue(int value) {
+      gender_ = value;
+      bitField0_ |= 0x00000004;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>.user.v1.User.Gender gender = 3 [json_name = "gender"];</code>
+     * @return The gender.
+     */
+    @java.lang.Override
+    public user.v1.User.Gender getGender() {
+      user.v1.User.Gender result = user.v1.User.Gender.forNumber(gender_);
+      return result == null ? user.v1.User.Gender.UNRECOGNIZED : result;
+    }
+    /**
+     * <code>.user.v1.User.Gender gender = 3 [json_name = "gender"];</code>
+     * @param value The gender to set.
+     * @return This builder for chaining.
+     */
+    public Builder setGender(user.v1.User.Gender value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
+      bitField0_ |= 0x00000004;
+      gender_ = value.getNumber();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>.user.v1.User.Gender gender = 3 [json_name = "gender"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearGender() {
+      bitField0_ = (bitField0_ & ~0x00000004);
+      gender_ = 0;
       onChanged();
       return this;
     }
