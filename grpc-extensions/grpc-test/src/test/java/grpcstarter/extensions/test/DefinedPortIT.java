@@ -8,7 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * {@link LocalGrpcPort} tester.
+ * Test when {@code grpc.test.server.port-type} set to {@link GrpcTestProperties.PortType#DEFINED_PORT},
+ * the grpc server will start with defined port.
  *
  * @author Freeman
  */
