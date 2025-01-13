@@ -11,6 +11,13 @@ option go_package = "github.com/your/repo/user/v1;user_v1";
 message User {
   int64 id = 1;
   string name = 2;
+  Gender gender = 3;
+
+  enum Gender {
+    GENDER_UNSPECIFIED = 0;
+    MALE = 1;
+    FEMALE = 2;
+  }
 }
 
 message GetUserRequest {

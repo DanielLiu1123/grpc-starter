@@ -96,5 +96,12 @@ components:
                     type: string
                 name:
                     type: string
+                gender:
+                    enum:
+                        - GENDER_UNSPECIFIED
+                        - MALE
+                        - FEMALE
+                    type: string
+                    format: enum
 tags:
     - name: UserService

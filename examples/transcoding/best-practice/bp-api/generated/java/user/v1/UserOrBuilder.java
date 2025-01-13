@@ -25,4 +25,15 @@ public interface UserOrBuilder extends
    */
   com.google.protobuf.ByteString
       getNameBytes();
+
+  /**
+   * <code>.user.v1.User.Gender gender = 3 [json_name = "gender"];</code>
+   * @return The enum numeric value on the wire for gender.
+   */
+  int getGenderValue();
+  /**
+   * <code>.user.v1.User.Gender gender = 3 [json_name = "gender"];</code>
+   * @return The gender.
+   */
+  user.v1.User.Gender getGender();
 }

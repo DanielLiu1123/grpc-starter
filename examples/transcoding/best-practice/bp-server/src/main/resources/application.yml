@@ -1,0 +1,9 @@
+grpc:
+  transcoding:
+    print-options:
+      always-print-enums-as-ints: false
+      add-whitespace: true
+
+  server:
+    reflection:
+      enabled: true
