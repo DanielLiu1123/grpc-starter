@@ -133,12 +133,6 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
         }
     }
 
-    /**
-     * Extracts the HttpRule from the method descriptor or auto-maps it if enabled.
-     *
-     * @param md MethodDescriptor
-     * @return HttpRule or null
-     */
     @Nullable
     private HttpRule extractHttpRule(Descriptors.MethodDescriptor md) {
         HttpRule httpRule = null;
@@ -159,12 +153,6 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
         return new Operation().operationId(md.getName());
     }
 
-    /**
-     * Adds path parameters to the operation.
-     *
-     * @param operation The OpenAPI Operation
-     * @param pathVars  The set of path variable names
-     */
     private static void addPathParameters(Operation operation, Set<String> pathVars) {
         for (String var : pathVars) {
             Parameter parameter =
@@ -173,13 +161,6 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
         }
     }
 
-    /**
-     * Adds query parameters to the operation by excluding path variables.
-     *
-     * @param operation The OpenAPI Operation
-     * @param md        MethodDescriptor
-     * @param pathVars  The set of path variable names
-     */
     private void addQueryParameters(
             Operation operation, HttpRule httpRule, Descriptors.MethodDescriptor md, Set<String> pathVars) {
         if (!httpRule.hasGet()) { // Only add query parameters for GET requests
@@ -225,14 +206,7 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
         }
     }
 
-    /**
-     * Handles the request body based on the HttpRule.
-     *
-     * @param operation The OpenAPI Operation
-     * @param httpRule  The HttpRule
-     * @param md        MethodDescriptor
-     */
-    private void handleRequestBody(Operation operation, HttpRule httpRule, Descriptors.MethodDescriptor md) {
+    private static void handleRequestBody(Operation operation, HttpRule httpRule, Descriptors.MethodDescriptor md) {
         if (Objects.equals(httpRule.getBody(), "*")) {
             String inputTypeFullName = md.getInputType().getFullName();
             RequestBody requestBody = new RequestBody()
@@ -243,16 +217,26 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
                                     new MediaType()
                                             .schema(new Schema<>().$ref("#/components/schemas/" + inputTypeFullName))));
             operation.setRequestBody(requestBody);
+        } else if (!httpRule.getBody().isBlank()) {
+            md.getInputType().getFields().stream()
+                    .filter(field -> Objects.equals(field.getName(), httpRule.getBody()))
+                    .findFirst()
+                    .ifPresent(field -> {
+                        String inputTypeFullName = field.getMessageType().getFullName();
+                        RequestBody requestBody = new RequestBody()
+                                .required(!field.toProto().getProto3Optional()) // specified property is optional
+                                .content(new Content()
+                                        .addMediaType(
+                                                "application/json",
+                                                new MediaType()
+                                                        .schema(new Schema<>()
+                                                                .$ref("#/components/schemas/" + inputTypeFullName))));
+                        operation.setRequestBody(requestBody);
+                    });
         }
     }
 
-    /**
-     * Handles the responses for the operation.
-     *
-     * @param operation The OpenAPI Operation
-     * @param md        MethodDescriptor
-     */
-    private void handleResponses(Operation operation, Descriptors.MethodDescriptor md) {
+    private static void handleResponses(Operation operation, Descriptors.MethodDescriptor md) {
         String outputTypeFullName = md.getOutputType().getFullName();
         ApiResponse apiResponse = new ApiResponse()
                 .content(new Content()
@@ -265,13 +249,6 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
         operation.setResponses(apiResponses);
     }
 
-    /**
-     * Assigns the operation to the corresponding HTTP method in the PathItem.
-     *
-     * @param pathItem  The PathItem to assign the operation to
-     * @param operation The Operation to assign
-     * @param httpRule  The HttpRule indicating the HTTP method
-     */
     private static void assignOperationToMethod(PathItem pathItem, Operation operation, HttpRule httpRule) {
         switch (httpRule.getPatternCase()) {
             case GET -> pathItem.setGet(operation);

@@ -4,39 +4,52 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import java.util.Locale;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springdoc.api.AbstractOpenApiResource;
-import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.util.ReflectionTestUtils;
 
+@SpringBootTest
 class ABitOfEverythingIT {
+
+    @Autowired
+    AbstractOpenApiResource openApiResource;
 
     /**
      * {@link AbstractOpenApiResource#getOpenApi(Locale)}
      */
     @Test
     @SuppressWarnings("unchecked")
-    void testRequiredAttribute() {
-        try (var ctx = new SpringApplicationBuilder(TranscodingSpringDocsApp.class)
-                .properties("grpc.server.in-process.name=" + UUID.randomUUID())
-                .properties("server.port=" + 0)
-                .run()) {
-            var apiResource = ctx.getBean(AbstractOpenApiResource.class);
-            var openApi = (OpenAPI) ReflectionTestUtils.invokeMethod(apiResource, "getOpenApi", Locale.getDefault());
-            assertThat(openApi).isNotNull();
+    void testRequiredField() {
+        var openApi = (OpenAPI) ReflectionTestUtils.invokeMethod(openApiResource, "getOpenApi", Locale.getDefault());
+        assertThat(openApi).isNotNull();
 
-            var testParameterRequestschema =
-                    openApi.getComponents().getSchemas().get("test.TestParameterRequest");
-            assertThat(testParameterRequestschema).isNotNull();
-            assertThat(testParameterRequestschema.getRequired())
-                    .containsExactlyInAnyOrder(
-                            "pathParameterInt", "pathParameterString", "queryParameterInt", "queryParameterString");
+        var testParameterRequestschema = openApi.getComponents().getSchemas().get("test.TestParameterRequest");
+        assertThat(testParameterRequestschema).isNotNull();
+        assertThat(testParameterRequestschema.getRequired())
+                .containsExactlyInAnyOrder(
+                        "pathParameterInt", "pathParameterString", "queryParameterInt", "queryParameterString");
 
-            var testBigMessageResponseschema =
-                    openApi.getComponents().getSchemas().get("test.TestBigMessageResponse");
-            assertThat(testBigMessageResponseschema).isNotNull();
-            assertThat(testBigMessageResponseschema.getRequired()).isNull();
-        }
+        var testBigMessageResponseschema = openApi.getComponents().getSchemas().get("test.TestBigMessageResponse");
+        assertThat(testBigMessageResponseschema).isNotNull();
+        assertThat(testBigMessageResponseschema.getRequired()).isNull();
+    }
+
+    /**
+     * {@link AbstractOpenApiResource#getOpenApi(Locale)}
+     */
+    @Test
+    void testBodyNotStar() {
+        var openApi = (OpenAPI) ReflectionTestUtils.invokeMethod(openApiResource, "getOpenApi", Locale.getDefault());
+        assertThat(openApi).isNotNull();
+
+        var requestBody = openApi.getPaths()
+                .get("/abitofeverything/bodynotstar")
+                .getPost()
+                .getRequestBody();
+        assertThat(requestBody.getContent().get("application/json").getSchema().get$ref())
+                .isEqualTo("#/components/schemas/test.User");
+        assertThat(requestBody.getRequired()).isFalse(); // optional field
     }
 }

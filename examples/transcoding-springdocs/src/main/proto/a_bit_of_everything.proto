@@ -22,6 +22,13 @@ service ABitOfEverythingService {
       body: "*"
     };
   }
+
+  rpc TestBodyNotStar (TestBodyNotStarRequest) returns (TestBodyNotStarResponse) {
+    option (google.api.http) = {
+      post: "/abitofeverything/bodynotstar",
+      body: "user_info"
+    };
+  }
 }
 
 message TestParameterRequest {
@@ -102,4 +109,11 @@ message User {
     bool notifications = 2;
     repeated string interests = 3;
   }
+}
+
+message TestBodyNotStarRequest {
+  optional User user_info = 1;
+}
+
+message TestBodyNotStarResponse {
 }
