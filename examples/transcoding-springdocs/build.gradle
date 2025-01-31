@@ -1,6 +1,5 @@
 plugins {
     id "org.springframework.boot"
-    id "org.graalvm.buildtools.native"
 }
 
 dependencies {
@@ -18,14 +17,3 @@ dependencies {
 }
 
 apply from: "${rootDir}/gradle/protobuf.gradle"
-
-// https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html#configuration-options
-graalvmNative {
-    testSupport = false
-    binaries {
-        main {
-            verbose = true
-            sharedLibrary = false
-        }
-    }
-}
