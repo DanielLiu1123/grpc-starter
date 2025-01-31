@@ -17,6 +17,7 @@ include(":grpc-extensions:grpc-metrics")
 include(":grpc-extensions:grpc-test")
 include(":grpc-extensions:grpc-tracing")
 include(":grpc-extensions:grpc-transcoding")
+include(":grpc-extensions:grpc-transcoding-springdocs")
 include(":grpc-extensions:grpc-validation")
 
 // bom
@@ -31,6 +32,7 @@ include(":grpc-starters:grpc-starter-protovalidate")
 include(":grpc-starters:grpc-starter-test")
 include(":grpc-starters:grpc-starter-tracing")
 include(":grpc-starters:grpc-starter-transcoding")
+include(":grpc-starters:grpc-starter-transcoding-springdocs")
 include(":grpc-starters:grpc-starter-validation")
 
 // examples, order by name
@@ -49,6 +51,7 @@ include(":examples:transcoding:best-practice:bp-api")
 include(":examples:transcoding:best-practice:bp-server")
 include(":examples:transcoding:webflux")
 include(":examples:transcoding:webmvc")
+include(":examples:transcoding-springdocs")
 
 java.util.Optional.of(new File("${rootDir}/.git/hooks")).filter { it.exists() && it.isDirectory() }.ifPresent {
     new File("${rootDir}/.githooks").eachFile(groovy.io.FileType.FILES) {

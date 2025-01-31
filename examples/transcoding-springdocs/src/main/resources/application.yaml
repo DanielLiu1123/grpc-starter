@@ -1,0 +1,8 @@
+grpc:
+  server:
+    reflection:
+      enabled: true
+spring:
+  mvc:
+    problemdetails:
+      enabled: true

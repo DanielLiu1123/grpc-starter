@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package test;
+
+import "google/api/annotations.proto";
+import "google/type/date.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/any.proto";
+
+service ABitOfEverythingService {
+  rpc TestParameter (TestParameterRequest) returns (TestParameterResponse) {
+    option (google.api.http) = {
+      get: "/abitofeverything/{path_parameter_string}/{path_parameter_int}"
+    };
+  }
+
+  rpc TestBigMessage (TestBigMessageRequest) returns (TestBigMessageResponse) {
+    option (google.api.http) = {
+      post: "/abitofeverything/bigmessage",
+      body: "*"
+    };
+  }
+}
+
+message TestParameterRequest {
+  string path_parameter_string = 1;
+  int32 path_parameter_int = 2;
+  string query_parameter_string = 3;
+  optional string query_parameter_string_optional = 4;
+  int32 query_parameter_int = 5;
+  optional int32 query_parameter_int_optional = 6;
+}
+
+message TestParameterResponse {
+}
+
+message TestBigMessageRequest{
+}
+
+message TestBigMessageResponse {
+  optional User user = 1;
+}
+
+message User {
+  int64 id = 1;
+  string name = 2;
+  Gender gender = 3;
+  google.type.Date birthday = 4;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Duration last_login_duration = 11;
+  bytes profile_picture = 5;
+  string email = 6;
+  repeated PhoneNumber phone_numbers = 7;
+  map<string, string> social_media = 8;
+  google.protobuf.Struct metadata = 9;
+  map<string, Preference> preferences = 12;
+  google.protobuf.Any additional_info = 13;
+
+  oneof employment {
+    EmploymentDetails employment_details = 14;
+    Unemployed unemployed = 15;
+  }
+
+  Address address = 16;
+
+  enum Gender {
+    GENDER_UNSPECIFIED = 0;
+    MALE = 1;
+    FEMALE = 2;
+  }
+
+  message PhoneNumber {
+    string type = 1;
+    string number = 2;
+    bool primary = 3;
+  }
+
+  message Address {
+    string street = 1;
+    string city = 2;
+    string state = 3;
+    string postal_code = 4;
+    string country = 5;
+  }
+
+  message EmploymentDetails {
+    string company = 1;
+    string position = 2;
+    google.protobuf.Timestamp start_date = 3;
+    google.protobuf.Duration tenure = 4;
+  }
+
+  message Unemployed {
+    string reason = 1;
+    google.protobuf.Timestamp since = 2;
+  }
+
+  message Preference {
+    bool newsletter = 1;
+    bool notifications = 2;
+    repeated string interests = 3;
+  }
+}
