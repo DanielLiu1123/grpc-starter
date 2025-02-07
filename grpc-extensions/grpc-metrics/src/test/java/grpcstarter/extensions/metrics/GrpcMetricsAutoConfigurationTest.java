@@ -3,9 +3,7 @@ package grpcstarter.extensions.metrics;
 import static grpcstarter.extensions.metrics.Deps.SPRING_BOOT_VERSION;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import com.freemanan.cr.core.anno.Action;
-import com.freemanan.cr.core.anno.ClasspathReplacer;
-import com.freemanan.cr.core.anno.Verb;
+import cr.Classpath;
 import grpcstarter.server.GrpcServerProperties;
 import io.micrometer.core.aop.CountedAspect;
 import io.micrometer.core.aop.TimedAspect;
@@ -26,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
 class GrpcMetricsAutoConfigurationTest {
 
     @Test
-    @ClasspathReplacer(@Action("org.springframework.boot:spring-boot-starter-aop:" + SPRING_BOOT_VERSION))
+    @Classpath(add = "org.springframework.boot:spring-boot-starter-aop:" + SPRING_BOOT_VERSION)
     void testMetricsBeans_whenAllConditionsMatched() {
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.PREFIX + ".in-process.name=" + UUID.randomUUID())
@@ -52,7 +50,7 @@ class GrpcMetricsAutoConfigurationTest {
     }
 
     @Test
-    @ClasspathReplacer(@Action(verb = Verb.EXCLUDE, value = "grpc-server-boot-autoconfigure-*.jar"))
+    @Classpath(exclude = "grpc-server-boot-autoconfigure-*.jar")
     void testMetricsBeans_whenGrpcServerNotOnClasspath() {
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class).run();
 
@@ -65,7 +63,7 @@ class GrpcMetricsAutoConfigurationTest {
     }
 
     @Test
-    @ClasspathReplacer(@Action(verb = Verb.EXCLUDE, value = "grpc-client-boot-autoconfigure-*.jar"))
+    @Classpath(exclude = "grpc-client-boot-autoconfigure-*.jar")
     void testMetricsBeans_whenGrpcClientNotOnClasspath() {
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.PREFIX + ".in-process.name=" + UUID.randomUUID())
