@@ -33,7 +33,7 @@ jobs:
           cache: 'gradle'
 
       - name: Build with Gradle
-        run: ./gradlew build --no-daemon --stacktrace --info
+        run: ./gradlew build --no-daemon
 
   native-image-build:
     runs-on: ubuntu-latest
@@ -52,4 +52,4 @@ jobs:
 
       - name: Build native image
         run: |
-          ./gradlew nativeRun --no-daemon --stacktrace
+          ./gradlew nativeRun --no-daemon

@@ -53,6 +53,7 @@ Specify the server port type using the `grpc.test.server.port-type` configuratio
 This is the default value.
 - `RANDOM_PORT`: Use a random port. The port number can be obtained using the `@LocalGrpcPort` annotation.
 - `DEFINED_PORT`: Use the defined port, which is the value of `grpc.server.port`.
+- `NONE`: Do not start the server.
 
 Get random port using the `@LocalGrpcPort` annotation:
 
