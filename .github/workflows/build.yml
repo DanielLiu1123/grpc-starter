@@ -36,7 +36,7 @@ jobs:
         run: ./gradlew classes --no-daemon
   lint:
     runs-on: ubuntu-latest
-    depends-on: [ install ]
+    needs: [ install ]
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -52,7 +52,7 @@ jobs:
         run: ./gradlew spotlessCheck spotbugsMain --no-daemon
   test:
     runs-on: ubuntu-latest
-    depends-on: [ install ]
+    needs: [ install ]
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
