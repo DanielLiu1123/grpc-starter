@@ -18,7 +18,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  build:
+  install:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -32,8 +32,40 @@ jobs:
           distribution: 'corretto'
           cache: 'gradle'
 
-      - name: Build with Gradle
-        run: ./gradlew build --no-daemon
+      - name: Compile
+        run: ./gradlew classes --no-daemon
+  lint:
+    runs-on: ubuntu-latest
+    depends-on: [ install ]
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+          cache: 'gradle'
+
+      - name: Lint
+        run: ./gradlew spotlessCheck spotbugsMain --no-daemon
+  test:
+    runs-on: ubuntu-latest
+    depends-on: [ install ]
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+          cache: 'gradle'
+
+      - name: Test with Gradle
+        run: ./gradlew test --no-daemon
 
   native-image-build:
     runs-on: ubuntu-latest
