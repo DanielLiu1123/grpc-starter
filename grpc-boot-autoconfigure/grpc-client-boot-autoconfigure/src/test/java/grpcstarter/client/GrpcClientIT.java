@@ -13,7 +13,6 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -24,67 +23,64 @@ class GrpcClientIT {
     @Test
     void testGrpcStubAutowired_whenNotConfigureBasePackages() {
         String name = UUID.randomUUID().toString();
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        try (var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.InProcess.PREFIX + ".name=" + name)
-                .run();
+                .run()) {
 
-        assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(SimpleServiceGrpc.SimpleServiceStub.class))
-                .isInstanceOf(NoSuchBeanDefinitionException.class);
-
-        ctx.close();
+            assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();
+            assertThatCode(() -> ctx.getBean(SimpleServiceGrpc.SimpleServiceStub.class))
+                    .isInstanceOf(NoSuchBeanDefinitionException.class);
+        }
     }
 
     @Test
     void testGrpcStubAutowired_whenNotConfigureAuthority() {
         String name = UUID.randomUUID().toString();
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        try (var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.InProcess.PREFIX + ".name=" + name)
                 .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=io")
-                .run();
+                .run()) {
 
-        assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(SimpleServiceGrpc.SimpleServiceStub.class))
-                .isInstanceOf(BeanCreationException.class)
-                .rootCause()
-                .hasMessageStartingWith("gRPC channel authority is not configured for stub");
-
-        ctx.close();
+            assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();
+            assertThatCode(() -> ctx.getBean(SimpleServiceGrpc.SimpleServiceStub.class))
+                    .isInstanceOf(BeanCreationException.class)
+                    .rootCause()
+                    .hasMessageStartingWith("gRPC channel authority is not configured for stub");
+        }
     }
 
     @Test
     void testGrpcStubAutowired_whenOK() {
         String name = UUID.randomUUID().toString();
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        try (var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.InProcess.PREFIX + ".name=" + name)
                 .properties(GrpcClientProperties.InProcess.PREFIX + ".name=" + name)
                 .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=io")
-                .run();
+                .run()) {
 
-        assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(SimpleServiceGrpc.SimpleServiceStub.class))
-                .doesNotThrowAnyException();
-
-        ctx.close();
+            assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).doesNotThrowAnyException();
+            assertThatCode(() -> ctx.getBean(SimpleServiceGrpc.SimpleServiceStub.class))
+                    .doesNotThrowAnyException();
+        }
     }
 
     @Test
     void testGrpcStubAutowired_whenDisableGrpcClient() {
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        try (var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.PREFIX + ".port=0")
                 .properties(GrpcClientProperties.PREFIX + ".enabled=false")
-                .run();
+                .run()) {
 
-        assertThatCode(() -> ctx.getBean(GrpcClientProperties.class)).isInstanceOf(NoSuchBeanDefinitionException.class);
-        assertThatCode(() -> ctx.getBean(SimpleServiceGrpc.SimpleServiceStub.class))
-                .isInstanceOf(NoSuchBeanDefinitionException.class);
-
-        ctx.close();
+            assertThatCode(() -> ctx.getBean(GrpcClientProperties.class))
+                    .isInstanceOf(NoSuchBeanDefinitionException.class);
+            assertThatCode(() -> ctx.getBean(SimpleServiceGrpc.SimpleServiceStub.class))
+                    .isInstanceOf(NoSuchBeanDefinitionException.class);
+        }
     }
 
     @Test
     void testClassesConfiguration() {
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        try (var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.PREFIX + ".enabled=false")
                 .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=io.grpc")
                 .properties(GrpcClientProperties.PREFIX + ".channels[0].authority=localhost:9090")
@@ -92,13 +88,13 @@ class GrpcClientIT {
                         + HealthGrpc.HealthBlockingStub.class.getCanonicalName())
                 .properties(GrpcClientProperties.PREFIX + ".channels[0].classes[1]="
                         + HealthGrpc.HealthFutureStub.class.getCanonicalName())
-                .run();
+                .run()) {
 
-        assertThatCode(() -> ctx.getBean(HealthGrpc.HealthBlockingStub.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(HealthGrpc.HealthFutureStub.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(HealthGrpc.HealthStub.class)).isInstanceOf(BeanCreationException.class);
-
-        ctx.close();
+            assertThatCode(() -> ctx.getBean(HealthGrpc.HealthBlockingStub.class))
+                    .doesNotThrowAnyException();
+            assertThatCode(() -> ctx.getBean(HealthGrpc.HealthFutureStub.class)).doesNotThrowAnyException();
+            assertThatCode(() -> ctx.getBean(HealthGrpc.HealthStub.class)).isInstanceOf(BeanCreationException.class);
+        }
     }
 
     @ParameterizedTest
@@ -111,33 +107,33 @@ class GrpcClientIT {
                 "**"
             })
     void testStubsConfiguration(String stub) {
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        try (var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.PREFIX + ".enabled=false")
                 .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=io.grpc")
                 .properties(GrpcClientProperties.PREFIX + ".channels[0].authority=localhost:9090")
                 .properties(GrpcClientProperties.PREFIX + ".channels[0].stubs[0]=" + stub)
-                .run();
+                .run()) {
 
-        assertThatCode(() -> ctx.getBean(HealthGrpc.HealthBlockingStub.class)).doesNotThrowAnyException();
-
-        ctx.close();
+            assertThatCode(() -> ctx.getBean(HealthGrpc.HealthBlockingStub.class))
+                    .doesNotThrowAnyException();
+        }
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"grpc.**", "**.health.**", "**"})
     void testServicesConfiguration(String service) {
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        try (var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.PREFIX + ".enabled=false")
                 .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=io.grpc")
                 .properties(GrpcClientProperties.PREFIX + ".channels[0].authority=localhost:9090")
                 .properties(GrpcClientProperties.PREFIX + ".channels[0].services[0]=" + service)
-                .run();
+                .run()) {
 
-        assertThatCode(() -> ctx.getBean(HealthGrpc.HealthBlockingStub.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(HealthGrpc.HealthStub.class)).doesNotThrowAnyException();
-        assertThatCode(() -> ctx.getBean(HealthGrpc.HealthFutureStub.class)).doesNotThrowAnyException();
-
-        ctx.close();
+            assertThatCode(() -> ctx.getBean(HealthGrpc.HealthBlockingStub.class))
+                    .doesNotThrowAnyException();
+            assertThatCode(() -> ctx.getBean(HealthGrpc.HealthStub.class)).doesNotThrowAnyException();
+            assertThatCode(() -> ctx.getBean(HealthGrpc.HealthFutureStub.class)).doesNotThrowAnyException();
+        }
     }
 
     @Configuration(proxyBeanMethods = false)

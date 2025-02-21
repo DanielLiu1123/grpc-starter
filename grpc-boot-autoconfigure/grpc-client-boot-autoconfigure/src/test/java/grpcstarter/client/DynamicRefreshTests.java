@@ -47,27 +47,27 @@ class DynamicRefreshTests {
 
     @Test
     void testDynamicRefresh() {
-        ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        try (ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("grpc.client.refresh.enabled=true")
                 .properties("grpc.client.authority=localhost:" + port1)
                 .properties("grpc.server.enabled=false")
-                .run();
+                .run()) {
 
-        SimpleServiceGrpc.SimpleServiceBlockingStub stub =
-                ctx.getBean(SimpleServiceGrpc.SimpleServiceBlockingStub.class);
+            SimpleServiceGrpc.SimpleServiceBlockingStub stub =
+                    ctx.getBean(SimpleServiceGrpc.SimpleServiceBlockingStub.class);
 
-        SimpleResponse response = stub.unaryRpc(SimpleRequest.getDefaultInstance());
-        assertThat(response.getResponseMessage()).isEqualTo("v1");
+            SimpleResponse response = stub.unaryRpc(SimpleRequest.getDefaultInstance());
+            assertThat(response.getResponseMessage()).isEqualTo("v1");
 
-        System.setProperty("grpc.client.authority", "localhost:" + port2);
-        System.setProperty("grpc.client.deadline", "2000");
-        ctx.publishEvent(new RefreshEvent(ctx, null, null));
+            System.setProperty("grpc.client.authority", "localhost:" + port2);
+            System.setProperty("grpc.client.deadline", "2000");
+            ctx.publishEvent(new RefreshEvent(ctx, null, null));
 
-        response = stub.unaryRpc(SimpleRequest.getDefaultInstance());
-        assertThat(response.getResponseMessage()).isEqualTo("v2");
+            response = stub.unaryRpc(SimpleRequest.getDefaultInstance());
+            assertThat(response.getResponseMessage()).isEqualTo("v2");
 
-        System.clearProperty("grpc.client.authority");
-        ctx.close();
+            System.clearProperty("grpc.client.authority");
+        }
     }
 
     @Configuration(proxyBeanMethods = false)

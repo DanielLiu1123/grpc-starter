@@ -19,20 +19,19 @@ class Issue23Test {
 
     @Test
     void testOneConfigCreateOneChannel() {
-        var ctx = new SpringApplicationBuilder(Cfg.class)
+        try (var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("grpc.client.authority=localhost:9090")
                 .properties("grpc.server.enabled=false")
-                .run();
+                .run()) {
 
-        var simpleStub = ctx.getBean(SimpleServiceGrpc.SimpleServiceBlockingStub.class);
-        var simpleFutureStub = ctx.getBean(SimpleServiceGrpc.SimpleServiceFutureStub.class);
-        var healthStub = ctx.getBean(HealthGrpc.HealthBlockingStub.class);
+            var simpleStub = ctx.getBean(SimpleServiceGrpc.SimpleServiceBlockingStub.class);
+            var simpleFutureStub = ctx.getBean(SimpleServiceGrpc.SimpleServiceFutureStub.class);
+            var healthStub = ctx.getBean(HealthGrpc.HealthBlockingStub.class);
 
-        assertThat(getField(simpleStub, "channel"))
-                .isSameAs(getField(simpleFutureStub, "channel"))
-                .isSameAs(getField(healthStub, "channel"));
-
-        ctx.close();
+            assertThat(getField(simpleStub, "channel"))
+                    .isSameAs(getField(simpleFutureStub, "channel"))
+                    .isSameAs(getField(healthStub, "channel"));
+        }
     }
 
     @Configuration(proxyBeanMethods = false)
