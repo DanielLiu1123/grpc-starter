@@ -32,19 +32,6 @@ jobs:
           distribution: 'corretto'
           cache: 'gradle'
 
-      # Incremental builds require cache of the .gradle folder.
-      # The .gradle will change with each build,
-      # so we need to generate a new key every time (generate a brand-new cache),
-      # and use the key we built last time as the restore-keys
-      - name: Cache .gradle
-        uses: actions/cache@v4
-        with:
-          path: .gradle
-          key: ${{ runner.os }}-gradle-${{ github.ref_name }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-${{ github.ref_name }}-
-            ${{ runner.os }}-gradle-main-
-
       - name: Build
         run: ./gradlew build --no-daemon
 
