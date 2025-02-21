@@ -1,10 +1,10 @@
 package grpcstarter.extensions.transcoding;
 
-import static grpcstarter.extensions.transcoding.TestUtil.randomPort;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
+import static org.springframework.test.util.TestSocketUtils.findAvailableTcpPort;
 
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.protobuf.SimpleRequest;
@@ -36,25 +36,24 @@ class GrpcTranscodingPropertiesIT {
     @ParameterizedTest
     @ValueSource(strings = {"SERVLET", "REACTIVE"})
     void testEndpoint_whenUsingWrongEndpoint(String webType) {
-        int httpPort = randomPort();
-        int grpcPort = randomPort();
-        var ctx = new SpringApplicationBuilder(GrpcTranscodingPropertiesIT.Cfg.class)
+        int httpPort = findAvailableTcpPort();
+        int grpcPort = findAvailableTcpPort();
+        try (var ctx = new SpringApplicationBuilder(Cfg.class)
                 .web(WebApplicationType.valueOf(webType))
                 .properties("server.port=" + httpPort)
                 .properties("grpc.server.port=" + grpcPort)
                 .properties("grpc.transcoding.endpoint=localhost:" + (grpcPort - 1))
-                .run();
+                .run()) {
 
-        var rest = new TestRestTemplate();
+            var rest = new TestRestTemplate();
 
-        var response = rest.postForEntity(
-                "http://localhost:%d/grpc.testing.SimpleService/UnaryRpc".formatted(httpPort),
-                "{\"requestMessage\":\"World!\"}",
-                String.class);
+            var response = rest.postForEntity(
+                    "http://localhost:%d/grpc.testing.SimpleService/UnaryRpc".formatted(httpPort),
+                    "{\"requestMessage\":\"World!\"}",
+                    String.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(SERVICE_UNAVAILABLE);
-
-        ctx.close();
+            assertThat(response.getStatusCode()).isEqualTo(SERVICE_UNAVAILABLE);
+        }
     }
 
     /**
@@ -63,28 +62,27 @@ class GrpcTranscodingPropertiesIT {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testAutoMapping(boolean autoMapping) {
-        int port = randomPort();
-        var ctx = new SpringApplicationBuilder(GrpcTranscodingPropertiesIT.Cfg.class)
+        int port = findAvailableTcpPort();
+        try (var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
                 .properties("grpc.server.in-process.name=" + UUID.randomUUID())
                 .properties("grpc.transcoding.auto-mapping=" + autoMapping)
-                .run();
+                .run()) {
 
-        var rest = new TestRestTemplate();
+            var rest = new TestRestTemplate();
 
-        var response = rest.postForEntity(
-                "http://localhost:%d/grpc.testing.SimpleService/UnaryRpc".formatted(port),
-                "{\"requestMessage\":\"World!\"}",
-                String.class);
+            var response = rest.postForEntity(
+                    "http://localhost:%d/grpc.testing.SimpleService/UnaryRpc".formatted(port),
+                    "{\"requestMessage\":\"World!\"}",
+                    String.class);
 
-        if (autoMapping) {
-            assertThat(response.getStatusCode()).isEqualTo(OK);
-            assertThat(response.getBody()).isEqualTo("{\"responseMessage\":\"Hello World!\"}");
-        } else {
-            assertThat(response.getStatusCode()).isEqualTo(NOT_FOUND);
+            if (autoMapping) {
+                assertThat(response.getStatusCode()).isEqualTo(OK);
+                assertThat(response.getBody()).isEqualTo("{\"responseMessage\":\"Hello World!\"}");
+            } else {
+                assertThat(response.getStatusCode()).isEqualTo(NOT_FOUND);
+            }
         }
-
-        ctx.close();
     }
 
     /**
@@ -93,7 +91,7 @@ class GrpcTranscodingPropertiesIT {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testAddWhitespace(boolean addWhitespace) {
-        int port = randomPort();
+        int port = findAvailableTcpPort();
         var ctx = new SpringApplicationBuilder(GrpcTranscodingPropertiesIT.Cfg.class)
                 .properties("server.port=" + port)
                 .properties("grpc.server.in-process.name=" + UUID.randomUUID())
@@ -130,29 +128,28 @@ class GrpcTranscodingPropertiesIT {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testAlwaysPrintEnumsAsInts(boolean alwaysPrintEnumsAsInts) {
-        int port = randomPort();
-        var ctx = new SpringApplicationBuilder(GrpcTranscodingPropertiesIT.Cfg.class)
+        int port = findAvailableTcpPort();
+        try (var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
                 .properties("grpc.server.in-process.name=" + UUID.randomUUID())
                 .properties("grpc.transcoding.print-options.always-print-enums-as-ints=" + alwaysPrintEnumsAsInts)
-                .run();
+                .run()) {
 
-        var rest = new TestRestTemplate();
+            var rest = new TestRestTemplate();
 
-        var response = rest.postForEntity(
-                "http://localhost:%d/transcoding.PrintEnumService/PrintEnum".formatted(port), null, String.class);
+            var response = rest.postForEntity(
+                    "http://localhost:%d/transcoding.PrintEnumService/PrintEnum".formatted(port), null, String.class);
 
-        if (alwaysPrintEnumsAsInts) {
-            assertThat(response.getStatusCode()).isEqualTo(OK);
-            assertThat(response.getBody()).isEqualTo("""
-                    {"enum":1}""");
-        } else {
-            assertThat(response.getStatusCode()).isEqualTo(OK);
-            assertThat(response.getBody()).isEqualTo("""
-                    {"enum":"V1"}""");
+            if (alwaysPrintEnumsAsInts) {
+                assertThat(response.getStatusCode()).isEqualTo(OK);
+                assertThat(response.getBody()).isEqualTo("""
+                        {"enum":1}""");
+            } else {
+                assertThat(response.getStatusCode()).isEqualTo(OK);
+                assertThat(response.getBody()).isEqualTo("""
+                        {"enum":"V1"}""");
+            }
         }
-
-        ctx.close();
     }
 
     @Configuration(proxyBeanMethods = false)

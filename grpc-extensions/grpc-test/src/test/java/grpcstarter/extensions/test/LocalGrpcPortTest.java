@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author Freeman
  */
-@SpringBootTest(classes = LocalGrpcPortTest.Cfg.class, properties = "grpc.server.port=9091")
+@SpringBootTest(classes = LocalGrpcPortTest.Cfg.class, properties = "grpc.server.port=${random.int(50000,60000)}")
 class LocalGrpcPortTest {
 
     @LocalGrpcPort
