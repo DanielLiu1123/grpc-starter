@@ -6,12 +6,15 @@ import io.grpc.stub.AbstractStub;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.aot.AbstractAotProcessor;
+import org.springframework.core.env.Environment;
 
 /**
  * @author Freeman
@@ -30,7 +33,8 @@ public final class GrpcClientUtil {
      * @param beanFactory {@link DefaultListableBeanFactory}
      * @param clz         gRPC client class
      */
-    public static void registerGrpcClientBean(@Nonnull DefaultListableBeanFactory beanFactory, @Nonnull Class<?> clz) {
+    public static void registerGrpcClientBean(
+            @Nonnull DefaultListableBeanFactory beanFactory, Environment environment, @Nonnull Class<?> clz) {
         if (!AbstractStub.class.isAssignableFrom(clz)) {
             throw new IllegalArgumentException(clz + " is not a gRPC client");
         }
@@ -49,8 +53,20 @@ public final class GrpcClientUtil {
         abd.setAttribute(GrpcClientBeanFactoryInitializationAotProcessor.IS_CREATED_BY_FRAMEWORK, true);
         abd.setResourceDescription("registered by grpc-client-boot-starter");
 
+        BeanDefinition definitionToUse = abd;
+        if (GrpcStubBeanDefinitionRegistry.scanInfo.beanDefinitionHandler != null) {
+            GrpcClientBeanDefinitionHandler beanDefinitionHandler =
+                    BeanUtils.instantiateClass(GrpcStubBeanDefinitionRegistry.scanInfo.beanDefinitionHandler);
+            definitionToUse = beanDefinitionHandler.handle(abd, clz);
+        }
+
+        if (definitionToUse == null) {
+            return;
+        }
+
         try {
-            BeanDefinitionReaderUtils.registerBeanDefinition(new BeanDefinitionHolder(abd, className), beanFactory);
+            BeanDefinitionReaderUtils.registerBeanDefinition(
+                    new BeanDefinitionHolder(definitionToUse, className), beanFactory);
         } catch (BeanDefinitionOverrideException ignore) {
             // clients are included in base packages
             log.warn(

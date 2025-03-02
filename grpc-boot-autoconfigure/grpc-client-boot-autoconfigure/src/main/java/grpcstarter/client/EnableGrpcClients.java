@@ -55,4 +55,17 @@ public @interface EnableGrpcClients {
      * @return the classes to register as gRPC client beans.
      */
     Class<? extends AbstractStub>[] clients() default {};
+
+    /**
+     * gRPC client bean definition handler, used to customize the bean definition before registering.
+     *
+     * <p> Default is {@link GrpcClientBeanDefinitionHandler.Default}.
+     *
+     * <p> Implementation must have a public no-args constructor.
+     *
+     * @return the bean definition handler
+     * @since 3.4.3.1
+     */
+    Class<? extends GrpcClientBeanDefinitionHandler> beanDefinitionHandler() default
+            GrpcClientBeanDefinitionHandler.Default.class;
 }

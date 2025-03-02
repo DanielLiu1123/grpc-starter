@@ -3,6 +3,7 @@ package grpcstarter.client;
 import io.grpc.stub.AbstractStub;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.env.Environment;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 
@@ -23,12 +25,14 @@ class GrpcStubBeanRegistrar {
 
     private final ClassPathScanningCandidateComponentProvider scanner = getScanner();
     private final BeanDefinitionRegistry registry;
+    private final Environment environment;
 
     private static final HashMap<BeanDefinitionRegistry, Map<Class<?>, List<BeanDefinition>>> beanDefinitionMap =
             new HashMap<>();
 
-    public GrpcStubBeanRegistrar(BeanDefinitionRegistry registry) {
+    public GrpcStubBeanRegistrar(BeanDefinitionRegistry registry, Environment environment) {
         this.registry = registry;
+        this.environment = environment;
     }
 
     /**
@@ -37,13 +41,15 @@ class GrpcStubBeanRegistrar {
      * @param basePackages base packages to scan
      */
     public void register(String... basePackages) {
+        Set<BeanDefinition> beanDefinitions = new LinkedHashSet<>();
         for (String pkg : basePackages) {
-            Set<BeanDefinition> beanDefinitions = scanner.findCandidateComponents(pkg);
-            for (BeanDefinition bd : beanDefinitions) {
-                var clz = Util.getBeanDefinitionClass(bd);
-                if (clz != null) {
-                    registerGrpcStubBean(clz);
-                }
+            beanDefinitions.addAll(scanner.findCandidateComponents(pkg));
+        }
+
+        for (BeanDefinition bd : beanDefinitions) {
+            var clz = Util.getBeanDefinitionClass(bd);
+            if (clz != null) {
+                registerGrpcStubBean(clz);
             }
         }
     }
@@ -68,7 +74,7 @@ class GrpcStubBeanRegistrar {
             return;
         }
 
-        GrpcClientUtil.registerGrpcClientBean(dlb, clz);
+        GrpcClientUtil.registerGrpcClientBean(dlb, environment, clz);
     }
 
     private static boolean hasManualRegistered(BeanDefinitionRegistry registry, Class<?> clz) {

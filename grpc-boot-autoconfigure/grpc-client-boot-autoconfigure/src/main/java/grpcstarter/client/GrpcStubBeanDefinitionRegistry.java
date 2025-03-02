@@ -30,16 +30,28 @@ class GrpcStubBeanDefinitionRegistry implements BeanDefinitionRegistryPostProces
         if (!enabled) {
             return;
         }
-        registerBeans(new GrpcStubBeanRegistrar(registry));
+        registerBeans(new GrpcStubBeanRegistrar(registry, environment));
     }
 
     private void registerBeans(GrpcStubBeanRegistrar registrar) {
         var properties = Util.getProperties(environment);
+
+        // NOTE: @EnableGrpcClients has higher priority than properties
+        // we need to check if @EnableGrpcClients set the beanDefinitionHandler first
+        if ((scanInfo.beanDefinitionHandler == null // not use @EnableGrpcClients
+                        || scanInfo.beanDefinitionHandler
+                                == GrpcClientBeanDefinitionHandler.Default.class) // not set beanDefinitionHandler
+                && properties.getBeanDefinitionHandler() != null) {
+            scanInfo.beanDefinitionHandler = properties.getBeanDefinitionHandler();
+        }
+
         scanInfo.basePackages.addAll(properties.getBasePackages());
+        scanInfo.clients.addAll(properties.getClients());
+
         if (!ObjectUtils.isEmpty(scanInfo.basePackages)) {
             registrar.register(scanInfo.basePackages.toArray(String[]::new));
         }
-        scanInfo.clients.addAll(properties.getClients());
+
         if (!ObjectUtils.isEmpty(scanInfo.clients)) {
             registrar.register(scanInfo.clients.toArray(Class<?>[]::new));
         }
