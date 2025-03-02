@@ -20,7 +20,7 @@ public interface GrpcClientBeanDefinitionHandler {
      * Handle the given gRPC client bean definition.
      *
      * @param beanDefinition bean definition
-     * @param clazz gRPC client class
+     * @param clazz          gRPC client class
      * @return the handled bean definition, or {@code null} if you want to skip this bean definition to be registered
      */
     @Nullable
