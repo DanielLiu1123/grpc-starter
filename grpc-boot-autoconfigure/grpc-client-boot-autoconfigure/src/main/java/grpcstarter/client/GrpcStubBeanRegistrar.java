@@ -3,6 +3,7 @@ package grpcstarter.client;
 import io.grpc.stub.AbstractStub;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,13 +38,15 @@ class GrpcStubBeanRegistrar {
      * @param basePackages base packages to scan
      */
     public void register(String... basePackages) {
+        Set<BeanDefinition> beanDefinitions = new LinkedHashSet<>();
         for (String pkg : basePackages) {
-            Set<BeanDefinition> beanDefinitions = scanner.findCandidateComponents(pkg);
-            for (BeanDefinition bd : beanDefinitions) {
-                var clz = Util.getBeanDefinitionClass(bd);
-                if (clz != null) {
-                    registerGrpcStubBean(clz);
-                }
+            beanDefinitions.addAll(scanner.findCandidateComponents(pkg));
+        }
+
+        for (BeanDefinition bd : beanDefinitions) {
+            var clz = Util.getBeanDefinitionClass(bd);
+            if (clz != null) {
+                registerGrpcStubBean(clz);
             }
         }
     }
