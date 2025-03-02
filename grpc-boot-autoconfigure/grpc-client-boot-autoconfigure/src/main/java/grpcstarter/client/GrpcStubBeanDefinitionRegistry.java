@@ -30,7 +30,7 @@ class GrpcStubBeanDefinitionRegistry implements BeanDefinitionRegistryPostProces
         if (!enabled) {
             return;
         }
-        registerBeans(new GrpcStubBeanRegistrar(registry, environment));
+        registerBeans(new GrpcStubBeanRegistrar(registry));
     }
 
     private void registerBeans(GrpcStubBeanRegistrar registrar) {

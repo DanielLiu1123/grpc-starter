@@ -13,7 +13,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.core.env.Environment;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 
@@ -25,14 +24,12 @@ class GrpcStubBeanRegistrar {
 
     private final ClassPathScanningCandidateComponentProvider scanner = getScanner();
     private final BeanDefinitionRegistry registry;
-    private final Environment environment;
 
     private static final HashMap<BeanDefinitionRegistry, Map<Class<?>, List<BeanDefinition>>> beanDefinitionMap =
             new HashMap<>();
 
-    public GrpcStubBeanRegistrar(BeanDefinitionRegistry registry, Environment environment) {
+    public GrpcStubBeanRegistrar(BeanDefinitionRegistry registry) {
         this.registry = registry;
-        this.environment = environment;
     }
 
     /**
@@ -74,7 +71,7 @@ class GrpcStubBeanRegistrar {
             return;
         }
 
-        GrpcClientUtil.registerGrpcClientBean(dlb, environment, clz);
+        GrpcClientUtil.registerGrpcClientBean(dlb, clz);
     }
 
     private static boolean hasManualRegistered(BeanDefinitionRegistry registry, Class<?> clz) {

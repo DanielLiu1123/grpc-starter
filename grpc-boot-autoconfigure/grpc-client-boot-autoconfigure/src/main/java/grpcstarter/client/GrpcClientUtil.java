@@ -14,7 +14,6 @@ import org.springframework.beans.factory.support.BeanDefinitionOverrideException
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.aot.AbstractAotProcessor;
-import org.springframework.core.env.Environment;
 
 /**
  * @author Freeman
@@ -33,8 +32,7 @@ public final class GrpcClientUtil {
      * @param beanFactory {@link DefaultListableBeanFactory}
      * @param clz         gRPC client class
      */
-    public static void registerGrpcClientBean(
-            @Nonnull DefaultListableBeanFactory beanFactory, Environment environment, @Nonnull Class<?> clz) {
+    public static void registerGrpcClientBean(@Nonnull DefaultListableBeanFactory beanFactory, @Nonnull Class<?> clz) {
         if (!AbstractStub.class.isAssignableFrom(clz)) {
             throw new IllegalArgumentException(clz + " is not a gRPC client");
         }
@@ -53,6 +51,7 @@ public final class GrpcClientUtil {
         abd.setAttribute(GrpcClientBeanFactoryInitializationAotProcessor.IS_CREATED_BY_FRAMEWORK, true);
         abd.setResourceDescription("registered by grpc-client-boot-starter");
 
+        // TODO(Freeman): beanDefinitionHandler not working in AOT
         BeanDefinition definitionToUse = abd;
         if (GrpcStubBeanDefinitionRegistry.scanInfo.beanDefinitionHandler != null) {
             GrpcClientBeanDefinitionHandler beanDefinitionHandler =

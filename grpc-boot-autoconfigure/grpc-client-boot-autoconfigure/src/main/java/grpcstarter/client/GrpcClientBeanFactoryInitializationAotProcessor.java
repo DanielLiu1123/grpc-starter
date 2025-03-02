@@ -17,7 +17,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
-import org.springframework.core.env.Environment;
 import org.springframework.javapoet.MethodSpec;
 
 /**
@@ -98,11 +97,9 @@ class GrpcClientBeanFactoryInitializationAotProcessor
         // See org.springframework.beans.factory.aot.BeanFactoryInitializationCode.addInitializer
         // Support DefaultListableBeanFactory, Environment, and ResourceLoader
         method.addParameter(DefaultListableBeanFactory.class, "beanFactory");
-        method.addParameter(Environment.class, "environment");
         definitions.forEach((beanName, beanDefinition) -> {
             Class<?> clientClass = beanDefinition.getResolvableType().resolve();
-            method.addStatement(
-                    "$T.registerGrpcClientBean(beanFactory, environment, $T.class)", GrpcClientUtil.class, clientClass);
+            method.addStatement("$T.registerGrpcClientBean(beanFactory, $T.class)", GrpcClientUtil.class, clientClass);
         });
     }
 
