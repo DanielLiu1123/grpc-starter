@@ -48,6 +48,28 @@ public class RetryGrpcChannelCustomizer implements GrpcChannelCustomizer {
 
 Multiple `GrpcChannelCustomizer` will be called in the order defined by the Spring Bean's order, from smallest to largest.
 
+## GrpcClientBeanDefinitionHandler
+
+Starting from [`3.4.3.1`](https://github.com/DanielLiu1123/grpc-starter/releases/tag/v3.4.3.1),
+[`GrpcClientBeanDefinitionHandler`](https://github.com/DanielLiu1123/grpc-starter/blob/main/grpc-boot-autoconfigure/grpc-client-boot-autoconfigure/src/main/java/grpcstarter/client/GrpcClientBeanDefinitionHandler.java)
+is used to post-process `BeanDefinition` before the gRPC client bean is registered.
+
+You can set `beanDefinitionHandler` by `@EnableGrpcClient` or configuring `grpc.client.bean-definition-handler`.
+If both are set, the one set by `@EnableGrpcClient` will be used.
+
+If you want only blocking stub to be registered:
+
+```java
+@EnableGrpcClients(beanDefinitionHandler = GrpcClientBeanDefinitionHandler.Blocking.class)
+```
+
+The framework provides some built-in `GrpcClientBeanDefinitionHandler` implementations:
+
+- `GrpcClientBeanDefinitionHandler.Default`: Register all stubs.
+- `GrpcClientBeanDefinitionHandler.Blocking`: Only register blocking stub.
+- `GrpcClientBeanDefinitionHandler.Future`: Only register future stub.
+- `GrpcClientBeanDefinitionHandler.Async`: Only register async stub.
+
 ## Deep Customization
 
 If you're not happy with the autoconfigured gRPC client bean,
