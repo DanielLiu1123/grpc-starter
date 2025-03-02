@@ -30,10 +30,12 @@ jobs:
         with:
           java-version: '17'
           distribution: 'corretto'
-          cache: 'gradle'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build
 
   native-image-build:
     runs-on: ubuntu-latest
@@ -50,6 +52,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Build native image
         run: |
-          ./gradlew nativeRun --no-daemon
+          ./gradlew nativeRun
