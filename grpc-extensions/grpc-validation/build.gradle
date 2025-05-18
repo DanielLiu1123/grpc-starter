@@ -2,6 +2,7 @@ dependencies {
     compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
     compileOnly(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
 
+    api("com.google.protobuf:protobuf-java")
     api("io.grpc:grpc-stub")
     api("io.grpc:grpc-protobuf")
 
