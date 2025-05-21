@@ -3,9 +3,7 @@ package grpcstarter.extensions.tracing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import com.freemanan.cr.core.anno.Action;
-import com.freemanan.cr.core.anno.ClasspathReplacer;
-import com.freemanan.cr.core.anno.Verb;
+import cr.Classpath;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -48,9 +46,7 @@ class GrpcTracingAutoConfigurationTest {
     }
 
     @Test
-    @ClasspathReplacer({
-        @Action(verb = Verb.EXCLUDE, value = "grpc-server-boot-autoconfigure-*.jar"),
-    })
+    @Classpath(exclude = "grpc-server-boot-autoconfigure-*.jar")
     void tracingServerNotEnabled_whenGrpcServerNotOnClasspath() {
         try (ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class).run()) {
 
@@ -60,9 +56,7 @@ class GrpcTracingAutoConfigurationTest {
     }
 
     @Test
-    @ClasspathReplacer({
-        @Action(verb = Verb.EXCLUDE, value = "grpc-client-boot-autoconfigure-*.jar"),
-    })
+    @Classpath(exclude = "grpc-client-boot-autoconfigure-*.jar")
     void tracingClientNotEnabled_whenGrpcClientNotOnClasspath() {
         try (ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("grpc.server.in-process.name=" + UUID.randomUUID())

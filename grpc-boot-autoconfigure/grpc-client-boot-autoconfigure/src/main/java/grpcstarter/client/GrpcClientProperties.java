@@ -52,6 +52,16 @@ public class GrpcClientProperties implements InitializingBean {
      */
     private List<String> basePackages = new ArrayList<>();
     /**
+     * gRPC client bean definition handler, used to customize the bean definition before registering.
+     *
+     * <p> Use {@link GrpcClientBeanDefinitionHandler} if not set.
+     *
+     * <p> Implementation must have a public no-args constructor.
+     *
+     * @since 3.4.3.1
+     */
+    private Class<? extends GrpcClientBeanDefinitionHandler> beanDefinitionHandler;
+    /**
      * The clients used to register as Spring beans.
      *
      * <p> This value will merge with {@link EnableGrpcClients#clients}.

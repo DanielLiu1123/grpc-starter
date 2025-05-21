@@ -2,6 +2,7 @@ dependencies {
     compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
     compileOnly(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
 
+    api("com.google.protobuf:protobuf-java")
     api("io.grpc:grpc-stub")
     api("io.grpc:grpc-protobuf")
 
@@ -15,7 +16,7 @@ dependencies {
     testImplementation("build.buf:protovalidate:${protovalidateVersion}")
     testImplementation(project(":grpc-starters:grpc-boot-starter"))
     testImplementation(project(":grpc-starters:grpc-starter-test"))
-    testImplementation("com.freemanan:classpath-replacer-junit5:${classpathReplacerVersion}")
+    testImplementation("io.github.danielliu1123:classpath-replacer:${classpathReplacerVersion}")
 }
 
 apply from: "${rootDir}/gradle/deploy.gradle"

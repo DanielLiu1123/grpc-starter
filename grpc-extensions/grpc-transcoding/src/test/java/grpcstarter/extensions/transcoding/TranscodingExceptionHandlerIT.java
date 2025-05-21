@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.function.ServerResponse;
@@ -32,9 +31,6 @@ class TranscodingExceptionHandlerIT {
             webEnvironment = RANDOM_PORT,
             properties = "spring.main.web-application-type=servlet")
     class Servlet {
-
-        @LocalServerPort
-        int port;
 
         @Autowired
         TestRestTemplate rest;
@@ -54,9 +50,6 @@ class TranscodingExceptionHandlerIT {
             webEnvironment = RANDOM_PORT,
             properties = "spring.main.web-application-type=reactive")
     class Reactive {
-
-        @LocalServerPort
-        int port;
 
         @Autowired
         TestRestTemplate rest;

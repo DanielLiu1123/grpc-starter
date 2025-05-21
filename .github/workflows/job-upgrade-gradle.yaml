@@ -39,7 +39,7 @@ jobs:
             exit 0
           fi
           
-          ./gradlew wrapper --gradle-version $latest_version
+          ./gradlew wrapper --gradle-version $latest_version && ./gradlew wrapper
 
       - name: Create Pull Request
         if: env.latest_version != env.current_version

@@ -11,13 +11,6 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'corretto'
-          cache: 'gradle'
-
       - name: Check version
         run: |
           VERSION_TAG=${{ github.ref_name }}
@@ -30,8 +23,17 @@ jobs:
             exit 1
           fi
 
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Build
-        run: ./gradlew build --no-daemon --stacktrace --info
+        run: ./gradlew build
 
       - name: Decrypt secring.gpg
         run: openssl enc -aes-256-cbc -d -pbkdf2 -in private.key.bin -out private.key -pass pass:${{ secrets.privateKeyPassword }}
