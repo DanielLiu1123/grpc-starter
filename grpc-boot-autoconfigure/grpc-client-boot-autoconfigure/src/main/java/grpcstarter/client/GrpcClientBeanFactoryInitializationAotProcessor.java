@@ -4,6 +4,7 @@ import io.grpc.Channel;
 import io.grpc.stub.AbstractStub;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +85,15 @@ class GrpcClientBeanFactoryInitializationAotProcessor
                             GrpcClientCreator.NEW_FUTURE_STUB_METHOD,
                             List.of(TypeReference.of(Channel.class)),
                             ExecutableMode.INVOKE);
+
+                    // From gRPC 1.70.0, newBlockingV2Stub is added
+                    if (Arrays.stream(grpcClass.getMethods())
+                            .anyMatch(e -> e.getName().equals(GrpcClientCreator.NEW_BLOCKING_V2_STUB_METHOD))) {
+                        builder.withMethod(
+                                GrpcClientCreator.NEW_BLOCKING_V2_STUB_METHOD,
+                                List.of(TypeReference.of(Channel.class)),
+                                ExecutableMode.INVOKE);
+                    }
 
                     // io.grpc.testing.protobuf.SimpleServiceGrpc#SERVICE_NAME
                     builder.withField(Util.SERVICE_NAME);

@@ -24,9 +24,11 @@ import org.springframework.util.unit.DataSize;
  */
 class GrpcClientCreator {
     static final String NEW_BLOCKING_STUB_METHOD = "newBlockingStub";
+    static final String NEW_BLOCKING_V2_STUB_METHOD = "newBlockingV2Stub";
     static final String NEW_FUTURE_STUB_METHOD = "newFutureStub";
     static final String NEW_STUB_METHOD = "newStub";
     private static final String BLOCKING_STUB = "BlockingStub";
+    private static final String BLOCKING_V2_STUB = "BlockingV2Stub";
     private static final String FUTURE_STUB = "FutureStub";
 
     static final boolean SPRING_CLOUD_CONTEXT_PRESENT =
@@ -105,9 +107,11 @@ class GrpcClientCreator {
 
     private static String getStubMethodName(Class<?> stubClass) {
         String className = stubClass.getName();
-        if (className.endsWith(BLOCKING_STUB) || className.contains("Blocking")) {
+        if (className.endsWith(BLOCKING_STUB)) {
             return NEW_BLOCKING_STUB_METHOD;
-        } else if (className.endsWith(FUTURE_STUB) || className.contains("Future")) {
+        } else if (className.endsWith(BLOCKING_V2_STUB)) {
+            return NEW_BLOCKING_V2_STUB_METHOD;
+        } else if (className.endsWith(FUTURE_STUB)) {
             return NEW_FUTURE_STUB_METHOD;
         } else {
             return NEW_STUB_METHOD;
