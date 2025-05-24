@@ -49,9 +49,9 @@ public final class UserOuterClass {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022user/v1/user.proto\022\007user.v1\032\034google/ap" +
-      "i/annotations.proto\032\033buf/validate/valida" +
-      "te.proto\"\220\001\n\004User\022\016\n\002id\030\001 \001(\003R\002id\022\022\n\004nam" +
+      "\n\022user/v1/user.proto\022\007user.v1\032\033buf/valid" +
+      "ate/validate.proto\032\034google/api/annotatio" +
+      "ns.proto\"\220\001\n\004User\022\016\n\002id\030\001 \001(\003R\002id\022\022\n\004nam" +
       "e\030\002 \001(\tR\004name\022,\n\006gender\030\003 \001(\0162\024.user.v1." +
       "User.GenderR\006gender\"6\n\006Gender\022\026\n\022GENDER_" +
       "UNSPECIFIED\020\000\022\010\n\004MALE\020\001\022\n\n\006FEMALE\020\002\")\n\016G" +
@@ -70,8 +70,8 @@ public final class UserOuterClass {
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          com.google.api.AnnotationsProto.getDescriptor(),
           build.buf.validate.ValidateProto.getDescriptor(),
+          com.google.api.AnnotationsProto.getDescriptor(),
         });
     internal_static_user_v1_User_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -109,8 +109,8 @@ public final class UserOuterClass {
     registry.add(com.google.api.AnnotationsProto.http);
     com.google.protobuf.Descriptors.FileDescriptor
         .internalUpdateFileDescriptor(descriptor, registry);
-    com.google.api.AnnotationsProto.getDescriptor();
     build.buf.validate.ValidateProto.getDescriptor();
+    com.google.api.AnnotationsProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

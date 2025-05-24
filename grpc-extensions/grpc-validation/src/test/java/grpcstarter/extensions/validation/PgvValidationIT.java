@@ -29,8 +29,7 @@ class PgvValidationIT {
 
     @Test
     void testPgvValidation_whenOK() {
-        FooServiceGrpc.FooServiceBlockingStub stub =
-                StubUtil.createStub(name, FooServiceGrpc.FooServiceBlockingStub.class);
+        var stub = StubUtil.createStub(name, FooServiceGrpc.FooServiceBlockingStub.class);
         Foo foo = stub.getFoo(GetFooRequest.newBuilder().setName("1234567890").build());
         assertThat(foo.getName()).isEqualTo("1234567890");
         assertThat(foo.getAge()).isEqualTo(1);

@@ -28,8 +28,7 @@ class GrpcMetricsAutoConfigurationTest {
     void testMetricsBeans_whenAllConditionsMatched() {
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.PREFIX + ".in-process.name=" + UUID.randomUUID())
-                // From 3.2.2, see https://github.com/spring-projects/spring-boot/issues/39128
-                .properties("micrometer.observations.annotations.enabled=true")
+                .properties("management.observations.annotations.enabled=true")
                 .run();
 
         assertThatCode(() -> ctx.getBean(OrderedMetricCollectingServerInterceptor.class))
