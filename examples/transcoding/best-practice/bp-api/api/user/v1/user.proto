@@ -2,11 +2,11 @@ syntax = "proto3";
 
 package user.v1;
 
-import "google/api/annotations.proto";
 import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
 
-option java_multiple_files = true;
 option go_package = "github.com/your/repo/user/v1;user_v1";
+option java_multiple_files = true;
 
 message User {
   int64 id = 1;
@@ -21,9 +21,7 @@ message User {
 }
 
 message GetUserRequest {
-  int64 id = 1 [(buf.validate.field).int64 = {
-    gte: 0
-  }];
+  int64 id = 1 [(buf.validate.field).int64 = {gte: 0}];
 }
 
 message GetUserResponse {
@@ -31,27 +29,19 @@ message GetUserResponse {
 }
 
 message DeleteUserRequest {
-  int64 id = 1 [(buf.validate.field).int64 = {
-    gte: 0
-  }];
+  int64 id = 1 [(buf.validate.field).int64 = {gte: 0}];
 }
 
-message DeleteUserResponse {
-
-}
+message DeleteUserResponse {}
 
 service UserService {
   // Get a user by ID.
   rpc GetUser(GetUserRequest) returns (GetUserResponse) {
-    option (google.api.http) = {
-      get: "/v1/users/{id}"
-    };
+    option (google.api.http) = {get: "/v1/users/{id}"};
   }
 
   // Delete a user by ID.
   rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {
-    option (google.api.http) = {
-      delete: "/v1/users/{id}"
-    };
+    option (google.api.http) = {delete: "/v1/users/{id}"};
   }
 }

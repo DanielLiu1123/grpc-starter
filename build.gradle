@@ -55,6 +55,10 @@ allprojects {
     test {
         systemProperties("spring.cloud.compatibility-verifier.enabled": "false")
         useJUnitPlatform()
+        dependencies {
+            // https://docs.gradle.org/current/userguide/upgrading_version_8.html#test_framework_implementation_dependencies
+            testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+        }
     }
 
     afterEvaluate {
