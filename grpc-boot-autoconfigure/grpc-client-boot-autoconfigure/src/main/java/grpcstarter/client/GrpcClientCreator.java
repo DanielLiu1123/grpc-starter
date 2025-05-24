@@ -104,9 +104,10 @@ class GrpcClientCreator {
     }
 
     private static String getStubMethodName(Class<?> stubClass) {
-        if (stubClass.getName().endsWith(BLOCKING_STUB)) {
+        String className = stubClass.getName();
+        if (className.endsWith(BLOCKING_STUB) || className.contains("Blocking")) {
             return NEW_BLOCKING_STUB_METHOD;
-        } else if (stubClass.getName().endsWith(FUTURE_STUB)) {
+        } else if (className.endsWith(FUTURE_STUB) || className.contains("Future")) {
             return NEW_FUTURE_STUB_METHOD;
         } else {
             return NEW_STUB_METHOD;

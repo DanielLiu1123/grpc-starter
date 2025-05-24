@@ -15,9 +15,11 @@ import org.springframework.util.ReflectionUtils;
 public class StubUtil {
 
     private static final String NEW_BLOCKING_STUB_METHOD = "newBlockingStub";
+    private static final String NEW_BLOCKING_V2_STUB_METHOD = "newBlockingV2Stub";
     private static final String NEW_FUTURE_STUB_METHOD = "newFutureStub";
     private static final String NEW_STUB_METHOD = "newStub";
     private static final String BLOCKING_STUB = "BlockingStub";
+    private static final String BLOCKING_V2_STUB = "BlockingV2Stub";
     private static final String FUTURE_STUB = "FutureStub";
 
     /**
@@ -43,6 +45,9 @@ public class StubUtil {
     private static String getStubMethodName(Class<?> stubClass) {
         if (stubClass.getName().endsWith(BLOCKING_STUB)) {
             return NEW_BLOCKING_STUB_METHOD;
+        }
+        if (stubClass.getName().endsWith(BLOCKING_V2_STUB)) {
+            return NEW_BLOCKING_V2_STUB_METHOD;
         }
         if (stubClass.getName().endsWith(FUTURE_STUB)) {
             return NEW_FUTURE_STUB_METHOD;
