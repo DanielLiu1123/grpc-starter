@@ -183,9 +183,8 @@ class Transcoder {
                 throw new IllegalArgumentException(
                         "Can't parse enum value '" + value + "' for field '" + field.getName() + "'");
             }
-            case MESSAGE ->
-                throw new IllegalArgumentException(
-                        "Direct parsing to message type not supported, field " + field.getName());
+            case MESSAGE -> throw new IllegalArgumentException(
+                    "Direct parsing to message type not supported, field " + field.getName());
         };
     }
 
