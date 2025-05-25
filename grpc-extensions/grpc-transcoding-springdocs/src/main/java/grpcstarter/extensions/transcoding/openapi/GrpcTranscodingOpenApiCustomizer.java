@@ -4,7 +4,6 @@ import com.google.api.AnnotationsProto;
 import com.google.api.HttpRule;
 import com.google.api.pathtemplate.PathTemplate;
 import com.google.protobuf.Descriptors;
-import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
 import grpcstarter.extensions.transcoding.GrpcTranscodingProperties;
 import io.grpc.BindableService;
 import io.grpc.ServerServiceDefinition;

@@ -2,8 +2,6 @@ dependencies {
     compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
     api(project(":grpc-extensions:grpc-transcoding"))
 
-    api("com.hubspot.jackson:jackson-datatype-protobuf:${jacksonDatatypeProtobufVersion}")
-
     compileOnly("org.springdoc:springdoc-openapi-starter-common:${springDocsVersion}")
 
     compileOnly("org.springframework.boot:spring-boot-starter-web")

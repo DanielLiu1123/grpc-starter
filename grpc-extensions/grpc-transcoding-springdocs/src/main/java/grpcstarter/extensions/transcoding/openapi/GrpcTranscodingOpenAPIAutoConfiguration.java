@@ -1,6 +1,5 @@
 package grpcstarter.extensions.transcoding.openapi;
 
-import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
 import grpcstarter.extensions.transcoding.GrpcTranscodingAutoConfiguration;
 import grpcstarter.extensions.transcoding.GrpcTranscodingProperties;
 import io.grpc.BindableService;
@@ -21,7 +20,6 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration(
         after = {GrpcTranscodingAutoConfiguration.class, SpringDocConfiguration.class, SpringDocConfigProperties.class})
 @ConditionalOnClass({
-    ProtobufModule.class, // com.hubspot.jackson:jackson-datatype-protobuf
     GrpcTranscodingProperties.class, // grpc-starter-transcoding
     OpenApiCustomizer.class, // springdoc-openapi-starter-common
 })
