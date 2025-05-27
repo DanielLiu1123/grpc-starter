@@ -1,0 +1,12 @@
+grpc:
+  server:
+    reflection:
+      enabled: true
+spring:
+  mvc:
+    problemdetails:
+      enabled: true
+springdoc:
+  use-fqn: true
+  swagger-ui:
+    path: /swagger-ui.html

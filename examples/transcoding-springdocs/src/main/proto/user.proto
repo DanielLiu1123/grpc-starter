@@ -1,0 +1,265 @@
+syntax = "proto3";
+
+package user.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+option java_multiple_files = true;
+option java_package = "user.v1";
+
+// User management service
+service UserService {
+  // Create a new user
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/users"
+      body: "*"
+    };
+  }
+
+  // Get user by ID
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users/{user_id}"
+    };
+  }
+
+  // Update user
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/users/{user_id}"
+      body: "user"
+    };
+  }
+
+  // Partially update user
+  rpc PatchUser(PatchUserRequest) returns (PatchUserResponse) {
+    option (google.api.http) = {
+      patch: "/api/v1/users/{user_id}"
+      body: "*"
+    };
+  }
+
+  // Delete user
+  rpc DeleteUser(DeleteUserRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/v1/users/{user_id}"
+    };
+  }
+
+  // List users with pagination and filtering
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users"
+    };
+  }
+
+  // Search users by criteria
+  rpc SearchUsers(SearchUsersRequest) returns (SearchUsersResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/users/search"
+      body: "*"
+    };
+  }
+
+  // Batch operations
+  rpc BatchCreateUsers(BatchCreateUsersRequest) returns (BatchCreateUsersResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/users/batch"
+      body: "*"
+    };
+  }
+}
+
+// User model
+message User {
+  string user_id = 1;
+  string username = 2;
+  string email = 3;
+  string first_name = 4;
+  string last_name = 5;
+  string display_name = 6;
+  Gender gender = 7;
+  int32 age = 8;
+  UserStatus status = 9;
+  Address address = 10;
+  repeated PhoneNumber phone_numbers = 11;
+  repeated string tags = 12;
+  map<string, string> metadata = 13;
+  UserPreferences preferences = 14;
+  google.protobuf.Timestamp created_at = 15;
+  google.protobuf.Timestamp updated_at = 16;
+  google.protobuf.Timestamp last_login_at = 17;
+
+  // Nested message for address
+  message Address {
+    string street = 1;
+    string city = 2;
+    string state = 3;
+    string postal_code = 4;
+    string country = 5;
+    AddressType type = 6;
+    bool is_primary = 7;
+  }
+
+  // Nested message for phone number
+  message PhoneNumber {
+    string number = 1;
+    PhoneType type = 2;
+    string country_code = 3;
+    bool is_primary = 4;
+    bool is_verified = 5;
+  }
+
+  // Nested message for user preferences
+  message UserPreferences {
+    bool email_notifications = 1;
+    bool sms_notifications = 2;
+    bool marketing_emails = 3;
+    string language = 4;
+    string timezone = 5;
+    Theme theme = 6;
+  }
+
+  // Gender enum
+  enum Gender {
+    GENDER_UNSPECIFIED = 0;
+    MALE = 1;
+    FEMALE = 2;
+    OTHER = 3;
+    PREFER_NOT_TO_SAY = 4;
+  }
+
+  // User status enum
+  enum UserStatus {
+    STATUS_UNSPECIFIED = 0;
+    ACTIVE = 1;
+    INACTIVE = 2;
+    SUSPENDED = 3;
+    PENDING_VERIFICATION = 4;
+    DELETED = 5;
+  }
+
+  // Address type enum
+  enum AddressType {
+    ADDRESS_TYPE_UNSPECIFIED = 0;
+    HOME = 1;
+    WORK = 2;
+    BILLING = 3;
+    SHIPPING = 4;
+  }
+
+  // Phone type enum
+  enum PhoneType {
+    PHONE_TYPE_UNSPECIFIED = 0;
+    MOBILE = 1;
+    HOME_PHONE = 2;
+    WORK_PHONE = 3;
+    FAX = 4;
+  }
+
+  // Theme enum
+  enum Theme {
+    THEME_UNSPECIFIED = 0;
+    LIGHT = 1;
+    DARK = 2;
+    AUTO = 3;
+  }
+}
+
+// Request/Response messages
+message CreateUserRequest {
+  User user = 1;
+}
+
+message CreateUserResponse {
+  User user = 1;
+  string message = 2;
+}
+
+message GetUserRequest {
+  string user_id = 1;
+  repeated string fields = 2; // Field mask for partial response
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message UpdateUserRequest {
+  string user_id = 1;
+  User user = 2;
+}
+
+message UpdateUserResponse {
+  User user = 1;
+  string message = 2;
+}
+
+message PatchUserRequest {
+  string user_id = 1;
+  string username = 2;
+  string email = 3;
+  string first_name = 4;
+  string last_name = 5;
+  User.Gender gender = 6;
+  int32 age = 7;
+  User.UserStatus status = 8;
+}
+
+message PatchUserResponse {
+  User user = 1;
+  string message = 2;
+}
+
+message DeleteUserRequest {
+  string user_id = 1;
+  bool soft_delete = 2; // Whether to soft delete or hard delete
+}
+
+message ListUsersRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  User.UserStatus status_filter = 3;
+  User.Gender gender_filter = 4;
+  string search_query = 5;
+  repeated string sort_by = 6;
+}
+
+message ListUsersResponse {
+  repeated User users = 1;
+  string next_page_token = 2;
+  int32 total_count = 3;
+}
+
+message SearchUsersRequest {
+  string query = 1;
+  repeated User.UserStatus status_filters = 2;
+  repeated User.Gender gender_filters = 3;
+  int32 min_age = 4;
+  int32 max_age = 5;
+  repeated string tags = 6;
+  int32 limit = 7;
+  int32 offset = 8;
+}
+
+message SearchUsersResponse {
+  repeated User users = 1;
+  int32 total_count = 2;
+  map<string, int32> facets = 3; // Aggregation results
+}
+
+message BatchCreateUsersRequest {
+  repeated User users = 1;
+  bool skip_duplicates = 2;
+}
+
+message BatchCreateUsersResponse {
+  repeated User created_users = 1;
+  repeated string failed_user_ids = 2;
+  string message = 3;
+  int32 success_count = 4;
+  int32 failure_count = 5;
+}
