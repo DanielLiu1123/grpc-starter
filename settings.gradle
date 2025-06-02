@@ -46,12 +46,12 @@ include(":examples:quick-start")
 include(":examples:refresh")
 include(":examples:tls")
 include(":examples:tracing")
-include(":examples:validation")
 include(":examples:transcoding:best-practice:bp-api")
 include(":examples:transcoding:best-practice:bp-server")
 include(":examples:transcoding:webflux")
 include(":examples:transcoding:webmvc")
 include(":examples:transcoding-springdocs")
+include(":examples:validation")
 
 java.util.Optional.of(new File("${rootDir}/.git/hooks")).filter { it.exists() && it.isDirectory() }.ifPresent {
     new File("${rootDir}/.githooks").eachFile(groovy.io.FileType.FILES) {

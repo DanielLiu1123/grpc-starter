@@ -2,6 +2,8 @@ dependencies {
     compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
     api(project(":grpc-extensions:grpc-transcoding"))
 
+    api("io.github.danielliu1123:springdoc-bridge-protobuf:${springdocBridgeVersion}")
+
     compileOnly("org.springdoc:springdoc-openapi-starter-common:${springDocsVersion}")
 
     compileOnly("org.springframework.boot:spring-boot-starter-web")

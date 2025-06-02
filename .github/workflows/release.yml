@@ -6,7 +6,7 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 120
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -33,10 +33,15 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build
-        run: ./gradlew build
-
-      - name: Decrypt secring.gpg
-        run: openssl enc -aes-256-cbc -d -pbkdf2 -in private.key.bin -out private.key -pass pass:${{ secrets.privateKeyPassword }}
+        run: ./gradlew build --no-daemon
 
       - name: Release
-        run: RELEASE=true OSSRH_USER=${{ secrets.OSSRH_USER }} OSSRH_PASSWORD=${{ secrets.OSSRH_PASSWORD }} ./gradlew publish -Psigning.secretKeyRingFile=$(pwd)/private.key -Psigning.keyId=${{ secrets.signKeyId }} -Psigning.password=${{ secrets.signPassword }}
+        env:
+          RELEASE: 1
+          MAVENCENTRAL_USERNAME: ${{ secrets.MAVENCENTRAL_USERNAME }}
+          MAVENCENTRAL_PASSWORD: ${{ secrets.MAVENCENTRAL_PASSWORD }}
+          GPG_PUBLIC_KEY: ${{ secrets.GPG_PUBLIC_KEY }}
+          GPG_SECRET_KEY: ${{ secrets.GPG_SECRET_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          ./gradlew publish jreleaserDeploy --no-daemon

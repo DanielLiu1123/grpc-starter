@@ -9,7 +9,6 @@ import io.grpc.BindableService;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.protobuf.ProtoFileDescriptorSupplier;
 import io.swagger.v3.core.converter.ModelConverters;
-import io.swagger.v3.core.jackson.ModelResolver;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -39,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.properties.SpringDocConfigProperties;
-import org.springdoc.core.providers.ObjectMapperProvider;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -57,12 +55,11 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
     public GrpcTranscodingOpenApiCustomizer(
             List<BindableService> services,
             GrpcTranscodingProperties grpcTranscodingProperties,
-            SpringDocConfigProperties springDocConfigProperties,
-            ObjectMapperProvider objectMapperProvider) {
+            SpringDocConfigProperties springDocConfigProperties) {
         this.serviceDefinitions =
                 services.stream().map(BindableService::bindService).toList();
         this.grpcTranscodingProperties = grpcTranscodingProperties;
-        this.modelConverters = buildModelConverters(springDocConfigProperties, objectMapperProvider);
+        this.modelConverters = buildModelConverters(springDocConfigProperties);
         this.methodMap = buildMethodMap(services);
     }
 
@@ -77,12 +74,12 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
                 continue;
             }
 
-            for (var md : descriptor.getMethods()) {
-                if (md.isClientStreaming() || md.isServerStreaming()) {
+            for (var rpcMethod : descriptor.getMethods()) {
+                if (rpcMethod.isClientStreaming() || rpcMethod.isServerStreaming()) {
                     continue;
                 }
 
-                HttpRule httpRule = extractHttpRule(md);
+                HttpRule httpRule = extractHttpRule(rpcMethod);
                 if (httpRule == null) {
                     continue;
                 }
@@ -94,7 +91,7 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
 
                 PathItem pathItem = openApi.getPaths().getOrDefault(path, new PathItem());
 
-                Operation operation = createOperation(md);
+                Operation operation = createOperation(rpcMethod);
 
                 PathTemplate pathTemplate = PathTemplate.create(path);
                 Set<String> pathVars = new HashSet<>(pathTemplate.vars());
@@ -103,13 +100,13 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
                 addPathParameters(operation, pathVars);
 
                 // Handle query parameters
-                addQueryParameters(operation, httpRule, md, pathVars);
+                addQueryParameters(operation, httpRule, rpcMethod, pathVars);
 
                 // Handle request body
-                handleRequestBody(operation, httpRule, md);
+                handleRequestBody(operation, httpRule, rpcMethod);
 
                 // Handle responses
-                handleResponses(operation, md);
+                handleResponses(operation, rpcMethod);
 
                 // Assign operation to HTTP method
                 assignOperationToMethod(pathItem, operation, httpRule);
@@ -118,7 +115,7 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
                 openApi.getPaths().addPathItem(path, pathItem);
 
                 // Add schemas to OpenAPI Components
-                addSchemas(openApi, md);
+                addSchemas(openApi, rpcMethod);
             }
         }
     }
@@ -289,7 +286,6 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
         Components components = openApi.getComponents();
         if (components == null) {
             components = new Components();
-            openApi.setComponents(components);
         }
 
         for (var entry : schemas.entrySet()) {
@@ -297,19 +293,12 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
             Schema<?> schema = entry.getValue();
             components.addSchemas(schemaName, schema);
         }
+
+        openApi.setComponents(components);
     }
 
-    private static ModelConverters buildModelConverters(
-            SpringDocConfigProperties springDocConfigProperties, ObjectMapperProvider objectMapperProvider) {
-        var result = ModelConverters.getInstance(springDocConfigProperties.isOpenapi31());
-
-        var mapper = objectMapperProvider.jsonMapper();
-        mapper.registerModules(new ProtobufModule(), new ProtobufPropertiesModule());
-
-        result.addConverter(new ModelResolver(mapper, new ProtobufTypeNameResolver()));
-        result.addConverter(new ProtobufModelConverter(objectMapperProvider));
-
-        return result;
+    private static ModelConverters buildModelConverters(SpringDocConfigProperties springDocConfigProperties) {
+        return ModelConverters.getInstance(springDocConfigProperties.isOpenapi31());
     }
 
     private static Map<String, Map<String, Method>> buildMethodMap(List<BindableService> services) {
@@ -338,6 +327,7 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
         return map;
     }
 
+    @Nullable
     private static String getPath(HttpRule httpRule) {
         return switch (httpRule.getPatternCase()) {
             case GET -> httpRule.getGet();
