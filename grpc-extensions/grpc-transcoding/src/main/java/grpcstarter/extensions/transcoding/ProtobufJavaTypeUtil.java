@@ -27,7 +27,7 @@ public final class ProtobufJavaTypeUtil {
     /**
      * Cache for Java field types mapped by class and field descriptor combinations.
      */
-    private static final Map<Class<?>, Map<String, Type>> fieldTypeCache = new ConcurrentHashMap<>();
+    private static final Map<String, Map<String, Type>> fieldTypeCache = new ConcurrentHashMap<>();
 
     /**
      * Finds the Java class corresponding to the given protobuf message descriptor.
@@ -62,7 +62,7 @@ public final class ProtobufJavaTypeUtil {
         }
 
         return fieldTypeCache
-                .computeIfAbsent(javaClass, k -> new ConcurrentHashMap<>())
+                .computeIfAbsent(javaClass.getName(), k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(fieldDescriptor.getName(), k -> findGetterReturnType(javaClass, fieldDescriptor));
     }
 
