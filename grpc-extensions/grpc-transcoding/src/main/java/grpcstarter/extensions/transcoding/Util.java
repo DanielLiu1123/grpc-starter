@@ -5,7 +5,6 @@ import com.google.api.HttpRule;
 import com.google.api.pathtemplate.PathTemplate;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.BytesValue;
-import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.FloatValue;
@@ -227,58 +226,14 @@ class Util {
     }
 
     static Message getDefaultMessage(Descriptors.Descriptor descriptor) {
-        DescriptorProtos.FileOptions options = descriptor.getFile().getOptions();
-        String javaPackage = options.hasJavaPackage()
-                ? options.getJavaPackage()
-                : descriptor.getFile().getPackage();
-        List<String> classNames = new ArrayList<>(2);
-        if (options.getJavaMultipleFiles()) {
-            classNames.add(javaPackage + "." + Util.getClassName(descriptor));
-        } else {
-            if (options.hasJavaOuterClassname()) {
-                classNames.add(
-                        javaPackage + "." + options.getJavaOuterClassname() + "$" + Util.getClassName(descriptor));
-            } else {
-                String name = descriptor.getFile().getName(); // "google/protobuf/empty.proto"
-                String fileName = name.substring(name.lastIndexOf('/') + 1); // "empty.proto"
-
-                // If there’s a service, enum, or message (including nested types) in the file with the same name,
-                // “OuterClass” will be appended to the wrapper class’s name.
-                // See https://protobuf.dev/reference/java/java-generated/#invocation
-                String outerClassName = snakeToPascal(fileName.replace(".proto", "")); // "Empty"
-                classNames.add("%s.%sOuterClass$%s"
-                        .formatted(
-                                javaPackage,
-                                outerClassName,
-                                getClassName(descriptor))); // "com.google.protobuf.EmptyOuterClass$Empty"
-                classNames.add("%s.%s$%s"
-                        .formatted(
-                                javaPackage,
-                                outerClassName,
-                                getClassName(descriptor))); // "com.google.protobuf.Empty$Empty"
-            }
-        }
-
-        Class<?> clazz = null;
-        for (String className : classNames) {
-            try {
-                clazz = Class.forName(className);
-                break;
-            } catch (ClassNotFoundException ignored) {
-                // no-op
-            }
-        }
-
-        if (clazz == null) {
-            throw new IllegalStateException("Unable to find Protobuf Message type: " + classNames);
-        }
-
+        Class<?> javaClass = ProtobufJavaTypeUtil.findJavaClass(descriptor);
         try {
-            Method defaultInstance = clazz.getMethod("getDefaultInstance");
+            Method defaultInstance = javaClass.getMethod("getDefaultInstance");
             return ((Message) defaultInstance.invoke(null));
         } catch (Exception ex) {
             throw new IllegalStateException(
-                    "Invalid Protobuf Message type: no invocable newBuilder() method on " + clazz, ex);
+                    "Invalid Protobuf Message type: no invocable getDefaultInstance() method on " + javaClass.getName(),
+                    ex);
         }
     }
 

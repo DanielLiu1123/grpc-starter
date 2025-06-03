@@ -1,5 +1,8 @@
 package grpcstarter.extensions.transcoding.openapi;
 
+import static grpcstarter.extensions.transcoding.ProtobufJavaTypeUtil.findJavaClass;
+import static grpcstarter.extensions.transcoding.ProtobufJavaTypeUtil.findJavaFieldType;
+
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.api.AnnotationsProto;
 import com.google.api.HttpRule;
@@ -28,10 +31,7 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import jakarta.annotation.Nullable;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.properties.SpringDocConfigProperties;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 import springdocbridge.protobuf.ProtobufNameResolver;
 import springdocbridge.protobuf.SpringDocBridgeProtobufProperties;
 
@@ -52,12 +50,11 @@ import springdocbridge.protobuf.SpringDocBridgeProtobufProperties;
  * @author Freeman
  */
 public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
-
     private static final Logger log = LoggerFactory.getLogger(GrpcTranscodingOpenApiCustomizer.class);
+
     private final List<ServerServiceDefinition> serviceDefinitions;
     private final GrpcTranscodingProperties grpcTranscodingProperties;
     private final ModelConverterContext modelConverterContext;
-    private final Map</*service*/ String, Map</*method name*/ String, Method>> methodMap;
     private final ProtobufNameResolver protobufNameResolver;
 
     public GrpcTranscodingOpenApiCustomizer(
@@ -70,7 +67,6 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
         this.grpcTranscodingProperties = grpcTranscodingProperties;
         this.modelConverterContext = new ModelConverterContextImpl(
                 buildModelConverters(springDocConfigProperties).getConverters());
-        this.methodMap = buildMethodMap(services);
         this.protobufNameResolver = new ProtobufNameResolver(
                 springDocBridgeProtobufProperties.getSchemaNamingStrategy(), springDocConfigProperties.isUseFqn());
     }
@@ -179,7 +175,7 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
             return;
         }
 
-        Class<?> requestClass = mustGetRequestClass(md);
+        Class<?> requestClass = findJavaClass(md.getInputType());
         if (requestClass == null) {
             return;
         }
@@ -216,7 +212,7 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
     private void handleRequestBody(Operation operation, HttpRule httpRule, Descriptors.MethodDescriptor md) {
         if (Objects.equals(httpRule.getBody(), "*")) {
 
-            Class<?> requestClass = mustGetRequestClass(md);
+            Class<?> requestClass = findJavaClass(md.getInputType());
             var schemaName = getSchemaName(requestClass);
             Schema<?> schema = resolveSchema(schemaName, requestClass);
 
@@ -230,7 +226,7 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
                     .findFirst()
                     .ifPresent(field -> {
                         // assume the field is a message type
-                        var fieldType = getGetterReturnType(mustGetRequestClass(md), field);
+                        var fieldType = findJavaFieldType(findJavaClass(md.getInputType()), field);
                         var schemaName = getSchemaName(fieldType);
                         Schema<?> schema = resolveSchema(schemaName, fieldType);
 
@@ -244,7 +240,7 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
     }
 
     private void handleResponses(Operation operation, Descriptors.MethodDescriptor md) {
-        Class<?> responseClass = mustGetResponseClass(md);
+        Class<?> responseClass = findJavaClass(md.getOutputType());
 
         var schemaName = getSchemaName(responseClass);
         Schema<?> schema = resolveSchema(schemaName, responseClass);
@@ -269,32 +265,6 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
 
     private static ModelConverters buildModelConverters(SpringDocConfigProperties springDocConfigProperties) {
         return ModelConverters.getInstance(springDocConfigProperties.isOpenapi31());
-    }
-
-    private static Map<String, Map<String, Method>> buildMethodMap(List<BindableService> services) {
-        Map<String, Map<String, Method>> map = new HashMap<>();
-
-        for (BindableService service : services) {
-            var serviceDefinition = service.bindService();
-            var serviceName = serviceDefinition.getServiceDescriptor().getName();
-
-            Map<String, Method> methods = new HashMap<>();
-            for (var methodDef : serviceDefinition.getMethods()) {
-                String methodName = methodDef.getMethodDescriptor().getBareMethodName();
-                if (methodName == null) {
-                    continue;
-                }
-                var method = ReflectionUtils.findMethod(
-                        service.getClass(), StringUtils.uncapitalize(methodName), (Class<?>[]) null);
-                if (method != null) {
-                    methods.put(methodName, method);
-                }
-            }
-
-            map.put(serviceName, methods);
-        }
-
-        return map;
     }
 
     @Nullable
@@ -323,32 +293,6 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
         throw new IllegalStateException("Service descriptor not found");
     }
 
-    private Class<?> mustGetRequestClass(Descriptors.MethodDescriptor methodDescriptor) {
-        String serviceName = methodDescriptor.getService().getFullName();
-        String methodName = methodDescriptor.getName();
-        Method method = methodMap.getOrDefault(serviceName, Map.of()).get(methodName);
-        if (method != null && method.getParameterCount() >= 1) {
-            return method.getParameterTypes()[0];
-        }
-        throw new IllegalStateException("Request class not found for method: " + methodName);
-    }
-
-    private Class<?> mustGetResponseClass(Descriptors.MethodDescriptor methodDescriptor) {
-        String serviceName = methodDescriptor.getService().getFullName();
-        String methodName = methodDescriptor.getName();
-        Method method = methodMap.getOrDefault(serviceName, Map.of()).get(methodName);
-        if (method != null && method.getParameterCount() >= 2) {
-            Type secondParamType = method.getGenericParameterTypes()[1];
-            if (secondParamType instanceof ParameterizedType pType) {
-                Type[] typeArgs = pType.getActualTypeArguments();
-                if (typeArgs.length == 1 && typeArgs[0] instanceof Class<?> respClass) {
-                    return respClass;
-                }
-            }
-        }
-        throw new IllegalStateException("Response class not found for method " + methodName);
-    }
-
     private Schema<?> resolveSchema(String schemaName, Type type) {
 
         var ref = RefUtils.constructRef(schemaName);
@@ -370,39 +314,5 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
     private String getSchemaName(Type type) {
         var javaType = TypeFactory.defaultInstance().constructType(type);
         return protobufNameResolver.nameForType(javaType);
-    }
-
-    private static Type getGetterReturnType(Class<?> clazz, Descriptors.FieldDescriptor fieldDescriptor) {
-        var name = underlineToCamel(fieldDescriptor.getName());
-
-        String[] possibleMethodNames = {
-            "get" + StringUtils.capitalize(name),
-            "get" + StringUtils.capitalize(name) + "List", // repeated fields
-            "get" + StringUtils.capitalize(name) + "Map" // map fields
-        };
-
-        for (String methodName : possibleMethodNames) {
-            try {
-                Method method = clazz.getMethod(methodName);
-                return method.getGenericReturnType();
-            } catch (NoSuchMethodException e) {
-                // no-op
-            }
-        }
-
-        throw new IllegalStateException("No getter method found for " + name + " in " + clazz);
-    }
-
-    private static String underlineToCamel(String name) {
-        var sb = new StringBuilder();
-        for (var i = 0; i < name.length(); i++) {
-            var c = name.charAt(i);
-            if (c == '_') {
-                sb.append(Character.toUpperCase(name.charAt(++i)));
-            } else {
-                sb.append(c);
-            }
-        }
-        return sb.toString();
     }
 }
