@@ -1,5 +1,6 @@
 package grpcstarter.extensions.transcoding.openapi;
 
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.api.AnnotationsProto;
 import com.google.api.HttpRule;
 import com.google.api.pathtemplate.PathTemplate;
@@ -8,7 +9,11 @@ import grpcstarter.extensions.transcoding.GrpcTranscodingProperties;
 import io.grpc.BindableService;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.protobuf.ProtoFileDescriptorSupplier;
+import io.swagger.v3.core.converter.AnnotatedType;
+import io.swagger.v3.core.converter.ModelConverterContext;
+import io.swagger.v3.core.converter.ModelConverterContextImpl;
 import io.swagger.v3.core.converter.ModelConverters;
+import io.swagger.v3.core.util.RefUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -40,6 +45,8 @@ import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.properties.SpringDocConfigProperties;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import springdocbridge.protobuf.ProtobufNameResolver;
+import springdocbridge.protobuf.SpringDocBridgeProtobufProperties;
 
 /**
  * @author Freeman
@@ -49,27 +56,33 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
     private static final Logger log = LoggerFactory.getLogger(GrpcTranscodingOpenApiCustomizer.class);
     private final List<ServerServiceDefinition> serviceDefinitions;
     private final GrpcTranscodingProperties grpcTranscodingProperties;
-    private final ModelConverters modelConverters;
+    private final ModelConverterContext modelConverterContext;
     private final Map</*service*/ String, Map</*method name*/ String, Method>> methodMap;
+    private final ProtobufNameResolver protobufNameResolver;
 
     public GrpcTranscodingOpenApiCustomizer(
             List<BindableService> services,
             GrpcTranscodingProperties grpcTranscodingProperties,
-            SpringDocConfigProperties springDocConfigProperties) {
+            SpringDocConfigProperties springDocConfigProperties,
+            SpringDocBridgeProtobufProperties springDocBridgeProtobufProperties) {
         this.serviceDefinitions =
                 services.stream().map(BindableService::bindService).toList();
         this.grpcTranscodingProperties = grpcTranscodingProperties;
-        this.modelConverters = buildModelConverters(springDocConfigProperties);
+        this.modelConverterContext = new ModelConverterContextImpl(
+                buildModelConverters(springDocConfigProperties).getConverters());
         this.methodMap = buildMethodMap(services);
+        this.protobufNameResolver = new ProtobufNameResolver(
+                springDocBridgeProtobufProperties.getSchemaNamingStrategy(), springDocConfigProperties.isUseFqn());
     }
 
     @Override
     public void customise(OpenAPI openApi) {
 
-        initializeOpenApiComponents(openApi);
+        init(openApi);
 
         for (var sd : serviceDefinitions) {
             var descriptor = mustGetServiceDescriptor(sd);
+
             if (descriptor == null) {
                 continue;
             }
@@ -89,7 +102,8 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
                     continue;
                 }
 
-                PathItem pathItem = openApi.getPaths().getOrDefault(path, new PathItem());
+                var paths = openApi.getPaths();
+                PathItem pathItem = paths.getOrDefault(path, new PathItem());
 
                 Operation operation = createOperation(rpcMethod);
 
@@ -112,15 +126,16 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
                 assignOperationToMethod(pathItem, operation, httpRule);
 
                 // Add PathItem to OpenAPI Paths
-                openApi.getPaths().addPathItem(path, pathItem);
-
-                // Add schemas to OpenAPI Components
-                addSchemas(openApi, rpcMethod);
+                paths.addPathItem(path, pathItem);
             }
+        }
+
+        for (var en : modelConverterContext.getDefinedModels().entrySet()) {
+            openApi.getComponents().addSchemas(en.getKey(), en.getValue());
         }
     }
 
-    private static void initializeOpenApiComponents(OpenAPI openApi) {
+    private static void init(OpenAPI openApi) {
         if (openApi.getPaths() == null) {
             openApi.setPaths(new Paths());
         }
@@ -157,6 +172,7 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void addQueryParameters(
             Operation operation, HttpRule httpRule, Descriptors.MethodDescriptor md, Set<String> pathVars) {
         if (!httpRule.hasGet()) { // Only add query parameters for GET requests
@@ -168,13 +184,8 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
             return;
         }
 
-        var schemaMap = modelConverters.read(requestClass);
-        if (schemaMap == null || schemaMap.isEmpty()) {
-            return;
-        }
-
-        Schema<?> requestSchema = schemaMap.values().iterator().next();
-        var properties = requestSchema.getProperties();
+        var requestSchema = modelConverterContext.resolve(new AnnotatedType(requestClass));
+        var properties = (Map<String, Schema<?>>) requestSchema.getProperties();
         if (properties == null) {
             return;
         }
@@ -202,44 +213,44 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
         }
     }
 
-    private static void handleRequestBody(Operation operation, HttpRule httpRule, Descriptors.MethodDescriptor md) {
+    private void handleRequestBody(Operation operation, HttpRule httpRule, Descriptors.MethodDescriptor md) {
         if (Objects.equals(httpRule.getBody(), "*")) {
-            String inputTypeFullName = md.getInputType().getFullName();
+
+            Class<?> requestClass = mustGetRequestClass(md);
+            var schemaName = getSchemaName(requestClass);
+            Schema<?> schema = resolveSchema(schemaName, requestClass);
+
             RequestBody requestBody = new RequestBody()
                     .required(true)
-                    .content(new Content()
-                            .addMediaType(
-                                    "application/json",
-                                    new MediaType()
-                                            .schema(new Schema<>().$ref("#/components/schemas/" + inputTypeFullName))));
+                    .content(new Content().addMediaType("application/json", new MediaType().schema(schema)));
             operation.setRequestBody(requestBody);
         } else if (!httpRule.getBody().isBlank()) {
             md.getInputType().getFields().stream()
                     .filter(field -> Objects.equals(field.getName(), httpRule.getBody()))
                     .findFirst()
                     .ifPresent(field -> {
-                        String inputTypeFullName = field.getMessageType().getFullName();
+                        // assume the field is a message type
+                        var fieldType = getGetterReturnType(mustGetRequestClass(md), field);
+                        var schemaName = getSchemaName(fieldType);
+                        Schema<?> schema = resolveSchema(schemaName, fieldType);
+
                         RequestBody requestBody = new RequestBody()
                                 .required(!field.toProto().getProto3Optional()) // specified property is optional
-                                .content(new Content()
-                                        .addMediaType(
-                                                "application/json",
-                                                new MediaType()
-                                                        .schema(new Schema<>()
-                                                                .$ref("#/components/schemas/" + inputTypeFullName))));
+                                .content(
+                                        new Content().addMediaType("application/json", new MediaType().schema(schema)));
                         operation.setRequestBody(requestBody);
                     });
         }
     }
 
-    private static void handleResponses(Operation operation, Descriptors.MethodDescriptor md) {
-        String outputTypeFullName = md.getOutputType().getFullName();
+    private void handleResponses(Operation operation, Descriptors.MethodDescriptor md) {
+        Class<?> responseClass = mustGetResponseClass(md);
+
+        var schemaName = getSchemaName(responseClass);
+        Schema<?> schema = resolveSchema(schemaName, responseClass);
+
         ApiResponse apiResponse = new ApiResponse()
-                .content(new Content()
-                        .addMediaType(
-                                "application/json",
-                                new MediaType()
-                                        .schema(new Schema<>().$ref("#/components/schemas/" + outputTypeFullName))));
+                .content(new Content().addMediaType("application/json", new MediaType().schema(schema)));
         ApiResponses apiResponses = new ApiResponses();
         apiResponses.addApiResponse("200", apiResponse);
         operation.setResponses(apiResponses);
@@ -254,47 +265,6 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
             case PATCH -> pathItem.setPatch(operation);
             default -> log.warn("Unhandled HTTP pattern case: {}", httpRule);
         }
-    }
-
-    /**
-     * Adds the necessary schemas for request and response to OpenAPI Components.
-     *
-     * @param openApi The OpenAPI instance
-     * @param md      MethodDescriptor
-     */
-    private void addSchemas(OpenAPI openApi, Descriptors.MethodDescriptor md) {
-        addSchema(openApi, mustGetRequestClass(md));
-        addSchema(openApi, mustGetResponseClass(md));
-    }
-
-    /**
-     * Adds a single schema to OpenAPI Components.
-     *
-     * @param openApi The OpenAPI instance
-     * @param clazz   The Java Class to convert
-     */
-    private void addSchema(OpenAPI openApi, Class<?> clazz) {
-        if (clazz == null) {
-            return;
-        }
-
-        var schemas = modelConverters.readAll(clazz);
-        if (schemas == null || schemas.isEmpty()) {
-            return;
-        }
-
-        Components components = openApi.getComponents();
-        if (components == null) {
-            components = new Components();
-        }
-
-        for (var entry : schemas.entrySet()) {
-            String schemaName = entry.getKey();
-            Schema<?> schema = entry.getValue();
-            components.addSchemas(schemaName, schema);
-        }
-
-        openApi.setComponents(components);
     }
 
     private static ModelConverters buildModelConverters(SpringDocConfigProperties springDocConfigProperties) {
@@ -377,5 +347,62 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
             }
         }
         throw new IllegalStateException("Response class not found for method " + methodName);
+    }
+
+    private Schema<?> resolveSchema(String schemaName, Type type) {
+
+        var ref = RefUtils.constructRef(schemaName);
+
+        if (modelConverterContext.getDefinedModels().containsKey(schemaName)) {
+            return new Schema<>().$ref(ref);
+        }
+
+        var schema = modelConverterContext.resolve(new AnnotatedType(type));
+        if (schema.get$ref() != null) {
+            return schema;
+        }
+
+        modelConverterContext.defineModel(schemaName, schema);
+
+        return new Schema<>().$ref(ref);
+    }
+
+    private String getSchemaName(Type type) {
+        var javaType = TypeFactory.defaultInstance().constructType(type);
+        return protobufNameResolver.nameForType(javaType);
+    }
+
+    private static Type getGetterReturnType(Class<?> clazz, Descriptors.FieldDescriptor fieldDescriptor) {
+        var name = underlineToCamel(fieldDescriptor.getName());
+
+        String[] possibleMethodNames = {
+            "get" + StringUtils.capitalize(name),
+            "get" + StringUtils.capitalize(name) + "List", // repeated fields
+            "get" + StringUtils.capitalize(name) + "Map" // map fields
+        };
+
+        for (String methodName : possibleMethodNames) {
+            try {
+                Method method = clazz.getMethod(methodName);
+                return method.getGenericReturnType();
+            } catch (NoSuchMethodException e) {
+                // no-op
+            }
+        }
+
+        throw new IllegalStateException("No getter method found for " + name + " in " + clazz);
+    }
+
+    private static String underlineToCamel(String name) {
+        var sb = new StringBuilder();
+        for (var i = 0; i < name.length(); i++) {
+            var c = name.charAt(i);
+            if (c == '_') {
+                sb.append(Character.toUpperCase(name.charAt(++i)));
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 }
