@@ -1,0 +1,19 @@
+dependencies {
+    compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+    api(project(":grpc-extensions:grpc-transcoding"))
+
+    api("io.github.danielliu1123:springdoc-bridge-protobuf:${springdocBridgeVersion}")
+
+    compileOnly("org.springdoc:springdoc-openapi-starter-common:${springDocsVersion}")
+
+    compileOnly("org.springframework.boot:spring-boot-starter-web")
+    compileOnly("org.springframework.boot:spring-boot-starter-webflux")
+
+    testImplementation(project(":grpc-starters:grpc-boot-starter"))
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
+    testImplementation(project(":grpc-starters:grpc-starter-transcoding"))
+    testImplementation("org.springframework.boot:spring-boot-starter-web")
+    testImplementation("org.springdoc:springdoc-openapi-starter-webmvc-api:${springDocsVersion}")
+}
+
+apply from: "${rootDir}/gradle/deploy.gradle"

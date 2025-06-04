@@ -14,6 +14,7 @@ plugins {
     id "com.github.spotbugs" version "${spotbugsVersion}" apply false
     id "com.google.protobuf" version "${protobufGradlePluginVersion}" apply false
     id "org.graalvm.buildtools.native" version "${graalvmBuildToolsVersion}" apply false
+    id "org.jreleaser" version "${jReleaserVersion}" apply false
 }
 
 allprojects {
@@ -35,6 +36,11 @@ allprojects {
         registerFeature("optionalSupport") {
             usingSourceSet(sourceSets.optionalSupport)
         }
+    }
+
+    javadoc {
+        // Suppress warnings about missing Javadoc comments
+        options.addStringOption('Xdoclint:none', '-quiet')
     }
 
     repositories {
