@@ -191,6 +191,7 @@ message GetUserResponse {
 message UpdateUserRequest {
   string user_id = 1;
   User user = 2;
+  map<string, string> metadata = 3;
 }
 
 message UpdateUserResponse {

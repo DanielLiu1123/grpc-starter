@@ -29,7 +29,7 @@ publishing {
             pom {
                 url = "${githubUrl}"
                 name = project.name
-                description = project.description ?: ""
+                description = project.description ?: project.name
                 licenses {
                     license {
                         name = 'MIT License'
