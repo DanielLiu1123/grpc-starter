@@ -7,6 +7,8 @@ on:
 jobs:
   tweet:
     runs-on: ubuntu-latest
+    # Skip workflow execution for Release Candidate (RC) versions
+    if: ${{ !contains(github.event.release.tag_name, 'RC') }}
     steps:
       - uses: actions/setup-go@v5
         with:
