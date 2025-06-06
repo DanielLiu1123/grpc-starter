@@ -110,6 +110,7 @@ jreleaser {
                     stagingRepository('build/staging-deploy')
                     username = System.getenv('MAVENCENTRAL_USERNAME')
                     password = System.getenv('MAVENCENTRAL_PASSWORD')
+                    verifyUrl = "https://repo1.maven.org/maven2/{{path}}/{{filename}}"
                 }
             }
             nexus2 {
