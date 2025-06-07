@@ -2,7 +2,7 @@
 
 ```bash
 cd "$(git rev-parse --show-toplevel)"
-./gradlew :examples:transcoding-springdocs:bootRun
+./gradlew :examples:transcoding-springdoc:bootRun
 ```
 
 ## Fetch OpenAPI

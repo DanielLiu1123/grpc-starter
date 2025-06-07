@@ -1,5 +1,5 @@
 dependencies {
-    api(project(":grpc-extensions:grpc-transcoding-springdocs"))
+    api(project(":grpc-extensions:grpc-transcoding-springdoc"))
     api(project(":grpc-starters:grpc-starter-transcoding"))
 }
 

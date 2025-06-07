@@ -4,7 +4,7 @@ dependencies {
 
     api("io.github.danielliu1123:springdoc-bridge-protobuf:${springdocBridgeVersion}")
 
-    compileOnly("org.springdoc:springdoc-openapi-starter-common:${springDocsVersion}")
+    compileOnly("org.springdoc:springdoc-openapi-starter-common:${springdocVersion}")
 
     compileOnly("org.springframework.boot:spring-boot-starter-web")
     compileOnly("org.springframework.boot:spring-boot-starter-webflux")
@@ -13,7 +13,7 @@ dependencies {
     testImplementation(project(":grpc-starters:grpc-starter-test"))
     testImplementation(project(":grpc-starters:grpc-starter-transcoding"))
     testImplementation("org.springframework.boot:spring-boot-starter-web")
-    testImplementation("org.springdoc:springdoc-openapi-starter-webmvc-api:${springDocsVersion}")
+    testImplementation("org.springdoc:springdoc-openapi-starter-webmvc-api:${springdocVersion}")
 }
 
 apply from: "${rootDir}/gradle/deploy.gradle"

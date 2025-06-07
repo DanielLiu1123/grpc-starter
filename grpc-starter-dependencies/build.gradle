@@ -26,7 +26,7 @@ dependencies {
         api(project(":grpc-extensions:grpc-test"))
         api(project(":grpc-extensions:grpc-tracing"))
         api(project(":grpc-extensions:grpc-transcoding"))
-        api(project(":grpc-extensions:grpc-transcoding-springdocs"))
+        api(project(":grpc-extensions:grpc-transcoding-springdoc"))
         api(project(":grpc-extensions:grpc-validation"))
 
         // starters
@@ -38,7 +38,7 @@ dependencies {
         api(project(":grpc-starters:grpc-starter-test"))
         api(project(":grpc-starters:grpc-starter-tracing"))
         api(project(":grpc-starters:grpc-starter-transcoding"))
-        api(project(":grpc-starters:grpc-starter-transcoding-springdocs"))
+        api(project(":grpc-starters:grpc-starter-transcoding-springdoc"))
         api(project(":grpc-starters:grpc-starter-validation"))
 
         // grpc related dependencies

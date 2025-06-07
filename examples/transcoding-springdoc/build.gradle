@@ -4,14 +4,14 @@ plugins {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${springDocsVersion}")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}")
     implementation("io.grpc:grpc-testing-proto")
     implementation(project(":grpc-starters:grpc-server-boot-starter")){
         exclude(group: 'io.grpc', module: "grpc-netty-shaded")
     }
     runtimeOnly("io.grpc:grpc-netty")
     implementation(project(":grpc-starters:grpc-starter-transcoding"))
-    implementation(project(":grpc-starters:grpc-starter-transcoding-springdocs"))
+    implementation(project(":grpc-starters:grpc-starter-transcoding-springdoc"))
 
     testImplementation(project(":grpc-starters:grpc-starter-test"))
 }
