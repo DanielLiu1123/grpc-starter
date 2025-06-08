@@ -1,6 +1,9 @@
 apply plugin: 'org.jreleaser'
 apply plugin: 'signing'
 
+version = version as String
+version = System.getenv('RELEASE') ? version.substring(0, version.lastIndexOf('-SNAPSHOT')) : version
+
 // see https://jreleaser.org/guide/latest/reference/deploy/maven/maven-central.html
 jreleaser {
     signing {
