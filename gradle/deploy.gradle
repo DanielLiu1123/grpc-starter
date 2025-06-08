@@ -17,6 +17,11 @@ publishing {
         maven(MavenPublication) {
             from components.java
 
+            // Suppress optional-support variants from Maven publication
+            // The optional dependencies are already correctly marked in POM via Feature Variants
+            suppressPomMetadataWarningsFor('optionalSupportApiElements')
+            suppressPomMetadataWarningsFor('optionalSupportRuntimeElements')
+
             // see  https://docs.gradle.org/current/userguide/publishing_maven.html
             versionMapping {
                 usage('java-api') {
@@ -58,4 +63,9 @@ publishing {
             url = "${rootDir}/build/staging-deploy"
         }
     }
+}
+
+// Disable the optional-support JAR task to prevent its creation
+optionalSupportJar {
+    enabled = false
 }
