@@ -122,3 +122,4 @@ allprojects {
 }
 
 apply from: "${rootDir}/gradle/generate-configuration-properties-docs.gradle"
+apply from: "${rootDir}/gradle/jreleaser.gradle"

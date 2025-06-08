@@ -1,7 +1,6 @@
 apply plugin: 'java-platform'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
-apply plugin: 'org.jreleaser'
 
 version = version as String
 version = System.getenv('RELEASE') ? version.substring(0, version.lastIndexOf('-SNAPSHOT')) : version
@@ -87,47 +86,7 @@ publishing {
 
     repositories {
         maven {
-            url = layout.buildDirectory.dir('staging-deploy')
-        }
-    }
-}
-
-// see https://jreleaser.org/guide/latest/reference/deploy/maven/maven-central.html
-jreleaser {
-    signing {
-        active = 'RELEASE'
-        armored = true
-        passphrase = System.getenv('GPG_PASSPHRASE')
-        publicKey  = System.getenv('GPG_PUBLIC_KEY')
-        secretKey  = System.getenv('GPG_SECRET_KEY')
-    }
-    deploy {
-        maven {
-            mavenCentral {
-                'release-deploy' {
-                    active = 'RELEASE'
-                    url = 'https://central.sonatype.com/api/v1/publisher'
-                    stagingRepository('build/staging-deploy')
-                    username = System.getenv('MAVENCENTRAL_USERNAME')
-                    password = System.getenv('MAVENCENTRAL_PASSWORD')
-                    verifyUrl = "https://repo1.maven.org/maven2/{{path}}/{{filename}}"
-                }
-            }
-            nexus2 {
-                'snapshot-deploy' {
-                    active = 'SNAPSHOT'
-                    url = 'https://s01.oss.sonatype.org/service/local'
-                    snapshotUrl = 'https://central.sonatype.com/repository/maven-snapshots'
-                    applyMavenCentralRules = true
-                    snapshotSupported = true
-                    closeRepository = true
-                    releaseRepository = true
-                    stagingRepository('build/staging-deploy')
-                    username = System.getenv('MAVENCENTRAL_USERNAME')
-                    password = System.getenv('MAVENCENTRAL_PASSWORD')
-                    sign = false
-                }
-            }
+            url = "${rootDir}/build/staging-deploy"
         }
     }
 }
