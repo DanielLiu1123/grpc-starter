@@ -1,4 +1,5 @@
 apply plugin: 'org.jreleaser'
+apply plugin: 'signing'
 
 // see https://jreleaser.org/guide/latest/reference/deploy/maven/maven-central.html
 jreleaser {

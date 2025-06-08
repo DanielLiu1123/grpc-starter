@@ -1,6 +1,4 @@
 apply plugin: 'maven-publish'
-apply plugin: 'signing'
-apply plugin: 'org.jreleaser'
 
 version = version as String
 version = System.getenv('RELEASE') ? version.substring(0, version.lastIndexOf('-SNAPSHOT')) : version
