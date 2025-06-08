@@ -45,4 +45,4 @@ jobs:
           GPG_SECRET_KEY: ${{ secrets.GPG_SECRET_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          ./gradlew publish jreleaserDeploy --no-daemon
+          ./gradlew publish jreleaserDeploy --no-daemon --stacktrace
