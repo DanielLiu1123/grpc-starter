@@ -10,3 +10,9 @@ cd "$(git rev-parse --show-toplevel)"
 ```bash
 curl http://localhost:8080/v3/api-docs
 ```
+
+## Go to Swagger UI
+
+```bash
+open http://localhost:8080/swagger-ui.html
+```
