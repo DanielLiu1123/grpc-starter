@@ -12,7 +12,6 @@ import io.grpc.internal.GrpcUtil;
 import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.SneakyThrows;
@@ -37,7 +36,6 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
 
     private final Server server;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
-    private final CountDownLatch latch = new CountDownLatch(1);
     private final GrpcServerProperties properties;
 
     private ApplicationEventPublisher publisher;
@@ -161,7 +159,6 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
         if (isRunning.get()) {
             gracefulShutdown();
             isRunning.set(false);
-            latch.countDown();
         }
     }
 
@@ -176,18 +173,19 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
     }
 
     private void waitUntilShutdown() {
-        new Thread(
-                        () -> {
-                            try {
-                                // wait here until terminating
-                                latch.await();
-                            } catch (InterruptedException e) {
-                                log.warn("gRPC server await termination interrupted", e);
-                                Thread.currentThread().interrupt();
-                            }
-                        },
-                        "grpc-termination-awaiter")
-                .start();
+        Thread t = new Thread(
+                () -> {
+                    try {
+                        // wait here until terminating
+                        server.awaitTermination();
+                    } catch (InterruptedException e) {
+                        log.warn("gRPC server await termination interrupted", e);
+                        Thread.currentThread().interrupt();
+                    }
+                },
+                "grpc-termination-awaiter");
+        t.setDaemon(false);
+        t.start();
     }
 
     private void gracefulShutdown() {
