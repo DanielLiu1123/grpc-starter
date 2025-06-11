@@ -195,6 +195,87 @@ The values of request message fields can be filled by path variables, request bo
 If the same field exists, the priority is: **path variables > request body > query parameters**.
 :::
 
+## OpenAPI Integration
+
+**Available since version [3.5.0.1](https://github.com/DanielLiu1123/grpc-starter/releases/tag/v3.5.0.1)**
+
+The `grpc-starter-transcoding-springdoc` module provides automatic OpenAPI documentation generation for your gRPC transcoding endpoints. This integration allows you to:
+
+- Automatically generate OpenAPI 3.0 specifications for transcoded gRPC services
+- Access interactive Swagger UI for testing your APIs
+- Leverage SpringDoc's powerful documentation features
+
+:::tip
+The integration leverages [springdoc-bridge-protobuf](https://github.com/DanielLiu1123/springdoc-bridge) to handle protobuf message conversion to OpenAPI schemas, ensuring accurate documentation generation.
+:::
+
+### Dependencies
+
+To enable OpenAPI integration, use the `grpc-starter-transcoding-springdoc` dependency instead of the basic transcoding module:
+
+<Tabs>
+    <TabItem value="gradle" label="Gradle">
+        ```groovy
+        implementation("io.github.danielliu1123:grpc-server-boot-starter")
+        implementation("io.github.danielliu1123:grpc-starter-transcoding-springdoc")
+        implementation("org.springframework.boot:spring-boot-starter-web")
+        implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui")
+        ```
+    </TabItem>
+    <TabItem value="maven" label="Maven">
+        ```xml
+        <dependency>
+            <groupId>io.github.danielliu1123</groupId>
+            <artifactId>grpc-server-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.danielliu1123</groupId>
+            <artifactId>grpc-starter-transcoding-springdoc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+        ```
+    </TabItem>
+</Tabs>
+
+### Configuration
+
+The OpenAPI integration works automatically with minimal configuration. You can customize the behavior using standard SpringDoc properties:
+
+```yaml
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+  use-fqn: true  # Use fully qualified names for better clarity
+```
+
+### Usage
+
+Once configured, the integration automatically:
+
+1. **Scans your gRPC services** for HTTP transcoding annotations (`google.api.http`)
+2. **Generates OpenAPI paths** based on the HTTP mappings
+3. **Creates request/response schemas** from your protobuf message definitions
+4. **Handles path parameters, query parameters, and request bodies** according to your gRPC service definitions
+
+After starting your application, you can access:
+
+- **OpenAPI JSON**: `http://localhost:8080/v3/api-docs`
+- **Swagger UI**: `http://localhost:8080/swagger-ui.html`
+
+### Example
+
+Refer to the [examples/transcoding-springdoc](https://github.com/DanielLiu1123/grpc-starter/tree/main/examples/transcoding-springdoc) for a complete working demonstration.
+
 ## Extension Points
 
 ### HeaderConverter

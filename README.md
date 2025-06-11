@@ -58,7 +58,7 @@ Refer to [quick-start](examples/quick-start).
 
 ### Extensions:
 
-- [gRPC HTTP transcoding](https://danielliu1123.github.io/grpc-starter/docs/extensions/grpc-http-transcoding): Support both gRPC and HTTP/JSON with a single codebase.
+- [gRPC HTTP transcoding](https://danielliu1123.github.io/grpc-starter/docs/extensions/grpc-http-transcoding): Support both gRPC and HTTP/JSON with a single codebase, with optional OpenAPI integration.
 - [Protobuf validation](https://danielliu1123.github.io/grpc-starter/docs/extensions/protobuf-validation): Protobuf message validation using [protovalidate](https://github.com/bufbuild/protovalidate-java) and [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate).
 - [Metrics](https://danielliu1123.github.io/grpc-starter/docs/extensions/metrics): Integrate Spring Boot Actuator with gRPC services.
 - [Tracing](https://danielliu1123.github.io/grpc-starter/docs/extensions/tracing): Integrate Spring Boot Actuator with gRPC server and client.
