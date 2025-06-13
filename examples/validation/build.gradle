@@ -4,10 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":grpc-starters:grpc-boot-starter")){
-        exclude(group: 'io.grpc', module: "grpc-netty-shaded")
-    }
-    runtimeOnly("io.grpc:grpc-netty")
+    implementation(project(":grpc-starters:grpc-boot-starter"))
     implementation(project(":grpc-starters:grpc-starter-validation"))
 
     implementation("io.grpc:grpc-testing-proto")
