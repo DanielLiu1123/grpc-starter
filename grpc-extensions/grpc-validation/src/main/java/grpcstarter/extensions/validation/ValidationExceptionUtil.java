@@ -1,7 +1,8 @@
 package grpcstarter.extensions.validation;
 
+import build.buf.protovalidate.Violation;
 import build.buf.protovalidate.exceptions.ValidationException;
-import build.buf.validate.Violation;
+import build.buf.validate.FieldPathElement;
 import com.google.protobuf.Any;
 import com.google.rpc.BadRequest;
 import com.google.rpc.Code;
@@ -10,14 +11,17 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.StatusProto;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.experimental.UtilityClass;
 import org.springframework.util.StringUtils;
 
 /**
  * @author Freeman
  */
-@UtilityClass
-class ValidationExceptionUtil {
+final class ValidationExceptionUtil {
+
+    private ValidationExceptionUtil() {
+        throw new UnsupportedOperationException("Cannot instantiate utility class");
+    }
+
     /**
      * Convert {@link ValidationException} to {@link StatusRuntimeException}.
      *
@@ -41,10 +45,10 @@ class ValidationExceptionUtil {
                 .collect(Collectors.joining(", "));
 
         var badRquestBuilder = BadRequest.newBuilder();
-        for (Violation violation : violations) {
+        for (var violation : violations) {
             badRquestBuilder.addFieldViolations(BadRequest.FieldViolation.newBuilder()
-                    .setField(violation.getFieldPath())
-                    .setDescription(cut(violation.getMessage()))
+                    .setField(getFieldPath(violation))
+                    .setDescription(cut(violation.toProto().getMessage()))
                     .build());
         }
 
@@ -56,14 +60,20 @@ class ValidationExceptionUtil {
     }
 
     private static String getErrorMessage(Violation violation) {
-        String field = violation.getFieldPath();
+        String field = getFieldPath(violation);
         String message;
         if (StringUtils.hasText(field)) {
-            message = field + ": " + violation.getMessage();
+            message = field + ": " + violation.toProto().getMessage();
         } else {
-            message = violation.getMessage();
+            message = violation.toProto().getMessage();
         }
         return cut(message);
+    }
+
+    private static String getFieldPath(Violation violation) {
+        return violation.toProto().getField().getElementsList().stream()
+                .map(FieldPathElement::getFieldName)
+                .collect(Collectors.joining("."));
     }
 
     private static String cut(String str) {
