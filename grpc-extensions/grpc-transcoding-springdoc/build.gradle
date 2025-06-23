@@ -2,7 +2,10 @@ dependencies {
     compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
     api(project(":grpc-extensions:grpc-transcoding"))
 
-    api("io.github.danielliu1123:springdoc-bridge-protobuf:${springdocBridgeVersion}")
+    api("io.github.danielliu1123:springdoc-bridge-protobuf:${springdocBridgeVersion}") {
+        exclude group: "com.google.protobuf", module: "protobuf-java-util"
+    }
+    api("com.google.protobuf:protobuf-java-util") // Use protobuf-java-util from protobuf-bom
 
     compileOnly("org.springdoc:springdoc-openapi-starter-common:${springdocVersion}")
 
