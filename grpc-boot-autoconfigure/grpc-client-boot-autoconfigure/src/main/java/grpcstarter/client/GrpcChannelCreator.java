@@ -146,15 +146,15 @@ class GrpcChannelCreator {
         TlsChannelCredentials.Builder tlsBuilder = TlsChannelCredentials.newBuilder();
 
         // Set key managers if available
-        if (sslBundle.getManagers().getKeyManagers() != null
-                && sslBundle.getManagers().getKeyManagers().length > 0) {
-            tlsBuilder.keyManager(sslBundle.getManagers().getKeyManagers());
+        var keyManagers = sslBundle.getManagers().getKeyManagers();
+        if (keyManagers != null && keyManagers.length > 0) {
+            tlsBuilder.keyManager(keyManagers);
         }
 
         // Set trust managers if available
-        if (sslBundle.getManagers().getTrustManagers() != null
-                && sslBundle.getManagers().getTrustManagers().length > 0) {
-            tlsBuilder.trustManager(sslBundle.getManagers().getTrustManagers());
+        var trustManagers = sslBundle.getManagers().getTrustManagers();
+        if (trustManagers != null && trustManagers.length > 0) {
+            tlsBuilder.trustManager(trustManagers);
         }
 
         return Grpc.newChannelBuilder(authority, tlsBuilder.build());

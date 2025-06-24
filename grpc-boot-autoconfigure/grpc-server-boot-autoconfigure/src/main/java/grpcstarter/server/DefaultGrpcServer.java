@@ -118,15 +118,15 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
         TlsServerCredentials.Builder tlsBuilder = TlsServerCredentials.newBuilder();
 
         // Set key managers if available
-        if (sslBundle.getManagers().getKeyManagers() != null
-                && sslBundle.getManagers().getKeyManagers().length > 0) {
-            tlsBuilder.keyManager(sslBundle.getManagers().getKeyManagers());
+        var keyManagers = sslBundle.getManagers().getKeyManagers();
+        if (keyManagers != null && keyManagers.length > 0) {
+            tlsBuilder.keyManager(keyManagers);
         }
 
         // Set trust managers if available
-        if (sslBundle.getManagers().getTrustManagers() != null
-                && sslBundle.getManagers().getTrustManagers().length > 0) {
-            tlsBuilder.trustManager(sslBundle.getManagers().getTrustManagers());
+        var trustManagers = sslBundle.getManagers().getTrustManagers();
+        if (trustManagers != null && trustManagers.length > 0) {
+            tlsBuilder.trustManager(trustManagers);
         }
 
         return Grpc.newServerBuilderForPort(port, tlsBuilder.build());
@@ -157,9 +157,11 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
     }
 
     private static void logTlsDeprecationWarning() {
-        log.warn("Using deprecated 'tls' configuration for gRPC server. "
-                + "Please migrate to 'ssl-bundle' configuration. "
-                + "The 'tls' configuration will be removed in a future version.");
+        log.warn(
+                """
+                Using deprecated 'tls' configuration for gRPC server. \
+                Please migrate to 'ssl-bundle' configuration. \
+                The 'tls' configuration will be removed in a future version.""");
     }
 
     @Override
