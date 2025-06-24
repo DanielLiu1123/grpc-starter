@@ -6,11 +6,9 @@ import grpcstarter.server.GrpcServerShutdownEvent;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.ssl.SslAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent;
@@ -27,7 +25,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 @ConditionOnGrpcClientEnabled
 @EnableConfigurationProperties(GrpcClientProperties.class)
-@AutoConfigureAfter(SslAutoConfiguration.class)
 public class GrpcClientAutoConfiguration implements DisposableBean, ApplicationListener<ApplicationReadyEvent> {
 
     @Override

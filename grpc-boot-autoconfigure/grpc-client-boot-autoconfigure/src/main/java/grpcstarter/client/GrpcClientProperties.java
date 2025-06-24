@@ -110,17 +110,17 @@ public class GrpcClientProperties implements InitializingBean {
     /**
      * TLS configuration.
      *
-     * @deprecated Use {@link #sslBundle} instead. This will be removed in a future version.
+     * @deprecated Use {@link #sslBundle} instead. This will be removed in 3.6.0
      */
     @Deprecated(since = "3.5.3", forRemoval = true)
     private Tls tls;
     /**
      * SSL bundle name to use for secure connections.
      *
-     * <p>References a SSL bundle configured under {@code spring.ssl.bundle.*}.
+     * <p>References an SSL bundle configured under {@code spring.ssl.bundle.*}.
      * This is the preferred way to configure SSL/TLS for gRPC clients.
      *
-     * @since 3.5.0
+     * @since 3.5.3
      */
     private String sslBundle;
     /**
@@ -197,7 +197,7 @@ public class GrpcClientProperties implements InitializingBean {
         /**
          * TLS configuration for this channel, use {@link GrpcClientProperties#tls} if not set.
          *
-         * @deprecated Use {@link #sslBundle} instead. This will be removed in a future version.
+         * @deprecated Use {@link #sslBundle} instead. This will be removed in 3.6.0
          */
         @Deprecated(since = "3.5.3", forRemoval = true)
         private Tls tls;
@@ -208,7 +208,7 @@ public class GrpcClientProperties implements InitializingBean {
          * If not set, uses {@link GrpcClientProperties#sslBundle}.
          * This is the preferred way to configure SSL/TLS for gRPC clients.
          *
-         * @since 3.5.0
+         * @since 3.5.3
          */
         private String sslBundle;
         /**
@@ -420,20 +420,22 @@ public class GrpcClientProperties implements InitializingBean {
     }
 
     Channel defaultChannel() {
-        Channel channel = new Channel();
-        channel.setName("__default__");
-        channel.setAuthority(authority);
-        channel.setMaxInboundMessageSize(maxInboundMessageSize);
-        channel.setMaxOutboundMessageSize(maxOutboundMessageSize);
-        channel.setMaxInboundMetadataSize(maxInboundMetadataSize);
-        channel.setShutdownTimeout(shutdownTimeout);
-        channel.setMetadata(metadata);
-        channel.setInProcess(inProcess);
-        channel.setTls(tls);
-        channel.setSslBundle(sslBundle);
-        channel.setRetry(retry);
-        channel.setDeadline(deadline);
-        channel.setCompression(compression);
-        return channel;
+        return new Channel(
+                "__default__",
+                authority,
+                maxInboundMessageSize,
+                maxOutboundMessageSize,
+                maxInboundMetadataSize,
+                shutdownTimeout,
+                metadata,
+                inProcess,
+                tls,
+                sslBundle,
+                retry,
+                deadline,
+                compression,
+                null,
+                null,
+                null);
     }
 }

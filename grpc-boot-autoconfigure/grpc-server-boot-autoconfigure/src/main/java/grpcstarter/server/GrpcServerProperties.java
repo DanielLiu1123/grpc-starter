@@ -78,13 +78,13 @@ public class GrpcServerProperties {
      * When specified, it takes precedence over the deprecated {@link #tls} configuration.
      * </p>
      *
-     * @since 3.5.0
+     * @since 3.5.3
      */
     private String sslBundle;
     /**
      * TLS configuration.
      *
-     * @deprecated Use {@link #sslBundle} instead. This will be removed in a future version.
+     * @deprecated Use {@link #sslBundle} instead. This will be removed in 3.6.0
      */
     @Deprecated(since = "3.5.3", forRemoval = true)
     private Tls tls;
