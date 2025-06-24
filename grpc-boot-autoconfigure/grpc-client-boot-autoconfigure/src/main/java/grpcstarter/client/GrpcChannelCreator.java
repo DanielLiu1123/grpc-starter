@@ -11,7 +11,11 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.MetadataUtils;
 import java.util.Optional;
 import lombok.SneakyThrows;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.boot.ssl.SslBundle;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -21,6 +25,8 @@ import org.springframework.util.unit.DataSize;
  * @author Freeman
  */
 class GrpcChannelCreator {
+
+    private static final Logger log = LoggerFactory.getLogger(GrpcChannelCreator.class);
 
     private final BeanFactory beanFactory;
     private final Class<?> stubClass;
@@ -118,10 +124,44 @@ class GrpcChannelCreator {
         if (!StringUtils.hasText(channelConfig.getAuthority())) {
             throw new MissingChannelConfigurationException(stubClass);
         }
+
+        // Priority: SSL Bundle > TLS > Plain text
+        String sslBundleName = channelConfig.getSslBundle();
         GrpcClientProperties.Tls tls = channelConfig.getTls();
-        if (tls == null) {
+
+        if (StringUtils.hasText(sslBundleName)) {
+            return createChannelWithSslBundle(channelConfig.getAuthority(), sslBundleName);
+        } else if (tls != null) {
+            logTlsDeprecationWarning();
+            return createChannelWithTls(channelConfig.getAuthority(), tls);
+        } else {
             return ManagedChannelBuilder.forTarget(channelConfig.getAuthority()).usePlaintext();
         }
+    }
+
+    private ManagedChannelBuilder<?> createChannelWithSslBundle(String authority, String sslBundleName) {
+        SslBundles sslBundles = beanFactory.getBean(SslBundles.class);
+        SslBundle sslBundle = sslBundles.getBundle(sslBundleName);
+
+        TlsChannelCredentials.Builder tlsBuilder = TlsChannelCredentials.newBuilder();
+
+        // Set key managers if available
+        var keyManagers = sslBundle.getManagers().getKeyManagers();
+        if (keyManagers != null && keyManagers.length > 0) {
+            tlsBuilder.keyManager(keyManagers);
+        }
+
+        // Set trust managers if available
+        var trustManagers = sslBundle.getManagers().getTrustManagers();
+        if (trustManagers != null && trustManagers.length > 0) {
+            tlsBuilder.trustManager(trustManagers);
+        }
+
+        return Grpc.newChannelBuilder(authority, tlsBuilder.build());
+    }
+
+    @SneakyThrows
+    private ManagedChannelBuilder<?> createChannelWithTls(String authority, GrpcClientProperties.Tls tls) {
         TlsChannelCredentials.Builder tlsBuilder = TlsChannelCredentials.newBuilder();
         if (tls.getKeyManager() != null) {
             GrpcClientProperties.Tls.KeyManager keyManager = tls.getKeyManager();
@@ -139,6 +179,14 @@ class GrpcChannelCreator {
         if (tls.getTrustManager() != null) {
             tlsBuilder.trustManager(tls.getTrustManager().getRootCerts().getInputStream());
         }
-        return Grpc.newChannelBuilder(channelConfig.getAuthority(), tlsBuilder.build());
+        return Grpc.newChannelBuilder(authority, tlsBuilder.build());
+    }
+
+    private static void logTlsDeprecationWarning() {
+        log.warn(
+                """
+                Using deprecated 'tls' configuration for gRPC client. \
+                Please migrate to 'ssl-bundle' configuration. \
+                The 'tls' configuration will be removed in a future version.""");
     }
 }

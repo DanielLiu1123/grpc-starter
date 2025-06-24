@@ -109,8 +109,20 @@ public class GrpcClientProperties implements InitializingBean {
     private Long shutdownTimeout = 5000L;
     /**
      * TLS configuration.
+     *
+     * @deprecated Use {@link #sslBundle} instead. This will be removed in 3.6.0
      */
+    @Deprecated(since = "3.5.3", forRemoval = true)
     private Tls tls;
+    /**
+     * SSL bundle name to use for secure connections.
+     *
+     * <p>References an SSL bundle configured under {@code spring.ssl.bundle.*}.
+     * This is the preferred way to configure SSL/TLS for gRPC clients.
+     *
+     * @since 3.5.3
+     */
+    private String sslBundle;
     /**
      * Retry configuration.
      */
@@ -184,8 +196,21 @@ public class GrpcClientProperties implements InitializingBean {
         private InProcess inProcess;
         /**
          * TLS configuration for this channel, use {@link GrpcClientProperties#tls} if not set.
+         *
+         * @deprecated Use {@link #sslBundle} instead. This will be removed in 3.6.0
          */
+        @Deprecated(since = "3.5.3", forRemoval = true)
         private Tls tls;
+        /**
+         * SSL bundle name to use for secure connections for this channel.
+         *
+         * <p>References a SSL bundle configured under {@code spring.ssl.bundle.*}.
+         * If not set, uses {@link GrpcClientProperties#sslBundle}.
+         * This is the preferred way to configure SSL/TLS for gRPC clients.
+         *
+         * @since 3.5.3
+         */
+        private String sslBundle;
         /**
          * Retry configuration for this channel, use {@link GrpcClientProperties#retry} if not set.
          */
@@ -376,6 +401,7 @@ public class GrpcClientProperties implements InitializingBean {
                     .to(stub::setShutdownTimeout);
             mapper.from(inProcess).when(e -> isNull(stub.getInProcess())).to(stub::setInProcess);
             mapper.from(tls).when(e -> isNull(stub.getTls())).to(stub::setTls);
+            mapper.from(sslBundle).when(e -> isNull(stub.getSslBundle())).to(stub::setSslBundle);
             mapper.from(retry).when(e -> isNull(stub.getRetry())).to(stub::setRetry);
             mapper.from(deadline).when(e -> isNull(stub.getDeadline())).to(stub::setDeadline);
             mapper.from(compression).when(e -> isNull(stub.getCompression())).to(stub::setCompression);
@@ -404,6 +430,7 @@ public class GrpcClientProperties implements InitializingBean {
                 metadata,
                 inProcess,
                 tls,
+                sslBundle,
                 retry,
                 deadline,
                 compression,
