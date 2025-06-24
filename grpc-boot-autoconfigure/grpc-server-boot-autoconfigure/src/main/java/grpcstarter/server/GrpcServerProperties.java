@@ -72,8 +72,21 @@ public class GrpcServerProperties {
      */
     private InProcess inProcess;
     /**
-     * TLS configuration.
+     * SSL bundle name for TLS configuration.
+     * <p>
+     * This is the preferred way to configure SSL/TLS for gRPC server.
+     * When specified, it takes precedence over the deprecated {@link #tls} configuration.
+     * </p>
+     *
+     * @since 3.5.3
      */
+    private String sslBundle;
+    /**
+     * TLS configuration.
+     *
+     * @deprecated Use {@link #sslBundle} instead. This will be removed in 3.6.0
+     */
+    @Deprecated(since = "3.5.3", forRemoval = true)
     private Tls tls;
     /**
      * Response configuration.
