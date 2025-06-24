@@ -1,13 +1,20 @@
+spring:
+  ssl:
+    bundle:
+      pem:
+        server-bundle:
+          keystore:
+            certificate: "classpath:server.crt"
+            private-key: "classpath:server.key"
+        client-bundle:
+          truststore:
+            certificate: "classpath:ca.crt"
+
 grpc:
   server:
     reflection:
       enabled: true
-    tls:
-      key-manager:
-        cert-chain: classpath:server.crt
-        private-key: classpath:server.key
+    ssl-bundle: server-bundle
   client:
     authority: localhost:${grpc.server.port:9090}
-    tls:
-      trust-manager:
-        root-certs: classpath:ca.crt
+    ssl-bundle: client-bundle

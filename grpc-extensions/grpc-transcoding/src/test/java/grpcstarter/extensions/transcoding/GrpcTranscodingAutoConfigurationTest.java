@@ -8,6 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.ssl.SslAutoConfiguration;
 import org.springframework.boot.test.context.runner.ReactiveWebApplicationContextRunner;
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
 
@@ -17,12 +18,16 @@ import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
 class GrpcTranscodingAutoConfigurationTest {
 
     final WebApplicationContextRunner servletRunner = new WebApplicationContextRunner()
-            .withConfiguration(
-                    AutoConfigurations.of(GrpcTranscodingAutoConfiguration.class, GrpcServerAutoConfiguration.class));
+            .withConfiguration(AutoConfigurations.of(
+                    GrpcTranscodingAutoConfiguration.class,
+                    GrpcServerAutoConfiguration.class,
+                    SslAutoConfiguration.class));
 
     final ReactiveWebApplicationContextRunner reactiveRunner = new ReactiveWebApplicationContextRunner()
-            .withConfiguration(
-                    AutoConfigurations.of(GrpcTranscodingAutoConfiguration.class, GrpcServerAutoConfiguration.class));
+            .withConfiguration(AutoConfigurations.of(
+                    GrpcTranscodingAutoConfiguration.class,
+                    GrpcServerAutoConfiguration.class,
+                    SslAutoConfiguration.class));
 
     @ParameterizedTest
     @ValueSource(strings = {"SERVLET", "REACTIVE"})
