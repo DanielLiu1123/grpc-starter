@@ -6,7 +6,7 @@ This document describes the new SSL Bundle support for gRPC client configuration
 
 Spring Boot 3.1 introduced [SSL Bundles](https://spring.io/blog/2023/06/07/securing-spring-boot-applications-with-ssl/) as a standardized way to configure SSL/TLS connections. SSL Bundles provide a more convenient and consistent approach to SSL configuration across different Spring Boot components.
 
-The gRPC starter now supports SSL Bundles as the preferred way to configure SSL/TLS for gRPC clients, while maintaining backward compatibility with the existing TLS configuration.
+The gRPC starter now supports SSL Bundles as the preferred way to configure SSL/TLS for both gRPC clients and servers, while maintaining backward compatibility with the existing TLS configuration.
 
 ## Configuration
 
@@ -72,9 +72,22 @@ grpc:
           - com.example.AnotherService
 ```
 
+### gRPC Server Configuration with SSL Bundle
+
+Configure SSL bundle for gRPC server:
+
+```yaml
+grpc:
+  server:
+    ssl-bundle: server  # Reference to spring.ssl.bundle.jks.server
+    port: 9090
+```
+
 ## Migration from TLS Configuration
 
-### Before (Deprecated)
+### Client Migration
+
+#### Before (Deprecated)
 
 ```yaml
 grpc:
@@ -87,7 +100,7 @@ grpc:
         private-key: classpath:client.key
 ```
 
-### After (Recommended)
+#### After (Recommended)
 
 ```yaml
 spring:
@@ -106,15 +119,55 @@ grpc:
     ssl-bundle: grpc-client
 ```
 
+### Server Migration
+
+#### Before (Deprecated)
+
+```yaml
+grpc:
+  server:
+    tls:
+      key-manager:
+        cert-chain: classpath:server.crt
+        private-key: classpath:server.key
+```
+
+#### After (Recommended)
+
+```yaml
+spring:
+  ssl:
+    bundle:
+      pem:
+        grpc-server:
+          keystore:
+            certificate: "classpath:server.crt"
+            private-key: "classpath:server.key"
+
+grpc:
+  server:
+    ssl-bundle: grpc-server
+```
+
 ## Configuration Priority
 
-The configuration priority order is:
+### Client Configuration Priority
+
+The configuration priority order for gRPC clients is:
 
 1. Channel-specific `ssl-bundle`
 2. Channel-specific `tls` (deprecated)
 3. Global `ssl-bundle`
 4. Global `tls` (deprecated)
 5. Plain text
+
+### Server Configuration Priority
+
+The configuration priority order for gRPC servers is:
+
+1. `ssl-bundle`
+2. `tls` (deprecated)
+3. Plain text
 
 ## Benefits
 
@@ -128,31 +181,44 @@ The configuration priority order is:
 
 The existing `tls` configuration is deprecated as of version 3.5.0 and will be removed in a future version. When using the deprecated `tls` configuration, you will see a warning message:
 
+For gRPC clients:
 ```
 Using deprecated 'tls' configuration for gRPC client. Please migrate to 'ssl-bundle' configuration. The 'tls' configuration will be removed in a future version.
 ```
 
+For gRPC servers:
+```
+Using deprecated 'tls' configuration for gRPC server. Please migrate to 'ssl-bundle' configuration. The 'tls' configuration will be removed in a future version.
+```
+
 ## Examples
 
-### Complete Example with Multiple Services
+### Complete Example with Client and Server
 
 ```yaml
 spring:
   ssl:
     bundle:
       jks:
+        server-bundle:
+          keystore:
+            location: "classpath:server.p12"
+            password: "server-password"
+        client-bundle:
+          truststore:
+            location: "classpath:ca.p12"
+            password: "ca-password"
         secure-service:
           keystore:
             location: "classpath:secure-service.p12"
             password: "secure-password"
-        public-service:
-          truststore:
-            location: "classpath:public-ca.p12"
-            password: "public-password"
 
 grpc:
+  server:
+    ssl-bundle: server-bundle  # Server SSL configuration
+    port: 9090
   client:
-    ssl-bundle: public-service  # Default for all services
+    ssl-bundle: client-bundle  # Default for all client services
     base-packages:
       - com.example.grpc
     channels:
@@ -161,7 +227,7 @@ grpc:
         services:
           - com.example.grpc.SecureInternalService
       - authority: public-api:443
-        # Uses default ssl-bundle: public-service
+        # Uses default ssl-bundle: client-bundle
         services:
           - com.example.grpc.PublicApiService
       - authority: insecure-dev:9090
@@ -172,13 +238,14 @@ grpc:
 
 ### In-Process Configuration
 
-In-process channels ignore SSL bundle configuration:
+In-process channels and servers ignore SSL bundle configuration:
 
 ```yaml
 grpc:
   server:
     in-process:
       name: test-server
+    ssl-bundle: server  # Ignored for in-process servers
   client:
     in-process:
       name: test-server

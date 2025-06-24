@@ -18,6 +18,8 @@ import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.ssl.SslBundle;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -43,21 +45,24 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
     @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public DefaultGrpcServer(
             GrpcServerProperties properties,
+            SslBundles sslBundles,
             ObjectProvider<ServerBuilder<?>> serverBuilder,
             ObjectProvider<BindableService> serviceProvider,
             ObjectProvider<ServerInterceptor> interceptorProvider,
             ObjectProvider<GrpcServerCustomizer> customizers) {
         this.properties = properties;
-        this.server = buildGrpcServer(properties, serverBuilder, serviceProvider, interceptorProvider, customizers);
+        this.server = buildGrpcServer(
+                properties, sslBundles, serverBuilder, serviceProvider, interceptorProvider, customizers);
     }
 
     private static Server buildGrpcServer(
             GrpcServerProperties properties,
+            SslBundles sslBundles,
             ObjectProvider<ServerBuilder<?>> serverBuilder,
             ObjectProvider<BindableService> serviceProvider,
             ObjectProvider<ServerInterceptor> interceptorProvider,
             ObjectProvider<GrpcServerCustomizer> customizers) {
-        ServerBuilder<?> builder = serverBuilder.getIfUnique(() -> getDefaultServerBuilder(properties));
+        ServerBuilder<?> builder = serverBuilder.getIfUnique(() -> getDefaultServerBuilder(properties, sslBundles));
 
         // add services
         serviceProvider.forEach(builder::addService);
@@ -83,17 +88,53 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
     }
 
     @SneakyThrows
-    private static ServerBuilder<? extends ServerBuilder<?>> getDefaultServerBuilder(GrpcServerProperties properties) {
+    private static ServerBuilder<? extends ServerBuilder<?>> getDefaultServerBuilder(
+            GrpcServerProperties properties, SslBundles sslBundles) {
         if (properties.getInProcess() != null) {
             Assert.hasText(properties.getInProcess().getName(), "In-process server name must not be empty");
             return InProcessServerBuilder.forName(properties.getInProcess().getName())
                     .directExecutor();
         }
         int port = Math.max(properties.getPort(), 0);
+
+        // Priority: SSL Bundle > TLS > Plain text
+        String sslBundleName = properties.getSslBundle();
         GrpcServerProperties.Tls tls = properties.getTls();
-        if (tls == null) {
+
+        if (StringUtils.hasText(sslBundleName)) {
+            return createServerBuilderWithSslBundle(port, sslBundleName, sslBundles);
+        } else if (tls != null) {
+            logTlsDeprecationWarning();
+            return createServerBuilderWithTls(port, tls);
+        } else {
             return ServerBuilder.forPort(port);
         }
+    }
+
+    private static ServerBuilder<? extends ServerBuilder<?>> createServerBuilderWithSslBundle(
+            int port, String sslBundleName, SslBundles sslBundles) {
+        SslBundle sslBundle = sslBundles.getBundle(sslBundleName);
+
+        TlsServerCredentials.Builder tlsBuilder = TlsServerCredentials.newBuilder();
+
+        // Set key managers if available
+        if (sslBundle.getManagers().getKeyManagers() != null
+                && sslBundle.getManagers().getKeyManagers().length > 0) {
+            tlsBuilder.keyManager(sslBundle.getManagers().getKeyManagers());
+        }
+
+        // Set trust managers if available
+        if (sslBundle.getManagers().getTrustManagers() != null
+                && sslBundle.getManagers().getTrustManagers().length > 0) {
+            tlsBuilder.trustManager(sslBundle.getManagers().getTrustManagers());
+        }
+
+        return Grpc.newServerBuilderForPort(port, tlsBuilder.build());
+    }
+
+    @SneakyThrows
+    private static ServerBuilder<? extends ServerBuilder<?>> createServerBuilderWithTls(
+            int port, GrpcServerProperties.Tls tls) {
         TlsServerCredentials.Builder tlsBuilder = TlsServerCredentials.newBuilder();
         GrpcServerProperties.Tls.KeyManager keyManager = tls.getKeyManager();
         if (keyManager != null) {
@@ -113,6 +154,12 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
             tlsBuilder.trustManager(trustManager.getRootCerts().getInputStream());
         }
         return Grpc.newServerBuilderForPort(port, tlsBuilder.build());
+    }
+
+    private static void logTlsDeprecationWarning() {
+        log.warn("Using deprecated 'tls' configuration for gRPC server. "
+                + "Please migrate to 'ssl-bundle' configuration. "
+                + "The 'tls' configuration will be removed in a future version.");
     }
 
     @Override
