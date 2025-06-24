@@ -11,9 +11,9 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.MetadataUtils;
 import java.util.Optional;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.ssl.SslBundle;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -24,8 +24,9 @@ import org.springframework.util.unit.DataSize;
 /**
  * @author Freeman
  */
-@Slf4j
 class GrpcChannelCreator {
+
+    private static final Logger log = LoggerFactory.getLogger(GrpcChannelCreator.class);
 
     private final BeanFactory beanFactory;
     private final Class<?> stubClass;
@@ -139,32 +140,24 @@ class GrpcChannelCreator {
     }
 
     private ManagedChannelBuilder<?> createChannelWithSslBundle(String authority, String sslBundleName) {
-        try {
-            SslBundles sslBundles = beanFactory.getBean(SslBundles.class);
-            SslBundle sslBundle = sslBundles.getBundle(sslBundleName);
+        SslBundles sslBundles = beanFactory.getBean(SslBundles.class);
+        SslBundle sslBundle = sslBundles.getBundle(sslBundleName);
 
-            log.debug("Using SSL bundle '{}' for gRPC channel to '{}'", sslBundleName, authority);
+        TlsChannelCredentials.Builder tlsBuilder = TlsChannelCredentials.newBuilder();
 
-            TlsChannelCredentials.Builder tlsBuilder = TlsChannelCredentials.newBuilder();
-
-            // Set key managers if available
-            if (sslBundle.getManagers().getKeyManagers() != null && sslBundle.getManagers().getKeyManagers().length > 0) {
-                tlsBuilder.keyManager(sslBundle.getManagers().getKeyManagers());
-            }
-
-            // Set trust managers if available
-            if (sslBundle.getManagers().getTrustManagers() != null && sslBundle.getManagers().getTrustManagers().length > 0) {
-                tlsBuilder.trustManager(sslBundle.getManagers().getTrustManagers());
-            }
-
-            return Grpc.newChannelBuilder(authority, tlsBuilder.build());
-        } catch (NoSuchBeanDefinitionException e) {
-            throw new IllegalStateException(
-                    "SSL bundles are not available. Make sure you're using Spring Boot 3.1+ and have SSL bundles configured.", e);
-        } catch (Exception e) {
-            throw new IllegalStateException(
-                    "Failed to create SSL context from bundle '" + sslBundleName + "'", e);
+        // Set key managers if available
+        if (sslBundle.getManagers().getKeyManagers() != null
+                && sslBundle.getManagers().getKeyManagers().length > 0) {
+            tlsBuilder.keyManager(sslBundle.getManagers().getKeyManagers());
         }
+
+        // Set trust managers if available
+        if (sslBundle.getManagers().getTrustManagers() != null
+                && sslBundle.getManagers().getTrustManagers().length > 0) {
+            tlsBuilder.trustManager(sslBundle.getManagers().getTrustManagers());
+        }
+
+        return Grpc.newChannelBuilder(authority, tlsBuilder.build());
     }
 
     @SneakyThrows
@@ -189,10 +182,11 @@ class GrpcChannelCreator {
         return Grpc.newChannelBuilder(authority, tlsBuilder.build());
     }
 
-    private void logTlsDeprecationWarning() {
-        log.warn("Using deprecated 'tls' configuration for gRPC client. " +
-                "Please migrate to 'ssl-bundle' configuration. " +
-                "The 'tls' configuration will be removed in a future version. " +
-                "See documentation for migration guide.");
+    private static void logTlsDeprecationWarning() {
+        log.warn(
+                """
+                Using deprecated 'tls' configuration for gRPC client. \
+                Please migrate to 'ssl-bundle' configuration. \
+                The 'tls' configuration will be removed in a future version.""");
     }
 }
