@@ -11,7 +11,11 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.MetadataUtils;
 import java.util.Optional;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.boot.ssl.SslBundle;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -20,6 +24,7 @@ import org.springframework.util.unit.DataSize;
 /**
  * @author Freeman
  */
+@Slf4j
 class GrpcChannelCreator {
 
     private final BeanFactory beanFactory;
@@ -118,10 +123,52 @@ class GrpcChannelCreator {
         if (!StringUtils.hasText(channelConfig.getAuthority())) {
             throw new MissingChannelConfigurationException(stubClass);
         }
+
+        // Priority: SSL Bundle > TLS > Plain text
+        String sslBundleName = channelConfig.getSslBundle();
         GrpcClientProperties.Tls tls = channelConfig.getTls();
-        if (tls == null) {
+
+        if (StringUtils.hasText(sslBundleName)) {
+            return createChannelWithSslBundle(channelConfig.getAuthority(), sslBundleName);
+        } else if (tls != null) {
+            logTlsDeprecationWarning();
+            return createChannelWithTls(channelConfig.getAuthority(), tls);
+        } else {
             return ManagedChannelBuilder.forTarget(channelConfig.getAuthority()).usePlaintext();
         }
+    }
+
+    private ManagedChannelBuilder<?> createChannelWithSslBundle(String authority, String sslBundleName) {
+        try {
+            SslBundles sslBundles = beanFactory.getBean(SslBundles.class);
+            SslBundle sslBundle = sslBundles.getBundle(sslBundleName);
+
+            log.debug("Using SSL bundle '{}' for gRPC channel to '{}'", sslBundleName, authority);
+
+            TlsChannelCredentials.Builder tlsBuilder = TlsChannelCredentials.newBuilder();
+
+            // Set key managers if available
+            if (sslBundle.getManagers().getKeyManagers() != null && sslBundle.getManagers().getKeyManagers().length > 0) {
+                tlsBuilder.keyManager(sslBundle.getManagers().getKeyManagers());
+            }
+
+            // Set trust managers if available
+            if (sslBundle.getManagers().getTrustManagers() != null && sslBundle.getManagers().getTrustManagers().length > 0) {
+                tlsBuilder.trustManager(sslBundle.getManagers().getTrustManagers());
+            }
+
+            return Grpc.newChannelBuilder(authority, tlsBuilder.build());
+        } catch (NoSuchBeanDefinitionException e) {
+            throw new IllegalStateException(
+                    "SSL bundles are not available. Make sure you're using Spring Boot 3.1+ and have SSL bundles configured.", e);
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    "Failed to create SSL context from bundle '" + sslBundleName + "'", e);
+        }
+    }
+
+    @SneakyThrows
+    private ManagedChannelBuilder<?> createChannelWithTls(String authority, GrpcClientProperties.Tls tls) {
         TlsChannelCredentials.Builder tlsBuilder = TlsChannelCredentials.newBuilder();
         if (tls.getKeyManager() != null) {
             GrpcClientProperties.Tls.KeyManager keyManager = tls.getKeyManager();
@@ -139,6 +186,13 @@ class GrpcChannelCreator {
         if (tls.getTrustManager() != null) {
             tlsBuilder.trustManager(tls.getTrustManager().getRootCerts().getInputStream());
         }
-        return Grpc.newChannelBuilder(channelConfig.getAuthority(), tlsBuilder.build());
+        return Grpc.newChannelBuilder(authority, tlsBuilder.build());
+    }
+
+    private void logTlsDeprecationWarning() {
+        log.warn("Using deprecated 'tls' configuration for gRPC client. " +
+                "Please migrate to 'ssl-bundle' configuration. " +
+                "The 'tls' configuration will be removed in a future version. " +
+                "See documentation for migration guide.");
     }
 }
