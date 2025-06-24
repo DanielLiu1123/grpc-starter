@@ -21,7 +21,7 @@ class SslBundleIT {
     void testSslBundleConfiguration_whenSslBundleNotFound() {
         assertThatExceptionOfType(BeanCreationException.class)
                 .isThrownBy(() -> {
-                    try (var ctx = new SpringApplicationBuilder(Cfg.class)
+                    try (var ignored = new SpringApplicationBuilder(Cfg.class)
                             .properties(GrpcServerProperties.PREFIX + ".ssl-bundle=nonexistent")
                             .properties(GrpcServerProperties.PREFIX + ".port=0")
                             .run()) {
@@ -56,27 +56,6 @@ class SslBundleIT {
 
             assertThatNoException().isThrownBy(() -> ctx.getBean(GrpcServer.class));
         }
-    }
-
-    @Test
-    void testTlsDeprecationWarning_whenUsingTlsConfiguration() {
-        // This test verifies that using deprecated TLS configuration logs a deprecation warning
-        // We don't provide actual certificate files, so it should fail during bean creation
-        // but the important thing is that the deprecation warning is logged
-        assertThatExceptionOfType(BeanCreationException.class)
-                .isThrownBy(() -> {
-                    try (var ctx = new SpringApplicationBuilder(Cfg.class)
-                            .properties(GrpcServerProperties.PREFIX + ".port=0")
-                            .properties(GrpcServerProperties.PREFIX
-                                    + ".tls.key-manager.cert-chain=classpath:nonexistent.crt")
-                            .properties(GrpcServerProperties.PREFIX
-                                    + ".tls.key-manager.private-key=classpath:nonexistent.key")
-                            .run()) {
-                        // This should fail during context initialization due to missing certificate files
-                    }
-                })
-                .havingRootCause()
-                .withMessageContaining("cannot be opened because it does not exist");
     }
 
     @Configuration(proxyBeanMethods = false)

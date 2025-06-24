@@ -112,7 +112,7 @@ public class GrpcClientProperties implements InitializingBean {
      *
      * @deprecated Use {@link #sslBundle} instead. This will be removed in a future version.
      */
-    @Deprecated(since = "3.5.0", forRemoval = true)
+    @Deprecated(since = "3.5.3", forRemoval = true)
     private Tls tls;
     /**
      * SSL bundle name to use for secure connections.
@@ -199,7 +199,7 @@ public class GrpcClientProperties implements InitializingBean {
          *
          * @deprecated Use {@link #sslBundle} instead. This will be removed in a future version.
          */
-        @Deprecated(since = "3.5.0", forRemoval = true)
+        @Deprecated(since = "3.5.3", forRemoval = true)
         private Tls tls;
         /**
          * SSL bundle name to use for secure connections for this channel.

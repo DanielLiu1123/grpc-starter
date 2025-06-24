@@ -86,7 +86,7 @@ public class GrpcServerProperties {
      *
      * @deprecated Use {@link #sslBundle} instead. This will be removed in a future version.
      */
-    @Deprecated(since = "3.5.0")
+    @Deprecated(since = "3.5.3", forRemoval = true)
     private Tls tls;
     /**
      * Response configuration.
