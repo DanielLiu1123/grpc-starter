@@ -2,21 +2,13 @@
 
 This example demonstrates how to configure SSL/TLS for gRPC clients and servers using Spring Boot's SSL Bundle feature.
 
-## SSL Bundle Configuration (Recommended)
+## SSL Bundle Configuration
 
-The example uses Spring Boot 3.1+ SSL Bundles, which provide a standardized way to configure SSL/TLS connections. This is the preferred approach over the legacy TLS configuration.
-
-### Configuration Files
-
-- `application.yaml` - SSL Bundle configuration using PEM format (recommended)
-- `application-jks.yaml` - SSL Bundle configuration using JKS/PKCS12 format
-- `application-legacy.yaml` - Legacy TLS configuration (deprecated, shows deprecation warnings)
+The example uses Spring Boot 3.1+ SSL Bundles, which provide a standardized way to configure SSL/TLS connections.
 
 ## Run Example
 
 ### 1. Generate certificates:
-
-#### For PEM format (default configuration):
 
 ```shell
 # Generate CA private key
@@ -38,31 +30,10 @@ openssl req -new -key server.key -out server.csr -subj "/CN=localhost"
 openssl x509 -req -days 3650 -in server.csr -CA ca.crt -CAkey ca.key -out server.crt -extensions v3_req
 ```
 
-#### For JKS/PKCS12 format (application-jks.yaml):
-
-```shell
-# Convert PEM certificates to PKCS12 format
-openssl pkcs12 -export -out server.p12 -inkey server.key -in server.crt -password pass:server-password
-
-# Create truststore with CA certificate
-keytool -import -file ca.crt -alias ca -keystore ca.p12 -storetype PKCS12 -storepass ca-password -noprompt
-```
-
 ### 2. Run the application:
 
-#### Using SSL Bundle configuration (default):
 ```shell
 ./gradlew :examples:tls:bootRun
-```
-
-#### Using JKS format:
-```shell
-./gradlew :examples:tls:bootRun --args='--spring.profiles.active=jks'
-```
-
-#### Using legacy TLS configuration:
-```shell
-./gradlew :examples:tls:bootRun --args='--spring.profiles.active=legacy'
 ```
 
 ### 3. Run tests:
@@ -70,9 +41,10 @@ keytool -import -file ca.crt -alias ca -keystore ca.p12 -storetype PKCS12 -store
 ./gradlew :examples:tls:test
 ```
 
-## Configuration Comparison
+## Configuration
 
-### SSL Bundle (Recommended)
+The example uses SSL Bundle configuration:
+
 ```yaml
 spring:
   ssl:
@@ -93,20 +65,6 @@ grpc:
     ssl-bundle: client-bundle
 ```
 
-### Legacy TLS (Deprecated)
-```yaml
-grpc:
-  server:
-    tls:
-      key-manager:
-        cert-chain: classpath:server.crt
-        private-key: classpath:server.key
-  client:
-    tls:
-      trust-manager:
-        root-certs: classpath:ca.crt
-```
-
 ## Benefits of SSL Bundle
 
 1. **Consistency**: Aligns with Spring Boot's standard SSL configuration
@@ -114,7 +72,3 @@ grpc:
 3. **Simplified Configuration**: Reduces boilerplate configuration
 4. **Better Management**: Centralized SSL configuration management
 5. **Hot Reloading**: Leverage Spring Boot's SSL bundle reloading capabilities
-
-## Migration Guide
-
-See [SSL_BUNDLE_MIGRATION.md](../../SSL_BUNDLE_MIGRATION.md) for detailed migration instructions from legacy TLS configuration to SSL Bundle.
