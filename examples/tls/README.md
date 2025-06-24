@@ -19,25 +19,3 @@ This example demonstrates SSL/TLS configuration for gRPC using Spring Boot SSL B
    ```shell
    ./gradlew :examples:tls:bootRun
    ```
-
-## Configuration
-
-```yaml
-spring:
-  ssl:
-    bundle:
-      pem:
-        server-bundle:
-          keystore:
-            certificate: "classpath:server.crt"
-            private-key: "classpath:server.key"
-        client-bundle:
-          truststore:
-            certificate: "classpath:ca.crt"
-
-grpc:
-  server:
-    ssl-bundle: server-bundle
-  client:
-    ssl-bundle: client-bundle
-```
