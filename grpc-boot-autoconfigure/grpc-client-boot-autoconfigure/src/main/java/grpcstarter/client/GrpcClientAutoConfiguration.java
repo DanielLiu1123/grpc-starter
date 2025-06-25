@@ -47,6 +47,12 @@ public class GrpcClientAutoConfiguration implements DisposableBean, ApplicationL
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    public ManagedChannels managedChannels() {
+        return new ManagedChannelsImpl();
+    }
+
+    @Bean
     @ConditionalOnProperty(
             prefix = GrpcClientProperties.PREFIX,
             name = "warn-unused-config-enabled",
