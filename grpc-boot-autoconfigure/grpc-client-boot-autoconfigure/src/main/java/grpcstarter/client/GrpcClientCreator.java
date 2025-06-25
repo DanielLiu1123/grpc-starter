@@ -1,11 +1,11 @@
 package grpcstarter.client;
 
+import grpcstarter.client.exception.MissingChannelConfigurationException;
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.AbstractStub;
 import java.lang.reflect.Method;
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.BeanFactory;
@@ -17,6 +17,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.util.unit.DataSize;
 
 /**
@@ -56,13 +57,13 @@ class GrpcClientCreator {
         Assert.notNull(stubMethod, "stubMethod must not be null");
 
         AbstractBeanDefinition abd = BeanDefinitionBuilder.genericBeanDefinition(
-                        ManagedChannel.class, () -> new GrpcChannelCreator(beanFactory, stubClass).create())
+                        ManagedChannel.class, this::createChannel)
                 .getBeanDefinition();
         abd.setLazyInit(true);
 
         GrpcClientProperties properties = beanFactory.getBean(GrpcClientProperties.class);
 
-        String channelBeanName = "grpc-channel-" + UUID.randomUUID();
+        String channelBeanName = "grpc-channel-" + getMatchedConfig(properties).getName();
         BeanDefinitionHolder holder = new BeanDefinitionHolder(abd, channelBeanName);
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
         if (supportRefresh
@@ -82,6 +83,22 @@ class GrpcClientCreator {
 
         Cache.addStubClass(stubClass);
         return stub;
+    }
+
+    private ManagedChannel createChannel() {
+        // NOTE: support refresh, so get the properties from bean factory
+        var properties = beanFactory.getBean(GrpcClientProperties.class);
+        setChannelName(properties);
+
+        var channelConfig = getMatchedConfig(properties);
+        if (!StringUtils.hasText(channelConfig.getAuthority())) {
+            throw new MissingChannelConfigurationException(stubClass);
+        }
+        return new GrpcChannelCreator(beanFactory, channelConfig).create();
+    }
+
+    private GrpcClientProperties.Channel getMatchedConfig(GrpcClientProperties properties) {
+        return GrpcChannelCreator.getMatchedConfig(stubClass, properties);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -115,6 +132,15 @@ class GrpcClientCreator {
             return NEW_FUTURE_STUB_METHOD;
         } else {
             return NEW_STUB_METHOD;
+        }
+    }
+
+    static void setChannelName(GrpcClientProperties properties) {
+        var unnamedChannels = properties.getChannels().stream()
+                .filter(ch -> !StringUtils.hasText(ch.getName()))
+                .toList();
+        for (int i = 0; i < unnamedChannels.size(); i++) {
+            unnamedChannels.get(i).setName("unnamed-channel-" + i);
         }
     }
 }

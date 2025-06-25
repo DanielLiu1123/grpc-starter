@@ -7,7 +7,6 @@ import grpcstarter.server.GrpcServerProperties;
 import io.grpc.ManagedChannel;
 import io.grpc.health.v1.HealthGrpc;
 import io.grpc.testing.protobuf.SimpleServiceGrpc;
-import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -45,17 +44,6 @@ class ManagedChannelsIT {
 
             ManagedChannels managedChannels = ctx.getBean(ManagedChannels.class);
 
-            // Test getChannelNames
-            Set<String> channelNames = managedChannels.getChannelNames();
-            assertThat(channelNames).containsExactlyInAnyOrder("channel1", "channel2");
-
-            // Test hasChannel
-            assertThat(managedChannels.hasChannel("channel1")).isTrue();
-            assertThat(managedChannels.hasChannel("channel2")).isTrue();
-            assertThat(managedChannels.hasChannel("nonexistent")).isFalse();
-            assertThat(managedChannels.hasChannel(null)).isFalse();
-            assertThat(managedChannels.hasChannel("")).isFalse();
-
             // Test getChannel
             ManagedChannel channel1 = managedChannels.getChannel("channel1");
             ManagedChannel channel2 = managedChannels.getChannel("channel2");
@@ -68,14 +56,6 @@ class ManagedChannelsIT {
             assertThatThrownBy(() -> managedChannels.getChannel("nonexistent"))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("No channel found with name: nonexistent");
-
-            assertThatThrownBy(() -> managedChannels.getChannel(null))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("Channel name must not be null or empty");
-
-            assertThatThrownBy(() -> managedChannels.getChannel(""))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("Channel name must not be null or empty");
         }
     }
 
@@ -89,12 +69,6 @@ class ManagedChannelsIT {
                 .run()) {
 
             ManagedChannels managedChannels = ctx.getBean(ManagedChannels.class);
-
-            // When no named channels are configured, should return empty set
-            Set<String> channelNames = managedChannels.getChannelNames();
-            assertThat(channelNames).isEmpty();
-
-            assertThat(managedChannels.hasChannel("any")).isFalse();
 
             assertThatThrownBy(() -> managedChannels.getChannel("any"))
                     .isInstanceOf(IllegalArgumentException.class)

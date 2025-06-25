@@ -68,10 +68,11 @@ final class Cache {
         // Do not close the channel if it already exists, it may be still in use
         ManagedChannel channel = cfgToChannel.computeIfAbsent(channelConfig, k -> channelSupplier.get());
 
-        // Also cache by name if the channel has a name
+        // Also cache by name
         String channelName = channelConfig.getName();
-        if (!StringUtils.hasText(channelName) || channelName.equals(GrpcClientProperties.DEFAULT_CHANNEL_NAME)) {
-            channelName = "unnamed-channel-" + unnamedChannelCounter.getAndIncrement();
+        if (!StringUtils.hasText(channelName)) {
+            throw new IllegalArgumentException(
+                    "Channel name must not be null or empty, authority: " + channelConfig.getAuthority());
         }
 
         nameToChannel.put(channelName, channel);

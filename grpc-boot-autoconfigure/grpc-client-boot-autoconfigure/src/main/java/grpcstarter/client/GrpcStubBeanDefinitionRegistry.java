@@ -30,11 +30,22 @@ class GrpcStubBeanDefinitionRegistry implements BeanDefinitionRegistryPostProces
         if (!enabled) {
             return;
         }
-        registerBeans(new GrpcStubBeanRegistrar(registry));
+
+        var properties = Util.getProperties(environment);
+        GrpcClientCreator.setChannelName(properties);
+
+        registerChannels(registry, properties);
+
+        registerStubs(new GrpcStubBeanRegistrar(registry), properties);
     }
 
-    private void registerBeans(GrpcStubBeanRegistrar registrar) {
-        var properties = Util.getProperties(environment);
+    private void registerChannels(BeanDefinitionRegistry registry, GrpcClientProperties properties) {
+        for (GrpcClientProperties.Channel channelConfig : properties.getChannels()) {
+            String channelName = channelConfig.getName();
+        }
+    }
+
+    private void registerStubs(GrpcStubBeanRegistrar registrar, GrpcClientProperties properties) {
 
         // NOTE: @EnableGrpcClients has higher priority than properties
         // we need to check if @EnableGrpcClients set the beanDefinitionHandler first

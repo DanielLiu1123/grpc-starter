@@ -1,6 +1,5 @@
 package grpcstarter.client;
 
-import grpcstarter.client.exception.MissingChannelConfigurationException;
 import io.grpc.ClientInterceptor;
 import io.grpc.Grpc;
 import io.grpc.ManagedChannel;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.ssl.SslBundle;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.unit.DataSize;
 
@@ -29,19 +27,14 @@ class GrpcChannelCreator {
     private static final Logger log = LoggerFactory.getLogger(GrpcChannelCreator.class);
 
     private final BeanFactory beanFactory;
-    private final Class<?> stubClass;
+    private final GrpcClientProperties.Channel channelConfig;
 
-    GrpcChannelCreator(BeanFactory beanFactory, Class<?> stubClass) {
+    GrpcChannelCreator(BeanFactory beanFactory, GrpcClientProperties.Channel channelConfig) {
         this.beanFactory = beanFactory;
-        this.stubClass = stubClass;
+        this.channelConfig = channelConfig;
     }
 
     public ManagedChannel create() {
-        GrpcClientProperties grpcClientProperties = beanFactory.getBean(
-                GrpcClientProperties.class); // get from beanFactory first because it can be refreshed
-
-        GrpcClientProperties.Channel channelConfig = getMatchedConfig(stubClass, grpcClientProperties);
-
         // One channel configuration results in the creation of one gRPC channel.
         // See https://github.com/DanielLiu1123/grpc-starter/issues/23
         return Cache.getOrSupplyChannel(channelConfig, () -> buildChannel(channelConfig));
@@ -115,14 +108,11 @@ class GrpcChannelCreator {
     @SneakyThrows
     private ManagedChannelBuilder<?> getManagedChannelBuilder(GrpcClientProperties.Channel channelConfig) {
         if (channelConfig.getInProcess() != null) {
-            Assert.hasText(
-                    channelConfig.getInProcess().getName(),
-                    "Not configure in-process name for stub: " + stubClass.getName());
-            return InProcessChannelBuilder.forName(channelConfig.getInProcess().getName())
-                    .directExecutor();
-        }
-        if (!StringUtils.hasText(channelConfig.getAuthority())) {
-            throw new MissingChannelConfigurationException(stubClass);
+            var name = channelConfig.getInProcess().getName();
+            if (!StringUtils.hasText(name)) {
+                throw new IllegalArgumentException("In-process name must not be empty");
+            }
+            return InProcessChannelBuilder.forName(name).directExecutor();
         }
 
         // Priority: SSL Bundle > TLS > Plain text
