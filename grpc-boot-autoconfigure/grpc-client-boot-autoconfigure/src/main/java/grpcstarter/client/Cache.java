@@ -4,6 +4,7 @@ import static grpcstarter.client.Util.serviceName;
 import static grpcstarter.client.Util.shutdownChannel;
 
 import io.grpc.ManagedChannel;
+import jakarta.annotation.Nullable;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,10 +14,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Freeman
@@ -28,6 +31,8 @@ final class Cache {
     }
 
     private static final Logger log = LoggerFactory.getLogger(Cache.class);
+
+    private static final AtomicInteger unnamedChannelCounter = new AtomicInteger(0);
 
     /**
      * Cache service name to stub classes mapping of gRPC stubs that already created bean.
@@ -65,9 +70,11 @@ final class Cache {
 
         // Also cache by name if the channel has a name
         String channelName = channelConfig.getName();
-        if (channelName != null && !channelName.isEmpty() && !channelName.equals("__default__")) {
-            nameToChannel.put(channelName, channel);
+        if (!StringUtils.hasText(channelName) || channelName.equals(GrpcClientProperties.DEFAULT_CHANNEL_NAME)) {
+            channelName = "unnamed-channel-" + unnamedChannelCounter.getAndIncrement();
         }
+
+        nameToChannel.put(channelName, channel);
 
         return channel;
     }
@@ -92,6 +99,7 @@ final class Cache {
                     System.currentTimeMillis() - start);
         }
         cfgToChannel.clear();
+        nameToChannel.clear();
     }
 
     /**
@@ -100,32 +108,14 @@ final class Cache {
      * @param name the channel name
      * @return the managed channel, or null if not found
      */
+    @Nullable
     public static ManagedChannel getChannelByName(String name) {
         return nameToChannel.get(name);
     }
 
-    /**
-     * Get all available channel names.
-     *
-     * @return a set of channel names
-     */
-    public static Set<String> getChannelNames() {
-        return Collections.unmodifiableSet(nameToChannel.keySet());
-    }
-
-    /**
-     * Check if a channel with the given name exists.
-     *
-     * @param name the channel name
-     * @return true if the channel exists, false otherwise
-     */
-    public static boolean hasChannel(String name) {
-        return nameToChannel.containsKey(name);
-    }
-
     public static void clear() {
         serviceToStubClasses.clear();
-        nameToChannel.clear();
         shutdownChannels();
+        unnamedChannelCounter.set(0);
     }
 }

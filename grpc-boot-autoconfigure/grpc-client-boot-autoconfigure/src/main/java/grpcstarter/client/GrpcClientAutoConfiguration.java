@@ -48,7 +48,7 @@ public class GrpcClientAutoConfiguration implements DisposableBean, ApplicationL
 
     @Bean
     @ConditionalOnMissingBean
-    public ManagedChannels managedChannels() {
+    public ManagedChannels grpcClientManagedChannels() {
         return new ManagedChannelsImpl();
     }
 

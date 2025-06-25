@@ -33,6 +33,8 @@ import org.springframework.util.unit.DataSize;
 public class GrpcClientProperties implements InitializingBean {
     public static final String PREFIX = "grpc.client";
 
+    static final String DEFAULT_CHANNEL_NAME = "__default__";
+
     /**
      * Whether to enable gRPC client autoconfiguration, default true.
      */
@@ -421,7 +423,7 @@ public class GrpcClientProperties implements InitializingBean {
 
     Channel defaultChannel() {
         return new Channel(
-                "__default__",
+                DEFAULT_CHANNEL_NAME,
                 authority,
                 maxInboundMessageSize,
                 maxOutboundMessageSize,
