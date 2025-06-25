@@ -15,15 +15,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import lombok.experimental.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author Freeman
  */
-@UtilityClass
-class Cache {
+final class Cache {
+
+    private Cache() {
+        throw new UnsupportedOperationException("Cannot instantiate utility class");
+    }
+
     private static final Logger log = LoggerFactory.getLogger(Cache.class);
 
     /**
