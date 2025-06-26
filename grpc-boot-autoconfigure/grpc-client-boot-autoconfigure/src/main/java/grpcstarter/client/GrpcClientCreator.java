@@ -7,17 +7,10 @@ import io.grpc.stub.AbstractStub;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import org.springframework.aop.framework.AopProxyUtils;
-import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.util.unit.DataSize;
 
 /**
@@ -46,33 +39,22 @@ class GrpcClientCreator {
     /**
      * Create a gRPC stub instance.
      *
-     * @param supportRefresh whether to support refresh scope
      * @param <T>            stub type
      * @return gRPC stub instance
      */
     @SuppressWarnings({"unchecked"})
-    public <T> T create(boolean supportRefresh) {
+    public <T> T create() {
         Method stubMethod =
                 ReflectionUtils.findMethod(stubClass.getEnclosingClass(), getStubMethodName(stubClass), Channel.class);
         Assert.notNull(stubMethod, "stubMethod must not be null");
 
-        AbstractBeanDefinition abd = BeanDefinitionBuilder.genericBeanDefinition(
-                        ManagedChannel.class, this::createChannel)
-                .getBeanDefinition();
-        abd.setLazyInit(true);
-
         GrpcClientProperties properties = beanFactory.getBean(GrpcClientProperties.class);
 
-        String channelBeanName = "grpc-channel-" + getMatchedConfig(properties).getName();
-        BeanDefinitionHolder holder = new BeanDefinitionHolder(abd, channelBeanName);
-        BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-        if (supportRefresh
-                && SPRING_CLOUD_CONTEXT_PRESENT
-                && properties.getRefresh().isEnabled()) {
-            abd.setScope("refresh");
-            holder = ScopedProxyUtils.createScopedProxy(holder, registry, true);
+        String channelBeanName = GrpcStubBeanDefinitionRegistry.channelBeanNamePrefix
+                + getMatchedConfig(properties).getName();
+        if (!beanFactory.containsBean(channelBeanName)) {
+            throw new MissingChannelConfigurationException(stubClass);
         }
-        BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
 
         ManagedChannel channel = beanFactory.getBean(channelBeanName, ManagedChannel.class);
         T stub = (T) ReflectionUtils.invokeMethod(stubMethod, null, channel);
@@ -83,18 +65,6 @@ class GrpcClientCreator {
 
         Cache.addStubClass(stubClass);
         return stub;
-    }
-
-    private ManagedChannel createChannel() {
-        // NOTE: support refresh, so get the properties from bean factory
-        var properties = beanFactory.getBean(GrpcClientProperties.class);
-        setChannelName(properties);
-
-        var channelConfig = getMatchedConfig(properties);
-        if (!StringUtils.hasText(channelConfig.getAuthority())) {
-            throw new MissingChannelConfigurationException(stubClass);
-        }
-        return new GrpcChannelCreator(beanFactory, channelConfig).create();
     }
 
     private GrpcClientProperties.Channel getMatchedConfig(GrpcClientProperties properties) {
@@ -132,15 +102,6 @@ class GrpcClientCreator {
             return NEW_FUTURE_STUB_METHOD;
         } else {
             return NEW_STUB_METHOD;
-        }
-    }
-
-    static void setChannelName(GrpcClientProperties properties) {
-        var unnamedChannels = properties.getChannels().stream()
-                .filter(ch -> !StringUtils.hasText(ch.getName()))
-                .toList();
-        for (int i = 0; i < unnamedChannels.size(); i++) {
-            unnamedChannels.get(i).setName("unnamed-channel-" + i);
         }
     }
 }

@@ -1,7 +1,5 @@
 package grpcstarter.client;
 
-import static org.springframework.core.NativeDetector.inNativeImage;
-
 import io.grpc.stub.AbstractStub;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
@@ -13,7 +11,6 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.aot.AbstractAotProcessor;
 
 /**
  * @author Freeman
@@ -41,10 +38,9 @@ public final class GrpcClientUtil {
 
         // Refresh scope is not supported with native images, see
         // https://docs.spring.io/spring-cloud-config/reference/server/aot-and-native-image-support.html
-        var supportRefresh = !isAotProcessing() && !inNativeImage();
 
         var abd = BeanDefinitionBuilder.genericBeanDefinition(
-                        clz, () -> new GrpcClientCreator(beanFactory, clz).create(supportRefresh))
+                        clz, () -> new GrpcClientCreator(beanFactory, clz).create())
                 .getBeanDefinition();
 
         abd.setLazyInit(true);
@@ -72,12 +68,5 @@ public final class GrpcClientUtil {
                     "gRPC stub '{}' is included in base packages, you can remove it from 'clients' property.",
                     className);
         }
-    }
-
-    /**
-     * @see AbstractAotProcessor#process()
-     */
-    private static boolean isAotProcessing() {
-        return Boolean.getBoolean("spring.aot.processing");
     }
 }

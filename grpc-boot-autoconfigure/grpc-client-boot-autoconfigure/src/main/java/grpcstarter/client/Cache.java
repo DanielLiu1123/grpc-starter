@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -31,8 +30,6 @@ final class Cache {
     }
 
     private static final Logger log = LoggerFactory.getLogger(Cache.class);
-
-    private static final AtomicInteger unnamedChannelCounter = new AtomicInteger(0);
 
     /**
      * Cache service name to stub classes mapping of gRPC stubs that already created bean.
@@ -117,6 +114,5 @@ final class Cache {
     public static void clear() {
         serviceToStubClasses.clear();
         shutdownChannels();
-        unnamedChannelCounter.set(0);
     }
 }
