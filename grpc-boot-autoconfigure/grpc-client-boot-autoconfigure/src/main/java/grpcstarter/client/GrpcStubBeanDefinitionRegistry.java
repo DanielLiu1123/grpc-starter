@@ -1,23 +1,13 @@
 package grpcstarter.client;
 
-import static org.springframework.core.NativeDetector.inNativeImage;
-
-import io.grpc.ManagedChannel;
-import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.EnvironmentAware;
-import org.springframework.context.aot.AbstractAotProcessor;
 import org.springframework.core.env.Environment;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link GrpcStubBeanDefinitionRegistry} registers the bean definitions for gRPC stubs based on the configuration provided.
@@ -28,7 +18,6 @@ class GrpcStubBeanDefinitionRegistry implements BeanDefinitionRegistryPostProces
 
     static final ScanInfo scanInfo = new ScanInfo();
     static final String channelBeanNamePrefix = "grpc-channel-";
-    static final boolean supportRefresh = !isAotProcessing() && !inNativeImage();
 
     private Environment environment;
 
@@ -52,35 +41,8 @@ class GrpcStubBeanDefinitionRegistry implements BeanDefinitionRegistryPostProces
     }
 
     private void registerChannels(BeanDefinitionRegistry registry, GrpcClientProperties properties) {
-        for (var channelConfig : properties.getChannels()) {
-            registerChannel(registry, properties, channelConfig);
-        }
-
-        var defaultChannel = properties.defaultChannel();
-        if (StringUtils.hasText(defaultChannel.getAuthority())) {
-            registerChannel(registry, properties, defaultChannel);
-        }
-    }
-
-    private void registerChannel(
-            BeanDefinitionRegistry registry,
-            GrpcClientProperties properties,
-            GrpcClientProperties.Channel channelConfig) {
-        var bf = (BeanFactory) registry;
-
-        AbstractBeanDefinition abd = BeanDefinitionBuilder.genericBeanDefinition(
-                        ManagedChannel.class, () -> createChannel(bf, channelConfig))
-                .getBeanDefinition();
-
-        String channelBeanName = channelBeanNamePrefix + channelConfig.getName();
-        BeanDefinitionHolder holder = new BeanDefinitionHolder(abd, channelBeanName);
-        if (supportRefresh
-                && GrpcClientCreator.SPRING_CLOUD_CONTEXT_PRESENT
-                && properties.getRefresh().isEnabled()) {
-            abd.setScope("refresh");
-            holder = ScopedProxyUtils.createScopedProxy(holder, registry, true);
-        }
-        BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
+        var bf = (DefaultListableBeanFactory) registry;
+        GrpcClientUtil.registerGrpcChannelBeans(bf, environment, properties);
     }
 
     private void registerStubs(GrpcStubBeanRegistrar registrar, GrpcClientProperties properties) {
@@ -106,22 +68,8 @@ class GrpcStubBeanDefinitionRegistry implements BeanDefinitionRegistryPostProces
         }
     }
 
-    private ManagedChannel createChannel(BeanFactory beanFactory, GrpcClientProperties.Channel channelConfig) {
-        if (!StringUtils.hasText(channelConfig.getAuthority())) {
-            throw new IllegalStateException("Channel authority must not be empty, name: " + channelConfig.getName());
-        }
-        return new GrpcChannelCreator(beanFactory, channelConfig).create();
-    }
-
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         // nothing to do
-    }
-
-    /**
-     * @see AbstractAotProcessor#process()
-     */
-    private static boolean isAotProcessing() {
-        return Boolean.getBoolean("spring.aot.processing");
     }
 }

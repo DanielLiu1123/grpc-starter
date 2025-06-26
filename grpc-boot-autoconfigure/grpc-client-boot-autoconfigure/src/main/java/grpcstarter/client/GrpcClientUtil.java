@@ -1,16 +1,25 @@
 package grpcstarter.client;
 
+import static org.springframework.core.NativeDetector.inNativeImage;
+
+import io.grpc.ManagedChannel;
 import io.grpc.stub.AbstractStub;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.aot.AbstractAotProcessor;
+import org.springframework.core.env.Environment;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Freeman
@@ -18,6 +27,9 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 public final class GrpcClientUtil {
 
     private static final Logger log = LoggerFactory.getLogger(GrpcClientUtil.class);
+
+    static final String channelBeanNamePrefix = "grpc-channel-";
+    static final boolean supportRefresh = !isAotProcessing() && !inNativeImage();
 
     private GrpcClientUtil() {
         throw new UnsupportedOperationException("Cannot instantiate utility class");
@@ -45,7 +57,7 @@ public final class GrpcClientUtil {
 
         abd.setLazyInit(true);
         abd.setAttribute(GrpcClientBeanFactoryInitializationAotProcessor.IS_CREATED_BY_FRAMEWORK, true);
-        abd.setResourceDescription("registered by grpc-client-boot-starter");
+        abd.setResourceDescription("Auto registered by grpc-client-boot-starter");
 
         // TODO(Freeman): beanDefinitionHandler not working in AOT
         BeanDefinition definitionToUse = abd;
@@ -68,5 +80,84 @@ public final class GrpcClientUtil {
                     "gRPC stub '{}' is included in base packages, you can remove it from 'clients' property.",
                     className);
         }
+    }
+
+    /**
+     * Register a gRPC channel bean for the given channel configuration.
+     *
+     * <p> This method is used in AOT processing.
+     *
+     * @param beanFactory   {@link DefaultListableBeanFactory}
+     * @param channelConfig gRPC channel configuration
+     */
+    public static void registerGrpcChannelBean(
+            DefaultListableBeanFactory beanFactory,
+            Environment environment,
+            GrpcClientProperties.Channel channelConfig) {
+        if (!StringUtils.hasText(channelConfig.getAuthority())) {
+            throw new IllegalStateException("Channel authority must not be empty, name: " + channelConfig.getName());
+        }
+
+        AbstractBeanDefinition abd = BeanDefinitionBuilder.genericBeanDefinition(
+                        ManagedChannel.class, () -> createChannel(beanFactory, channelConfig))
+                .getBeanDefinition();
+
+        abd.setAttribute(GrpcClientBeanFactoryInitializationAotProcessor.IS_CREATED_BY_FRAMEWORK, true);
+        abd.setResourceDescription("Auto registered by grpc-client-boot-starter");
+
+        String channelBeanName = channelBeanNamePrefix + channelConfig.getName();
+        BeanDefinitionHolder holder = new BeanDefinitionHolder(abd, channelBeanName);
+        if (supportRefresh && GrpcClientCreator.SPRING_CLOUD_CONTEXT_PRESENT && isRefreshEnabled(environment)) {
+            abd.setScope("refresh");
+            holder = ScopedProxyUtils.createScopedProxy(holder, beanFactory, true);
+        }
+
+        BeanDefinitionReaderUtils.registerBeanDefinition(holder, beanFactory);
+    }
+
+    /**
+     * Register gRPC channel beans for the given environment.
+     *
+     * <p> This method is used in AOT processing.
+     *
+     * @param beanFactory bean factory
+     * @param environment environment
+     */
+    public static void registerGrpcChannelBeans(DefaultListableBeanFactory beanFactory, Environment environment) {
+        var properties = Util.getProperties(environment);
+        registerGrpcChannelBeans(beanFactory, environment, properties);
+    }
+
+    /**
+     * Internal usage.
+     */
+    static void registerGrpcChannelBeans(
+            DefaultListableBeanFactory beanFactory, Environment environment, GrpcClientProperties properties) {
+        for (var channelConfig : properties.getChannels()) {
+            registerGrpcChannelBean(beanFactory, environment, channelConfig);
+        }
+
+        var defaultChannel = properties.defaultChannel();
+        if (StringUtils.hasText(defaultChannel.getAuthority())) {
+            registerGrpcChannelBean(beanFactory, environment, defaultChannel);
+        }
+    }
+
+    private static boolean isRefreshEnabled(Environment environment) {
+        return environment.getProperty(GrpcClientProperties.Refresh.PREFIX + ".enabled", Boolean.class, false);
+    }
+
+    private static ManagedChannel createChannel(BeanFactory beanFactory, GrpcClientProperties.Channel channelConfig) {
+        if (!StringUtils.hasText(channelConfig.getAuthority())) {
+            throw new IllegalStateException("Channel authority must not be empty, name: " + channelConfig.getName());
+        }
+        return new GrpcChannelCreator(beanFactory, channelConfig).create();
+    }
+
+    /**
+     * @see AbstractAotProcessor#process()
+     */
+    private static boolean isAotProcessing() {
+        return Boolean.getBoolean("spring.aot.processing");
     }
 }
