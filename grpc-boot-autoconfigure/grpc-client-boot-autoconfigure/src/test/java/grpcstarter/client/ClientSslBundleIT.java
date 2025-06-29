@@ -17,24 +17,24 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author Freeman
  */
-class SslBundleIT {
+class ClientSslBundleIT {
 
     @Test
     void testSslBundleConfiguration_whenSslBundleNotFound() {
-        try (var ctx = new SpringApplicationBuilder(Cfg.class)
-                .properties(GrpcServerProperties.PREFIX + ".enabled=false")
-                .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=io.grpc")
-                .properties(GrpcClientProperties.PREFIX + ".channels[0].authority=localhost:9090")
-                .properties(GrpcClientProperties.PREFIX + ".channels[0].ssl-bundle=nonexistent")
-                .properties(GrpcClientProperties.PREFIX + ".channels[0].services[0]=grpc.health.**.Health")
-                .run()) {
-
-            assertThatExceptionOfType(BeanCreationException.class)
-                    .isThrownBy(() ->
-                            ctx.getBean(HealthGrpc.HealthBlockingStub.class).getChannel())
-                    .havingCause()
-                    .withMessageContaining("SSL bundle name 'nonexistent' cannot be found");
-        }
+        assertThatExceptionOfType(BeanCreationException.class)
+                .isThrownBy(() -> {
+                    try (var ignored = new SpringApplicationBuilder(Cfg.class)
+                            .properties(GrpcServerProperties.PREFIX + ".enabled=false")
+                            .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=io.grpc")
+                            .properties(GrpcClientProperties.PREFIX + ".channels[0].authority=localhost:9090")
+                            .properties(GrpcClientProperties.PREFIX + ".channels[0].ssl-bundle=nonexistent")
+                            .properties(GrpcClientProperties.PREFIX + ".channels[0].services[0]=grpc.health.**.Health")
+                            .run()) {
+                        // This should fail during context initialization
+                    }
+                })
+                .havingCause()
+                .withMessageContaining("SSL bundle name 'nonexistent' cannot be found");
     }
 
     @Test

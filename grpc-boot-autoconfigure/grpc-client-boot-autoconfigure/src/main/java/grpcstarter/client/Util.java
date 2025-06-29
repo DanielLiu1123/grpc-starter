@@ -4,6 +4,7 @@ import io.grpc.ManagedChannel;
 import jakarta.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.time.Duration;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.experimental.UtilityClass;
@@ -160,5 +161,21 @@ class Util {
         } catch (ClassNotFoundException e) {
             return null;
         }
+    }
+
+    @Nullable
+    public static GrpcClientProperties.Channel findChannelByName(String name, GrpcClientProperties properties) {
+        for (var ch : properties.getChannels()) {
+            if (Objects.equals(ch.getName(), name)) {
+                return ch;
+            }
+        }
+
+        var defaultChannel = properties.defaultChannel();
+        if (Objects.equals(defaultChannel.getName(), name)) {
+            return defaultChannel;
+        }
+
+        return null;
     }
 }

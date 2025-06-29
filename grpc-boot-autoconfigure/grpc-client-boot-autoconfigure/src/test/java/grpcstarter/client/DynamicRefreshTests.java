@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.endpoint.event.RefreshEvent;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -47,7 +46,7 @@ class DynamicRefreshTests {
 
     @Test
     void testDynamicRefresh() {
-        try (ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
+        try (var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("grpc.client.refresh.enabled=true")
                 .properties("grpc.client.authority=localhost:" + port1)
                 .properties("grpc.server.enabled=false")
@@ -65,7 +64,7 @@ class DynamicRefreshTests {
 
             response = stub.unaryRpc(SimpleRequest.getDefaultInstance());
             assertThat(response.getResponseMessage()).isEqualTo("v2");
-
+        } finally {
             System.clearProperty("grpc.client.authority");
         }
     }

@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author Freeman
  */
-class SslBundleIT {
+class ServerSslBundleIT {
 
     @Test
     void testSslBundleConfiguration_whenSslBundleNotFound() {

@@ -10,6 +10,7 @@ import io.grpc.internal.GrpcUtil;
 import io.grpc.stub.AbstractStub;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +22,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.PropertyMapper;
 import org.springframework.core.io.Resource;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.util.unit.DataSize;
 
 /**
@@ -156,6 +158,7 @@ public class GrpcClientProperties implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         merge();
+        setChannelNames();
     }
 
     @Data
@@ -163,7 +166,9 @@ public class GrpcClientProperties implements InitializingBean {
     @AllArgsConstructor
     public static class Channel {
         /**
-         * Channel name, optional.
+         * Channel name.
+         *
+         * <p> If not set, will be auto-generated.
          */
         private String name;
         /**
@@ -416,6 +421,24 @@ public class GrpcClientProperties implements InitializingBean {
                     .map(e -> new Metadata(e.getKey(), e.getValue()))
                     .collect(Collectors.toList());
             stub.setMetadata(merged);
+        }
+    }
+
+    void setChannelNames() {
+        var unnamedChannels = channels.stream()
+                .filter(ch -> !StringUtils.hasText(ch.getName()))
+                .toList();
+        for (int i = 0; i < unnamedChannels.size(); i++) {
+            unnamedChannels.get(i).setName("unnamed-" + i);
+        }
+
+        var names = new HashSet<String>();
+        for (var channel : channels) {
+            var name = channel.getName();
+            if (names.contains(name)) {
+                throw new IllegalArgumentException("Duplicate channel name: " + name);
+            }
+            names.add(name);
         }
     }
 
