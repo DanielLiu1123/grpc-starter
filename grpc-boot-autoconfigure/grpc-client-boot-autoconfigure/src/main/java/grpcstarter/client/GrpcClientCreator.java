@@ -1,21 +1,14 @@
 package grpcstarter.client;
 
+import grpcstarter.client.exception.MissingChannelConfigurationException;
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.AbstractStub;
 import java.lang.reflect.Method;
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.aop.framework.AopProxyUtils;
-import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.unit.DataSize;
 
@@ -31,9 +24,6 @@ class GrpcClientCreator {
     private static final String BLOCKING_V2_STUB = "BlockingV2Stub";
     private static final String FUTURE_STUB = "FutureStub";
 
-    static final boolean SPRING_CLOUD_CONTEXT_PRESENT =
-            ClassUtils.isPresent("org.springframework.cloud.context.scope.refresh.RefreshScope", null);
-
     private final BeanFactory beanFactory;
     private final Class<?> stubClass;
 
@@ -45,33 +35,22 @@ class GrpcClientCreator {
     /**
      * Create a gRPC stub instance.
      *
-     * @param supportRefresh whether to support refresh scope
      * @param <T>            stub type
      * @return gRPC stub instance
      */
     @SuppressWarnings({"unchecked"})
-    public <T> T create(boolean supportRefresh) {
+    public <T> T create() {
         Method stubMethod =
                 ReflectionUtils.findMethod(stubClass.getEnclosingClass(), getStubMethodName(stubClass), Channel.class);
         Assert.notNull(stubMethod, "stubMethod must not be null");
 
-        AbstractBeanDefinition abd = BeanDefinitionBuilder.genericBeanDefinition(
-                        ManagedChannel.class, () -> new GrpcChannelCreator(beanFactory, stubClass).create())
-                .getBeanDefinition();
-        abd.setLazyInit(true);
-
         GrpcClientProperties properties = beanFactory.getBean(GrpcClientProperties.class);
 
-        String channelBeanName = "grpc-channel-" + UUID.randomUUID();
-        BeanDefinitionHolder holder = new BeanDefinitionHolder(abd, channelBeanName);
-        BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-        if (supportRefresh
-                && SPRING_CLOUD_CONTEXT_PRESENT
-                && properties.getRefresh().isEnabled()) {
-            abd.setScope("refresh");
-            holder = ScopedProxyUtils.createScopedProxy(holder, registry, true);
+        String channelBeanName = GrpcClientUtil.CHANNEL_BEAN_NAME_PREFIX
+                + getMatchedConfig(properties).getName();
+        if (!beanFactory.containsBean(channelBeanName)) {
+            throw new MissingChannelConfigurationException(stubClass);
         }
-        BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
 
         ManagedChannel channel = beanFactory.getBean(channelBeanName, ManagedChannel.class);
         T stub = (T) ReflectionUtils.invokeMethod(stubMethod, null, channel);
@@ -82,6 +61,10 @@ class GrpcClientCreator {
 
         Cache.addStubClass(stubClass);
         return stub;
+    }
+
+    private GrpcClientProperties.Channel getMatchedConfig(GrpcClientProperties properties) {
+        return GrpcChannelCreator.getMatchedConfig(stubClass, properties);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

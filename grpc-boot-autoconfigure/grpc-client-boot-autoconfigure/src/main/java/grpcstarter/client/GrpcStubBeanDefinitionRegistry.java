@@ -4,6 +4,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.util.ObjectUtils;
@@ -30,11 +31,20 @@ class GrpcStubBeanDefinitionRegistry implements BeanDefinitionRegistryPostProces
         if (!enabled) {
             return;
         }
-        registerBeans(new GrpcStubBeanRegistrar(registry));
+
+        var properties = Util.getProperties(environment);
+
+        registerChannels(registry, properties);
+
+        registerStubs(new GrpcStubBeanRegistrar(registry), properties);
     }
 
-    private void registerBeans(GrpcStubBeanRegistrar registrar) {
-        var properties = Util.getProperties(environment);
+    private void registerChannels(BeanDefinitionRegistry registry, GrpcClientProperties properties) {
+        var bf = (DefaultListableBeanFactory) registry;
+        GrpcClientUtil.registerGrpcChannelBeans(bf, environment, properties);
+    }
+
+    private void registerStubs(GrpcStubBeanRegistrar registrar, GrpcClientProperties properties) {
 
         // NOTE: @EnableGrpcClients has higher priority than properties
         // we need to check if @EnableGrpcClients set the beanDefinitionHandler first
