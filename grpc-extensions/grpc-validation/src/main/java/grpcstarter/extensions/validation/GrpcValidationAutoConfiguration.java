@@ -1,6 +1,7 @@
 package grpcstarter.extensions.validation;
 
 import build.buf.protovalidate.Validator;
+import build.buf.protovalidate.ValidatorFactory;
 import grpcstarter.client.ConditionOnGrpcClientEnabled;
 import grpcstarter.client.GrpcClientProperties;
 import grpcstarter.server.ConditionOnGrpcServerEnabled;
@@ -87,6 +88,13 @@ public class GrpcValidationAutoConfiguration {
             havingValue = "PROTO_VALIDATE",
             matchIfMissing = true)
     static class ProtoValidate {
+
+        @Bean
+        @ConditionalOnMissingBean(Validator.class)
+        public Validator grpcStarterProtoValidateValidator() {
+            return ValidatorFactory.newBuilder().build();
+        }
+
         @Configuration(proxyBeanMethods = false)
         @ConditionalOnClass({GrpcClientProperties.class})
         @ConditionOnGrpcClientEnabled
@@ -95,9 +103,10 @@ public class GrpcValidationAutoConfiguration {
 
             @Bean
             @ConditionalOnMissingBean
-            public ProtoValidateClientInterceptor protoValidateClientInterceptor(GrpcValidationProperties properties) {
+            public ProtoValidateClientInterceptor protoValidateClientInterceptor(
+                    GrpcValidationProperties properties, Validator validator) {
                 return new ProtoValidateClientInterceptor(
-                        new Validator(), properties.getClient().getOrder());
+                        validator, properties.getClient().getOrder());
             }
         }
 
@@ -109,9 +118,10 @@ public class GrpcValidationAutoConfiguration {
 
             @Bean
             @ConditionalOnMissingBean
-            public ProtoValidateServerInterceptor protoValidateServerInterceptor(GrpcValidationProperties properties) {
+            public ProtoValidateServerInterceptor protoValidateServerInterceptor(
+                    GrpcValidationProperties properties, Validator validator) {
                 return new ProtoValidateServerInterceptor(
-                        new Validator(), properties.getServer().getOrder());
+                        validator, properties.getServer().getOrder());
             }
         }
 
