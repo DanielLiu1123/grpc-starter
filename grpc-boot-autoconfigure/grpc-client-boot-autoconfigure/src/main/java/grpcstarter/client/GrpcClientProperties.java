@@ -429,7 +429,7 @@ public class GrpcClientProperties implements InitializingBean {
                 .filter(ch -> !StringUtils.hasText(ch.getName()))
                 .toList();
         for (int i = 0; i < unnamedChannels.size(); i++) {
-            unnamedChannels.get(i).setName("unnamed-channel-" + i);
+            unnamedChannels.get(i).setName("unnamed-" + i);
         }
 
         var names = new HashSet<String>();

@@ -10,7 +10,7 @@ import io.grpc.ManagedChannel;
  *
  * <p>Example usage:
  * <pre>{@code
- * @Bean("stub1")
+ * @Bean
  * MyServiceBlockingStub stub1(ManagedChannels channels) {
  *     ManagedChannel channel = channels.getChannel("channel-1");
  *     return MyServiceGrpc.newBlockingStub(channel);
