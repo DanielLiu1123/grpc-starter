@@ -1,6 +1,7 @@
 package grpcstarter.client;
 
 import grpcstarter.server.GrpcServerShutdownEvent;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -45,8 +46,9 @@ public class GrpcClientAutoConfiguration implements DisposableBean, ApplicationL
 
     @Bean
     @ConditionalOnMissingBean
-    public ManagedChannels grpcClientManagedChannels() {
-        return new ManagedChannelsImpl();
+    public ManagedChannels grpcClientManagedChannels(
+            BeanFactory beanFactory, GrpcClientProperties grpcClientProperties) {
+        return new ManagedChannelsImpl(beanFactory, grpcClientProperties);
     }
 
     @Configuration(proxyBeanMethods = false)
