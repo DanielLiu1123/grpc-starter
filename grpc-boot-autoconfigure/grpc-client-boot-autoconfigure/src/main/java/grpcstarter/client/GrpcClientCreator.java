@@ -46,7 +46,7 @@ class GrpcClientCreator {
 
         GrpcClientProperties properties = beanFactory.getBean(GrpcClientProperties.class);
 
-        String channelBeanName = GrpcStubBeanDefinitionRegistry.channelBeanNamePrefix
+        String channelBeanName = GrpcClientUtil.CHANNEL_BEAN_NAME_PREFIX
                 + getMatchedConfig(properties).getName();
         if (!beanFactory.containsBean(channelBeanName)) {
             throw new MissingChannelConfigurationException(stubClass);

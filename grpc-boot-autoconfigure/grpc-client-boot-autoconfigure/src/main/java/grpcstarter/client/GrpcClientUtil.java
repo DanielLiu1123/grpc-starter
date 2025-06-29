@@ -30,10 +30,12 @@ public final class GrpcClientUtil {
 
     private static final Logger log = LoggerFactory.getLogger(GrpcClientUtil.class);
 
-    private static final boolean springCloudContextPresent =
+    static final String CHANNEL_BEAN_NAME_PREFIX = "grpc-channel-";
+    static final String IS_CREATED_BY_FRAMEWORK = "isCreatedByFramework";
+
+    private static final boolean SPRING_CLOUD_CONTEXT_PRESENT =
             ClassUtils.isPresent("org.springframework.cloud.context.scope.refresh.RefreshScope", null);
-    private static final String channelBeanNamePrefix = "grpc-channel-";
-    private static final boolean supportRefresh = !isAotProcessing() && !inNativeImage();
+    private static final boolean SUPPORT_REFRESH = !isAotProcessing() && !inNativeImage();
 
     private GrpcClientUtil() {
         throw new UnsupportedOperationException("Cannot instantiate utility class");
@@ -60,7 +62,7 @@ public final class GrpcClientUtil {
                 .getBeanDefinition();
 
         abd.setLazyInit(true);
-        abd.setAttribute(GrpcClientBeanFactoryInitializationAotProcessor.IS_CREATED_BY_FRAMEWORK, true);
+        abd.setAttribute(IS_CREATED_BY_FRAMEWORK, true);
         abd.setResourceDescription("Auto registered by grpc-client-boot-starter");
 
         // TODO(Freeman): beanDefinitionHandler not working in AOT
@@ -98,11 +100,9 @@ public final class GrpcClientUtil {
             DefaultListableBeanFactory beanFactory,
             Environment environment,
             GrpcClientProperties.Channel channelConfig) {
-        if (!StringUtils.hasText(channelConfig.getAuthority())) {
-            throw new IllegalStateException("Channel authority must not be empty, name: " + channelConfig.getName());
-        }
+        checkValid(channelConfig);
 
-        String channelBeanName = channelBeanNamePrefix + channelConfig.getName();
+        String channelBeanName = CHANNEL_BEAN_NAME_PREFIX + channelConfig.getName();
         if (beanFactory.containsBean(channelBeanName)) {
             return;
         }
@@ -111,18 +111,24 @@ public final class GrpcClientUtil {
                         ManagedChannel.class, () -> createChannel(beanFactory, channelConfig))
                 .getBeanDefinition();
 
-        abd.setAttribute(GrpcClientBeanFactoryInitializationAotProcessor.IS_CREATED_BY_FRAMEWORK, true);
+        abd.setAttribute(IS_CREATED_BY_FRAMEWORK, true);
         abd.setResourceDescription("Auto registered by grpc-client-boot-starter");
 
         BeanDefinitionHolder holder = new BeanDefinitionHolder(abd, channelBeanName);
-        if (supportRefresh
-                && springCloudContextPresent
+        if (SUPPORT_REFRESH
+                && SPRING_CLOUD_CONTEXT_PRESENT
                 && getRefresh(environment).isEnabled()) {
             abd.setScope("refresh");
             holder = ScopedProxyUtils.createScopedProxy(holder, beanFactory, true);
         }
 
         BeanDefinitionReaderUtils.registerBeanDefinition(holder, beanFactory);
+    }
+
+    private static boolean isValid(GrpcClientProperties.Channel channelConfig) {
+        return StringUtils.hasText(channelConfig.getAuthority())
+                || (channelConfig.getInProcess() != null
+                        && StringUtils.hasText(channelConfig.getInProcess().getName()));
     }
 
     /**
@@ -147,23 +153,29 @@ public final class GrpcClientUtil {
             registerGrpcChannelBean(beanFactory, environment, channelConfig);
         }
 
+        // Default channel may not have authority or in-process name
         var defaultChannel = properties.defaultChannel();
-        if (StringUtils.hasText(defaultChannel.getAuthority())) {
+        if (isValid(defaultChannel)) {
             registerGrpcChannelBean(beanFactory, environment, defaultChannel);
         }
     }
 
-    private static GrpcClientProperties.Refresh getRefresh(Environment environment) {
+    static GrpcClientProperties.Refresh getRefresh(Environment environment) {
         return Binder.get(environment)
                 .bind(GrpcClientProperties.Refresh.PREFIX, GrpcClientProperties.Refresh.class)
                 .orElseGet(GrpcClientProperties.Refresh::new);
     }
 
     private static ManagedChannel createChannel(BeanFactory beanFactory, GrpcClientProperties.Channel channelConfig) {
-        if (!StringUtils.hasText(channelConfig.getAuthority())) {
-            throw new IllegalStateException("Channel authority must not be empty, name: " + channelConfig.getName());
-        }
+        checkValid(channelConfig);
         return new GrpcChannelCreator(beanFactory, channelConfig).create();
+    }
+
+    private static void checkValid(GrpcClientProperties.Channel channelConfig) {
+        if (!isValid(channelConfig)) {
+            throw new IllegalStateException(
+                    "Channel authority or in-process name must be configured, name: " + channelConfig.getName());
+        }
     }
 
     /**

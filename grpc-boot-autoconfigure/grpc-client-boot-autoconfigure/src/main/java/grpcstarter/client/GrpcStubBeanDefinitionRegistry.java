@@ -17,7 +17,6 @@ import org.springframework.util.ObjectUtils;
 class GrpcStubBeanDefinitionRegistry implements BeanDefinitionRegistryPostProcessor, EnvironmentAware {
 
     static final ScanInfo scanInfo = new ScanInfo();
-    static final String channelBeanNamePrefix = "grpc-channel-";
 
     private Environment environment;
 

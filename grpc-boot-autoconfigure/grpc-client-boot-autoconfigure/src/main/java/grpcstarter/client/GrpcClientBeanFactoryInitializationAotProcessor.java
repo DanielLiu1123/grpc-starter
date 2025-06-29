@@ -30,8 +30,6 @@ import org.springframework.javapoet.MethodSpec;
 class GrpcClientBeanFactoryInitializationAotProcessor
         implements BeanRegistrationExcludeFilter, BeanFactoryInitializationAotProcessor {
 
-    static final String IS_CREATED_BY_FRAMEWORK = "isCreatedByFramework";
-
     @Override
     public boolean isExcludedFromAotProcessing(RegisteredBean registeredBean) {
         // Separate manually registered beans from those registered by Spring
@@ -153,7 +151,7 @@ class GrpcClientBeanFactoryInitializationAotProcessor
         var beanDefinitions = new HashMap<String, BeanDefinition>();
         for (String name : beanFactory.getBeanDefinitionNames()) {
             // Only include channel beans created by the framework
-            if (!name.startsWith(GrpcStubBeanDefinitionRegistry.channelBeanNamePrefix)) {
+            if (!name.startsWith(GrpcClientUtil.CHANNEL_BEAN_NAME_PREFIX)) {
                 continue;
             }
             BeanDefinition beanDefinition = beanFactory.getBeanDefinition(name);
@@ -176,6 +174,6 @@ class GrpcClientBeanFactoryInitializationAotProcessor
     }
 
     private static boolean isCreatedByFramework(RegisteredBean registeredBean) {
-        return registeredBean.getMergedBeanDefinition().hasAttribute(IS_CREATED_BY_FRAMEWORK);
+        return registeredBean.getMergedBeanDefinition().hasAttribute(GrpcClientUtil.IS_CREATED_BY_FRAMEWORK);
     }
 }

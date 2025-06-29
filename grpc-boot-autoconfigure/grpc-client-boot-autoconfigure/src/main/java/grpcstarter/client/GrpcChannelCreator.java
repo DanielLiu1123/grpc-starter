@@ -1,5 +1,8 @@
 package grpcstarter.client;
 
+import static grpcstarter.client.GrpcClientUtil.getRefresh;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.grpc.ClientInterceptor;
 import io.grpc.Grpc;
 import io.grpc.ManagedChannel;
@@ -16,6 +19,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.ssl.SslBundle;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 import org.springframework.util.unit.DataSize;
 
@@ -27,17 +31,37 @@ class GrpcChannelCreator {
     private static final Logger log = LoggerFactory.getLogger(GrpcChannelCreator.class);
 
     private final BeanFactory beanFactory;
+    private final GrpcClientProperties.Refresh refreshConfig;
     private final GrpcClientProperties.Channel channelConfig;
 
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     GrpcChannelCreator(BeanFactory beanFactory, GrpcClientProperties.Channel channelConfig) {
         this.beanFactory = beanFactory;
+        this.refreshConfig = getRefresh(beanFactory.getBean(Environment.class));
         this.channelConfig = channelConfig;
     }
 
     public ManagedChannel create() {
         // One channel configuration results in the creation of one gRPC channel.
         // See https://github.com/DanielLiu1123/grpc-starter/issues/23
-        return Cache.getOrSupplyChannel(channelConfig, () -> buildChannel(channelConfig));
+        var newestConfig = getLatestChannelConfig();
+        return Cache.getOrSupplyChannel(newestConfig, () -> buildChannel(newestConfig));
+    }
+
+    private GrpcClientProperties.Channel getLatestChannelConfig() {
+        if (refreshConfig.isEnabled()) {
+            // NOTE: If we support refresh, we need to get the latest config,
+            // because the properties may have been updated at runtime.
+            var properties = beanFactory.getBean(GrpcClientProperties.class);
+            var channel = Util.findChannelByName(channelConfig.getName(), properties);
+            if (channel != null) {
+                return channel;
+            }
+
+            // Channel name changed, just return the old one
+            return channelConfig;
+        }
+        return channelConfig;
     }
 
     static GrpcClientProperties.Channel getMatchedConfig(
@@ -89,7 +113,7 @@ class GrpcChannelCreator {
         GrpcClientProperties.Retry retry = channelConfig.getRetry();
         if (retry != null) {
             Optional.ofNullable(retry.getEnabled()).ifPresent((enabled -> {
-                if (Boolean.TRUE.equals(enabled)) {
+                if (enabled) {
                     builder.enableRetry();
                 } else {
                     builder.disableRetry();
