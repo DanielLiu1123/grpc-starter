@@ -1,11 +1,8 @@
 package grpcstarter.client;
 
-import static grpcstarter.client.Checker.checkUnusedConfig;
-
 import grpcstarter.server.GrpcServerShutdownEvent;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -50,15 +47,6 @@ public class GrpcClientAutoConfiguration implements DisposableBean, ApplicationL
     @ConditionalOnMissingBean
     public ManagedChannels grpcClientManagedChannels() {
         return new ManagedChannelsImpl();
-    }
-
-    @Bean
-    @ConditionalOnProperty(
-            prefix = GrpcClientProperties.PREFIX,
-            name = "warn-unused-config-enabled",
-            matchIfMissing = true)
-    public CommandLineRunner grpcClientUnusedConfigChecker(GrpcClientProperties properties) {
-        return args -> checkUnusedConfig(properties);
     }
 
     @Configuration(proxyBeanMethods = false)

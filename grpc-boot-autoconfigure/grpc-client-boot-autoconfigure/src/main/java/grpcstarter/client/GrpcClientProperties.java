@@ -150,10 +150,6 @@ public class GrpcClientProperties implements InitializingBean {
      * Refresh configuration.
      */
     private Refresh refresh = new Refresh();
-    /**
-     * Whether to enable warn unused config, default true.
-     */
-    private boolean warnUnusedConfigEnabled = true;
 
     @Override
     public void afterPropertiesSet() {
