@@ -1,5 +1,6 @@
 package grpcstarter.example;
 
+import grpcstarter.client.ManagedChannels;
 import io.grpc.testing.protobuf.SimpleRequest;
 import io.grpc.testing.protobuf.SimpleServiceGrpc;
 import order.v1.GetOrdersByUserIdRequest;
@@ -41,5 +42,10 @@ public class QuickStartApp {
                     .getOrdersList();
             System.out.println("Orders: " + orders);
         };
+    }
+
+    @Bean
+    SimpleServiceGrpc.SimpleServiceBlockingStub simpleServiceBlockingStub(ManagedChannels managedChannels) {
+        return SimpleServiceGrpc.newBlockingStub(managedChannels.getChannel("unnamed-0"));
     }
 }
