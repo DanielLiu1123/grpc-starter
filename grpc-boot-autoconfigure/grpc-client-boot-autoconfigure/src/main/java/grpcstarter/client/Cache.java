@@ -4,7 +4,6 @@ import static grpcstarter.client.Util.serviceName;
 import static grpcstarter.client.Util.shutdownChannel;
 
 import io.grpc.ManagedChannel;
-import jakarta.annotation.Nullable;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,7 +17,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Freeman
@@ -39,11 +37,6 @@ final class Cache {
     private static final Map<GrpcClientProperties.Channel, ManagedChannel> cfgToChannel =
             Collections.synchronizedMap(new LinkedHashMap<>());
 
-    /**
-     * Cache channel name to ManagedChannel mapping.
-     */
-    private static final ConcurrentMap<String, ManagedChannel> nameToChannel = new ConcurrentHashMap<>();
-
     public static Set<Class<?>> getStubClasses() {
         return serviceToStubClasses.values().stream().flatMap(List::stream).collect(Collectors.toSet());
     }
@@ -63,18 +56,7 @@ final class Cache {
     public static ManagedChannel getOrSupplyChannel(
             GrpcClientProperties.Channel channelConfig, Supplier<ManagedChannel> channelSupplier) {
         // Do not close the channel if it already exists, it may be still in use
-        ManagedChannel channel = cfgToChannel.computeIfAbsent(channelConfig, k -> channelSupplier.get());
-
-        // Also cache by name
-        String channelName = channelConfig.getName();
-        if (!StringUtils.hasText(channelName)) {
-            throw new IllegalArgumentException(
-                    "Channel name must not be null or empty, authority: " + channelConfig.getAuthority());
-        }
-
-        nameToChannel.put(channelName, channel);
-
-        return channel;
+        return cfgToChannel.computeIfAbsent(channelConfig, k -> channelSupplier.get());
     }
 
     /**
@@ -97,18 +79,6 @@ final class Cache {
                     System.currentTimeMillis() - start);
         }
         cfgToChannel.clear();
-        nameToChannel.clear();
-    }
-
-    /**
-     * Get a ManagedChannel by name.
-     *
-     * @param name the channel name
-     * @return the managed channel, or null if not found
-     */
-    @Nullable
-    public static ManagedChannel getChannelByName(String name) {
-        return nameToChannel.get(name);
     }
 
     public static void clear() {

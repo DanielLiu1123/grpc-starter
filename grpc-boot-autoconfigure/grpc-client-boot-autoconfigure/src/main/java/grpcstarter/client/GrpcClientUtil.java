@@ -166,7 +166,7 @@ public final class GrpcClientUtil {
                 .orElseGet(GrpcClientProperties.Refresh::new);
     }
 
-    private static ManagedChannel createChannel(BeanFactory beanFactory, GrpcClientProperties.Channel channelConfig) {
+    static ManagedChannel createChannel(BeanFactory beanFactory, GrpcClientProperties.Channel channelConfig) {
         checkValid(channelConfig);
         return new GrpcChannelCreator(beanFactory, channelConfig).create();
     }

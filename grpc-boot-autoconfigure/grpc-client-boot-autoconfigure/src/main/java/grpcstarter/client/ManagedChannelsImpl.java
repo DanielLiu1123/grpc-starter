@@ -1,6 +1,7 @@
 package grpcstarter.client;
 
 import io.grpc.ManagedChannel;
+import org.springframework.beans.factory.BeanFactory;
 
 /**
  * Default implementation of {@link ManagedChannels}.
@@ -10,12 +11,20 @@ import io.grpc.ManagedChannel;
  */
 class ManagedChannelsImpl implements ManagedChannels {
 
+    private final BeanFactory beanFactory;
+    private final GrpcClientProperties properties;
+
+    ManagedChannelsImpl(BeanFactory beanFactory, GrpcClientProperties properties) {
+        this.beanFactory = beanFactory;
+        this.properties = properties;
+    }
+
     @Override
     public ManagedChannel getChannel(String name) {
-        ManagedChannel channel = Cache.getChannelByName(name);
-        if (channel == null) {
+        var channelConfig = Util.findChannelByName(name, properties);
+        if (channelConfig == null) {
             throw new IllegalArgumentException("No channel found with name: " + name);
         }
-        return channel;
+        return GrpcClientUtil.createChannel(beanFactory, channelConfig);
     }
 }
