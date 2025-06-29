@@ -35,10 +35,7 @@ class GrpcClientBeanFactoryInitializationAotProcessor
     @Override
     public boolean isExcludedFromAotProcessing(RegisteredBean registeredBean) {
         // Separate manually registered beans from those registered by Spring
-        var isGrpcClient = AbstractStub.class.isAssignableFrom(registeredBean.getBeanClass());
-        var isManagedChannel = ManagedChannel.class.isAssignableFrom(registeredBean.getBeanClass());
-        var isCreatedByFramework = registeredBean.getMergedBeanDefinition().hasAttribute(IS_CREATED_BY_FRAMEWORK);
-        return (isGrpcClient || isManagedChannel) && isCreatedByFramework;
+        return isGrpcClient(registeredBean) || isManagedChannel(registeredBean);
     }
 
     @Nullable
@@ -55,7 +52,7 @@ class GrpcClientBeanFactoryInitializationAotProcessor
                         .getMethods()
                         .add(
                                 "registerGrpcChannelBeanDefinitions",
-                                method -> buildChannelMethod(method, channelBeanDefinitions))
+                                GrpcClientBeanFactoryInitializationAotProcessor::buildChannelMethod)
                         .toMethodReference();
                 beanFactoryInitializationCode.addInitializer(channelMethodReference);
             }
@@ -69,10 +66,6 @@ class GrpcClientBeanFactoryInitializationAotProcessor
                                 method -> buildClientMethod(method, clientBeanDefinitions))
                         .toMethodReference();
                 beanFactoryInitializationCode.addInitializer(clientMethodReference);
-            }
-
-            if (clientBeanDefinitions.isEmpty() && channelBeanDefinitions.isEmpty()) {
-                return;
             }
 
             var reflection = generationContext.getRuntimeHints().reflection();
@@ -133,7 +126,7 @@ class GrpcClientBeanFactoryInitializationAotProcessor
         });
     }
 
-    private static void buildChannelMethod(MethodSpec.Builder method, Map<String, BeanDefinition> definitions) {
+    private static void buildChannelMethod(MethodSpec.Builder method) {
         method.addModifiers(Modifier.PUBLIC);
         // See org.springframework.beans.factory.aot.BeanFactoryInitializationCode.addInitializer
         // Support DefaultListableBeanFactory, Environment, and ResourceLoader
@@ -159,15 +152,30 @@ class GrpcClientBeanFactoryInitializationAotProcessor
     private static Map<String, BeanDefinition> listChannelDefinitions(ConfigurableListableBeanFactory beanFactory) {
         var beanDefinitions = new HashMap<String, BeanDefinition>();
         for (String name : beanFactory.getBeanDefinitionNames()) {
+            // Only include channel beans created by the framework
+            if (!name.startsWith(GrpcStubBeanDefinitionRegistry.channelBeanNamePrefix)) {
+                continue;
+            }
             BeanDefinition beanDefinition = beanFactory.getBeanDefinition(name);
             Class<?> clz = beanDefinition.getResolvableType().resolve();
             if (clz != null && ManagedChannel.class.isAssignableFrom(clz)) {
-                // Only include channel beans created by the framework
-                if (name.startsWith(GrpcStubBeanDefinitionRegistry.channelBeanNamePrefix)) {
-                    beanDefinitions.put(name, beanDefinition);
-                }
+                beanDefinitions.put(name, beanDefinition);
             }
         }
         return beanDefinitions;
+    }
+
+    private static boolean isManagedChannel(RegisteredBean registeredBean) {
+        return ManagedChannel.class.isAssignableFrom(registeredBean.getBeanClass())
+                && isCreatedByFramework(registeredBean);
+    }
+
+    private static boolean isGrpcClient(RegisteredBean registeredBean) {
+        return AbstractStub.class.isAssignableFrom(registeredBean.getBeanClass())
+                && isCreatedByFramework(registeredBean);
+    }
+
+    private static boolean isCreatedByFramework(RegisteredBean registeredBean) {
+        return registeredBean.getMergedBeanDefinition().hasAttribute(IS_CREATED_BY_FRAMEWORK);
     }
 }

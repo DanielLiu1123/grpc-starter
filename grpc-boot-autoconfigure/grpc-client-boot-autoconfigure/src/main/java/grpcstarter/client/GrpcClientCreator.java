@@ -9,7 +9,6 @@ import java.util.Optional;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.unit.DataSize;
 
@@ -24,9 +23,6 @@ class GrpcClientCreator {
     private static final String BLOCKING_STUB = "BlockingStub";
     private static final String BLOCKING_V2_STUB = "BlockingV2Stub";
     private static final String FUTURE_STUB = "FutureStub";
-
-    static final boolean SPRING_CLOUD_CONTEXT_PRESENT =
-            ClassUtils.isPresent("org.springframework.cloud.context.scope.refresh.RefreshScope", null);
 
     private final BeanFactory beanFactory;
     private final Class<?> stubClass;

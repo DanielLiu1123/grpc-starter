@@ -28,7 +28,7 @@ class ManagedChannelsIT {
                 .properties(GrpcClientProperties.PREFIX + ".base-packages[0]=io")
                 .properties(GrpcClientProperties.PREFIX + ".channels[0].name=channel1")
                 .properties(GrpcClientProperties.PREFIX + ".channels[0].authority=localhost:9090")
-                .properties(GrpcClientProperties.PREFIX + ".channels[0].stubs[0]=io.grpc.health.v1.**")
+                .properties(GrpcClientProperties.PREFIX + ".channels[0].stubs[0]=io.grpc.health.**")
                 .properties(GrpcClientProperties.PREFIX + ".channels[1].name=channel2")
                 .properties(GrpcClientProperties.PREFIX + ".channels[1].authority=localhost:9091")
                 .properties(GrpcClientProperties.PREFIX + ".channels[1].stubs[0]=io.grpc.testing.protobuf.**")
