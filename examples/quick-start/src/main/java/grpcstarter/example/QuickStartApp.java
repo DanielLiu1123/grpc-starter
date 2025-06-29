@@ -45,7 +45,12 @@ public class QuickStartApp {
     }
 
     @Bean
-    SimpleServiceGrpc.SimpleServiceBlockingStub simpleServiceBlockingStub(ManagedChannels managedChannels) {
-        return SimpleServiceGrpc.newBlockingStub(managedChannels.getChannel("unnamed-0"));
+    UserServiceGrpc.UserServiceBlockingStub userStub(ManagedChannels channels) {
+        return UserServiceGrpc.newBlockingStub(channels.getChannel("channel-1"));
+    }
+
+    @Bean
+    OrderServiceGrpc.OrderServiceBlockingStub orderStub(ManagedChannels channels) {
+        return OrderServiceGrpc.newBlockingStub(channels.getChannel("channel-1"));
     }
 }
