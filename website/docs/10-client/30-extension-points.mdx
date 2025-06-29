@@ -72,6 +72,8 @@ The framework provides some built-in `GrpcClientBeanDefinitionHandler` implement
 
 ## Deep Customization
 
+### Manual Bean Creation
+
 If you're not happy with the autoconfigured gRPC client bean,
 you can configure it using the Spring original approach (`@Bean`).
 
@@ -86,6 +88,38 @@ class GrpcClientConfiguration {
                 .usePlaintext()
                 .build();
         return SimpleServiceGrpc.newBlockingStub(channel);
+    }
+}
+```
+
+### ManagedChannels API
+
+Starting from [`3.5.3`](https://github.com/DanielLiu1123/grpc-starter/releases/tag/v3.5.3),
+you can use [`ManagedChannels`](https://github.com/DanielLiu1123/grpc-starter/blob/main/grpc-boot-autoconfigure/grpc-client-boot-autoconfigure/src/main/java/grpcstarter/client/ManagedChannels.java)
+to access configured gRPC channels by name.
+
+Configure multiple named channels:
+
+```yaml
+grpc:
+  client:
+    channels:
+      - name: "service-a"
+        authority: "localhost:9090"
+      - name: "service-b"
+        authority: "localhost:9091"
+```
+
+Use `ManagedChannels` to create custom stub beans:
+
+```java
+@Configuration
+class CustomStubConfiguration {
+
+    @Bean
+    public HealthGrpc.HealthBlockingStub customHealthStub(ManagedChannels channels) {
+        ManagedChannel channel = channels.getChannel("service-a");
+        return HealthGrpc.newBlockingStub(channel);
     }
 }
 ```
