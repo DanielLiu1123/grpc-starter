@@ -12,6 +12,8 @@ import io.grpc.ServerInterceptor;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnThreading;
+import org.springframework.boot.autoconfigure.thread.Threading;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.annotation.Bean;
@@ -46,6 +48,13 @@ public class GrpcServerAutoConfiguration {
     public GrpcRequestContextServerInterceptor grpcRequestContextServerInterceptor(
             GrpcServerProperties grpcServerProperties) {
         return new GrpcRequestContextServerInterceptor(grpcServerProperties);
+    }
+
+    @Bean
+    @ConditionalOnThreading(Threading.VIRTUAL)
+    @ConditionalOnMissingBean
+    public VirtualThreadGrpcServerCustomizer virtualThreadGrpcServerCustomizer() {
+        return new VirtualThreadGrpcServerCustomizer();
     }
 
     @Configuration(proxyBeanMethods = false)
