@@ -52,7 +52,8 @@ public class GrpcServerAutoConfiguration {
 
     @Bean
     @ConditionalOnThreading(Threading.VIRTUAL)
-    public GrpcServerCustomizer virtualThreadGrpcServerCustomizer() {
+    @ConditionalOnMissingBean
+    public VirtualThreadGrpcServerCustomizer virtualThreadGrpcServerCustomizer() {
         return new VirtualThreadGrpcServerCustomizer();
     }
 

@@ -3,6 +3,7 @@ package grpcstarter.server;
 import io.grpc.ServerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
 
 /**
@@ -15,8 +16,13 @@ import org.springframework.core.task.VirtualThreadTaskExecutor;
  * @author Freeman
  * @since 3.5.3.2
  */
-final class VirtualThreadGrpcServerCustomizer implements GrpcServerCustomizer {
+public class VirtualThreadGrpcServerCustomizer implements GrpcServerCustomizer, Ordered {
     private static final Logger log = LoggerFactory.getLogger(VirtualThreadGrpcServerCustomizer.class);
+
+    /**
+     * This priority should be relatively high, allowing user to customize the executor.
+     */
+    public static final int ORDER = -1000;
 
     @Override
     public void customize(ServerBuilder<?> serverBuilder) {
@@ -26,5 +32,10 @@ final class VirtualThreadGrpcServerCustomizer implements GrpcServerCustomizer {
         if (log.isDebugEnabled()) {
             log.debug("Configured gRPC server to use virtual threads");
         }
+    }
+
+    @Override
+    public int getOrder() {
+        return ORDER;
     }
 }
