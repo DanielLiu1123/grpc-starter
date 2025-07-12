@@ -32,7 +32,7 @@ class GrpcServerAutoConfigurationTest {
 
     @Test
     void testAutoConfigurationLoads() {
-        this.runner.run(context -> {
+        runner.run(context -> {
             assertThat(context).hasSingleBean(GrpcServerProperties.class);
             assertThat(context).hasSingleBean(GrpcServer.class);
             assertThat(context).hasSingleBean(GrpcRequestContextServerInterceptor.class);
@@ -41,7 +41,7 @@ class GrpcServerAutoConfigurationTest {
 
     @Test
     void testAutoConfigurationDisabledWhenGrpcServerDisabled() {
-        this.runner.withPropertyValues("grpc.server.enabled=false").run(context -> {
+        runner.withPropertyValues("grpc.server.enabled=false").run(context -> {
             assertThat(context).doesNotHaveBean(GrpcServerProperties.class);
             assertThat(context).doesNotHaveBean(GrpcServer.class);
             assertThat(context).doesNotHaveBean(GrpcRequestContextServerInterceptor.class);
@@ -50,7 +50,7 @@ class GrpcServerAutoConfigurationTest {
 
     @Test
     void testGrpcServerBeanCreatedByDefault() {
-        this.runner.run(context -> {
+        runner.run(context -> {
             assertThat(context).hasSingleBean(GrpcServer.class);
             GrpcServer grpcServer = context.getBean(GrpcServer.class);
             // Default should be DefaultGrpcServer when enableEmptyServer is true (default)
@@ -60,7 +60,7 @@ class GrpcServerAutoConfigurationTest {
 
     @Test
     void testDefaultGrpcServerWhenEmptyServerEnabled() {
-        this.runner.withPropertyValues("grpc.server.enable-empty-server=true").run(context -> {
+        runner.withPropertyValues("grpc.server.enable-empty-server=true").run(context -> {
             assertThat(context).hasSingleBean(GrpcServer.class);
             GrpcServer grpcServer = context.getBean(GrpcServer.class);
             assertThat(grpcServer).isInstanceOf(DefaultGrpcServer.class);
@@ -69,8 +69,7 @@ class GrpcServerAutoConfigurationTest {
 
     @Test
     void testDummyGrpcServerWhenEmptyServerDisabledAndOnlyInternalServices() {
-        this.runner
-                .withPropertyValues("grpc.server.enable-empty-server=false")
+        runner.withPropertyValues("grpc.server.enable-empty-server=false")
                 .withUserConfiguration(InternalServiceConfiguration.class)
                 .run(context -> {
                     assertThat(context).hasSingleBean(GrpcServer.class);
@@ -81,8 +80,7 @@ class GrpcServerAutoConfigurationTest {
 
     @Test
     void testDefaultGrpcServerWhenHasUserServices() {
-        this.runner
-                .withPropertyValues("grpc.server.enable-empty-server=false")
+        runner.withPropertyValues("grpc.server.enable-empty-server=false")
                 .withUserConfiguration(UserServiceConfiguration.class)
                 .run(context -> {
                     assertThat(context).hasSingleBean(GrpcServer.class);
@@ -93,7 +91,7 @@ class GrpcServerAutoConfigurationTest {
 
     @Test
     void testGrpcRequestContextServerInterceptorCreated() {
-        this.runner.run(context -> {
+        runner.run(context -> {
             assertThat(context).hasSingleBean(GrpcRequestContextServerInterceptor.class);
             var interceptor = context.getBean(GrpcRequestContextServerInterceptor.class);
             assertThat(interceptor).isNotNull();
@@ -102,7 +100,7 @@ class GrpcServerAutoConfigurationTest {
 
     @Test
     void testCustomGrpcRequestContextServerInterceptorNotOverridden() {
-        this.runner.withUserConfiguration(CustomInterceptorConfiguration.class).run(context -> {
+        runner.withUserConfiguration(CustomInterceptorConfiguration.class).run(context -> {
             assertThat(context).hasSingleBean(GrpcRequestContextServerInterceptor.class);
             var interceptor = context.getBean(GrpcRequestContextServerInterceptor.class);
             assertThat(interceptor).isInstanceOf(TestGrpcRequestContextServerInterceptor.class);
@@ -112,7 +110,7 @@ class GrpcServerAutoConfigurationTest {
     @Test
     @EnabledForJreRange(min = JRE.JAVA_21)
     void testVirtualThreadCustomizerCreatedWhenVirtualThreadsEnabledAndOnJavaGreater21() {
-        this.runner.withPropertyValues("spring.threads.virtual.enabled=true").run(context -> {
+        runner.withPropertyValues("spring.threads.virtual.enabled=true").run(context -> {
             assertThat(context).hasBean("virtualThreadGrpcServerCustomizer");
             assertThat(context.getBean("virtualThreadGrpcServerCustomizer"))
                     .isInstanceOf(VirtualThreadGrpcServerCustomizer.class);
@@ -120,30 +118,30 @@ class GrpcServerAutoConfigurationTest {
     }
 
     @Test
-    @EnabledForJreRange(max = JRE.JAVA_21)
+    @EnabledForJreRange(max = JRE.JAVA_20)
     void testVirtualThreadCustomizerNotCreatedWhenVirtualThreadsEnabledAndOnJavaLess21() {
-        this.runner.withPropertyValues("spring.threads.virtual.enabled=true").run(context -> {
+        runner.withPropertyValues("spring.threads.virtual.enabled=true").run(context -> {
             assertThat(context).doesNotHaveBean("virtualThreadGrpcServerCustomizer");
         });
     }
 
     @Test
     void testVirtualThreadCustomizerNotCreatedWhenVirtualThreadsDisabled() {
-        this.runner.withPropertyValues("spring.threads.virtual.enabled=false").run(context -> {
+        runner.withPropertyValues("spring.threads.virtual.enabled=false").run(context -> {
             assertThat(context).doesNotHaveBean("virtualThreadGrpcServerCustomizer");
         });
     }
 
     @Test
     void testVirtualThreadCustomizerNotCreatedByDefault() {
-        this.runner.run(context -> {
+        runner.run(context -> {
             assertThat(context).doesNotHaveBean("virtualThreadGrpcServerCustomizer");
         });
     }
 
     @Test
     void testFeaturesConfigurationImported() {
-        this.runner.run(context -> {
+        runner.run(context -> {
             assertThat(context).doesNotHaveBean(Reflection.class);
             assertThat(context).hasSingleBean(Health.class);
             assertThat(context).doesNotHaveBean(Channelz.class);
@@ -153,13 +151,11 @@ class GrpcServerAutoConfigurationTest {
 
     @Test
     void testGrpcServerWithInProcessConfiguration() {
-        this.runner
-                .withPropertyValues("grpc.server.in-process.name=test-server")
-                .run(context -> {
-                    assertThat(context).hasSingleBean(GrpcServer.class);
-                    GrpcServer grpcServer = context.getBean(GrpcServer.class);
-                    assertThat(grpcServer.getPort()).isEqualTo(-1);
-                });
+        runner.withPropertyValues("grpc.server.in-process.name=test-server").run(context -> {
+            assertThat(context).hasSingleBean(GrpcServer.class);
+            GrpcServer grpcServer = context.getBean(GrpcServer.class);
+            assertThat(grpcServer.getPort()).isEqualTo(-1);
+        });
     }
 
     @Configuration(proxyBeanMethods = false)
