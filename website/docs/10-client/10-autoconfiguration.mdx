@@ -142,6 +142,31 @@ class MyComponent {
 }
 ```
 
+## Virtual Threads Support
+
+Starting from version 3.6.0, gRPC client supports virtual threads when using Java 21+.
+
+When `spring.threads.virtual.enabled` is set to `true`, the gRPC client channels will automatically use virtual threads for handling asynchronous operations and callbacks, providing better performance for I/O-bound operations.
+
+```yaml
+spring:
+  threads:
+    virtual:
+      enabled: true
+```
+
+:::info
+Virtual threads are only available in Java 21+. This feature will be ignored on older Java versions.
+:::
+
+:::note
+Virtual threads benefit client-side operations such as:
+- Asynchronous gRPC calls
+- Client-side streaming operations
+- Callback handling
+- Connection management
+:::
+
 ## Configurations
 
 Configure `deadline` for the channel.

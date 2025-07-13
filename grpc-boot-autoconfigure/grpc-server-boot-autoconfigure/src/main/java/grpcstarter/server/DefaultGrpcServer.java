@@ -3,6 +3,7 @@ package grpcstarter.server;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.grpc.BindableService;
 import io.grpc.Grpc;
+import io.grpc.InsecureServerCredentials;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptor;
@@ -107,7 +108,7 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
             logTlsDeprecationWarning();
             return createServerBuilderWithTls(port, tls);
         } else {
-            return ServerBuilder.forPort(port);
+            return Grpc.newServerBuilderForPort(port, InsecureServerCredentials.create());
         }
     }
 

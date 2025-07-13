@@ -10,9 +10,6 @@ import org.springframework.core.task.VirtualThreadTaskExecutor;
  * A {@link GrpcServerCustomizer} that configures the gRPC server to use virtual threads
  * when {@code spring.threads.virtual.enabled} is set to {@code true}.
  *
- * <p>Note: This customizer will not affect in-process servers, which continue to use
- * the direct executor for testing scenarios.
- *
  * @author Freeman
  * @since 3.5.3.2
  */
