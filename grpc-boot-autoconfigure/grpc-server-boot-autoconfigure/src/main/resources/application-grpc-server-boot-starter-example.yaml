@@ -1,3 +1,8 @@
+spring:
+  threads:
+    virtual:
+      enabled: true                             # enable virtual threads (Java 21+)
+
 grpc:
   server:
     enabled: true                               # whether to enable grpc server
