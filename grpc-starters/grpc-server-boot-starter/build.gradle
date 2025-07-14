@@ -1,8 +1,8 @@
 dependencies {
     api(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
-    runtimeOnly("io.grpc:grpc-netty-shaded")
+    runtimeOnly("io.grpc:grpc-netty")
 
-    optionalSupportApi("io.grpc:grpc-netty")
+    optionalSupportApi("io.grpc:grpc-netty-shaded")
 
     // health check support
     optionalSupportApi("org.springframework.boot:spring-boot-starter-jdbc")
