@@ -35,7 +35,7 @@ Method annotated with `@GrpcExceptionHandler` must return one of the following t
 Implement `GrpcExceptionResolver` to process `IllegalArgumentException`:
 
 ```java
-@Bean
+@Component
 public class IllegalArgumentExceptionResolver implements GrpcExceptionResolver {
     @Override
     public StatusRuntimeException resolve(Throwable throwable, ServerCall<?, ?> call, Metadata headers) {
@@ -56,7 +56,7 @@ This interface is generally used for exception reporting.
 Send exception to [Sentry](https://sentry.io/welcome/) when unhandled exception occurs:
 
 ```java
-@Bean
+@Component
 public class SentryExceptionReporter implements GrpcUnhandledExceptionProcessor {
     @Override
     public void process(Throwable throwable, ServerCall<?, ?> call, Metadata headers) {

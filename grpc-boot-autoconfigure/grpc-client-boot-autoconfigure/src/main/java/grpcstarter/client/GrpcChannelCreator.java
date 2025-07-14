@@ -5,6 +5,7 @@ import static grpcstarter.client.GrpcClientUtil.getRefresh;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.grpc.ClientInterceptor;
 import io.grpc.Grpc;
+import io.grpc.InsecureChannelCredentials;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Metadata;
@@ -149,7 +150,7 @@ class GrpcChannelCreator {
             logTlsDeprecationWarning();
             return createChannelWithTls(channelConfig.getAuthority(), tls);
         } else {
-            return ManagedChannelBuilder.forTarget(channelConfig.getAuthority()).usePlaintext();
+            return Grpc.newChannelBuilder(channelConfig.getAuthority(), InsecureChannelCredentials.create());
         }
     }
 

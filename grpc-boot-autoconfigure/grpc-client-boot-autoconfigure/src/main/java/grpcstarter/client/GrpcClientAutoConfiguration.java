@@ -7,6 +7,8 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnThreading;
+import org.springframework.boot.autoconfigure.thread.Threading;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent;
@@ -49,6 +51,13 @@ public class GrpcClientAutoConfiguration implements DisposableBean, ApplicationL
     public ManagedChannels grpcClientManagedChannels(
             BeanFactory beanFactory, GrpcClientProperties grpcClientProperties) {
         return new ManagedChannelsImpl(beanFactory, grpcClientProperties);
+    }
+
+    @Bean
+    @ConditionalOnThreading(Threading.VIRTUAL)
+    @ConditionalOnMissingBean
+    public VirtualThreadGrpcChannelCustomizer virtualThreadGrpcChannelCustomizer() {
+        return new VirtualThreadGrpcChannelCustomizer();
     }
 
     @Configuration(proxyBeanMethods = false)
