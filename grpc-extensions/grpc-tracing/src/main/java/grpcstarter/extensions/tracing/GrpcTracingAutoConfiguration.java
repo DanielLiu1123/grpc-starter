@@ -8,7 +8,8 @@ import io.micrometer.core.instrument.binder.grpc.ObservationGrpcClientIntercepto
 import io.micrometer.core.instrument.binder.grpc.ObservationGrpcServerInterceptor;
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.tracing.Tracer;
-import org.springframework.boot.actuate.autoconfigure.tracing.ConditionalOnEnabledTracing;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -19,10 +20,11 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Freeman
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration(
+        afterName = "org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration")
 @ConditionalOnClass(Tracer.class)
-@ConditionalOnEnabledTracing
 @ConditionalOnProperty(prefix = GrpcTracingProperties.PREFIX, name = "enabled", matchIfMissing = true)
+@ConditionalOnBean(ObservationRegistry.class)
 @EnableConfigurationProperties(GrpcTracingProperties.class)
 public class GrpcTracingAutoConfiguration {
 
