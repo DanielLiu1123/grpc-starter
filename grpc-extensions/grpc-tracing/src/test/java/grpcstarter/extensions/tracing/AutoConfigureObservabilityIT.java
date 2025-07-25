@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * This test is to verify that {@link GrpcTracingAutoConfiguration} should not depend on {@link AutoConfigureObservability}.
+ *
+ * @see <a href="https://github.com/DanielLiu1123/grpc-starter/issues/122">Issue #122</a>
  */
 class AutoConfigureObservabilityIT {
 
