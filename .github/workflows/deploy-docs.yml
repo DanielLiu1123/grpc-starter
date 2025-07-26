@@ -8,6 +8,7 @@ on:
       - main
     paths:
       - 'website/**'
+      - '.github/workflows/deploy-docs.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
