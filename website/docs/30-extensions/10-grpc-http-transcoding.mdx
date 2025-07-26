@@ -97,8 +97,8 @@ Select the dependencies that match your technology stack.
 </Tabs>
 
 :::tip
-Since both WebFlux and gRPC utilize Netty, using the `grpc-netty-shaded` dependency will increase the size of the final JAR package by approximately 9MB. 
-To avoid this, exclude the `grpc-netty-shaded` dependency and use the `grpc-netty` dependency instead.
+Since both WebFlux and gRPC utilize Netty, the grpc-starter now (>=3.6.0) uses `grpc-netty` by default instead of `grpc-netty-shaded` to avoid increasing the size of the final JAR package by approximately 9MB.
+If you need to use `grpc-netty-shaded` for specific requirements, you can exclude `grpc-netty` and add `grpc-netty-shaded` as a dependency.
 :::
 
 ## Example
