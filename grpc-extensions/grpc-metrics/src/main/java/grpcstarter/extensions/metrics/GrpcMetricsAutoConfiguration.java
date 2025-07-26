@@ -7,6 +7,9 @@ import grpcstarter.server.GrpcServerProperties;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.grpc.MetricCollectingClientInterceptor;
 import io.micrometer.core.instrument.binder.grpc.MetricCollectingServerInterceptor;
+import org.springframework.boot.actuate.autoconfigure.metrics.CompositeMeterRegistryAutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -17,8 +20,9 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Freeman
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration(after = CompositeMeterRegistryAutoConfiguration.class)
 @ConditionalOnClass(MeterRegistry.class)
+@ConditionalOnBean(MeterRegistry.class)
 @ConditionalOnProperty(prefix = GrpcMetricsProperties.PREFIX, name = "enabled", matchIfMissing = true)
 @EnableConfigurationProperties(GrpcMetricsProperties.class)
 public class GrpcMetricsAutoConfiguration {
