@@ -14,12 +14,17 @@ message Foo {
   }];
   string name = 2 [(buf.validate.field).string = {min_len: 5}];
   repeated string hobbies = 3 [(buf.validate.field).repeated = {min_items: 1}];
+  NestedMessage nested = 4 [(buf.validate.field).required = true];
 
   option (buf.validate.message).cel = {
     id: "foo",
     message: "not a valid Foo",
     expression: "this.name != 'aaaaa' && !('coding' in this.hobbies)",
   };
+
+  message NestedMessage {
+    string msg = 1 [(buf.validate.field).string = {min_len: 5}];
+  }
 }
 
 service FooService {
