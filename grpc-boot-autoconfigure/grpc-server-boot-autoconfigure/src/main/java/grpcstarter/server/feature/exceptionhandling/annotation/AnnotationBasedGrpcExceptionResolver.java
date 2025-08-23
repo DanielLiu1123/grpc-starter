@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
@@ -35,7 +36,6 @@ import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.OrderUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -138,8 +138,7 @@ public class AnnotationBasedGrpcExceptionResolver
         advices.addAll(beans);
     }
 
-    @Nullable
-    private Map.Entry<Throwable, GrpcExceptionHandlerMethod> findHandlerMethod(Throwable throwable) {
+    private Map.@Nullable Entry<Throwable, GrpcExceptionHandlerMethod> findHandlerMethod(Throwable throwable) {
         GrpcExceptionHandlerMethod cached = exceptionClassToMethodCache.get(throwable.getClass());
         if (cached != null) {
             return new AbstractMap.SimpleEntry<>(throwable, cached);

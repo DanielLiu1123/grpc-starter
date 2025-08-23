@@ -27,7 +27,6 @@ import io.grpc.ServerServiceDefinition;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.protobuf.ProtoFileDescriptorSupplier;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -41,6 +40,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
@@ -110,8 +110,7 @@ class Util {
         return customRoutes;
     }
 
-    @Nullable
-    private static <T> Util.Route<T> createRouteWithBindings(
+    private static <T> Util.@Nullable Route<T> createRouteWithBindings(
             HttpRule httpRule,
             MethodDescriptor<?, ?> invokeMethod,
             Descriptors.MethodDescriptor methodDescriptor,
@@ -211,8 +210,7 @@ class Util {
         return result.toString();
     }
 
-    @Nullable
-    private static Descriptors.ServiceDescriptor getServiceDescriptor(ServerServiceDefinition definition) {
+    private static Descriptors.@Nullable ServiceDescriptor getServiceDescriptor(ServerServiceDefinition definition) {
         Object schemaDescriptor = definition.getServiceDescriptor().getSchemaDescriptor();
         if (schemaDescriptor instanceof ProtoFileDescriptorSupplier protoFileDescriptorSupplier) {
             Descriptors.FileDescriptor fileDescriptor = protoFileDescriptorSupplier.getFileDescriptor();

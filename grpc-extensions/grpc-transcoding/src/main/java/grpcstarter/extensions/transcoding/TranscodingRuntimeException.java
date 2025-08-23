@@ -1,7 +1,7 @@
 package grpcstarter.extensions.transcoding;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.server.ResponseStatusException;

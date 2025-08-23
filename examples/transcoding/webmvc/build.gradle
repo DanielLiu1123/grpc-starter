@@ -10,6 +10,7 @@ dependencies {
     }
     implementation(project(":grpc-starters:grpc-starter-transcoding"))
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-restclient")
     runtimeOnly("io.grpc:grpc-netty")
 
     testImplementation(project(":grpc-starters:grpc-starter-test"))
