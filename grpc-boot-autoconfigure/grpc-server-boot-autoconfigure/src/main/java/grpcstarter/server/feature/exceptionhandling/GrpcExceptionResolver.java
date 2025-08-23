@@ -4,7 +4,7 @@ import grpcstarter.server.feature.exceptionhandling.annotation.AnnotationBasedGr
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.StatusRuntimeException;
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@link GrpcExceptionResolver} is used to resolve exceptions thrown by gRPC services.

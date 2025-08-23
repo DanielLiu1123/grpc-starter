@@ -9,6 +9,7 @@ import io.grpc.protobuf.services.ChannelzService;
 import io.grpc.services.AdminInterface;
 import java.io.InputStream;
 import lombok.Data;
+import org.jspecify.annotations.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.util.unit.DataSize;
@@ -60,17 +61,17 @@ public class GrpcServerProperties {
      *
      * @see GrpcUtil#DEFAULT_MAX_MESSAGE_SIZE
      */
-    private DataSize maxInboundMessageSize;
+    private @Nullable DataSize maxInboundMessageSize;
     /**
      * The maximum size of metadata allowed to be received, default 8KB.
      *
      * @see GrpcUtil#DEFAULT_MAX_HEADER_LIST_SIZE
      */
-    private DataSize maxInboundMetadataSize;
+    private @Nullable DataSize maxInboundMetadataSize;
     /**
      * In-process server configuration.
      */
-    private InProcess inProcess;
+    private @Nullable InProcess inProcess;
     /**
      * SSL bundle name for TLS configuration.
      * <p>
@@ -80,14 +81,14 @@ public class GrpcServerProperties {
      *
      * @since 3.5.3
      */
-    private String sslBundle;
+    private @Nullable String sslBundle;
     /**
      * TLS configuration.
      *
      * @deprecated Use {@link #sslBundle} instead. This will be removed in 3.6.0
      */
     @Deprecated(since = "3.5.3", forRemoval = true)
-    private Tls tls;
+    private @Nullable Tls tls;
     /**
      * Response configuration.
      */
@@ -137,7 +138,7 @@ public class GrpcServerProperties {
             /**
              * The timeout in seconds for {@link java.sql.Connection#isValid(int)}, use 0 if not set.
              */
-            private Integer timeout;
+            private @Nullable Integer timeout;
         }
 
         @Data
@@ -226,11 +227,11 @@ public class GrpcServerProperties {
          * @see io.grpc.TlsServerCredentials.Builder#keyManager(InputStream, InputStream, String)
          * @see io.grpc.TlsServerCredentials.Builder#keyManager(InputStream, InputStream)
          */
-        private KeyManager keyManager;
+        private @Nullable KeyManager keyManager;
         /**
          * @see io.grpc.TlsServerCredentials.Builder#trustManager(InputStream)
          */
-        private TrustManager trustManager;
+        private @Nullable TrustManager trustManager;
 
         @Data
         public static class KeyManager {

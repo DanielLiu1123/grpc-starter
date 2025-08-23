@@ -2,12 +2,12 @@ package grpcstarter.extensions.test;
 
 import grpcstarter.server.GrpcServerProperties;
 import grpcstarter.server.GrpcServerStartedEvent;
-import jakarta.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;

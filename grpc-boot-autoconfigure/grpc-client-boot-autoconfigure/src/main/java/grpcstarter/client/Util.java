@@ -1,13 +1,13 @@
 package grpcstarter.client;
 
 import io.grpc.ManagedChannel;
-import jakarta.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.experimental.UtilityClass;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -163,8 +163,8 @@ class Util {
         }
     }
 
-    @Nullable
-    public static GrpcClientProperties.Channel findChannelByName(String name, GrpcClientProperties properties) {
+    public static GrpcClientProperties.@Nullable Channel findChannelByName(
+            String name, GrpcClientProperties properties) {
         for (var ch : properties.getChannels()) {
             if (Objects.equals(ch.getName(), name)) {
                 return ch;
