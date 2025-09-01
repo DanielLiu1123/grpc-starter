@@ -4,6 +4,7 @@ import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.Deadline;
 import lombok.Data;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@link GrpcClientOptions} is used to set options for gRPC stubs,
@@ -21,7 +22,12 @@ public class GrpcClientOptions {
     public static final CallOptions.Key<GrpcClientOptions> KEY =
             CallOptions.Key.createWithDefault("grpcClientOptions", new GrpcClientOptions());
 
+    @Nullable
     private Long deadline;
+
+    @Nullable
     private Integer maxOutboundMessageSize;
+
+    @Nullable
     private String compression;
 }

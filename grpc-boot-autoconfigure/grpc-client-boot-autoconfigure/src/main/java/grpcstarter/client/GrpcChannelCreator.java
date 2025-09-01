@@ -54,7 +54,11 @@ class GrpcChannelCreator {
             // NOTE: If we support refresh, we need to get the latest config,
             // because the properties may have been updated at runtime.
             var properties = beanFactory.getBean(GrpcClientProperties.class);
-            var channel = Util.findChannelByName(channelConfig.getName(), properties);
+            String channelName = channelConfig.getName();
+            if (channelName == null) {
+                return channelConfig;
+            }
+            var channel = Util.findChannelByName(channelName, properties);
             if (channel != null) {
                 return channel;
             }
@@ -144,13 +148,18 @@ class GrpcChannelCreator {
         String sslBundleName = channelConfig.getSslBundle();
         GrpcClientProperties.Tls tls = channelConfig.getTls();
 
+        String authority = channelConfig.getAuthority();
+        if (authority == null) {
+            throw new IllegalArgumentException("Channel authority cannot be null");
+        }
+
         if (StringUtils.hasText(sslBundleName)) {
-            return createChannelWithSslBundle(channelConfig.getAuthority(), sslBundleName);
+            return createChannelWithSslBundle(authority, sslBundleName);
         } else if (tls != null) {
             logTlsDeprecationWarning();
-            return createChannelWithTls(channelConfig.getAuthority(), tls);
+            return createChannelWithTls(authority, tls);
         } else {
-            return Grpc.newChannelBuilder(channelConfig.getAuthority(), InsecureChannelCredentials.create());
+            return Grpc.newChannelBuilder(authority, InsecureChannelCredentials.create());
         }
     }
 
@@ -180,6 +189,9 @@ class GrpcChannelCreator {
         TlsChannelCredentials.Builder tlsBuilder = TlsChannelCredentials.newBuilder();
         if (tls.getKeyManager() != null) {
             GrpcClientProperties.Tls.KeyManager keyManager = tls.getKeyManager();
+            if (keyManager.getCertChain() == null || keyManager.getPrivateKey() == null) {
+                throw new IllegalArgumentException("KeyManager certChain and privateKey cannot be null");
+            }
             if (StringUtils.hasText(keyManager.getPrivateKeyPassword())) {
                 tlsBuilder.keyManager(
                         keyManager.getCertChain().getInputStream(),
@@ -192,6 +204,9 @@ class GrpcChannelCreator {
             }
         }
         if (tls.getTrustManager() != null) {
+            if (tls.getTrustManager().getRootCerts() == null) {
+                throw new IllegalArgumentException("TrustManager rootCerts cannot be null");
+            }
             tlsBuilder.trustManager(tls.getTrustManager().getRootCerts().getInputStream());
         }
         return Grpc.newChannelBuilder(authority, tlsBuilder.build());

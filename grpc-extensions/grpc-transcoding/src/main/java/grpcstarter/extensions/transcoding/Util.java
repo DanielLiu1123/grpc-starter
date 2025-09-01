@@ -247,8 +247,8 @@ class Util {
     public static Channel getTranscodingChannel(
             int port, GrpcTranscodingProperties grpcTranscodingProperties, GrpcServerProperties grpcServerProperties) {
         var inProcess = grpcServerProperties.getInProcess();
-        if (inProcess != null && StringUtils.hasText(inProcess.getName())) {
-            var builder = InProcessChannelBuilder.forName(inProcess.getName());
+        if (inProcess != null && StringUtils.hasText(inProcess.name())) {
+            var builder = InProcessChannelBuilder.forName(inProcess.name());
             populateChannel(builder, grpcServerProperties);
             return builder.build();
         }
@@ -384,10 +384,11 @@ class Util {
                 case NUMBER_VALUE -> String.valueOf(value.getNumberValue());
                 case STRING_VALUE -> value.getStringValue();
                 case BOOL_VALUE -> String.valueOf(value.getBoolValue());
-                default -> null;
+                default -> throw new IllegalArgumentException("Unsupported Value kind: " + value.getKindCase());
             };
         }
-        return null;
+        throw new IllegalArgumentException(
+                "Not a simple value message: " + message.getClass().getName());
     }
 
     private static boolean isWrapperType(Class<?> clz) {

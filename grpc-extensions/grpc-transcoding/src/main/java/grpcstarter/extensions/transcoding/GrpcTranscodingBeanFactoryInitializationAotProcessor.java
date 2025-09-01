@@ -30,6 +30,7 @@ import org.springframework.util.ClassUtils;
 class GrpcTranscodingBeanFactoryInitializationAotProcessor
         implements BeanFactoryInitializationAotProcessor, EnvironmentAware {
 
+    @Nullable
     private Environment env;
 
     @Override
@@ -41,6 +42,9 @@ class GrpcTranscodingBeanFactoryInitializationAotProcessor
     @Override
     public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
         return (generationContext, beanFactoryInitializationCode) -> {
+            if (env == null) {
+                return;
+            }
             var enabled = env.getProperty(GrpcTranscodingProperties.PREFIX + ".enabled", Boolean.class, true);
             if (!enabled) {
                 return;

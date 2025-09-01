@@ -45,6 +45,7 @@ public class GrpcClientProperties implements InitializingBean {
      *
      * <p> e.g. localhost:8080 </p>
      */
+    @Nullable
     private String authority;
     /**
      * Base packages to scan for gRPC stubs.
@@ -171,6 +172,7 @@ public class GrpcClientProperties implements InitializingBean {
         /**
          * Authority for this channel, use {@link GrpcClientProperties#authority} if not set.
          */
+        @Nullable
         private String authority;
         /**
          * Max inbound message size, use {@link GrpcClientProperties#maxInboundMessageSize} if not set.
@@ -282,6 +284,7 @@ public class GrpcClientProperties implements InitializingBean {
         /**
          * Header key.
          */
+        @Nullable
         private String key;
         /**
          * Header values.
@@ -298,6 +301,7 @@ public class GrpcClientProperties implements InitializingBean {
          *
          * <p> If set, will create an in-process channel by default, usually for testing. </p>
          */
+        @Nullable
         private String name;
     }
 
@@ -362,14 +366,17 @@ public class GrpcClientProperties implements InitializingBean {
             /**
              * @see TlsChannelCredentials.Builder#getCertificateChain()
              */
+            @Nullable
             private Resource certChain;
             /**
              * @see TlsChannelCredentials.Builder#getPrivateKey()
              */
+            @Nullable
             private Resource privateKey;
             /**
              * @see TlsChannelCredentials.Builder#getPrivateKeyPassword()
              */
+            @Nullable
             private String privateKeyPassword;
         }
 
@@ -378,6 +385,7 @@ public class GrpcClientProperties implements InitializingBean {
             /**
              * @see TlsChannelCredentials.Builder#getRootCertificates()
              */
+            @Nullable
             private Resource rootCerts;
         }
     }

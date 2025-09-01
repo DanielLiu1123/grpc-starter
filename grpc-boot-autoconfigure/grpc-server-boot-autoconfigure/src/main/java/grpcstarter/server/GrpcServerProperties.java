@@ -3,7 +3,6 @@ package grpcstarter.server;
 import grpcstarter.server.feature.exceptionhandling.annotation.DefaultGrpcExceptionAdvice;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
-import io.grpc.TlsServerCredentials;
 import io.grpc.internal.GrpcUtil;
 import io.grpc.protobuf.services.ChannelzService;
 import io.grpc.services.AdminInterface;
@@ -61,17 +60,20 @@ public class GrpcServerProperties {
      *
      * @see GrpcUtil#DEFAULT_MAX_MESSAGE_SIZE
      */
-    private @Nullable DataSize maxInboundMessageSize;
+    @Nullable
+    private DataSize maxInboundMessageSize;
     /**
      * The maximum size of metadata allowed to be received, default 8KB.
      *
      * @see GrpcUtil#DEFAULT_MAX_HEADER_LIST_SIZE
      */
-    private @Nullable DataSize maxInboundMetadataSize;
+    @Nullable
+    private DataSize maxInboundMetadataSize;
     /**
      * In-process server configuration.
      */
-    private @Nullable InProcess inProcess;
+    @Nullable
+    private InProcess inProcess;
     /**
      * SSL bundle name for TLS configuration.
      * <p>
@@ -81,14 +83,16 @@ public class GrpcServerProperties {
      *
      * @since 3.5.3
      */
-    private @Nullable String sslBundle;
+    @Nullable
+    private String sslBundle;
     /**
      * TLS configuration.
      *
      * @deprecated Use {@link #sslBundle} instead. This will be removed in 3.6.0
      */
     @Deprecated(since = "3.5.3", forRemoval = true)
-    private @Nullable Tls tls;
+    @Nullable
+    private Tls tls;
     /**
      * Response configuration.
      */
@@ -209,14 +213,11 @@ public class GrpcServerProperties {
         private boolean defaultExceptionAdviceEnabled = true;
     }
 
-    @Data
-    public static class InProcess {
+    /**
+     * @param name In-process server name, if configured, will create an in-process server, usually for testing.
+     */
+    public record InProcess(String name) {
         public static final String PREFIX = GrpcServerProperties.PREFIX + ".in-process";
-
-        /**
-         * In-process server name, if configured, will create an in-process server, usually for testing.
-         */
-        private String name;
     }
 
     @Data
@@ -227,35 +228,25 @@ public class GrpcServerProperties {
          * @see io.grpc.TlsServerCredentials.Builder#keyManager(InputStream, InputStream, String)
          * @see io.grpc.TlsServerCredentials.Builder#keyManager(InputStream, InputStream)
          */
-        private @Nullable KeyManager keyManager;
+        @Nullable
+        private KeyManager keyManager;
         /**
          * @see io.grpc.TlsServerCredentials.Builder#trustManager(InputStream)
          */
-        private @Nullable TrustManager trustManager;
+        @Nullable
+        private TrustManager trustManager;
 
-        @Data
-        public static class KeyManager {
-            /**
-             * @see TlsServerCredentials.Builder#getCertificateChain()
-             */
-            private Resource certChain;
-            /**
-             * @see TlsServerCredentials.Builder#getPrivateKey()
-             */
-            private Resource privateKey;
-            /**
-             * @see TlsServerCredentials.Builder#getPrivateKeyPassword()
-             */
-            private String privateKeyPassword;
-        }
+        /**
+         * @param certChain
+         * @param privateKey
+         * @param privateKeyPassword
+         */
+        public record KeyManager(Resource certChain, Resource privateKey, String privateKeyPassword) {}
 
-        @Data
-        public static class TrustManager {
-            /**
-             * @see TlsServerCredentials.Builder#getRootCertificates()
-             */
-            private Resource rootCerts;
-        }
+        /**
+         * @param rootCerts
+         */
+        public record TrustManager(Resource rootCerts) {}
     }
 
     @Data

@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nullable;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ApplicationListener;
@@ -71,6 +72,7 @@ public class DefaultServletTranscoder
     private final GrpcServerProperties grpcServerProperties;
     private final TranscodingExceptionResolver transcodingExceptionResolver;
 
+    @Nullable
     private Channel channel;
 
     public DefaultServletTranscoder(
@@ -118,6 +120,9 @@ public class DefaultServletTranscoder
     @SuppressWarnings("unchecked")
     public ServerResponse handle(@Nonnull ServerRequest request) {
         var route = (Util.Route<ServerRequest>) request.attributes().get(MATCHING_ROUTE);
+        if (route == null) {
+            return ServerResponse.badRequest().build();
+        }
 
         var methodType = route.invokeMethod().getType();
 
@@ -231,6 +236,8 @@ public class DefaultServletTranscoder
 
     @Override
     public void destroy() throws Exception {
-        shutdown(channel, Duration.ofSeconds(15));
+        if (channel != null) {
+            shutdown(channel, Duration.ofSeconds(15));
+        }
     }
 }

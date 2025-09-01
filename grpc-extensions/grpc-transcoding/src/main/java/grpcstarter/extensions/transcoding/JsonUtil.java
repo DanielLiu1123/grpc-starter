@@ -27,7 +27,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 class JsonUtil {
 
     private static final ObjectMapper om;
-    private static JsonFormat.Printer printer;
+    private static JsonFormat.Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();
 
     static {
         om = new Jackson2ObjectMapperBuilder()

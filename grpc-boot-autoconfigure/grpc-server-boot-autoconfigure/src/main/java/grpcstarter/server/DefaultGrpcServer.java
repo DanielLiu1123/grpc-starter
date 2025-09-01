@@ -41,6 +41,7 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final GrpcServerProperties properties;
 
+    @SuppressWarnings("NullAway")
     private ApplicationEventPublisher publisher;
 
     @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
@@ -92,8 +93,8 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
     private static ServerBuilder<? extends ServerBuilder<?>> getDefaultServerBuilder(
             GrpcServerProperties properties, SslBundles sslBundles) {
         if (properties.getInProcess() != null) {
-            Assert.hasText(properties.getInProcess().getName(), "In-process server name must not be empty");
-            return InProcessServerBuilder.forName(properties.getInProcess().getName())
+            Assert.hasText(properties.getInProcess().name(), "In-process server name must not be empty");
+            return InProcessServerBuilder.forName(properties.getInProcess().name())
                     .directExecutor();
         }
         int port = Math.max(properties.getPort(), 0);
@@ -120,13 +121,13 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
 
         // Set key managers if available
         var keyManagers = sslBundle.getManagers().getKeyManagers();
-        if (keyManagers != null && keyManagers.length > 0) {
+        if (keyManagers.length > 0) {
             tlsBuilder.keyManager(keyManagers);
         }
 
         // Set trust managers if available
         var trustManagers = sslBundle.getManagers().getTrustManagers();
-        if (trustManagers != null && trustManagers.length > 0) {
+        if (trustManagers.length > 0) {
             tlsBuilder.trustManager(trustManagers);
         }
 
@@ -139,20 +140,20 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
         TlsServerCredentials.Builder tlsBuilder = TlsServerCredentials.newBuilder();
         GrpcServerProperties.Tls.KeyManager keyManager = tls.getKeyManager();
         if (keyManager != null) {
-            if (StringUtils.hasText(keyManager.getPrivateKeyPassword())) {
+            if (StringUtils.hasText(keyManager.privateKeyPassword())) {
                 tlsBuilder.keyManager(
-                        keyManager.getCertChain().getInputStream(),
-                        keyManager.getPrivateKey().getInputStream(),
-                        keyManager.getPrivateKeyPassword());
+                        keyManager.certChain().getInputStream(),
+                        keyManager.privateKey().getInputStream(),
+                        keyManager.privateKeyPassword());
             } else {
                 tlsBuilder.keyManager(
-                        keyManager.getCertChain().getInputStream(),
-                        keyManager.getPrivateKey().getInputStream());
+                        keyManager.certChain().getInputStream(),
+                        keyManager.privateKey().getInputStream());
             }
         }
         GrpcServerProperties.Tls.TrustManager trustManager = tls.getTrustManager();
         if (trustManager != null) {
-            tlsBuilder.trustManager(trustManager.getRootCerts().getInputStream());
+            tlsBuilder.trustManager(trustManager.rootCerts().getInputStream());
         }
         return Grpc.newServerBuilderForPort(port, tlsBuilder.build());
     }
@@ -175,10 +176,10 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
             isRunning.set(true);
             if (log.isInfoEnabled()) {
                 if (properties.getInProcess() != null
-                        && StringUtils.hasText(properties.getInProcess().getName())) {
+                        && StringUtils.hasText(properties.getInProcess().name())) {
                     log.info(
                             "gRPC in-process server started: {}",
-                            properties.getInProcess().getName());
+                            properties.getInProcess().name());
                 } else {
                     log.info("gRPC server started on port: {} ({})", server.getPort(), GrpcUtil.getGrpcBuildVersion());
                 }

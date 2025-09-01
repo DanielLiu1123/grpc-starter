@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -74,6 +75,7 @@ public class DefaultReactiveTranscoder
     private final GrpcServerProperties grpcServerProperties;
     private final ReactiveTranscodingExceptionResolver transcodingExceptionResolver;
 
+    @Nullable
     private Channel channel;
 
     public DefaultReactiveTranscoder(
@@ -121,6 +123,9 @@ public class DefaultReactiveTranscoder
     @SuppressWarnings("unchecked")
     public Mono<ServerResponse> handle(@Nonnull ServerRequest request) {
         var route = (Route<ServerRequest>) request.attributes().get(MATCHING_ROUTE);
+        if (route == null) {
+            return ServerResponse.badRequest().build();
+        }
 
         var methodType = route.invokeMethod().getType();
 
@@ -182,10 +187,11 @@ public class DefaultReactiveTranscoder
     }
 
     private static Transcoder getTranscoder(ServerRequest request, DataBuffer buf) {
-        return Transcoder.create(new Transcoder.Variable(
-                getBytes(buf),
-                convert(request.queryParams()),
-                request.exchange().getAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE)));
+        var uriTemplateVariables = request.exchange().getAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        @SuppressWarnings("unchecked")
+        Map<String, String> templateVars =
+                uriTemplateVariables != null ? (Map<String, String>) uriTemplateVariables : Map.of();
+        return Transcoder.create(new Transcoder.Variable(getBytes(buf), convert(request.queryParams()), templateVars));
     }
 
     private Mono<ServerResponse> processUnaryCall(ServerRequest request, Route<ServerRequest> route) {
@@ -259,6 +265,8 @@ public class DefaultReactiveTranscoder
 
     @Override
     public void destroy() throws Exception {
-        shutdown(channel, Duration.ofSeconds(15));
+        if (channel != null) {
+            shutdown(channel, Duration.ofSeconds(15));
+        }
     }
 }

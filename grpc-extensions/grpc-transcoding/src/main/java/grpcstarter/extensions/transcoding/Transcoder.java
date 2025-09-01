@@ -19,7 +19,7 @@ import java.util.Optional;
  */
 class Transcoder {
 
-    private static JsonFormat.Parser parser;
+    private static JsonFormat.Parser parser = JsonFormat.parser().ignoringUnknownFields();
 
     private final Variable variable;
 

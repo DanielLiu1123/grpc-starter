@@ -83,7 +83,9 @@ class Util {
     public static String serviceName(Class<?> stubClass) {
         Field serviceNameField = ReflectionUtils.findField(stubClass.getEnclosingClass(), SERVICE_NAME);
         Assert.notNull(serviceNameField, SERVICE_NAME + " field not found");
-        return (String) ReflectionUtils.getField(serviceNameField, null);
+        Object serviceName = ReflectionUtils.getField(serviceNameField, null);
+        Assert.notNull(serviceName, "Service name field value is null");
+        return (String) serviceName;
     }
 
     public static GrpcClientProperties getProperties(Environment environment) {
