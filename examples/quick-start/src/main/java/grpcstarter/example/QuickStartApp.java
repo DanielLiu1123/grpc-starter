@@ -1,6 +1,9 @@
 package grpcstarter.example;
 
+import com.google.protobuf.util.JsonFormat;
 import grpcstarter.client.ManagedChannels;
+// import grpcstarter.generated.GlobalTypes;
+import io.grpc.health.v1.HealthCheckRequest;
 import io.grpc.testing.protobuf.SimpleRequest;
 import io.grpc.testing.protobuf.SimpleServiceGrpc;
 import order.v1.GetOrdersByUserIdRequest;
@@ -16,6 +19,13 @@ import user.v1.UserServiceGrpc;
 public class QuickStartApp {
 
     public static void main(String[] args) {
+
+        var parser = JsonFormat.parser();
+
+        var healthCheckRequestClass = HealthCheckRequest.class;
+
+        //        parser.usingTypeRegistry(GlobalTypes.get());
+
         SpringApplication.run(QuickStartApp.class, args);
     }
 

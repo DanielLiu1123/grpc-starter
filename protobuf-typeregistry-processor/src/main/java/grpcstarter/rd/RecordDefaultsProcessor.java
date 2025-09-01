@@ -1,0 +1,152 @@
+package grpcstarter.rd;
+
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
+import java.io.IOException;
+import java.util.Set;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
+import javax.annotation.processing.Messager;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedSourceVersion;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
+import javax.tools.Diagnostic;
+
+/**
+ * Annotation processor that automatically generates Defaults classes for Java records.
+ * For each record type, it generates a corresponding <Type>Defaults class with a DEFAULT constant.
+ *
+ * @author Freeman
+ * @since 2025/8/30
+ */
+@SupportedAnnotationTypes("*")
+@SupportedSourceVersion(SourceVersion.RELEASE_17)
+public class RecordDefaultsProcessor extends AbstractProcessor {
+
+    private Types typeUtils;
+    private Elements elementUtils;
+    private Filer filer;
+    private Messager messager;
+
+    @Override
+    public synchronized void init(ProcessingEnvironment processingEnv) {
+        super.init(processingEnv);
+        typeUtils = processingEnv.getTypeUtils();
+        elementUtils = processingEnv.getElementUtils();
+        filer = processingEnv.getFiler();
+        messager = processingEnv.getMessager();
+    }
+
+    @Override
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        if (roundEnv.processingOver()) {
+            return false;
+        }
+
+        // Process all record types
+        for (Element rootElement : roundEnv.getRootElements()) {
+            if (rootElement.getKind() == ElementKind.RECORD) {
+                TypeElement recordElement = (TypeElement) rootElement;
+                try {
+                    generateDefaultsClass(recordElement);
+                } catch (IOException e) {
+                    messager.printMessage(
+                            Diagnostic.Kind.ERROR,
+                            "Failed to generate Defaults class for " + recordElement.getSimpleName() + ": "
+                                    + e.getMessage());
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void generateDefaultsClass(TypeElement recordElement) throws IOException {
+        String recordName = recordElement.getSimpleName().toString();
+        String packageName =
+                elementUtils.getPackageOf(recordElement).getQualifiedName().toString();
+        String defaultsClassName = recordName + "Defaults";
+
+        // Create the DEFAULT field with null values for all record components
+        CodeBlock.Builder defaultValueBuilder = CodeBlock.builder();
+        defaultValueBuilder.add("new $T(", recordElement);
+
+        // Get record components and generate appropriate default values for each
+        var recordComponents = recordElement.getRecordComponents();
+        for (int i = 0; i < recordComponents.size(); i++) {
+            if (i > 0) {
+                defaultValueBuilder.add(", ");
+            }
+            defaultValueBuilder.add(
+                    "$L", getDefaultValueForType(recordComponents.get(i).asType()));
+        }
+        defaultValueBuilder.add(")");
+
+        // Create the DEFAULT field
+        FieldSpec defaultField = FieldSpec.builder(
+                        TypeName.get(recordElement.asType()),
+                        "DEFAULT",
+                        Modifier.PUBLIC,
+                        Modifier.STATIC,
+                        Modifier.FINAL)
+                .initializer(defaultValueBuilder.build())
+                .build();
+
+        // Create private constructor
+        MethodSpec constructor =
+                MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build();
+
+        // Create the Defaults class
+        TypeSpec defaultsClass = TypeSpec.classBuilder(defaultsClassName)
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addField(defaultField)
+                .addMethod(constructor)
+                .addJavadoc("Generated defaults for {@link $T}.\n", recordElement)
+                .addJavadoc("\n@author RecordDefaultsProcessor")
+                .build();
+
+        // Write the Java file
+        JavaFile javaFile = JavaFile.builder(packageName, defaultsClass)
+                .addFileComment("Generated by RecordDefaultsProcessor")
+                .build();
+
+        javaFile.writeTo(filer);
+
+        messager.printMessage(Diagnostic.Kind.NOTE, "Generated " + defaultsClassName + " for record " + recordName);
+    }
+
+    private String getDefaultValueForType(TypeMirror type) {
+        String typeName = type.toString();
+
+        // Handle primitive types
+        switch (typeName) {
+            case "boolean":
+                return "false";
+            case "byte":
+            case "short":
+            case "int":
+            case "long":
+            case "float":
+            case "double":
+                return "0";
+            case "char":
+                return "'\\0'";
+            default:
+                // For reference types (including boxed primitives), use null
+                return "null";
+        }
+    }
+}

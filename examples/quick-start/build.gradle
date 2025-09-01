@@ -5,6 +5,9 @@ plugins {
 dependencies {
     implementation(project(":grpc-starters:grpc-boot-starter"))
     implementation("io.grpc:grpc-testing-proto")
+    implementation("com.google.protobuf:protobuf-java-util")
+
+    annotationProcessor(project(":protobuf-typeregistry-processor"))
 
     testImplementation(project(":grpc-starters:grpc-starter-test"))
 }

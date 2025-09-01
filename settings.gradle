@@ -19,6 +19,7 @@ include(":grpc-extensions:grpc-tracing")
 include(":grpc-extensions:grpc-transcoding")
 include(":grpc-extensions:grpc-transcoding-springdoc")
 include(":grpc-extensions:grpc-validation")
+include(":protobuf-typeregistry-processor")
 
 // bom
 include(":grpc-starter-dependencies")
