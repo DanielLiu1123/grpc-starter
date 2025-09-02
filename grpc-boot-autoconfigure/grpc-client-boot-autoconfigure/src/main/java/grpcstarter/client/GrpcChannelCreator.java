@@ -92,8 +92,8 @@ class GrpcChannelCreator {
         // add default metadata
         Metadata metadata = new Metadata();
         channelConfig.getMetadata().forEach(m -> {
-            Metadata.Key<String> key = Metadata.Key.of(m.getKey(), Metadata.ASCII_STRING_MARSHALLER);
-            m.getValues().forEach(v -> metadata.put(key, v));
+            Metadata.Key<String> key = Metadata.Key.of(m.key(), Metadata.ASCII_STRING_MARSHALLER);
+            m.values().forEach(v -> metadata.put(key, v));
         });
         if (!metadata.keys().isEmpty()) {
             ClientInterceptor metadataInterceptor = MetadataUtils.newAttachHeadersInterceptor(metadata);
@@ -135,9 +135,10 @@ class GrpcChannelCreator {
     }
 
     @SneakyThrows
+    @SuppressWarnings("deprecation")
     private ManagedChannelBuilder<?> getManagedChannelBuilder(GrpcClientProperties.Channel channelConfig) {
         if (channelConfig.getInProcess() != null) {
-            var name = channelConfig.getInProcess().getName();
+            var name = channelConfig.getInProcess().name();
             if (!StringUtils.hasText(name)) {
                 throw new IllegalArgumentException("In-process name must not be empty");
             }

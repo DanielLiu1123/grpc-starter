@@ -45,8 +45,7 @@ public class GrpcClientProperties implements InitializingBean {
      *
      * <p> e.g. localhost:8080 </p>
      */
-    @Nullable
-    private String authority;
+    private @Nullable String authority;
     /**
      * Base packages to scan for gRPC stubs.
      *
@@ -172,8 +171,7 @@ public class GrpcClientProperties implements InitializingBean {
         /**
          * Authority for this channel, use {@link GrpcClientProperties#authority} if not set.
          */
-        @Nullable
-        private String authority;
+        private @Nullable String authority;
         /**
          * Max inbound message size, use {@link GrpcClientProperties#maxInboundMessageSize} if not set.
          */
@@ -277,32 +275,32 @@ public class GrpcClientProperties implements InitializingBean {
         private List<String> services = new ArrayList<>();
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Metadata {
-        /**
-         * Header key.
-         */
-        @Nullable
-        private String key;
-        /**
-         * Header values.
-         */
-        private List<String> values = new ArrayList<>();
+    /**
+     * @param key    Header key.
+     * @param values Header values.
+     */
+    public record Metadata(String key, List<String> values) {
+        public Metadata {
+            if (!StringUtils.hasText(key)) {
+                throw new IllegalArgumentException("Metadata key must not be empty");
+            }
+            values = List.copyOf(values);
+        }
     }
 
-    @Data
-    public static class InProcess {
-        public static final String PREFIX = GrpcClientProperties.PREFIX + ".in-process";
+    /**
+     * @param name In-process client name.
+     *
+     *             <p> If set, will create an in-process channel by default, usually for testing. </p>
+     */
+    public record InProcess(String name) {
+        public InProcess {
+            if (!StringUtils.hasText(name)) {
+                throw new IllegalArgumentException("In-process name must not be empty");
+            }
+        }
 
-        /**
-         * In-process client name.
-         *
-         * <p> If set, will create an in-process channel by default, usually for testing. </p>
-         */
-        @Nullable
-        private String name;
+        public static final String PREFIX = GrpcClientProperties.PREFIX + ".in-process";
     }
 
     @Data
@@ -366,18 +364,15 @@ public class GrpcClientProperties implements InitializingBean {
             /**
              * @see TlsChannelCredentials.Builder#getCertificateChain()
              */
-            @Nullable
-            private Resource certChain;
+            private @Nullable Resource certChain;
             /**
              * @see TlsChannelCredentials.Builder#getPrivateKey()
              */
-            @Nullable
-            private Resource privateKey;
+            private @Nullable Resource privateKey;
             /**
              * @see TlsChannelCredentials.Builder#getPrivateKeyPassword()
              */
-            @Nullable
-            private String privateKeyPassword;
+            private @Nullable String privateKeyPassword;
         }
 
         @Data
@@ -385,8 +380,7 @@ public class GrpcClientProperties implements InitializingBean {
             /**
              * @see TlsChannelCredentials.Builder#getRootCertificates()
              */
-            @Nullable
-            private Resource rootCerts;
+            private @Nullable Resource rootCerts;
         }
     }
 
@@ -417,9 +411,9 @@ public class GrpcClientProperties implements InitializingBean {
 
             // default + client specified
             LinkedHashMap<String, List<String>> total = metadata.stream()
-                    .collect(toMap(Metadata::getKey, Metadata::getValues, (oldV, newV) -> oldV, LinkedHashMap::new));
+                    .collect(toMap(Metadata::key, Metadata::values, (oldV, newV) -> oldV, LinkedHashMap::new));
             for (Metadata m : stub.getMetadata()) {
-                total.put(m.getKey(), m.getValues());
+                total.put(m.key(), m.values());
             }
             List<Metadata> merged = total.entrySet().stream()
                     .map(e -> new Metadata(e.getKey(), e.getValue()))
