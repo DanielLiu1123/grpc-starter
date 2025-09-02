@@ -27,7 +27,6 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCalls;
 import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
@@ -97,8 +96,7 @@ public class DefaultReactiveTranscoder
     }
 
     @Override
-    @Nonnull
-    public Mono<HandlerFunction<ServerResponse>> route(@Nonnull ServerRequest request) {
+    public Mono<HandlerFunction<ServerResponse>> route(ServerRequest request) {
         if (Objects.equals(request.method(), HttpMethod.POST)) {
             var route = autoMappingRoutes.get(trim(request.path(), '/'));
             if (route != null) {
@@ -119,9 +117,8 @@ public class DefaultReactiveTranscoder
     }
 
     @Override
-    @Nonnull
     @SuppressWarnings("unchecked")
-    public Mono<ServerResponse> handle(@Nonnull ServerRequest request) {
+    public Mono<ServerResponse> handle(ServerRequest request) {
         var route = (Route<ServerRequest>) request.attributes().get(MATCHING_ROUTE);
         if (route == null) {
             return ServerResponse.badRequest().build();
@@ -153,7 +150,7 @@ public class DefaultReactiveTranscoder
                     var msg = getMessage(route, transcoder);
                     // forwards http headers
                     var chan = ClientInterceptors.intercept(
-                            channel,
+                            mustGetChannel(),
                             MetadataUtils.newAttachHeadersInterceptor(
                                     headerConverter.toMetadata(request.headers().asHttpHeaders())));
                     var call = getCall(chan, route);
@@ -203,7 +200,7 @@ public class DefaultReactiveTranscoder
                     var headers = new AtomicReference<Metadata>();
                     var trailers = new AtomicReference<Metadata>();
                     var chan = ClientInterceptors.intercept(
-                            channel,
+                            mustGetChannel(),
                             MetadataUtils.newCaptureMetadataInterceptor(headers, trailers),
                             MetadataUtils.newAttachHeadersInterceptor(
                                     headerConverter.toMetadata(request.headers().asHttpHeaders())));
@@ -268,5 +265,12 @@ public class DefaultReactiveTranscoder
         if (channel != null) {
             shutdown(channel, Duration.ofSeconds(15));
         }
+    }
+
+    Channel mustGetChannel() {
+        if (channel == null) {
+            throw new IllegalStateException("Channel not initialized");
+        }
+        return channel;
     }
 }

@@ -445,11 +445,11 @@ class Util {
     }
 
     record Route<T>(
-            @Nonnull HttpRule httpRule,
-            @Nonnull MethodDescriptor<?, ?> invokeMethod,
-            @Nonnull Descriptors.MethodDescriptor methodDescriptor,
-            @Nonnull Predicate<T> predicate,
-            @Nonnull List<Predicate<T>> additionalPredicates) {}
+            HttpRule httpRule,
+            MethodDescriptor<?, ?> invokeMethod,
+            Descriptors.MethodDescriptor methodDescriptor,
+            Predicate<T> predicate,
+            List<Predicate<T>> additionalPredicates) {}
 
     record ServletPredicate(HttpMethod httpMethod, PathTemplate pathTemplate) implements Predicate<ServerRequest> {
 
