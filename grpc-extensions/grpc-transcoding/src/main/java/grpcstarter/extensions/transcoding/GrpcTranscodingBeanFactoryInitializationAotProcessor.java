@@ -17,7 +17,6 @@ import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContrib
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.ClassUtils;
@@ -27,24 +26,18 @@ import org.springframework.util.ClassUtils;
  *
  * @author Freeman
  */
-class GrpcTranscodingBeanFactoryInitializationAotProcessor
-        implements BeanFactoryInitializationAotProcessor, EnvironmentAware {
+class GrpcTranscodingBeanFactoryInitializationAotProcessor implements BeanFactoryInitializationAotProcessor {
 
-    @Nullable
-    private Environment env;
+    private final Environment env;
 
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.env = environment;
+    GrpcTranscodingBeanFactoryInitializationAotProcessor(Environment env) {
+        this.env = env;
     }
 
     @Nullable
     @Override
     public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
         return (generationContext, beanFactoryInitializationCode) -> {
-            if (env == null) {
-                return;
-            }
             var enabled = env.getProperty(GrpcTranscodingProperties.PREFIX + ".enabled", Boolean.class, true);
             if (!enabled) {
                 return;
