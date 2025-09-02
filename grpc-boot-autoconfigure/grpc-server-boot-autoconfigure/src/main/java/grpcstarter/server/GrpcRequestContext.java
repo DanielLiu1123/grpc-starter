@@ -6,7 +6,7 @@ import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import jakarta.annotation.Nonnull;
 import lombok.Data;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * @author Freeman

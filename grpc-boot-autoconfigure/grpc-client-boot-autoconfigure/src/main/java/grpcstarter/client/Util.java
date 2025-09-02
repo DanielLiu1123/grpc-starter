@@ -1,13 +1,13 @@
 package grpcstarter.client;
 
 import io.grpc.ManagedChannel;
-import jakarta.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.experimental.UtilityClass;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -83,7 +83,9 @@ class Util {
     public static String serviceName(Class<?> stubClass) {
         Field serviceNameField = ReflectionUtils.findField(stubClass.getEnclosingClass(), SERVICE_NAME);
         Assert.notNull(serviceNameField, SERVICE_NAME + " field not found");
-        return (String) ReflectionUtils.getField(serviceNameField, null);
+        Object serviceName = ReflectionUtils.getField(serviceNameField, null);
+        Assert.notNull(serviceName, "Service name field value is null");
+        return (String) serviceName;
     }
 
     public static GrpcClientProperties getProperties(Environment environment) {
@@ -163,8 +165,8 @@ class Util {
         }
     }
 
-    @Nullable
-    public static GrpcClientProperties.Channel findChannelByName(String name, GrpcClientProperties properties) {
+    public static GrpcClientProperties.@Nullable Channel findChannelByName(
+            String name, GrpcClientProperties properties) {
         for (var ch : properties.getChannels()) {
             if (Objects.equals(ch.getName(), name)) {
                 return ch;

@@ -2,6 +2,7 @@ dependencies {
     compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
     api("org.springframework:spring-web")
     api("com.fasterxml.jackson.core:jackson-databind")
+    api("org.springframework.boot:spring-boot-starter-json")
     api("com.google.protobuf:protobuf-java-util")
     api("com.google.api:api-common:${googleApiCommonVersion}")
 

@@ -2,12 +2,12 @@ package grpcstarter.server;
 
 import io.grpc.Context;
 import io.grpc.Metadata;
-import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import lombok.experimental.UtilityClass;
+import org.jspecify.annotations.Nullable;
 
 /**
  * @author Freeman

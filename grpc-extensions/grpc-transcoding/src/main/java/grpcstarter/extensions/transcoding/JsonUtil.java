@@ -5,18 +5,21 @@ import static grpcstarter.extensions.transcoding.Util.stringifySimpleValueMessag
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
+import jakarta.annotation.Nullable;
 import java.io.IOException;
 import lombok.experimental.UtilityClass;
 import org.springframework.beans.BeanUtils;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 /**
  * Utility class for JSON serialization, aimed to support both Java bean and Protobuf {@link Message}.
@@ -27,12 +30,17 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 class JsonUtil {
 
     private static final ObjectMapper om;
+
+    @Nullable
     private static JsonFormat.Printer printer;
 
     static {
-        om = new Jackson2ObjectMapperBuilder()
-                .failOnEmptyBeans(false)
-                .modules(new SimpleModule().addSerializer(new ProtoMessageSerializer()))
+        om = JsonMapper.builder()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                .configure(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS, false)
+                .addModules(new SimpleModule().addSerializer(new ProtoMessageSerializer()))
                 .build();
     }
 

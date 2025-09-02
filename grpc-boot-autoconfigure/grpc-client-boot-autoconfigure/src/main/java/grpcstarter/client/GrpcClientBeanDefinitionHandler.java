@@ -3,7 +3,7 @@ package grpcstarter.client;
 import io.grpc.stub.AbstractAsyncStub;
 import io.grpc.stub.AbstractBlockingStub;
 import io.grpc.stub.AbstractFutureStub;
-import jakarta.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.config.BeanDefinition;
 
 /**

@@ -128,7 +128,7 @@ public final class GrpcClientUtil {
     private static boolean isValid(GrpcClientProperties.Channel channelConfig) {
         return StringUtils.hasText(channelConfig.getAuthority())
                 || (channelConfig.getInProcess() != null
-                        && StringUtils.hasText(channelConfig.getInProcess().getName()));
+                        && StringUtils.hasText(channelConfig.getInProcess().name()));
     }
 
     /**

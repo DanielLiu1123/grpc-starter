@@ -2,12 +2,12 @@ package grpcstarter.extensions.test;
 
 import grpcstarter.server.GrpcServerProperties;
 import grpcstarter.server.GrpcServerStartedEvent;
-import jakarta.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -27,7 +27,9 @@ class GrpcTestBeanPostProcessor
 
     private final Map<Object, Boolean> beanToInjected = new IdentityHashMap<>();
 
+    @Nullable
     private BeanFactory beanFactory;
+
     private int port;
 
     @Nullable
@@ -55,10 +57,12 @@ class GrpcTestBeanPostProcessor
     @Override
     public void onApplicationEvent(GrpcServerStartedEvent event) {
         this.port = event.getSource().getPort();
-        this.inProcessName = Optional.ofNullable(
-                        beanFactory.getBean(GrpcServerProperties.class).getInProcess())
-                .map(GrpcServerProperties.InProcess::getName)
-                .orElse(null);
+        if (beanFactory != null) {
+            this.inProcessName = Optional.ofNullable(
+                            beanFactory.getBean(GrpcServerProperties.class).getInProcess())
+                    .map(GrpcServerProperties.InProcess::name)
+                    .orElse(null);
+        }
 
         beanToInjected.keySet().forEach(this::injectFields);
     }

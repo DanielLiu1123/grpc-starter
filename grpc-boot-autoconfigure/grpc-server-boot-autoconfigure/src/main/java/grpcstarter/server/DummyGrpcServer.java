@@ -1,5 +1,7 @@
 package grpcstarter.server;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Dummy gRPC server.
  *
@@ -34,6 +36,7 @@ public class DummyGrpcServer implements GrpcServer {
     }
 
     @Override
+    @Nullable
     public Object getServer() {
         return null;
     }

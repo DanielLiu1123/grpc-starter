@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.PropertyMapper;
@@ -44,7 +45,7 @@ public class GrpcClientProperties implements InitializingBean {
      *
      * <p> e.g. localhost:8080 </p>
      */
-    private String authority;
+    private @Nullable String authority;
     /**
      * Base packages to scan for gRPC stubs.
      *
@@ -62,7 +63,7 @@ public class GrpcClientProperties implements InitializingBean {
      *
      * @since 3.4.3.1
      */
-    private Class<? extends GrpcClientBeanDefinitionHandler> beanDefinitionHandler;
+    private @Nullable Class<? extends GrpcClientBeanDefinitionHandler> beanDefinitionHandler;
     /**
      * The clients used to register as Spring beans.
      *
@@ -82,21 +83,21 @@ public class GrpcClientProperties implements InitializingBean {
      * @see DataSize
      * @see GrpcUtil#DEFAULT_MAX_MESSAGE_SIZE
      */
-    private DataSize maxInboundMessageSize;
+    private @Nullable DataSize maxInboundMessageSize;
     /**
      * Default max outbound message size.
      *
      * @see DataSize
      * @see AbstractStub#withMaxOutboundMessageSize(int)
      */
-    private DataSize maxOutboundMessageSize;
+    private @Nullable DataSize maxOutboundMessageSize;
     /**
      * Default max metadata size, default value is 8KB.
      *
      * @see DataSize
      * @see GrpcUtil#DEFAULT_MAX_HEADER_LIST_SIZE
      */
-    private DataSize maxInboundMetadataSize;
+    private @Nullable DataSize maxInboundMetadataSize;
     /**
      * Default metadata will be added to all the gRPC requests.
      */
@@ -104,18 +105,18 @@ public class GrpcClientProperties implements InitializingBean {
     /**
      * In-process client configuration.
      */
-    private InProcess inProcess;
+    private @Nullable InProcess inProcess;
     /**
      * Channel shutdown timeout in milliseconds, default value is 5000.
      */
-    private Long shutdownTimeout = 5000L;
+    private @Nullable Long shutdownTimeout = 5000L;
     /**
      * TLS configuration.
      *
      * @deprecated Use {@link #sslBundle} instead. This will be removed in 3.6.0
      */
     @Deprecated(since = "3.5.3", forRemoval = true)
-    private Tls tls;
+    private @Nullable Tls tls;
     /**
      * SSL bundle name to use for secure connections.
      *
@@ -124,24 +125,24 @@ public class GrpcClientProperties implements InitializingBean {
      *
      * @since 3.5.3
      */
-    private String sslBundle;
+    private @Nullable String sslBundle;
     /**
      * Retry configuration.
      */
-    private Retry retry;
+    private @Nullable Retry retry;
     /**
      * Deadline after in milliseconds, default value is 5000.
      *
      * @see AbstractStub#withDeadline(Deadline)
      * @since 3.2.0
      */
-    private Long deadline;
+    private @Nullable Long deadline;
     /**
      * Compression configuration.
      *
      * @see AbstractStub#withCompression(String)
      */
-    private String compression;
+    private @Nullable String compression;
     /**
      * Channels configuration.
      */
@@ -166,27 +167,27 @@ public class GrpcClientProperties implements InitializingBean {
          *
          * <p> If not set, will be auto-generated.
          */
-        private String name;
+        private @Nullable String name;
         /**
          * Authority for this channel, use {@link GrpcClientProperties#authority} if not set.
          */
-        private String authority;
+        private @Nullable String authority;
         /**
          * Max inbound message size, use {@link GrpcClientProperties#maxInboundMessageSize} if not set.
          */
-        private DataSize maxInboundMessageSize;
+        private @Nullable DataSize maxInboundMessageSize;
         /**
          * Max outbound message size, use {@link GrpcClientProperties#maxOutboundMessageSize} if not set.
          */
-        private DataSize maxOutboundMessageSize;
+        private @Nullable DataSize maxOutboundMessageSize;
         /**
          * Max metadata size for this channel, use {@link GrpcClientProperties#maxInboundMetadataSize} if not set.
          */
-        private DataSize maxInboundMetadataSize;
+        private @Nullable DataSize maxInboundMetadataSize;
         /**
          * Channel shutdown timeout in milliseconds, use {@link GrpcClientProperties#shutdownTimeout} if not set.
          */
-        private Long shutdownTimeout;
+        private @Nullable Long shutdownTimeout;
         /**
          * Metadata to be added to the requests for this channel, will be merged with {@link GrpcClientProperties#metadata}.
          */
@@ -194,14 +195,14 @@ public class GrpcClientProperties implements InitializingBean {
         /**
          * In-process configuration for this channel, use {@link GrpcClientProperties#inProcess} if not set.
          */
-        private InProcess inProcess;
+        private @Nullable InProcess inProcess;
         /**
          * TLS configuration for this channel, use {@link GrpcClientProperties#tls} if not set.
          *
          * @deprecated Use {@link #sslBundle} instead. This will be removed in 3.6.0
          */
         @Deprecated(since = "3.5.3", forRemoval = true)
-        private Tls tls;
+        private @Nullable Tls tls;
         /**
          * SSL bundle name to use for secure connections for this channel.
          *
@@ -211,23 +212,23 @@ public class GrpcClientProperties implements InitializingBean {
          *
          * @since 3.5.3
          */
-        private String sslBundle;
+        private @Nullable String sslBundle;
         /**
          * Retry configuration for this channel, use {@link GrpcClientProperties#retry} if not set.
          */
-        private Retry retry;
+        private @Nullable Retry retry;
         /**
          * Deadline after in milliseconds, use {@link GrpcClientProperties#deadline} if not set.
          *
          * @see AbstractStub#withDeadline(Deadline)
          */
-        private Long deadline;
+        private @Nullable Long deadline;
         /**
          * Compression for this channel, use {@link GrpcClientProperties#compression} if not set.
          *
          * @see AbstractStub#withCompression(String)
          */
-        private String compression;
+        private @Nullable String compression;
         /**
          * gRPC stub classes to apply this channel.
          *
@@ -274,30 +275,32 @@ public class GrpcClientProperties implements InitializingBean {
         private List<String> services = new ArrayList<>();
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Metadata {
-        /**
-         * Header key.
-         */
-        private String key;
-        /**
-         * Header values.
-         */
-        private List<String> values = new ArrayList<>();
+    /**
+     * @param key    Header key.
+     * @param values Header values.
+     */
+    public record Metadata(String key, List<String> values) {
+        public Metadata {
+            if (!StringUtils.hasText(key)) {
+                throw new IllegalArgumentException("Metadata key must not be empty");
+            }
+            values = List.copyOf(values);
+        }
     }
 
-    @Data
-    public static class InProcess {
-        public static final String PREFIX = GrpcClientProperties.PREFIX + ".in-process";
+    /**
+     * @param name In-process client name.
+     *
+     *             <p> If set, will create an in-process channel by default, usually for testing. </p>
+     */
+    public record InProcess(String name) {
+        public InProcess {
+            if (!StringUtils.hasText(name)) {
+                throw new IllegalArgumentException("In-process name must not be empty");
+            }
+        }
 
-        /**
-         * In-process client name.
-         *
-         * <p> If set, will create an in-process channel by default, usually for testing. </p>
-         */
-        private String name;
+        public static final String PREFIX = GrpcClientProperties.PREFIX + ".in-process";
     }
 
     @Data
@@ -309,25 +312,25 @@ public class GrpcClientProperties implements InitializingBean {
          * @see io.grpc.ManagedChannelBuilder#enableRetry()
          * @see io.grpc.ManagedChannelBuilder#disableRetry()
          */
-        private Boolean enabled;
+        private @Nullable Boolean enabled;
         /**
          * Maximum number of attempts to retry.
          *
          * @see io.grpc.ManagedChannelBuilder#maxRetryAttempts(int)
          */
-        private Integer maxRetryAttempts;
+        private @Nullable Integer maxRetryAttempts;
         /**
          * The maximum number of retry buffer entries.
          *
          * @see io.grpc.ManagedChannelBuilder#retryBufferSize(long)
          */
-        private DataSize retryBufferSize;
+        private @Nullable DataSize retryBufferSize;
         /**
          * The maximum number of retry buffer entries per RPC.
          *
          * @see io.grpc.ManagedChannelBuilder#perRpcBufferLimit(long)
          */
-        private DataSize perRpcBufferLimit;
+        private @Nullable DataSize perRpcBufferLimit;
     }
 
     @Data
@@ -350,26 +353,26 @@ public class GrpcClientProperties implements InitializingBean {
          * @see io.grpc.TlsChannelCredentials.Builder#keyManager(InputStream, InputStream, String)
          * @see io.grpc.TlsChannelCredentials.Builder#keyManager(InputStream, InputStream)
          */
-        private KeyManager keyManager;
+        private @Nullable KeyManager keyManager;
         /**
          * @see io.grpc.TlsChannelCredentials.Builder#trustManager(InputStream)
          */
-        private TrustManager trustManager;
+        private @Nullable TrustManager trustManager;
 
         @Data
         public static class KeyManager {
             /**
              * @see TlsChannelCredentials.Builder#getCertificateChain()
              */
-            private Resource certChain;
+            private @Nullable Resource certChain;
             /**
              * @see TlsChannelCredentials.Builder#getPrivateKey()
              */
-            private Resource privateKey;
+            private @Nullable Resource privateKey;
             /**
              * @see TlsChannelCredentials.Builder#getPrivateKeyPassword()
              */
-            private String privateKeyPassword;
+            private @Nullable String privateKeyPassword;
         }
 
         @Data
@@ -377,7 +380,7 @@ public class GrpcClientProperties implements InitializingBean {
             /**
              * @see TlsChannelCredentials.Builder#getRootCertificates()
              */
-            private Resource rootCerts;
+            private @Nullable Resource rootCerts;
         }
     }
 
@@ -387,7 +390,6 @@ public class GrpcClientProperties implements InitializingBean {
     void merge() {
         PropertyMapper mapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
         for (Channel stub : channels) {
-            mapper.from(authority).when(e -> isNull(stub.getAuthority())).to(stub::setAuthority);
             mapper.from(maxInboundMessageSize)
                     .when(e -> isNull(stub.getMaxInboundMessageSize()))
                     .to(stub::setMaxInboundMessageSize);
@@ -409,9 +411,9 @@ public class GrpcClientProperties implements InitializingBean {
 
             // default + client specified
             LinkedHashMap<String, List<String>> total = metadata.stream()
-                    .collect(toMap(Metadata::getKey, Metadata::getValues, (oldV, newV) -> oldV, LinkedHashMap::new));
+                    .collect(toMap(Metadata::key, Metadata::values, (oldV, newV) -> oldV, LinkedHashMap::new));
             for (Metadata m : stub.getMetadata()) {
-                total.put(m.getKey(), m.getValues());
+                total.put(m.key(), m.values());
             }
             List<Metadata> merged = total.entrySet().stream()
                     .map(e -> new Metadata(e.getKey(), e.getValue()))
@@ -431,6 +433,9 @@ public class GrpcClientProperties implements InitializingBean {
         var names = new HashSet<String>();
         for (var channel : channels) {
             var name = channel.getName();
+            if (!StringUtils.hasText(name)) {
+                continue;
+            }
             if (names.contains(name)) {
                 throw new IllegalArgumentException("Duplicate channel name: " + name);
             }
@@ -453,8 +458,8 @@ public class GrpcClientProperties implements InitializingBean {
                 retry,
                 deadline,
                 compression,
-                null,
-                null,
-                null);
+                List.of(),
+                List.of(),
+                List.of());
     }
 }
