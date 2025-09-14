@@ -16,16 +16,16 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.server.test.client.TestRestTemplate;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.client.RestTestClient;
 import transcoding.SimpleServiceGrpc;
 import transcoding.TranscoderTest;
 
 class JsonTranscoderIT {
+
+    final RestTestClient client = RestTestClient.bindToServer().build();
 
     @ParameterizedTest
     @ValueSource(strings = {"SERVLET", "REACTIVE"})
@@ -37,63 +37,60 @@ class JsonTranscoderIT {
                 .web(WebApplicationType.valueOf(webType))
                 .run()) {
 
-            var client = new TestRestTemplate();
-
             // path alias
-            var resp = client.exchange(
-                    "http://localhost:" + port + "/v1/unaryrpc",
-                    HttpMethod.POST,
-                    new HttpEntity<>(
+            var resp = client.post()
+                    .uri("http://localhost:" + port + "/v1/unaryrpc")
+                    .body(
                             """
-                                    {
-                                        "requestMessage": "Hi"
-                                    }
-                                    """),
-                    String.class);
-            assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-            assertThat(resp.getHeaders().get("request-id")).containsExactly("001");
-            assertThat(resp.getBody()).isNotBlank();
-            assertThat(resp.getBody()).isEqualTo("""
+                            {
+                                "requestMessage": "Hi"
+                            }
+                            """)
+                    .exchange();
+
+            resp.expectStatus().isEqualTo(HttpStatus.OK);
+            resp.expectHeader().contentType(MediaType.APPLICATION_JSON);
+            resp.expectHeader().valueEquals("request-id", "001");
+            resp.expectBody(String.class).isEqualTo("""
                     {"responseMessage":"Hi, Hi"}""");
 
             // Additional path alias
-            resp = client.exchange("http://localhost:" + port + "/v1/unaryrpc/Hi", HttpMethod.GET, null, String.class);
-            assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-            assertThat(resp.getHeaders().get("request-id")).containsExactly("001");
-            assertThat(resp.getBody()).isNotBlank();
-            assertThat(resp.getBody()).isEqualTo("""
+            resp = client.get()
+                    .uri("http://localhost:" + port + "/v1/unaryrpc/Hi")
+                    .exchange();
+            resp.expectStatus().isEqualTo(HttpStatus.OK);
+            resp.expectHeader().contentType(MediaType.APPLICATION_JSON);
+            resp.expectHeader().valueEquals("request-id", "001");
+            resp.expectBody(String.class).isEqualTo("""
                     {"responseMessage":"Hi, Hi"}""");
 
             // wrapper type parses as JSON is simple value format
             // google.protobuf.StringValue convert to JSON, the result is "foo", not {"value":"foo"}
-            resp = client.exchange(
-                    "http://localhost:" + port + "/v1/unaryrpc",
-                    HttpMethod.POST,
-                    new HttpEntity<>(
+            resp = client.post()
+                    .uri("http://localhost:" + port + "/v1/unaryrpc")
+                    .body(
                             """
-                                    {
-                                        "int32_wrapper": 1
-                                    }
-                                    """),
-                    String.class);
-            assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
+                            {
+                                "int32_wrapper": 1
+                            }
+                            """)
+                    .exchange();
+
+            resp.expectStatus().isEqualTo(HttpStatus.OK);
 
             // test wrong format
-            resp = client.exchange(
-                    "http://localhost:" + port + "/v1/unaryrpc",
-                    HttpMethod.POST,
-                    new HttpEntity<>(
+            resp = client.post()
+                    .uri("http://localhost:" + port + "/v1/unaryrpc")
+                    .body(
                             """
-                                    {
-                                        "int32_wrapper": {
-                                            "value": 1
-                                        }
-                                    }
-                                    """),
-                    String.class);
-            assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+                            {
+                                "int32_wrapper": {
+                                    "value": 1
+                                }
+                            }
+                            """)
+                    .exchange();
+            resp.expectStatus().isEqualTo(HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -107,15 +104,13 @@ class JsonTranscoderIT {
                 .web(WebApplicationType.valueOf(webType))
                 .run()) {
 
-            var client = new TestRestTemplate();
+            var resp = client.post()
+                    .uri("http://localhost:" + port + "/transcoding.SimpleService/UseAnotherPackageRequestRpc")
+                    .exchange();
 
-            var resp = client.postForEntity(
-                    "http://localhost:" + port + "/transcoding.SimpleService/UseAnotherPackageRequestRpc",
-                    null,
-                    String.class);
-            assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(resp.getHeaders().getContentType()).hasToString("text/plain;charset=UTF-8");
-            assertThat(resp.getBody()).isEqualTo("Hello");
+            resp.expectStatus().isEqualTo(HttpStatus.OK);
+            resp.expectHeader().contentType("text/plain;charset=UTF-8");
+            resp.expectBody(String.class).isEqualTo("Hello");
         }
     }
 
@@ -129,16 +124,15 @@ class JsonTranscoderIT {
                 .web(WebApplicationType.valueOf(webType))
                 .run()) {
 
-            var client = new TestRestTemplate();
+            var resp = client.post()
+                    .uri("http://localhost:" + port + "/transcoding.SimpleService/UseSubMessageRequestRpc")
+                    .body("""
+                            {"message":"Hello"}""")
+                    .exchange();
 
-            var resp = client.postForEntity(
-                    "http://localhost:" + port + "/transcoding.SimpleService/UseSubMessageRequestRpc",
-                    new HttpEntity<>("""
-                            {"message":"Hello"}"""),
-                    String.class);
-            assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(resp.getHeaders().getContentType()).hasToString("application/json");
-            assertThat(resp.getBody()).isEqualTo("""
+            resp.expectStatus().isEqualTo(HttpStatus.OK);
+            resp.expectHeader().contentType(MediaType.APPLICATION_JSON);
+            resp.expectBody(String.class).isEqualTo("""
                     {"message":"Hello"}""");
         }
     }
@@ -153,23 +147,23 @@ class JsonTranscoderIT {
                 .web(WebApplicationType.valueOf(webType))
                 .run()) {
 
-            var client = new TestRestTemplate();
-
-            var resp = client.exchange(
-                    "http://localhost:" + port + "/v1/unaryrpc",
-                    HttpMethod.POST,
-                    new HttpEntity<>(
+            var resp = client.post()
+                    .uri("http://localhost:" + port + "/v1/unaryrpc")
+                    .body(
                             """
-                                    {
-                                        "requestMessage": "Hi"
-                                    }
-                                    """),
-                    String.class);
-            assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-            assertThat(resp.getBody()).isNotBlank();
-            assertThat(resp.getBody()).isEqualTo("""
-                    {"responseMessage":"Hi, Hi"}""");
+                            {
+                                "requestMessage": "Hi"
+                            }
+                            """)
+                    .exchange();
+
+            resp.expectStatus().isEqualTo(HttpStatus.OK);
+            resp.expectHeader().contentType(MediaType.APPLICATION_JSON);
+            resp.expectBody(String.class).value(body -> {
+                assertThat(body).isNotBlank();
+                assertThat(body).isEqualTo("""
+                        {"responseMessage":"Hi, Hi"}""");
+            });
         }
     }
 
@@ -183,23 +177,23 @@ class JsonTranscoderIT {
                 .web(WebApplicationType.valueOf(webType))
                 .run()) {
 
-            var client = new TestRestTemplate();
-
-            var resp = client.exchange(
-                    "http://localhost:" + port + "/v1/unaryrpc",
-                    HttpMethod.POST,
-                    new HttpEntity<>(
+            var resp = client.post()
+                    .uri("http://localhost:" + port + "/v1/unaryrpc")
+                    .body(
                             """
-                                    {
-                                        "requestMessage": "Hi"
-                                    }
-                                    """),
-                    String.class);
-            assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(resp.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-            assertThat(resp.getBody()).isNotBlank();
-            assertThat(resp.getBody()).isEqualTo("""
-                    {"responseMessage":"Hi, Hi"}""");
+                            {
+                                "requestMessage": "Hi"
+                            }
+                            """)
+                    .exchange();
+
+            resp.expectStatus().isEqualTo(HttpStatus.OK);
+            resp.expectHeader().contentType(MediaType.APPLICATION_JSON);
+            resp.expectBody(String.class).value(body -> {
+                assertThat(body).isNotBlank();
+                assertThat(body).isEqualTo("""
+                        {"responseMessage":"Hi, Hi"}""");
+            });
         }
     }
 

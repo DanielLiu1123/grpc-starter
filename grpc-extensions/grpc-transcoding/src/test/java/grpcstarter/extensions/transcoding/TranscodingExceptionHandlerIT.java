@@ -1,6 +1,5 @@
 package grpcstarter.extensions.transcoding;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -12,12 +11,12 @@ import io.grpc.testing.protobuf.SimpleResponse;
 import io.grpc.testing.protobuf.SimpleServiceGrpc;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.test.client.TestRestTemplate;
+import org.springframework.boot.web.server.test.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.web.servlet.function.ServerResponse;
 
 /**
@@ -32,15 +31,19 @@ class TranscodingExceptionHandlerIT {
             properties = "spring.main.web-application-type=servlet")
     class Servlet {
 
-        @Autowired
-        TestRestTemplate rest;
+        @LocalServerPort
+        int port;
+
+        final RestTestClient client = RestTestClient.bindToServer().build();
 
         @Test
         void testTranscodingExceptionResolver() {
-            var response = rest.postForEntity("/grpc.testing.SimpleService/UnaryRpc", null, String.class);
+            var response = client.post()
+                    .uri("http://localhost:" + port + "/grpc.testing.SimpleService/UnaryRpc")
+                    .exchange();
 
-            assertThat(response.getStatusCode()).isEqualTo(BAD_REQUEST);
-            assertThat(response.getBody()).isEqualTo("Ops!");
+            response.expectStatus().isEqualTo(BAD_REQUEST);
+            response.expectBody(String.class).isEqualTo("Ops!");
         }
     }
 
@@ -51,15 +54,19 @@ class TranscodingExceptionHandlerIT {
             properties = "spring.main.web-application-type=reactive")
     class Reactive {
 
-        @Autowired
-        TestRestTemplate rest;
+        @LocalServerPort
+        int port;
+
+        final RestTestClient client = RestTestClient.bindToServer().build();
 
         @Test
         void testTranscodingExceptionResolver() {
-            var response = rest.postForEntity("/grpc.testing.SimpleService/UnaryRpc", null, String.class);
+            var resp = client.post()
+                    .uri("http://localhost:" + port + "/grpc.testing.SimpleService/UnaryRpc")
+                    .exchange();
 
-            assertThat(response.getStatusCode()).isEqualTo(BAD_REQUEST);
-            assertThat(response.getBody()).isEqualTo("Ops!");
+            resp.expectStatus().isEqualTo(BAD_REQUEST);
+            resp.expectBody(String.class).isEqualTo("Ops!");
         }
     }
 
