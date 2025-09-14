@@ -162,7 +162,7 @@ class ProtoValidateBeanFactoryInitializationAotProcessor implements BeanFactoryI
 
     private static void registerReflectionForClassAndInnerClasses(ReflectionHints reflection, Class<?> clz) {
 
-        reflection.registerType(clz, MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_METHODS);
+        reflection.registerType(clz, MemberCategory.INVOKE_PUBLIC_METHODS);
 
         for (var declaredClass : clz.getDeclaredClasses()) {
             registerReflectionForClassAndInnerClasses(reflection, declaredClass);
