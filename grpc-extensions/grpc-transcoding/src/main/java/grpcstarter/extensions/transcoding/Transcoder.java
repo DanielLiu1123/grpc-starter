@@ -69,7 +69,7 @@ class Transcoder {
         // Using parameters when the body is not set.
 
         Map<String, String[]> parameters = variable.parameters();
-        if (!parameters.isEmpty()) {
+        if (parameters != null && !parameters.isEmpty()) {
             for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
                 String key = entry.getKey();
                 String[] values = entry.getValue();
@@ -109,7 +109,7 @@ class Transcoder {
         // The path variables **must not** refer to any repeated or mapped field,
         // because client libraries are not capable of handling such variable expansion.
         Map<String, String> pathVariables = variable.pathVariables();
-        if (!pathVariables.isEmpty()) {
+        if (pathVariables != null && !pathVariables.isEmpty()) {
             for (Map.Entry<String, String> entry : pathVariables.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue();
@@ -199,5 +199,6 @@ class Transcoder {
         return parser;
     }
 
-    public record Variable(byte[] body, Map<String, String[]> parameters, Map<String, String> pathVariables) {}
+    public record Variable(
+            byte[] body, @Nullable Map<String, String[]> parameters, @Nullable Map<String, String> pathVariables) {}
 }
