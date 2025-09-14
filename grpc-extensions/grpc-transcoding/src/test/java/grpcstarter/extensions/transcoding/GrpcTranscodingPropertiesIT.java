@@ -1,6 +1,5 @@
 package grpcstarter.extensions.transcoding;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
@@ -16,9 +15,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.server.test.client.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.web.servlet.client.RestTestClient;
 import transcoding.AddWhiteSpaceServiceGrpc;
 import transcoding.AddWhitespaceTest;
 import transcoding.PrintEnumServiceGrpc;
@@ -29,6 +28,8 @@ import transcoding.PrintEnumTest.PrintEnumResponse;
  * {@link GrpcTranscodingProperties} tester.
  */
 class GrpcTranscodingPropertiesIT {
+
+    final RestTestClient client = RestTestClient.bindToServer().build();
 
     /**
      * {@link GrpcTranscodingProperties#endpoint}
@@ -45,14 +46,12 @@ class GrpcTranscodingPropertiesIT {
                 .properties("grpc.transcoding.endpoint=localhost:" + (grpcPort - 1))
                 .run()) {
 
-            var rest = new TestRestTemplate();
+            var resp = client.post()
+                    .uri("http://localhost:%d/grpc.testing.SimpleService/UnaryRpc".formatted(httpPort))
+                    .body("{\"requestMessage\":\"World!\"}")
+                    .exchange();
 
-            var response = rest.postForEntity(
-                    "http://localhost:%d/grpc.testing.SimpleService/UnaryRpc".formatted(httpPort),
-                    "{\"requestMessage\":\"World!\"}",
-                    String.class);
-
-            assertThat(response.getStatusCode()).isEqualTo(SERVICE_UNAVAILABLE);
+            resp.expectStatus().isEqualTo(SERVICE_UNAVAILABLE);
         }
     }
 
@@ -69,18 +68,16 @@ class GrpcTranscodingPropertiesIT {
                 .properties("grpc.transcoding.auto-mapping=" + autoMapping)
                 .run()) {
 
-            var rest = new TestRestTemplate();
-
-            var response = rest.postForEntity(
-                    "http://localhost:%d/grpc.testing.SimpleService/UnaryRpc".formatted(port),
-                    "{\"requestMessage\":\"World!\"}",
-                    String.class);
+            var resp = client.post()
+                    .uri("http://localhost:%d/grpc.testing.SimpleService/UnaryRpc".formatted(port))
+                    .body("{\"requestMessage\":\"World!\"}")
+                    .exchange();
 
             if (autoMapping) {
-                assertThat(response.getStatusCode()).isEqualTo(OK);
-                assertThat(response.getBody()).isEqualTo("{\"responseMessage\":\"Hello World!\"}");
+                resp.expectStatus().isEqualTo(OK);
+                resp.expectBody(String.class).isEqualTo("{\"responseMessage\":\"Hello World!\"}");
             } else {
-                assertThat(response.getStatusCode()).isEqualTo(NOT_FOUND);
+                resp.expectStatus().isEqualTo(NOT_FOUND);
             }
         }
     }
@@ -92,34 +89,30 @@ class GrpcTranscodingPropertiesIT {
     @ValueSource(booleans = {true, false})
     void testAddWhitespace(boolean addWhitespace) {
         int port = findAvailableTcpPort();
-        var ctx = new SpringApplicationBuilder(GrpcTranscodingPropertiesIT.Cfg.class)
+        try (var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties("server.port=" + port)
                 .properties("grpc.server.in-process.name=" + UUID.randomUUID())
                 .properties("grpc.transcoding.print-options.add-whitespace=" + addWhitespace)
-                .run();
+                .run()) {
 
-        var rest = new TestRestTemplate();
+            var resp = client.post()
+                    .uri("http://localhost:%d/transcoding.AddWhiteSpaceService/AddWhiteSpace".formatted(port))
+                    .exchange();
 
-        var response = rest.postForEntity(
-                "http://localhost:%d/transcoding.AddWhiteSpaceService/AddWhiteSpace".formatted(port),
-                null,
-                String.class);
-
-        if (addWhitespace) {
-            assertThat(response.getStatusCode()).isEqualTo(OK);
-            assertThat(response.getBody())
-                    .isEqualTo(
-                            """
-                    {
-                      "text": "Hello World!"
-                    }""");
-        } else {
-            assertThat(response.getStatusCode()).isEqualTo(OK);
-            assertThat(response.getBody()).isEqualTo("""
-                    {"text":"Hello World!"}""");
+            if (addWhitespace) {
+                resp.expectStatus().isEqualTo(OK);
+                resp.expectBody(String.class)
+                        .isEqualTo(
+                                """
+                                {
+                                  "text": "Hello World!"
+                                }""");
+            } else {
+                resp.expectStatus().isEqualTo(OK);
+                resp.expectBody(String.class).isEqualTo("""
+                                {"text":"Hello World!"}""");
+            }
         }
-
-        ctx.close();
     }
 
     /**
@@ -135,18 +128,17 @@ class GrpcTranscodingPropertiesIT {
                 .properties("grpc.transcoding.print-options.always-print-enums-as-ints=" + alwaysPrintEnumsAsInts)
                 .run()) {
 
-            var rest = new TestRestTemplate();
-
-            var response = rest.postForEntity(
-                    "http://localhost:%d/transcoding.PrintEnumService/PrintEnum".formatted(port), null, String.class);
+            var resp = client.post()
+                    .uri("http://localhost:%d/transcoding.PrintEnumService/PrintEnum".formatted(port))
+                    .exchange();
 
             if (alwaysPrintEnumsAsInts) {
-                assertThat(response.getStatusCode()).isEqualTo(OK);
-                assertThat(response.getBody()).isEqualTo("""
+                resp.expectStatus().isEqualTo(OK);
+                resp.expectBody(String.class).isEqualTo("""
                         {"enum":1}""");
             } else {
-                assertThat(response.getStatusCode()).isEqualTo(OK);
-                assertThat(response.getBody()).isEqualTo("""
+                resp.expectStatus().isEqualTo(OK);
+                resp.expectBody(String.class).isEqualTo("""
                         {"enum":"V1"}""");
             }
         }
