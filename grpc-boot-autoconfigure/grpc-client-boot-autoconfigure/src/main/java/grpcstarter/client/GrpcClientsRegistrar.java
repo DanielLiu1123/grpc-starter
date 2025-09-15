@@ -16,13 +16,14 @@ class GrpcClientsRegistrar implements ImportBeanDefinitionRegistrar {
     @Override
     @SuppressWarnings("unchecked")
     public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
-        Map<String, Object> attrs = Optional.ofNullable(
-                        metadata.getAnnotationAttributes(EnableGrpcClients.class.getName()))
+        var attrs = Optional.ofNullable(metadata.getAnnotationAttributes(EnableGrpcClients.class.getName()))
                 .orElse(Map.of());
 
         // Shouldn't scan basePackages when using 'clients' property
-        String[] basePackages = (String[]) attrs.getOrDefault("value", new String[0]);
-        Class<?>[] clientClasses = (Class<?>[]) attrs.getOrDefault("clients", new Class<?>[0]);
+        String[] basePackages =
+                Optional.ofNullable((String[]) attrs.get("value")).orElseGet(() -> new String[0]);
+        Class<?>[] clientClasses =
+                Optional.ofNullable((Class<?>[]) attrs.get("clients")).orElseGet(() -> new Class[0]);
         Class<? extends GrpcClientBeanDefinitionHandler> beanDefinitionHandler =
                 (Class<? extends GrpcClientBeanDefinitionHandler>) attrs.get("beanDefinitionHandler");
 
