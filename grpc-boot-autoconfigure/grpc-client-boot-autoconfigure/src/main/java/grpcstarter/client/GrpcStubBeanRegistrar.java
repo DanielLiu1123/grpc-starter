@@ -105,9 +105,7 @@ class GrpcStubBeanRegistrar {
 
     private static boolean isGrpcStub(MetadataReader mr) {
         ClassMetadata cm = mr.getClassMetadata();
-        boolean isStub = cm.hasSuperClass()
-                && cm.hasEnclosingClass()
-                && cm.getClassName().endsWith("Stub");
+        boolean isStub = cm.hasSuperClass() && cm.getClassName().endsWith("Stub");
         if (!isStub) {
             return false;
         }
