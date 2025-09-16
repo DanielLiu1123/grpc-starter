@@ -1,5 +1,6 @@
 package grpcstarter.extensions.transcoding;
 
+import javax.annotation.Nullable;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -21,6 +22,7 @@ public class GrpcTranscodingProperties {
      *
      * <p> In most cases, do not need to set this property explicitly.
      */
+    @Nullable
     private String endpoint;
 
     /**

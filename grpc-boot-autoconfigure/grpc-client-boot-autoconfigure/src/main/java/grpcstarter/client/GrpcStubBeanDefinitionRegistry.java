@@ -1,5 +1,6 @@
 package grpcstarter.client;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -18,6 +19,7 @@ class GrpcStubBeanDefinitionRegistry implements BeanDefinitionRegistryPostProces
 
     static final ScanInfo scanInfo = new ScanInfo();
 
+    @Nullable
     private Environment environment;
 
     @Override
@@ -27,6 +29,9 @@ class GrpcStubBeanDefinitionRegistry implements BeanDefinitionRegistryPostProces
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+        if (environment == null) {
+            return;
+        }
         boolean enabled = environment.getProperty(GrpcClientProperties.PREFIX + ".enabled", Boolean.class, true);
         if (!enabled) {
             return;
@@ -41,7 +46,9 @@ class GrpcStubBeanDefinitionRegistry implements BeanDefinitionRegistryPostProces
 
     private void registerChannels(BeanDefinitionRegistry registry, GrpcClientProperties properties) {
         var bf = (DefaultListableBeanFactory) registry;
-        GrpcClientUtil.registerGrpcChannelBeans(bf, environment, properties);
+        if (environment != null) {
+            GrpcClientUtil.registerGrpcChannelBeans(bf, environment, properties);
+        }
     }
 
     private void registerStubs(GrpcStubBeanRegistrar registrar, GrpcClientProperties properties) {

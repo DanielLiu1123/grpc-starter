@@ -17,6 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 
 /**
@@ -120,7 +121,8 @@ public class GrpcTranscodingAutoConfiguration implements SmartInitializingSingle
 
     // AOT support
     @Bean
-    static GrpcTranscodingBeanFactoryInitializationAotProcessor grpcTranscodingBeanFactoryInitializationAotProcessor() {
-        return new GrpcTranscodingBeanFactoryInitializationAotProcessor();
+    static GrpcTranscodingBeanFactoryInitializationAotProcessor grpcTranscodingBeanFactoryInitializationAotProcessor(
+            Environment environment) {
+        return new GrpcTranscodingBeanFactoryInitializationAotProcessor(environment);
     }
 }

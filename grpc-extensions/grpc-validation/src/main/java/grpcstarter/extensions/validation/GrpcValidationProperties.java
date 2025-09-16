@@ -1,6 +1,7 @@
 package grpcstarter.extensions.validation;
 
 import lombok.Data;
+import org.jspecify.annotations.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -29,6 +30,7 @@ public class GrpcValidationProperties {
     /**
      * Validation implementation.
      */
+    @Nullable
     private Backend backend;
 
     @Data
