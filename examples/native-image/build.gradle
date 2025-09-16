@@ -4,14 +4,8 @@ plugins {
 }
 
 dependencies {
-    // Do NOT use shaded libraries, as it is not supported by GraalVM native-image.
-    // Netty supports GraalVM native-image, but grpc-netty-shaded does not.
-    // Let grpc-netty-shaded support GraalVM native-image is not in the scope of this project.
-    // grpc-netty-shaded is needed to solve this problem.
-    implementation(project(":grpc-starters:grpc-boot-starter")){
-        exclude(group: 'io.grpc', module: "grpc-netty-shaded")
-    }
-    runtimeOnly("io.grpc:grpc-netty")
+    // grpc-netty is now used by default, which supports GraalVM native-image
+    implementation(project(":grpc-starters:grpc-boot-starter"))
 
     implementation("io.grpc:grpc-testing-proto")
 
