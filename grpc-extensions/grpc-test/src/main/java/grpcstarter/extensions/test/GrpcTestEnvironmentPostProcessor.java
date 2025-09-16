@@ -31,8 +31,11 @@ public class GrpcTestEnvironmentPostProcessor implements EnvironmentPostProcesso
             return;
         }
 
-        SpringBootTest anno =
-                AnnotationUtils.findAnnotation(application.getMainApplicationClass(), SpringBootTest.class);
+        Class<?> mainApplicationClass = application.getMainApplicationClass();
+        if (mainApplicationClass == null) {
+            return;
+        }
+        SpringBootTest anno = AnnotationUtils.findAnnotation(mainApplicationClass, SpringBootTest.class);
         if (anno == null) {
             return;
         }

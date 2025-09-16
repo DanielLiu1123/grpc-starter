@@ -8,7 +8,9 @@ dependencies {
     implementation(project(":grpc-starters:grpc-starter-tracing"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("io.micrometer:micrometer-tracing-bridge-brave")
+    implementation("org.springframework.boot:spring-boot-starter-restclient")
+    implementation("io.micrometer:micrometer-tracing-bridge-otel")
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
 
     testImplementation(project(":grpc-starters:grpc-starter-test"))
 }

@@ -8,6 +8,7 @@ on:
       - main
     paths:
       - 'website/**'
+      - '.github/workflows/deploy-docs.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,7 +22,7 @@ jobs:
       run:
         working-directory: ./website
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v4

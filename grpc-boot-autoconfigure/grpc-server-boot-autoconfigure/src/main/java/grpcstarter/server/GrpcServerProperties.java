@@ -3,12 +3,12 @@ package grpcstarter.server;
 import grpcstarter.server.feature.exceptionhandling.annotation.DefaultGrpcExceptionAdvice;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
-import io.grpc.TlsServerCredentials;
 import io.grpc.internal.GrpcUtil;
 import io.grpc.protobuf.services.ChannelzService;
 import io.grpc.services.AdminInterface;
 import java.io.InputStream;
 import lombok.Data;
+import org.jspecify.annotations.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.util.unit.DataSize;
@@ -60,16 +60,19 @@ public class GrpcServerProperties {
      *
      * @see GrpcUtil#DEFAULT_MAX_MESSAGE_SIZE
      */
+    @Nullable
     private DataSize maxInboundMessageSize;
     /**
      * The maximum size of metadata allowed to be received, default 8KB.
      *
      * @see GrpcUtil#DEFAULT_MAX_HEADER_LIST_SIZE
      */
+    @Nullable
     private DataSize maxInboundMetadataSize;
     /**
      * In-process server configuration.
      */
+    @Nullable
     private InProcess inProcess;
     /**
      * SSL bundle name for TLS configuration.
@@ -80,6 +83,7 @@ public class GrpcServerProperties {
      *
      * @since 3.5.3
      */
+    @Nullable
     private String sslBundle;
     /**
      * TLS configuration.
@@ -87,6 +91,7 @@ public class GrpcServerProperties {
      * @deprecated Use {@link #sslBundle} instead. This will be removed in 3.6.0
      */
     @Deprecated(since = "3.5.3", forRemoval = true)
+    @Nullable
     private Tls tls;
     /**
      * Response configuration.
@@ -137,7 +142,7 @@ public class GrpcServerProperties {
             /**
              * The timeout in seconds for {@link java.sql.Connection#isValid(int)}, use 0 if not set.
              */
-            private Integer timeout;
+            private @Nullable Integer timeout;
         }
 
         @Data
@@ -208,14 +213,11 @@ public class GrpcServerProperties {
         private boolean defaultExceptionAdviceEnabled = true;
     }
 
-    @Data
-    public static class InProcess {
+    /**
+     * @param name In-process server name, if configured, will create an in-process server, usually for testing.
+     */
+    public record InProcess(String name) {
         public static final String PREFIX = GrpcServerProperties.PREFIX + ".in-process";
-
-        /**
-         * In-process server name, if configured, will create an in-process server, usually for testing.
-         */
-        private String name;
     }
 
     @Data
@@ -226,35 +228,25 @@ public class GrpcServerProperties {
          * @see io.grpc.TlsServerCredentials.Builder#keyManager(InputStream, InputStream, String)
          * @see io.grpc.TlsServerCredentials.Builder#keyManager(InputStream, InputStream)
          */
+        @Nullable
         private KeyManager keyManager;
         /**
          * @see io.grpc.TlsServerCredentials.Builder#trustManager(InputStream)
          */
+        @Nullable
         private TrustManager trustManager;
 
-        @Data
-        public static class KeyManager {
-            /**
-             * @see TlsServerCredentials.Builder#getCertificateChain()
-             */
-            private Resource certChain;
-            /**
-             * @see TlsServerCredentials.Builder#getPrivateKey()
-             */
-            private Resource privateKey;
-            /**
-             * @see TlsServerCredentials.Builder#getPrivateKeyPassword()
-             */
-            private String privateKeyPassword;
-        }
+        /**
+         * @param certChain
+         * @param privateKey
+         * @param privateKeyPassword
+         */
+        public record KeyManager(Resource certChain, Resource privateKey, String privateKeyPassword) {}
 
-        @Data
-        public static class TrustManager {
-            /**
-             * @see TlsServerCredentials.Builder#getRootCertificates()
-             */
-            private Resource rootCerts;
-        }
+        /**
+         * @param rootCerts
+         */
+        public record TrustManager(Resource rootCerts) {}
     }
 
     @Data

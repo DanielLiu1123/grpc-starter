@@ -9,7 +9,7 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
-import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -19,6 +19,7 @@ import java.util.Optional;
  */
 class Transcoder {
 
+    @Nullable
     private static JsonFormat.Parser parser;
 
     private final Variable variable;
@@ -31,17 +32,15 @@ class Transcoder {
         return new Transcoder(variable);
     }
 
-    public void into(@Nonnull Message.Builder messageBuilder, @Nonnull HttpRule httpRule)
-            throws InvalidProtocolBufferException {
+    public void into(Message.Builder messageBuilder, HttpRule httpRule) throws InvalidProtocolBufferException {
 
         // The special name `*` can be used in the body mapping to define that
         // every field not bound by the path template should be mapped to the
         // request body.
 
         if (!httpRule.getBody().isBlank()) {
-            var bodyStringOpt = Optional.ofNullable(variable.body())
-                    .map(e -> new String(e, UTF_8))
-                    .filter(e -> !e.isBlank());
+            var bodyStringOpt =
+                    Optional.of(variable.body()).map(e -> new String(e, UTF_8)).filter(e -> !e.isBlank());
             if (bodyStringOpt.isPresent()) {
                 if (Objects.equals(httpRule.getBody(), "*")) {
                     merge(messageBuilder, bodyStringOpt.get());
@@ -123,7 +122,7 @@ class Transcoder {
         }
     }
 
-    public Object out(@Nonnull Message response, @Nonnull HttpRule httpRule) {
+    public Object out(Message response, HttpRule httpRule) {
         if (!httpRule.getResponseBody().isBlank()) {
             Descriptors.FieldDescriptor field =
                     response.getDescriptorForType().findFieldByName(httpRule.getResponseBody());
@@ -138,18 +137,21 @@ class Transcoder {
         getParser().merge(bodyString, messageBuilder);
     }
 
-    private static boolean hasBuilder(Descriptors.FieldDescriptor field) {
+    private static boolean hasBuilder(@Nullable Descriptors.FieldDescriptor field) {
         return field != null && !field.isRepeated() && !field.isMapField() && field.getType() == Type.MESSAGE;
     }
 
-    private static void setValueField(Message.Builder lastBuilder, Descriptors.FieldDescriptor field, String values) {
+    private static void setValueField(
+            @Nullable Message.Builder lastBuilder,
+            @Nullable Descriptors.FieldDescriptor field,
+            @Nullable String values) {
         if (lastBuilder == null || field == null || values == null) return;
         if (isValueType(field)) {
             lastBuilder.setField(field, parseValue(field, values));
         }
     }
 
-    private static boolean isValueType(Descriptors.FieldDescriptor field) {
+    private static boolean isValueType(@Nullable Descriptors.FieldDescriptor field) {
         return field != null
                 && switch (field.getJavaType()) {
                     case INT, LONG, FLOAT, DOUBLE, BOOLEAN, STRING, BYTE_STRING, ENUM -> true;
@@ -197,5 +199,6 @@ class Transcoder {
         return parser;
     }
 
-    public record Variable(byte[] body, Map<String, String[]> parameters, Map<String, String> pathVariables) {}
+    public record Variable(
+            byte[] body, @Nullable Map<String, String[]> parameters, @Nullable Map<String, String> pathVariables) {}
 }
