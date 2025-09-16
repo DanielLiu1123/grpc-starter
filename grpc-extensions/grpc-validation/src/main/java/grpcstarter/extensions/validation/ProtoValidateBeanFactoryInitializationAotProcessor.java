@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.jspecify.annotations.Nullable;
-import org.projectnessie.cel.common.ULong;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -38,6 +37,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -74,6 +74,9 @@ class ProtoValidateBeanFactoryInitializationAotProcessor implements BeanFactoryI
                 }
             }
 
+            // fixes 'Generated message class "dev.cel.expr.Type" missing method "getDyn"'
+            registerReflectionForClassAndInnerClasses(reflection, "dev.cel.expr.Type"); // dev.cel:cel
+
             // see org.projectnessie.cel.common.types.pb.Db
             registerReflectionForClassAndInnerClasses(reflection, Any.class);
             registerReflectionForClassAndInnerClasses(reflection, Any[].class);
@@ -97,8 +100,6 @@ class ProtoValidateBeanFactoryInitializationAotProcessor implements BeanFactoryI
 
             registerReflectionForClassAndInnerClasses(reflection, DynamicMessage.class);
             registerReflectionForClassAndInnerClasses(reflection, DynamicMessage[].class);
-
-            registerReflectionForClassAndInnerClasses(reflection, ULong[].class);
 
             // request + response messages
             var messageClasses = listGrpcServiceDefinition(beanFactory).values().stream()
@@ -167,6 +168,13 @@ class ProtoValidateBeanFactoryInitializationAotProcessor implements BeanFactoryI
         for (var declaredClass : clz.getDeclaredClasses()) {
             registerReflectionForClassAndInnerClasses(reflection, declaredClass);
         }
+    }
+
+    private static void registerReflectionForClassAndInnerClasses(ReflectionHints reflection, String className) {
+        if (!ClassUtils.isPresent(className, null)) {
+            return;
+        }
+        registerReflectionForClassAndInnerClasses(reflection, ClassUtils.resolveClassName(className, null));
     }
 
     private static ClassPathScanningCandidateComponentProvider getScanner() {

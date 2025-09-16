@@ -24,6 +24,7 @@ class ProtoValidateAppTest {
                 .setId("00001")
                 .setName("Freeman")
                 .addHobbies("Coding")
+                .setNested(Foo.NestedMessage.newBuilder().setMsg("11111").build())
                 .build());
         assertThat(foo.getId()).isEqualTo("00001");
         assertThat(foo.getName()).isEqualTo("Freeman");
@@ -32,11 +33,16 @@ class ProtoValidateAppTest {
     @Test
     void testInsertFoo_whenInvalidArgument() {
         FooServiceBlockingStub stub = StubUtil.createStub(name, FooServiceBlockingStub.class);
-        assertThatCode(() -> stub.insertFoo(
-                        Foo.newBuilder().setId("00001").setName("Free").build()))
+        assertThatCode(() -> stub.insertFoo(Foo.newBuilder()
+                        .setId("00001")
+                        .setName("Free")
+                        .setNested(Foo.NestedMessage.newBuilder()
+                                .setMsg("1111") // invalid, at least 5 characters
+                                .build())
+                        .build()))
                 .isInstanceOf(StatusRuntimeException.class)
                 .hasMessage(
-                        "INVALID_ARGUMENT: name: value length must be at least 5 characters, hobbies: value must contain at least 1 item(s)");
+                        "INVALID_ARGUMENT: name: value length must be at least 5 characters, hobbies: value must contain at least 1 item(s), nested.msg: value length must be at least 5 characters");
     }
 
     @Test
@@ -46,6 +52,8 @@ class ProtoValidateAppTest {
                         .setId("") // invalid
                         .setName("aaaaa") // invalid
                         .addHobbies("movies")
+                        .setNested(
+                                Foo.NestedMessage.newBuilder().setMsg("11111").build())
                         .build()))
                 .isInstanceOf(StatusRuntimeException.class)
                 .hasMessage("INVALID_ARGUMENT: not a valid Foo, id: at least 5 characters");
@@ -54,6 +62,8 @@ class ProtoValidateAppTest {
                         .setId("") // invalid
                         .setName("aaaaaa")
                         .addHobbies("coding") // invalid
+                        .setNested(
+                                Foo.NestedMessage.newBuilder().setMsg("11111").build())
                         .build()))
                 .isInstanceOf(StatusRuntimeException.class)
                 .hasMessage("INVALID_ARGUMENT: not a valid Foo, id: at least 5 characters");
@@ -62,6 +72,8 @@ class ProtoValidateAppTest {
                         .setId("11111")
                         .setName("aaaaaa")
                         .addHobbies("movies")
+                        .setNested(
+                                Foo.NestedMessage.newBuilder().setMsg("11111").build())
                         .build()))
                 .doesNotThrowAnyException();
     }

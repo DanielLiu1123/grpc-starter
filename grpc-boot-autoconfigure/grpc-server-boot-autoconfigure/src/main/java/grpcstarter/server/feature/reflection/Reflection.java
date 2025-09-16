@@ -35,6 +35,7 @@ public class Reflection {
          */
         @Bean
         @ConditionalOnMissingBean
+        @SuppressWarnings("deprecation")
         public ProtoReflectionService legacyGrpcReflectionService() {
             return (ProtoReflectionService) ProtoReflectionService.newInstance();
         }
