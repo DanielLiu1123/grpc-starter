@@ -4,6 +4,7 @@ import io.grpc.stub.AbstractStub;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -23,6 +24,7 @@ import org.springframework.util.ObjectUtils;
 public class GrpcClientRefreshScopeRefreshedEventListener
         implements ApplicationListener<RefreshScopeRefreshedEvent>, BeanFactoryAware {
 
+    @Nullable
     private DefaultListableBeanFactory beanFactory;
 
     @Override
@@ -36,6 +38,9 @@ public class GrpcClientRefreshScopeRefreshedEventListener
     }
 
     private void refreshGrpcStubOptions() {
+        if (beanFactory == null) {
+            return;
+        }
         String[] beanNames = beanFactory.getBeanNamesForType(AbstractStub.class, false, false);
 
         List<String> grpcStubNames =

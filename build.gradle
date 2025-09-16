@@ -15,6 +15,7 @@ plugins {
     id "com.google.protobuf" version "${protobufGradlePluginVersion}" apply false
     id "org.graalvm.buildtools.native" version "${graalvmBuildToolsVersion}" apply false
     id "org.jreleaser" version "${jReleaserVersion}" apply false
+    id "io.spring.nullability" version "${nullabilityVersion}" apply false
 }
 
 allprojects {
@@ -42,6 +43,7 @@ allprojects {
     }
 
     repositories {
+        mavenLocal()
         mavenCentral()
         maven { url = "https://repo.spring.io/snapshot" }
         maven { url = "https://repo.spring.io/milestone" }
@@ -59,10 +61,8 @@ allprojects {
     test {
         systemProperties("spring.cloud.compatibility-verifier.enabled": "false")
         useJUnitPlatform()
-        dependencies {
-            // https://docs.gradle.org/current/userguide/upgrading_version_8.html#test_framework_implementation_dependencies
-            testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-        }
+
+        jvmArgs("-XX:+EnableDynamicAgentLoading")
     }
 
     afterEvaluate {
@@ -87,6 +87,8 @@ allprojects {
         testCompileOnly("org.projectlombok:lombok")
         testAnnotationProcessor("org.projectlombok:lombok")
         compileOnly("com.github.spotbugs:spotbugs-annotations:${spotbugsAnnotationsVersion}")
+        // https://docs.gradle.org/current/userguide/upgrading_version_8.html#test_framework_implementation_dependencies
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     }
 
     // spotless
@@ -117,6 +119,8 @@ allprojects {
         omitVisitors.addAll "FindReturnRef", "DontReusePublicIdentifiers"
         excludeFilter = file("${rootDir}/config/spotbugs/exclude.xml")
     }
+
+    apply plugin: "io.spring.nullability"
 }
 
 apply from: "${rootDir}/gradle/generate-configuration-properties-docs.gradle"

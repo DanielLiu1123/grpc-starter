@@ -18,7 +18,6 @@ import com.google.rpc.BadRequest;
 import io.grpc.BindableService;
 import io.grpc.stub.StreamObserver;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -27,6 +26,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -163,7 +163,7 @@ class ProtoValidateBeanFactoryInitializationAotProcessor implements BeanFactoryI
 
     private static void registerReflectionForClassAndInnerClasses(ReflectionHints reflection, Class<?> clz) {
 
-        reflection.registerType(clz, MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_METHODS);
+        reflection.registerType(clz, MemberCategory.INVOKE_PUBLIC_METHODS);
 
         for (var declaredClass : clz.getDeclaredClasses()) {
             registerReflectionForClassAndInnerClasses(reflection, declaredClass);

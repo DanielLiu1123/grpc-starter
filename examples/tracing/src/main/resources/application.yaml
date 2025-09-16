@@ -10,11 +10,9 @@ grpc:
     authority: localhost:${grpc.server.port:9090}
 
 management:
-  zipkin:
+  otlp:
     tracing:
-      endpoint: http://localhost:9411/api/v2/spans
+      endpoint: http://localhost:4317
   tracing:
     sampling:
       probability: 1.0
-
-debug: true

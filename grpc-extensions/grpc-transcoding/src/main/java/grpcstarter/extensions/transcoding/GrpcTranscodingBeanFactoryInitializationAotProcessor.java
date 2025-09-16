@@ -3,8 +3,6 @@ package grpcstarter.extensions.transcoding;
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Message;
 import io.grpc.BindableService;
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -12,13 +10,13 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import lombok.SneakyThrows;
+import org.jspecify.annotations.Nullable;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.ClassUtils;
@@ -28,20 +26,17 @@ import org.springframework.util.ClassUtils;
  *
  * @author Freeman
  */
-class GrpcTranscodingBeanFactoryInitializationAotProcessor
-        implements BeanFactoryInitializationAotProcessor, EnvironmentAware {
+class GrpcTranscodingBeanFactoryInitializationAotProcessor implements BeanFactoryInitializationAotProcessor {
 
-    private Environment env;
+    private final Environment env;
 
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.env = environment;
+    GrpcTranscodingBeanFactoryInitializationAotProcessor(Environment env) {
+        this.env = env;
     }
 
     @Nullable
     @Override
-    public BeanFactoryInitializationAotContribution processAheadOfTime(
-            @Nonnull ConfigurableListableBeanFactory beanFactory) {
+    public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
         return (generationContext, beanFactoryInitializationCode) -> {
             var enabled = env.getProperty(GrpcTranscodingProperties.PREFIX + ".enabled", Boolean.class, true);
             if (!enabled) {
@@ -51,7 +46,8 @@ class GrpcTranscodingBeanFactoryInitializationAotProcessor
             var reflection = generationContext.getRuntimeHints().reflection();
 
             // See grpcstarter.extensions.transcoding.DefaultHeaderConverter.getHttpHeaders
-            reflection.registerType(HttpHeaders.class, builder -> builder.withMembers(MemberCategory.PUBLIC_FIELDS));
+            reflection.registerType(
+                    HttpHeaders.class, builder -> builder.withMembers(MemberCategory.ACCESS_PUBLIC_FIELDS));
 
             // This will increase the packaging size about 2MB.
             // I don't know why this type is needed, don't want to spend much time to figure it out :)
@@ -64,7 +60,7 @@ class GrpcTranscodingBeanFactoryInitializationAotProcessor
 
     private static void registerReflectionForClassAndInnerClasses(ReflectionHints reflection, Class<?> clz) {
 
-        reflection.registerType(clz, MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_METHODS);
+        reflection.registerType(clz, MemberCategory.INVOKE_PUBLIC_METHODS);
 
         for (var declaredClass : clz.getDeclaredClasses()) {
             registerReflectionForClassAndInnerClasses(reflection, declaredClass);
@@ -120,17 +116,16 @@ class GrpcTranscodingBeanFactoryInitializationAotProcessor
         for (var message : messages) {
 
             // register the message and its builder
-            reflection.registerType(
-                    message, MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_METHODS);
+            reflection.registerType(message, MemberCategory.INVOKE_PUBLIC_METHODS);
 
             var builderClass = getBuilderClass(message);
             if (builderClass != null) {
-                reflection.registerType(
-                        builderClass, MemberCategory.INTROSPECT_PUBLIC_METHODS, MemberCategory.INVOKE_PUBLIC_METHODS);
+                reflection.registerType(builderClass, MemberCategory.INVOKE_PUBLIC_METHODS);
             }
         }
     }
 
+    @Nullable
     private static Class<?> getBuilderClass(Class<?> message) {
         try {
             return ClassUtils.forName(message.getName() + "$Builder", null);
