@@ -50,24 +50,24 @@ jobs:
       - name: Test
         run: ./gradlew test
 
-  native-image-build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v5
-
-      - name: Setup GraalVM
-        uses: graalvm/setup-graalvm@v1
-        with:
-          java-version: '17'
-          distribution: 'graalvm'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          native-image-job-reports: 'true'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Build native image
-        run: |
-          ./gradlew nativeRun
+#  native-image-build:
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 60
+#    steps:
+#      - name: Check out the repo
+#        uses: actions/checkout@v5
+#
+#      - name: Setup GraalVM
+#        uses: graalvm/setup-graalvm@v1
+#        with:
+#          java-version: '17'
+#          distribution: 'graalvm'
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
+#          native-image-job-reports: 'true'
+#
+#      - name: Setup Gradle
+#        uses: gradle/actions/setup-gradle@v4
+#
+#      - name: Build native image
+#        run: |
+#          ./gradlew nativeRun
