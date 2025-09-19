@@ -1,6 +1,5 @@
 package grpcstarter.client;
 
-import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toMap;
 
 import io.grpc.Deadline;
@@ -20,7 +19,6 @@ import lombok.NoArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.PropertyMapper;
 import org.springframework.core.io.Resource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
@@ -388,37 +386,48 @@ public class GrpcClientProperties implements InitializingBean {
      * Merge default properties with channel specified properties.
      */
     void merge() {
-        PropertyMapper mapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
-        for (Channel stub : channels) {
-            mapper.from(maxInboundMessageSize)
-                    .when(e -> isNull(stub.getMaxInboundMessageSize()))
-                    .to(stub::setMaxInboundMessageSize);
-            mapper.from(maxOutboundMessageSize)
-                    .when(e -> isNull(stub.getMaxOutboundMessageSize()))
-                    .to(stub::setMaxOutboundMessageSize);
-            mapper.from(maxInboundMetadataSize)
-                    .when(e -> isNull(stub.getMaxInboundMetadataSize()))
-                    .to(stub::setMaxInboundMetadataSize);
-            mapper.from(shutdownTimeout)
-                    .when(e -> isNull(stub.getShutdownTimeout()))
-                    .to(stub::setShutdownTimeout);
-            mapper.from(inProcess).when(e -> isNull(stub.getInProcess())).to(stub::setInProcess);
-            mapper.from(tls).when(e -> isNull(stub.getTls())).to(stub::setTls);
-            mapper.from(sslBundle).when(e -> isNull(stub.getSslBundle())).to(stub::setSslBundle);
-            mapper.from(retry).when(e -> isNull(stub.getRetry())).to(stub::setRetry);
-            mapper.from(deadline).when(e -> isNull(stub.getDeadline())).to(stub::setDeadline);
-            mapper.from(compression).when(e -> isNull(stub.getCompression())).to(stub::setCompression);
+        for (Channel channel : channels) {
+            if (channel.getMaxInboundMessageSize() == null) {
+                channel.setMaxInboundMessageSize(maxInboundMessageSize);
+            }
+            if (channel.getMaxOutboundMessageSize() == null) {
+                channel.setMaxOutboundMessageSize(maxOutboundMessageSize);
+            }
+            if (channel.getMaxInboundMetadataSize() == null) {
+                channel.setMaxInboundMetadataSize(maxInboundMetadataSize);
+            }
+            if (channel.getShutdownTimeout() == null) {
+                channel.setShutdownTimeout(shutdownTimeout);
+            }
+            if (channel.getInProcess() == null) {
+                channel.setInProcess(inProcess);
+            }
+            if (channel.getTls() == null) {
+                channel.setTls(tls);
+            }
+            if (channel.getSslBundle() == null) {
+                channel.setSslBundle(sslBundle);
+            }
+            if (channel.getRetry() == null) {
+                channel.setRetry(retry);
+            }
+            if (channel.getDeadline() == null) {
+                channel.setDeadline(deadline);
+            }
+            if (channel.getCompression() == null) {
+                channel.setCompression(compression);
+            }
 
             // default + client specified
             LinkedHashMap<String, List<String>> total = metadata.stream()
                     .collect(toMap(Metadata::key, Metadata::values, (oldV, newV) -> oldV, LinkedHashMap::new));
-            for (Metadata m : stub.getMetadata()) {
+            for (Metadata m : channel.getMetadata()) {
                 total.put(m.key(), m.values());
             }
             List<Metadata> merged = total.entrySet().stream()
                     .map(e -> new Metadata(e.getKey(), e.getValue()))
                     .collect(Collectors.toList());
-            stub.setMetadata(merged);
+            channel.setMetadata(merged);
         }
     }
 
