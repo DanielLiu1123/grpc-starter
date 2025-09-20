@@ -36,9 +36,6 @@ class GrpcClientPropertiesTest {
             retry.setMaxRetryAttempts(3);
             properties.setRetry(retry);
 
-            var tls = new GrpcClientProperties.Tls();
-            properties.setTls(tls);
-
             var defaultMetadata = List.of(new GrpcClientProperties.Metadata("default-key", List.of("default-value")));
             properties.setMetadata(defaultMetadata);
 
@@ -60,7 +57,7 @@ class GrpcClientPropertiesTest {
             expected.setMaxInboundMetadataSize(DataSize.ofKilobytes(16));
             expected.setShutdownTimeout(3000L);
             expected.setInProcess(inProcess);
-            expected.setTls(tls);
+
             expected.setSslBundle("test-bundle");
             expected.setRetry(retry);
             expected.setDeadline(10000L);

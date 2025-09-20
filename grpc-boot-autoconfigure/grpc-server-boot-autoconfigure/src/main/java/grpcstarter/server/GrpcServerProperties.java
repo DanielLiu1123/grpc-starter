@@ -6,11 +6,9 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.internal.GrpcUtil;
 import io.grpc.protobuf.services.ChannelzService;
 import io.grpc.services.AdminInterface;
-import java.io.InputStream;
 import lombok.Data;
 import org.jspecify.annotations.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.core.io.Resource;
 import org.springframework.util.unit.DataSize;
 
 /**
@@ -85,14 +83,7 @@ public class GrpcServerProperties {
      */
     @Nullable
     private String sslBundle;
-    /**
-     * TLS configuration.
-     *
-     * @deprecated Use {@link #sslBundle} instead. This will be removed in 3.6.0
-     */
-    @Deprecated(since = "3.5.3", forRemoval = true)
-    @Nullable
-    private Tls tls;
+
     /**
      * Response configuration.
      */
@@ -218,35 +209,6 @@ public class GrpcServerProperties {
      */
     public record InProcess(String name) {
         public static final String PREFIX = GrpcServerProperties.PREFIX + ".in-process";
-    }
-
-    @Data
-    public static class Tls {
-        public static final String PREFIX = GrpcServerProperties.PREFIX + ".tls";
-
-        /**
-         * @see io.grpc.TlsServerCredentials.Builder#keyManager(InputStream, InputStream, String)
-         * @see io.grpc.TlsServerCredentials.Builder#keyManager(InputStream, InputStream)
-         */
-        @Nullable
-        private KeyManager keyManager;
-        /**
-         * @see io.grpc.TlsServerCredentials.Builder#trustManager(InputStream)
-         */
-        @Nullable
-        private TrustManager trustManager;
-
-        /**
-         * @param certChain
-         * @param privateKey
-         * @param privateKeyPassword
-         */
-        public record KeyManager(Resource certChain, Resource privateKey, String privateKeyPassword) {}
-
-        /**
-         * @param rootCerts
-         */
-        public record TrustManager(Resource rootCerts) {}
     }
 
     @Data

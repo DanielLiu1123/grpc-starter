@@ -258,7 +258,7 @@ class Util {
                 : "localhost:" + port;
         var builder = ManagedChannelBuilder.forTarget(endpoint);
         populateChannel(builder, grpcServerProperties);
-        if (grpcServerProperties.getTls() == null) {
+        if (!StringUtils.hasText(grpcServerProperties.getSslBundle())) {
             builder.usePlaintext();
         }
         return builder.build();

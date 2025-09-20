@@ -33,8 +33,8 @@ class ServerSslBundleIT {
     }
 
     @Test
-    void testPlaintextConfiguration_whenNoSslBundleOrTls() {
-        // When neither ssl-bundle nor tls is configured, should use plaintext
+    void testPlaintextConfiguration_whenNoSslBundle() {
+        // When ssl-bundle is not configured, should use plaintext
         try (var ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.PREFIX + ".port=0")
                 .run()) {

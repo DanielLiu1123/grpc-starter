@@ -99,15 +99,11 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
         }
         int port = Math.max(properties.getPort(), 0);
 
-        // Priority: SSL Bundle > TLS > Plain text
+        // Priority: SSL Bundle > Plain text
         String sslBundleName = properties.getSslBundle();
-        GrpcServerProperties.Tls tls = properties.getTls();
 
         if (StringUtils.hasText(sslBundleName)) {
             return createServerBuilderWithSslBundle(port, sslBundleName, sslBundles);
-        } else if (tls != null) {
-            logTlsDeprecationWarning();
-            return createServerBuilderWithTls(port, tls);
         } else {
             return Grpc.newServerBuilderForPort(port, InsecureServerCredentials.create());
         }
@@ -132,38 +128,6 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
         }
 
         return Grpc.newServerBuilderForPort(port, tlsBuilder.build());
-    }
-
-    @SneakyThrows
-    private static ServerBuilder<? extends ServerBuilder<?>> createServerBuilderWithTls(
-            int port, GrpcServerProperties.Tls tls) {
-        TlsServerCredentials.Builder tlsBuilder = TlsServerCredentials.newBuilder();
-        GrpcServerProperties.Tls.KeyManager keyManager = tls.getKeyManager();
-        if (keyManager != null) {
-            if (StringUtils.hasText(keyManager.privateKeyPassword())) {
-                tlsBuilder.keyManager(
-                        keyManager.certChain().getInputStream(),
-                        keyManager.privateKey().getInputStream(),
-                        keyManager.privateKeyPassword());
-            } else {
-                tlsBuilder.keyManager(
-                        keyManager.certChain().getInputStream(),
-                        keyManager.privateKey().getInputStream());
-            }
-        }
-        GrpcServerProperties.Tls.TrustManager trustManager = tls.getTrustManager();
-        if (trustManager != null) {
-            tlsBuilder.trustManager(trustManager.rootCerts().getInputStream());
-        }
-        return Grpc.newServerBuilderForPort(port, tlsBuilder.build());
-    }
-
-    private static void logTlsDeprecationWarning() {
-        log.warn(
-                """
-                Using deprecated 'tls' configuration for gRPC server. \
-                Please migrate to 'ssl-bundle' configuration. \
-                The 'tls' configuration will be removed in a future version.""");
     }
 
     @Override
