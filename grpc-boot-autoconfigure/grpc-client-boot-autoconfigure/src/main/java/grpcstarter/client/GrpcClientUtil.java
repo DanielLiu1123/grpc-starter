@@ -4,7 +4,6 @@ import static org.springframework.core.NativeDetector.inNativeImage;
 
 import io.grpc.ManagedChannel;
 import io.grpc.stub.AbstractStub;
-import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.scope.ScopedProxyUtils;
@@ -47,7 +46,7 @@ public final class GrpcClientUtil {
      * @param beanFactory {@link DefaultListableBeanFactory}
      * @param clz         gRPC client class
      */
-    public static void registerGrpcClientBean(@Nonnull DefaultListableBeanFactory beanFactory, @Nonnull Class<?> clz) {
+    public static void registerGrpcClientBean(DefaultListableBeanFactory beanFactory, Class<?> clz) {
         if (!AbstractStub.class.isAssignableFrom(clz)) {
             throw new IllegalArgumentException(clz + " is not a gRPC client");
         }

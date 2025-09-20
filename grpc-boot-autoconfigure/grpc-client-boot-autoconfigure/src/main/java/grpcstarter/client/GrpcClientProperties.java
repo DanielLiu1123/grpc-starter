@@ -3,11 +3,9 @@ package grpcstarter.client;
 import static java.util.stream.Collectors.toMap;
 
 import io.grpc.Deadline;
-import io.grpc.TlsChannelCredentials;
 import io.grpc.health.v1.HealthGrpc;
 import io.grpc.internal.GrpcUtil;
 import io.grpc.stub.AbstractStub;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -19,7 +17,6 @@ import lombok.NoArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.core.io.Resource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.util.unit.DataSize;
@@ -108,13 +105,7 @@ public class GrpcClientProperties implements InitializingBean {
      * Channel shutdown timeout in milliseconds, default value is 5000.
      */
     private @Nullable Long shutdownTimeout = 5000L;
-    /**
-     * TLS configuration.
-     *
-     * @deprecated Use {@link #sslBundle} instead. This will be removed in 3.6.0
-     */
-    @Deprecated(since = "3.5.3", forRemoval = true)
-    private @Nullable Tls tls;
+
     /**
      * SSL bundle name to use for secure connections.
      *
@@ -194,13 +185,7 @@ public class GrpcClientProperties implements InitializingBean {
          * In-process configuration for this channel, use {@link GrpcClientProperties#inProcess} if not set.
          */
         private @Nullable InProcess inProcess;
-        /**
-         * TLS configuration for this channel, use {@link GrpcClientProperties#tls} if not set.
-         *
-         * @deprecated Use {@link #sslBundle} instead. This will be removed in 3.6.0
-         */
-        @Deprecated(since = "3.5.3", forRemoval = true)
-        private @Nullable Tls tls;
+
         /**
          * SSL bundle name to use for secure connections for this channel.
          *
@@ -343,45 +328,6 @@ public class GrpcClientProperties implements InitializingBean {
         private boolean enabled = false;
     }
 
-    @Data
-    public static class Tls {
-        public static final String PREFIX = GrpcClientProperties.PREFIX + ".tls";
-
-        /**
-         * @see io.grpc.TlsChannelCredentials.Builder#keyManager(InputStream, InputStream, String)
-         * @see io.grpc.TlsChannelCredentials.Builder#keyManager(InputStream, InputStream)
-         */
-        private @Nullable KeyManager keyManager;
-        /**
-         * @see io.grpc.TlsChannelCredentials.Builder#trustManager(InputStream)
-         */
-        private @Nullable TrustManager trustManager;
-
-        @Data
-        public static class KeyManager {
-            /**
-             * @see TlsChannelCredentials.Builder#getCertificateChain()
-             */
-            private @Nullable Resource certChain;
-            /**
-             * @see TlsChannelCredentials.Builder#getPrivateKey()
-             */
-            private @Nullable Resource privateKey;
-            /**
-             * @see TlsChannelCredentials.Builder#getPrivateKeyPassword()
-             */
-            private @Nullable String privateKeyPassword;
-        }
-
-        @Data
-        public static class TrustManager {
-            /**
-             * @see TlsChannelCredentials.Builder#getRootCertificates()
-             */
-            private @Nullable Resource rootCerts;
-        }
-    }
-
     /**
      * Merge default properties with channel specified properties.
      */
@@ -402,9 +348,7 @@ public class GrpcClientProperties implements InitializingBean {
             if (channel.getInProcess() == null) {
                 channel.setInProcess(inProcess);
             }
-            if (channel.getTls() == null) {
-                channel.setTls(tls);
-            }
+
             if (channel.getSslBundle() == null) {
                 channel.setSslBundle(sslBundle);
             }
@@ -462,7 +406,6 @@ public class GrpcClientProperties implements InitializingBean {
                 shutdownTimeout,
                 metadata,
                 inProcess,
-                tls,
                 sslBundle,
                 retry,
                 deadline,

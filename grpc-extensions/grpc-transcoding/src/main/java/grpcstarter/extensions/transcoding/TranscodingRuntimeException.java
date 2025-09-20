@@ -1,6 +1,5 @@
 package grpcstarter.extensions.transcoding;
 
-import jakarta.annotation.Nonnull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -22,7 +21,6 @@ public class TranscodingRuntimeException extends ResponseStatusException {
     }
 
     @Override
-    @Nonnull
     public HttpHeaders getHeaders() {
         return headers;
     }

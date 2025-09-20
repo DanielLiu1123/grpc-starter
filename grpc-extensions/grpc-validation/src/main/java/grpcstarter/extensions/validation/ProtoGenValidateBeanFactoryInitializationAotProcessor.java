@@ -4,7 +4,6 @@ import com.google.protobuf.Message;
 import com.google.rpc.BadRequest;
 import io.grpc.BindableService;
 import io.grpc.stub.StreamObserver;
-import jakarta.annotation.Nonnull;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -35,8 +34,7 @@ class ProtoGenValidateBeanFactoryInitializationAotProcessor implements BeanFacto
 
     @Nullable
     @Override
-    public BeanFactoryInitializationAotContribution processAheadOfTime(
-            @Nonnull ConfigurableListableBeanFactory beanFactory) {
+    public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
         return (generationContext, beanFactoryInitializationCode) -> {
             var reflection = generationContext.getRuntimeHints().reflection();
 

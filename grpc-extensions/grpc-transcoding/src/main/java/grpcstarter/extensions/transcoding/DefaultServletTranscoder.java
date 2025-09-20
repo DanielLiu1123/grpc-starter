@@ -28,7 +28,6 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ClientCalls;
 import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -94,8 +93,7 @@ public class DefaultServletTranscoder
     }
 
     @Override
-    @Nonnull
-    public Optional<HandlerFunction<ServerResponse>> route(@Nonnull ServerRequest request) {
+    public Optional<HandlerFunction<ServerResponse>> route(ServerRequest request) {
         if (Objects.equals(request.method(), HttpMethod.POST)) {
             var route = autoMappingRoutes.get(trim(request.path(), '/'));
             if (route != null) {
@@ -116,9 +114,8 @@ public class DefaultServletTranscoder
     }
 
     @Override
-    @Nonnull
     @SuppressWarnings("unchecked")
-    public ServerResponse handle(@Nonnull ServerRequest request) {
+    public ServerResponse handle(ServerRequest request) {
         var route = (Util.Route<ServerRequest>) request.attributes().get(MATCHING_ROUTE);
         if (route == null) {
             return ServerResponse.badRequest().build();
