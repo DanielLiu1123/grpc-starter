@@ -26,7 +26,6 @@ import io.grpc.ServerMethodDefinition;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.protobuf.ProtoFileDescriptorSupplier;
-import jakarta.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -406,7 +405,7 @@ class Util {
     private static boolean isMatch(
             HttpMethod requestMethod,
             HttpMethod httpMethod,
-            @Nonnull String path,
+            String path,
             PathTemplate pathTemplate,
             Map<String, Object> attributes) {
         if (!Objects.equals(requestMethod, httpMethod)) return false;

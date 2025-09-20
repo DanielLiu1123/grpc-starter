@@ -33,7 +33,7 @@ jobs:
     needs: [ lint ]
     strategy:
       matrix:
-        java-version: ['17', '21', '24']
+        java-version: ['17', '21', '25']
     steps:
       - name: Check out the repo
         uses: actions/checkout@v5

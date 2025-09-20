@@ -17,7 +17,6 @@ import com.google.protobuf.Value;
 import com.google.rpc.BadRequest;
 import io.grpc.BindableService;
 import io.grpc.stub.StreamObserver;
-import jakarta.annotation.Nonnull;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -51,8 +50,7 @@ class ProtoValidateBeanFactoryInitializationAotProcessor implements BeanFactoryI
 
     @Nullable
     @Override
-    public BeanFactoryInitializationAotContribution processAheadOfTime(
-            @Nonnull ConfigurableListableBeanFactory beanFactory) {
+    public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
         return (generationContext, beanFactoryInitializationCode) -> {
             var reflection = generationContext.getRuntimeHints().reflection();
 

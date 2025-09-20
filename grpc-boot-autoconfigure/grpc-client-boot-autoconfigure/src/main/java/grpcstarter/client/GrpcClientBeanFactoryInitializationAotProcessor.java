@@ -3,7 +3,6 @@ package grpcstarter.client;
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.AbstractStub;
-import jakarta.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -38,8 +37,7 @@ class GrpcClientBeanFactoryInitializationAotProcessor
 
     @Nullable
     @Override
-    public BeanFactoryInitializationAotContribution processAheadOfTime(
-            @Nonnull ConfigurableListableBeanFactory beanFactory) {
+    public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
         return (generationContext, beanFactoryInitializationCode) -> {
             var clientBeanDefinitions = listClientDefinitions(beanFactory);
             var channelBeanDefinitions = listChannelDefinitions(beanFactory);
