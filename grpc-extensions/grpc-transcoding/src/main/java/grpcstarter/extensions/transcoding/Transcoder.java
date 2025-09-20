@@ -9,18 +9,17 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
-import jakarta.annotation.Nullable;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 /**
  * @author Freeman
  */
 class Transcoder {
 
-    @Nullable
-    private static JsonFormat.Parser parser;
+    private static JsonFormat.@Nullable Parser parser;
 
     private final Variable variable;
 
@@ -137,13 +136,13 @@ class Transcoder {
         getParser().merge(bodyString, messageBuilder);
     }
 
-    private static boolean hasBuilder(@Nullable Descriptors.FieldDescriptor field) {
+    private static boolean hasBuilder(Descriptors.@Nullable FieldDescriptor field) {
         return field != null && !field.isRepeated() && !field.isMapField() && field.getType() == Type.MESSAGE;
     }
 
     private static void setValueField(
-            @Nullable Message.Builder lastBuilder,
-            @Nullable Descriptors.FieldDescriptor field,
+            Message.@Nullable Builder lastBuilder,
+            Descriptors.@Nullable FieldDescriptor field,
             @Nullable String values) {
         if (lastBuilder == null || field == null || values == null) return;
         if (isValueType(field)) {
@@ -151,7 +150,7 @@ class Transcoder {
         }
     }
 
-    private static boolean isValueType(@Nullable Descriptors.FieldDescriptor field) {
+    private static boolean isValueType(Descriptors.@Nullable FieldDescriptor field) {
         return field != null
                 && switch (field.getJavaType()) {
                     case INT, LONG, FLOAT, DOUBLE, BOOLEAN, STRING, BYTE_STRING, ENUM -> true;

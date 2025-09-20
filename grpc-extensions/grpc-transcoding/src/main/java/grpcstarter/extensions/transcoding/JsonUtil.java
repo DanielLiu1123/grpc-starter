@@ -16,9 +16,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
-import jakarta.annotation.Nullable;
 import java.io.IOException;
 import lombok.experimental.UtilityClass;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeanUtils;
 
 /**
@@ -31,8 +31,7 @@ class JsonUtil {
 
     private static final ObjectMapper om;
 
-    @Nullable
-    private static JsonFormat.Printer printer;
+    private static JsonFormat.@Nullable Printer printer;
 
     static {
         om = JsonMapper.builder()
