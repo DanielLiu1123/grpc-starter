@@ -97,18 +97,13 @@ allprojects {
         encoding "UTF-8"
         java {
             toggleOffOn()
+            forbidWildcardImports()
             removeUnusedImports()
             trimTrailingWhitespace()
             endWithNewline()
             palantirJavaFormat()
 
             targetExclude "**/generated/**"
-
-            custom("Refuse wildcard imports", {
-                if (it =~ /\nimport .*\*;/) {
-                    throw new IllegalStateException("Do not use wildcard imports, 'spotlessApply' cannot resolve this issue, please fix it manually.")
-                }
-            } as Closure<String>)
         }
     }
 
