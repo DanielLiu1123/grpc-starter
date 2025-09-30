@@ -1,0 +1,12 @@
+dependencies {
+    api("io.grpc:grpc-stub")
+    api("org.springframework:spring-context")
+    api("org.springframework:spring-beans")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("io.grpc:grpc-protobuf")
+    testImplementation("io.grpc:grpc-testing")
+    testImplementation("io.grpc:grpc-testing-proto")
+    testImplementation("com.google.protobuf:protobuf-java")
+    testImplementation("com.google.testing.compile:compile-testing:0.21.0")
+}
