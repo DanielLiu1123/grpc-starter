@@ -1,6 +1,6 @@
 package com.example.grpc;
 
-import grpcstarter.processor.GenerateGrpcClients;
+import grpcstarter.client.GenerateGrpcClients;
 import io.grpc.health.v1.HealthGrpc;
 import io.grpc.testing.protobuf.SimpleServiceGrpc;
 import org.springframework.boot.ApplicationRunner;

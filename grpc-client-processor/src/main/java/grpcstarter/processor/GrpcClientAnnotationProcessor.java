@@ -1,5 +1,6 @@
 package grpcstarter.processor;
 
+import grpcstarter.client.GenerateGrpcClients;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedHashMap;
@@ -22,6 +23,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
+import org.springframework.util.AntPathMatcher;
 
 /**
  * Annotation processor for {@link GenerateGrpcClients}.
@@ -31,9 +33,11 @@ import javax.tools.JavaFileObject;
  *
  * @author Freeman
  */
-@SupportedAnnotationTypes("grpcstarter.processor.GenerateGrpcClients")
+@SupportedAnnotationTypes("grpcstarter.client.GenerateGrpcClients")
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 public class GrpcClientAnnotationProcessor extends AbstractProcessor {
+
+    private final AntPathMatcher matcher = new AntPathMatcher(".");
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -181,9 +185,7 @@ public class GrpcClientAnnotationProcessor extends AbstractProcessor {
             return false; // No package
         }
         String packageName = qualifiedClassName.substring(0, lastDot);
-
-        // Check if package name starts with base package
-        return packageName.equals(basePackage) || packageName.startsWith(basePackage + ".");
+        return matcher.match(basePackage, packageName);
     }
 
     /**

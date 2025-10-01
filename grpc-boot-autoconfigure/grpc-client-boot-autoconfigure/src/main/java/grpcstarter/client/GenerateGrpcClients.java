@@ -1,4 +1,4 @@
-package grpcstarter.processor;
+package grpcstarter.client;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

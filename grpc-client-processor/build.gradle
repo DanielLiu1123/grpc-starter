@@ -1,7 +1,6 @@
 dependencies {
-    api("io.grpc:grpc-stub")
-    api("org.springframework:spring-context")
-    api("org.springframework:spring-beans")
+    api("org.springframework.boot:spring-boot-starter")
+    api(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.grpc:grpc-protobuf")
