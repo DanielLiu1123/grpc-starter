@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
 class GrpcMetricsAutoConfigurationTest {
 
     @Test
-    @Classpath(add = "org.springframework.boot:spring-boot-starter-aop:" + SPRING_BOOT_VERSION)
+    @Classpath(add = "org.springframework.boot:spring-boot-starter-aspectj:" + SPRING_BOOT_VERSION)
     void testMetricsBeans_whenAllConditionsMatched() {
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(Cfg.class)
                 .properties(GrpcServerProperties.PREFIX + ".in-process.name=" + UUID.randomUUID())
