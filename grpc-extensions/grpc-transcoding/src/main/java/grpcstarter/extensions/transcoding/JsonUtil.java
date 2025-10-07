@@ -32,8 +32,6 @@ final class JsonUtil {
 
     static {
         om = JsonMapper.builder()
-                //                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                //                .configure(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS, false)
                 .addModules(new SimpleModule().addSerializer(new ProtoMessageSerializer()))
                 .build();
     }
