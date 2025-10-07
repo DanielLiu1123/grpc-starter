@@ -1,9 +1,6 @@
 dependencies {
     api(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
     runtimeOnly("io.grpc:grpc-netty")
-
-    optionalSupportApi("io.grpc:grpc-netty-shaded")
-    optionalSupportApi("org.springframework.cloud:spring-cloud-context:${springCloudCommonsVersion}")
 }
 
 apply from: "${rootDir}/gradle/deploy.gradle"

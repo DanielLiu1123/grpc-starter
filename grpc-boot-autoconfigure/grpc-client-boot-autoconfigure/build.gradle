@@ -5,9 +5,13 @@ dependencies {
     api("io.grpc:grpc-protobuf")
     api("io.grpc:grpc-stub")
 
-    compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+    optional("io.grpc:grpc-netty")
+    optional("io.grpc:grpc-netty-shaded")
+
     // dynamic refresh configuration for grpc clients
-    compileOnly("org.springframework.cloud:spring-cloud-context:${springCloudCommonsVersion}")
+    optional("org.springframework.cloud:spring-cloud-context:${springCloudCommonsVersion}")
+
+    compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 

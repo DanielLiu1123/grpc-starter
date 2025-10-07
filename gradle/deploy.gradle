@@ -12,12 +12,7 @@ publishing {
         maven(MavenPublication) {
             from components.java
 
-            // Suppress optional-support variants from Maven publication
-            // The optional dependencies are already correctly marked in POM via Feature Variants
-            suppressPomMetadataWarningsFor('optionalSupportApiElements')
-            suppressPomMetadataWarningsFor('optionalSupportRuntimeElements')
-
-            // see  https://docs.gradle.org/current/userguide/publishing_maven.html
+            // see https://docs.gradle.org/current/userguide/publishing_maven.html
             versionMapping {
                 usage('java-api') {
                     fromResolutionOf('runtimeClasspath')
@@ -49,6 +44,26 @@ publishing {
                     developerConnection = "scm:git:ssh@${githubUrl.substring(8)}.git"
                     url = "${githubUrl}"
                 }
+                withXml {
+                    // Generate optional dependencies for optional configuration
+                    def dependencies = asNode().dependencies[0] ?: asNode().appendNode("dependencies")
+
+                    def resolvedDeps = project.configurations.optional.resolvedConfiguration.resolvedArtifacts
+                            .stream()
+                            .map(e -> e.moduleVersion.id)
+                            .collect(java.util.stream.Collectors.toMap(dep -> dep.group + ":" + dep.name, dep -> dep.version));
+
+                    for (dep in project.configurations.optional.allDependencies) {
+                        def version = resolvedDeps[dep.group + ":" + dep.name]
+                        if (dep.group && dep.name && version) {
+                            def dependency = dependencies.appendNode("dependency")
+                            dependency.appendNode("groupId", dep.group)
+                            dependency.appendNode("artifactId", dep.name)
+                            dependency.appendNode("version", version)
+                            dependency.appendNode("optional", "true")
+                        }
+                    }
+                }
             }
         }
     }
@@ -58,9 +73,4 @@ publishing {
             url = "${rootDir}/build/staging-deploy"
         }
     }
-}
-
-// Disable the optional-support JAR task to prevent its creation
-optionalSupportJar {
-    enabled = false
 }

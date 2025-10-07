@@ -27,19 +27,14 @@ allprojects {
     apply plugin: "java"
     apply plugin: "java-library"
 
-    sourceSets {
-        optionalSupport
-    }
-
-    java {
-        registerFeature("optionalSupport") {
-            usingSourceSet(sourceSets.optionalSupport)
-        }
-    }
-
     javadoc {
         // Suppress warnings about missing Javadoc comments
         options.addStringOption('Xdoclint:none', '-quiet')
+    }
+
+    configurations {
+        optional
+        compileOnly.extendsFrom optional
     }
 
     repositories {

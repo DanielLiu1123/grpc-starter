@@ -1,44 +1,39 @@
 package grpcstarter.extensions.transcoding;
 
 import static grpcstarter.extensions.transcoding.Util.isSimpleValueMessage;
-import static grpcstarter.extensions.transcoding.Util.stringifySimpleValueMessage;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
-import java.io.IOException;
-import lombok.experimental.UtilityClass;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeanUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.ser.std.StdSerializer;
 
 /**
  * Utility class for JSON serialization, aimed to support both Java bean and Protobuf {@link Message}.
  *
  * @author Freeman
  */
-@UtilityClass
-class JsonUtil {
+final class JsonUtil {
 
-    private static final ObjectMapper om;
+    private JsonUtil() {
+        throw new UnsupportedOperationException("Cannot instantiate utility class");
+    }
+
+    private static final JsonMapper om;
 
     private static JsonFormat.@Nullable Printer printer;
 
     static {
         om = JsonMapper.builder()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                .configure(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS, false)
+                //                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                //                .configure(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS, false)
                 .addModules(new SimpleModule().addSerializer(new ProtoMessageSerializer()))
                 .build();
     }
@@ -53,26 +48,7 @@ class JsonUtil {
      * @return json string
      */
     public static String toJson(Object obj) {
-        if (obj instanceof Message m) {
-            if (isSimpleValueMessage(m)) {
-                return stringifySimpleValueMessage(m);
-            }
-            try {
-                return getPrinter().print(m);
-            } catch (InvalidProtocolBufferException e) {
-                throw new IllegalArgumentException(e);
-            }
-        }
-
-        if (BeanUtils.isSimpleValueType(obj.getClass())) {
-            return String.valueOf(obj);
-        }
-
-        try {
-            return om.writeValueAsString(obj);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException(e);
-        }
+        return om.writeValueAsString(obj);
     }
 
     public static boolean canParseJson(Object obj) {
@@ -100,9 +76,13 @@ class JsonUtil {
         }
 
         @Override
-        public void serialize(MessageOrBuilder value, JsonGenerator gen, SerializerProvider serializers)
-                throws IOException {
-            gen.writeRawValue(getPrinter().print(value));
+        public void serialize(MessageOrBuilder value, JsonGenerator gen, SerializationContext provider)
+                throws JacksonException {
+            try {
+                gen.writeRawValue(getPrinter().print(value));
+            } catch (InvalidProtocolBufferException e) {
+                throw new IllegalStateException("Print failed", e);
+            }
         }
     }
 }

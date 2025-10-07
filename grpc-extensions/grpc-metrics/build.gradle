@@ -1,12 +1,13 @@
 dependencies {
-    compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
-    compileOnly(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
+    optional(project(":grpc-starters:grpc-client-boot-starter"))
+    optional(project(":grpc-starters:grpc-server-boot-starter"))
 
-    compileOnly("org.springframework.boot:spring-boot-starter-actuator")
+    optional("org.springframework.boot:spring-boot-starter-aspectj")
 
-    compileOnly("io.micrometer:micrometer-registry-prometheus")
-    compileOnly("io.micrometer:micrometer-registry-otlp")
-    compileOnly("org.springframework.boot:spring-boot-starter-aspectj")
+    optional("org.springframework.boot:spring-boot-starter-actuator")
+
+    optional("io.micrometer:micrometer-registry-prometheus")
+    optional("io.micrometer:micrometer-registry-otlp")
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 

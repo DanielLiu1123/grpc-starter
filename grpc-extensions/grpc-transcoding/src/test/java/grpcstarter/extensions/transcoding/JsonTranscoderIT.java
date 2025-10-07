@@ -110,7 +110,7 @@ class JsonTranscoderIT {
 
             resp.expectStatus().isEqualTo(HttpStatus.OK);
             resp.expectHeader().contentType("text/plain;charset=UTF-8");
-            resp.expectBody(String.class).isEqualTo("Hello");
+            resp.expectBody(String.class).isEqualTo("\"Hello\"");
         }
     }
 

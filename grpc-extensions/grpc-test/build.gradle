@@ -1,8 +1,8 @@
 dependencies {
     api("org.springframework.boot:spring-boot-starter-test")
 
-    compileOnly(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
-    compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+    optional(project(":grpc-starters:grpc-client-boot-starter"))
+    optional(project(":grpc-starters:grpc-server-boot-starter"))
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 

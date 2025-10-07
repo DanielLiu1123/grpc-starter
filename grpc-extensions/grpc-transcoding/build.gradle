@@ -1,13 +1,12 @@
 dependencies {
-    compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
+    optional(project(":grpc-starters:grpc-server-boot-starter"))
     api("org.springframework:spring-web")
-    api("com.fasterxml.jackson.core:jackson-databind")
     api("org.springframework.boot:spring-boot-starter-json")
     api("com.google.protobuf:protobuf-java-util")
     api("com.google.api:api-common:${googleApiCommonVersion}")
 
-    compileOnly("org.springframework.boot:spring-boot-starter-web")
-    compileOnly("org.springframework.boot:spring-boot-starter-webflux")
+    optional("org.springframework.boot:spring-boot-starter-web")
+    optional("org.springframework.boot:spring-boot-starter-webflux")
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 

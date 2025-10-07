@@ -1,16 +1,16 @@
 dependencies {
-    compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
-    api(project(":grpc-extensions:grpc-transcoding"))
+    optional(project(":grpc-starters:grpc-server-boot-starter"))
+    optional(project(":grpc-starters:grpc-starter-transcoding"))
 
     api("io.github.danielliu1123:springdoc-bridge-protobuf:${springdocBridgeVersion}") {
         exclude group: "com.google.protobuf", module: "protobuf-java-util"
     }
     api("com.google.protobuf:protobuf-java-util") // Use protobuf-java-util from protobuf-bom
 
-    compileOnly("org.springdoc:springdoc-openapi-starter-common:${springdocVersion}")
+    optional("org.springdoc:springdoc-openapi-starter-common:${springdocVersion}")
 
-    compileOnly("org.springframework.boot:spring-boot-starter-web")
-    compileOnly("org.springframework.boot:spring-boot-starter-webflux")
+    optional("org.springframework.boot:spring-boot-starter-web")
+    optional("org.springframework.boot:spring-boot-starter-webflux")
 
     testImplementation(project(":grpc-starters:grpc-boot-starter"))
     testImplementation(project(":grpc-starters:grpc-starter-test"))

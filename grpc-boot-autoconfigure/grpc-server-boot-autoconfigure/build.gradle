@@ -5,6 +5,9 @@ dependencies {
     api("io.grpc:grpc-protobuf")
     api("io.grpc:grpc-services")
 
+    optional("io.grpc:grpc-netty")
+    optional("io.grpc:grpc-netty-shaded")
+
     // health check support
     compileOnly("org.springframework.boot:spring-boot-starter-jdbc")
     compileOnly("org.springframework.boot:spring-boot-starter-data-redis")

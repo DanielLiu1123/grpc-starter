@@ -1,14 +1,14 @@
 dependencies {
-    compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
-    compileOnly(project(":grpc-boot-autoconfigure:grpc-client-boot-autoconfigure"))
+    optional(project(":grpc-starters:grpc-client-boot-starter"))
+    optional(project(":grpc-starters:grpc-server-boot-starter"))
 
     api("com.google.protobuf:protobuf-java")
     api("io.grpc:grpc-stub")
     api("io.grpc:grpc-protobuf")
 
-    compileOnly("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
-    compileOnly("build.buf:protovalidate:${protovalidateVersion}")
-    compileOnly("dev.cel:cel:${celVersion}")
+    optional("build.buf.protoc-gen-validate:pgv-java-grpc:${pgvVersion}")
+    optional("build.buf:protovalidate:${protovalidateVersion}")
+    optional("dev.cel:cel:${celVersion}")
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
