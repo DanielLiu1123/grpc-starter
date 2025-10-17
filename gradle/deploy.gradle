@@ -1,11 +1,14 @@
-apply plugin: 'maven-publish'
+apply plugin: "maven-publish"
 
 java {
     withSourcesJar()
     withJavadocJar()
 }
 
-def githubUrl = 'https://github.com/DanielLiu1123/grpc-starter'
+// see https://docs.gradle.org/9.1.0/userguide/configuration_cache_requirements.html#config_cache:requirements:external_processes
+def githubUrl = providers.exec {
+    commandLine("git", "-C", rootDir, "config", "--get", "remote.origin.url")
+}.standardOutput.asText
 
 publishing {
     publications {
@@ -14,54 +17,47 @@ publishing {
 
             // see https://docs.gradle.org/current/userguide/publishing_maven.html
             versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
+                usage("java-api") {
+                    fromResolutionOf("runtimeClasspath")
                 }
-                usage('java-runtime') {
+                usage("java-runtime") {
                     fromResolutionResult()
                 }
             }
             pom {
-                url = "${githubUrl}"
+                url = "${githubUrl.get()}"
                 name = project.name
                 description = project.description ?: project.name
                 licenses {
                     license {
-                        name = 'MIT License'
-                        url = 'https://opensource.org/license/mit'
-                        distribution = 'repo'
+                        name = "MIT License"
+                        url = "https://opensource.org/license/mit"
+                        distribution = "repo"
                     }
                 }
                 developers {
                     developer {
-                        id = 'Freeman'
-                        name = 'Freeman Liu'
-                        email = 'freemanlau1228@gmail.com'
+                        id = "Freeman"
+                        name = "Freeman Liu"
+                        email = "llw599502537@gmail.com"
                     }
                 }
                 scm {
-                    connection = "scm:git:git://${githubUrl.substring(8)}.git"
-                    developerConnection = "scm:git:ssh@${githubUrl.substring(8)}.git"
-                    url = "${githubUrl}"
+                    connection = "scm:git:git://${githubUrl.get().substring(8)}.git"
+                    developerConnection = "scm:git:ssh@${githubUrl.get().substring(8)}.git"
+                    url = "${githubUrl.get()}"
                 }
+                // Capture optional dependencies at configuration time for Configuration Cache compatibility
+                def optionalDeps = getOptionalDependencies()
                 withXml {
                     // Generate optional dependencies for optional configuration
                     def dependencies = asNode().dependencies[0] ?: asNode().appendNode("dependencies")
-
-                    def resolvedDeps = project.configurations.optional.resolvedConfiguration.resolvedArtifacts
-                            .stream()
-                            .map(e -> e.moduleVersion.id)
-                            .collect(java.util.stream.Collectors.toMap(dep -> dep.group + ":" + dep.name, dep -> dep.version));
-
-                    for (dep in project.configurations.optional.allDependencies) {
-                        def version = resolvedDeps[dep.group + ":" + dep.name]
-                        if (dep.group && dep.name && version) {
-                            def dependency = dependencies.appendNode("dependency")
-                            dependency.appendNode("groupId", dep.group)
-                            dependency.appendNode("artifactId", dep.name)
-                            dependency.appendNode("version", version)
-                            dependency.appendNode("optional", "true")
-                        }
+                    for (dep in optionalDeps) {
+                        def dependency = dependencies.appendNode("dependency")
+                        dependency.appendNode("groupId", dep.group)
+                        dependency.appendNode("artifactId", dep.name)
+                        dependency.appendNode("version", dep.version)
+                        dependency.appendNode("optional", "true")
                     }
                 }
             }
@@ -73,4 +69,21 @@ publishing {
             url = "${rootDir}/build/staging-deploy"
         }
     }
+}
+
+def getOptionalDependencies() {
+    def result = []
+
+    def resolvedDeps = project.configurations.optional.resolvedConfiguration.resolvedArtifacts
+            .stream()
+            .map(e -> e.moduleVersion.id)
+            .collect(java.util.stream.Collectors.toMap(dep -> dep.group + ":" + dep.name, dep -> dep.version))
+
+    for (dep in project.configurations.optional.allDependencies) {
+        def version = resolvedDeps[dep.group + ":" + dep.name]
+        if (dep.group && dep.name && version) {
+            result.add([group: dep.group, name: dep.name, version: version])
+        }
+    }
+    return result
 }
