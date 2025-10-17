@@ -3,19 +3,23 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "org.rodnansol:spring-configuration-property-documenter-gradle-plugin:${springConfigurationPropertyDocumenterVersion}"
+        // https://github.com/rodnansol/spring-configuration-property-documenter
+        classpath "org.rodnansol:spring-configuration-property-documenter-gradle-plugin:+"
     }
 }
 
 plugins {
     id "org.springframework.boot" version "${springBootVersion}" apply false
-    id "io.spring.dependency-management" version "${springDependencyManagementVersion}" apply false
+    id "io.spring.dependency-management" version "+" apply false
     id "com.diffplug.spotless" version "${spotlessVersion}" apply false
     id "com.github.spotbugs" version "${spotbugsVersion}" apply false
-    id "com.google.protobuf" version "${protobufGradlePluginVersion}" apply false
+    // https://github.com/google/protobuf-gradle-plugin
+    id "com.google.protobuf" version "+" apply false
+    // https://github.com/graalvm/native-build-tools
     id "org.graalvm.buildtools.native" version "${graalvmBuildToolsVersion}" apply false
     id "org.jreleaser" version "${jReleaserVersion}" apply false
-    id "io.spring.nullability" version "${nullabilityVersion}" apply false
+    // https://github.com/spring-gradle-plugins/nullability-plugin
+    id "io.spring.nullability" version "+" apply false
 }
 
 allprojects {
