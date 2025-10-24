@@ -19,7 +19,7 @@ import java.lang.annotation.Target;
  * }</pre>
  *
  * @author Freeman
- * @see org.springframework.boot.web.server.test.LocalServerPort
+ * @see org.springframework.boot.test.web.server.LocalServerPort
  */
 @Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
