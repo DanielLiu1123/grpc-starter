@@ -343,53 +343,6 @@ class Util {
         return false;
     }
 
-    /**
-     * Stringify the simple value message.
-     *
-     * @param message protobuf message
-     * @return string representation of the simple value message, {@code null} if the message is not simple value
-     */
-    public static String stringifySimpleValueMessage(Message message) {
-        if (message instanceof BoolValue boolValue) {
-            return String.valueOf(boolValue.getValue());
-        }
-        if (message instanceof Int32Value int32Value) {
-            return String.valueOf(int32Value.getValue());
-        }
-        if (message instanceof Int64Value int64Value) {
-            return String.valueOf(int64Value.getValue());
-        }
-        if (message instanceof UInt32Value uInt32Value) {
-            return String.valueOf(uInt32Value.getValue());
-        }
-        if (message instanceof UInt64Value uInt64Value) {
-            return String.valueOf(uInt64Value.getValue());
-        }
-        if (message instanceof FloatValue floatValue) {
-            return String.valueOf(floatValue.getValue());
-        }
-        if (message instanceof DoubleValue doubleValue) {
-            return String.valueOf(doubleValue.getValue());
-        }
-        if (message instanceof StringValue stringValue) {
-            return stringValue.getValue();
-        }
-        if (message instanceof BytesValue bytesValue) {
-            return bytesValue.getValue().toStringUtf8();
-        }
-        if (message instanceof Value value) {
-            return switch (value.getKindCase()) {
-                case NULL_VALUE -> "null";
-                case NUMBER_VALUE -> String.valueOf(value.getNumberValue());
-                case STRING_VALUE -> value.getStringValue();
-                case BOOL_VALUE -> String.valueOf(value.getBoolValue());
-                default -> throw new IllegalArgumentException("Unsupported Value kind: " + value.getKindCase());
-            };
-        }
-        throw new IllegalArgumentException(
-                "Not a simple value message: " + message.getClass().getName());
-    }
-
     private static boolean isWrapperType(Class<?> clz) {
         return BoolValue.class.isAssignableFrom(clz)
                 || Int32Value.class.isAssignableFrom(clz)
