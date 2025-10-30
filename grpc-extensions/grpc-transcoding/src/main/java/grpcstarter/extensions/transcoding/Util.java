@@ -57,9 +57,6 @@ class Util {
 
     public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE = Util.class + ".matchingPattern";
 
-    private static final HttpRule defaultHttpRule =
-            HttpRule.newBuilder().setBody("*").build();
-
     /**
      * Cache for the default message of the method input type.
      *
@@ -105,6 +102,9 @@ class Util {
                                     .build();
                             for (var customizer : transcodingCustomizers) {
                                 httpRule = customizer.customize(methodDescriptor, httpRule);
+                            }
+                            if (!StringUtils.hasText(httpRule.getPost())) {
+                                throw new IllegalStateException("Auto mapping requires POST method.");
                             }
                             autoMappingRoutes.put(
                                     httpRule.getPost(),
