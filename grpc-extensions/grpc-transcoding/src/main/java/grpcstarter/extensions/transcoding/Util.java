@@ -72,7 +72,8 @@ class Util {
             List<Util.Route<T>> customRoutes,
             List<ServerServiceDefinition> definitions,
             BiFunction<HttpMethod, PathTemplate, Predicate<T>> predicateCreator,
-            GrpcTranscodingProperties grpcTranscodingProperties) {
+            GrpcTranscodingProperties grpcTranscodingProperties,
+            List<TranscodingCustomizer> transcodingCustomizers) {
         for (ServerServiceDefinition ssd : definitions) {
             Descriptors.ServiceDescriptor serviceDescriptor = Util.getServiceDescriptor(ssd);
             if (serviceDescriptor == null) {
@@ -95,14 +96,20 @@ class Util {
                         boolean hasHttpExtension = methodDescriptor.getOptions().hasExtension(AnnotationsProto.http);
                         if (hasHttpExtension) {
                             HttpRule httpRule = methodDescriptor.getOptions().getExtension(AnnotationsProto.http);
+                            // Apply customizers
+                            for (TranscodingCustomizer customizer : transcodingCustomizers) {
+                                httpRule = customizer.customize(methodDescriptor, httpRule);
+                            }
                             Optional.ofNullable(createRouteWithBindings(
                                             httpRule, invokeMethod, methodDescriptor, predicateCreator))
                                     .ifPresent(customRoutes::add);
                         } else if (grpcTranscodingProperties.isAutoMapping()) {
+                            var httpRule = HttpRule.newBuilder().setPost(invokeMethod.getFullMethodName()).setBody("*").build();
                             autoMappingRoutes.put(
-                                    invokeMethod.getFullMethodName(),
+                                    httpRule.getPost(),
                                     new Route<>(
-                                            defaultHttpRule, invokeMethod, methodDescriptor, t -> false, List.of()));
+                                            httpRule,
+                                            invokeMethod, methodDescriptor, t -> false, List.of()));
                         }
                     });
         }
@@ -169,26 +176,30 @@ class Util {
             List<BindableService> services,
             Map<String, Route<ServerRequest>> autoMappingRoutes,
             List<Util.Route<ServerRequest>> customRoutes,
-            GrpcTranscodingProperties grpcTranscodingProperties) {
+            GrpcTranscodingProperties grpcTranscodingProperties,
+            List<TranscodingCustomizer> transcodingCustomizers) {
         return fillRoutes(
                 autoMappingRoutes,
                 customRoutes,
                 listDefinition(services),
                 ServletPredicate::new,
-                grpcTranscodingProperties);
+                grpcTranscodingProperties,
+                transcodingCustomizers);
     }
 
     public static List<Util.Route<org.springframework.web.reactive.function.server.ServerRequest>> getReactiveRoutes(
             List<BindableService> services,
             Map<String, Route<org.springframework.web.reactive.function.server.ServerRequest>> autoMappingRoutes,
             List<Util.Route<org.springframework.web.reactive.function.server.ServerRequest>> customRoutes,
-            GrpcTranscodingProperties grpcTranscodingProperties) {
+            GrpcTranscodingProperties grpcTranscodingProperties,
+            List<TranscodingCustomizer> transcodingCustomizers) {
         return fillRoutes(
                 autoMappingRoutes,
                 customRoutes,
                 listDefinition(services),
                 ReactivePredicate::new,
-                grpcTranscodingProperties);
+                grpcTranscodingProperties,
+                transcodingCustomizers);
     }
 
     static String snakeToPascal(String input) {

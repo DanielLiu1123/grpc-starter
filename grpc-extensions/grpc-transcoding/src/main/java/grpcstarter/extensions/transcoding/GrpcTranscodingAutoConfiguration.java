@@ -81,13 +81,15 @@ public class GrpcTranscodingAutoConfiguration implements SmartInitializingSingle
                 HeaderConverter headerConverter,
                 GrpcTranscodingProperties grpcTranscodingProperties,
                 GrpcServerProperties grpcServerProperties,
-                TranscodingExceptionResolver transcodingExceptionResolver) {
+                TranscodingExceptionResolver transcodingExceptionResolver,
+                List<TranscodingCustomizer> transcodingCustomizers) {
             return new DefaultServletTranscoder(
                     services,
                     headerConverter,
                     grpcTranscodingProperties,
                     grpcServerProperties,
-                    transcodingExceptionResolver);
+                    transcodingExceptionResolver,
+                    transcodingCustomizers);
         }
     }
 
@@ -109,13 +111,15 @@ public class GrpcTranscodingAutoConfiguration implements SmartInitializingSingle
                 HeaderConverter headerConverter,
                 GrpcTranscodingProperties grpcTranscodingProperties,
                 GrpcServerProperties grpcServerProperties,
-                ReactiveTranscodingExceptionResolver transcodingExceptionResolver) {
+                ReactiveTranscodingExceptionResolver transcodingExceptionResolver,
+                List<TranscodingCustomizer> transcodingCustomizers) {
             return new DefaultReactiveTranscoder(
                     services,
                     headerConverter,
                     grpcTranscodingProperties,
                     grpcServerProperties,
-                    transcodingExceptionResolver);
+                    transcodingExceptionResolver,
+                    transcodingCustomizers);
         }
     }
 

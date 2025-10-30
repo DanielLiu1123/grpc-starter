@@ -79,8 +79,10 @@ public class DefaultServletTranscoder
             HeaderConverter headerConverter,
             GrpcTranscodingProperties grpcTranscodingProperties,
             GrpcServerProperties grpcServerProperties,
-            TranscodingExceptionResolver transcodingExceptionResolver) {
-        fillRoutes(services, autoMappingRoutes, customRoutes, grpcTranscodingProperties);
+            TranscodingExceptionResolver transcodingExceptionResolver,
+            List<TranscodingCustomizer> transcodingCustomizers
+    ) {
+        fillRoutes(services, autoMappingRoutes, customRoutes, grpcTranscodingProperties, transcodingCustomizers);
         this.headerConverter = headerConverter;
         this.grpcTranscodingProperties = grpcTranscodingProperties;
         this.grpcServerProperties = grpcServerProperties;

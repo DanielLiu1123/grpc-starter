@@ -82,8 +82,9 @@ public class DefaultReactiveTranscoder
             HeaderConverter headerConverter,
             GrpcTranscodingProperties grpcTranscodingProperties,
             GrpcServerProperties grpcServerProperties,
-            ReactiveTranscodingExceptionResolver transcodingExceptionResolver) {
-        getReactiveRoutes(services, autoMappingRoutes, customRoutes, grpcTranscodingProperties);
+            ReactiveTranscodingExceptionResolver transcodingExceptionResolver,
+            List<TranscodingCustomizer> transcodingCustomizers) {
+        getReactiveRoutes(services, autoMappingRoutes, customRoutes, grpcTranscodingProperties, transcodingCustomizers);
         this.headerConverter = headerConverter;
         this.grpcTranscodingProperties = grpcTranscodingProperties;
         this.grpcServerProperties = grpcServerProperties;
