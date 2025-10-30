@@ -95,19 +95,17 @@ class Util {
 
                         boolean hasHttpExtension = methodDescriptor.getOptions().hasExtension(AnnotationsProto.http);
                         if (hasHttpExtension) {
-                            HttpRule httpRule = methodDescriptor.getOptions().getExtension(AnnotationsProto.http);
-                            // Apply customizers
-                            for (TranscodingCustomizer customizer : transcodingCustomizers) {
-                                httpRule = customizer.customize(methodDescriptor, httpRule);
-                            }
                             Optional.ofNullable(createRouteWithBindings(
-                                            httpRule, invokeMethod, methodDescriptor, predicateCreator))
+                                            invokeMethod, methodDescriptor, predicateCreator, transcodingCustomizers))
                                     .ifPresent(customRoutes::add);
                         } else if (grpcTranscodingProperties.isAutoMapping()) {
                             var httpRule = HttpRule.newBuilder()
                                     .setPost(invokeMethod.getFullMethodName())
                                     .setBody("*")
                                     .build();
+                            for (var customizer : transcodingCustomizers) {
+                                httpRule = customizer.customize(methodDescriptor, httpRule);
+                            }
                             autoMappingRoutes.put(
                                     httpRule.getPost(),
                                     new Route<>(httpRule, invokeMethod, methodDescriptor, t -> false, List.of()));
@@ -118,13 +116,17 @@ class Util {
     }
 
     private static <T> Util.@Nullable Route<T> createRouteWithBindings(
-            HttpRule httpRule,
             MethodDescriptor<?, ?> invokeMethod,
             Descriptors.MethodDescriptor methodDescriptor,
-            BiFunction<HttpMethod, PathTemplate, Predicate<T>> predicateCreator) {
+            BiFunction<HttpMethod, PathTemplate, Predicate<T>> predicateCreator,
+            List<TranscodingCustomizer> transcodingCustomizers) {
+        var httpRule = methodDescriptor.getOptions().getExtension(AnnotationsProto.http);
         List<Predicate<T>> additionalPredicates = new ArrayList<>();
         // Process only one level of additional_bindings
         for (HttpRule binding : httpRule.getAdditionalBindingsList()) {
+            for (var customizer : transcodingCustomizers) {
+                binding = customizer.customize(methodDescriptor, binding);
+            }
             HttpMethod method = extractHttpMethod(binding);
             String path = extractPath(binding);
             if (method != null && path != null) {
@@ -132,6 +134,9 @@ class Util {
             }
         }
 
+        for (var customizer : transcodingCustomizers) {
+            httpRule = customizer.customize(methodDescriptor, httpRule);
+        }
         HttpMethod mainMethod = extractHttpMethod(httpRule);
         String mainPath = extractPath(httpRule);
         if (mainMethod != null && mainPath != null) {
