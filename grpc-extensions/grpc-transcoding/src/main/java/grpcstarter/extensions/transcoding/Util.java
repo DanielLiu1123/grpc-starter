@@ -104,12 +104,13 @@ class Util {
                                             httpRule, invokeMethod, methodDescriptor, predicateCreator))
                                     .ifPresent(customRoutes::add);
                         } else if (grpcTranscodingProperties.isAutoMapping()) {
-                            var httpRule = HttpRule.newBuilder().setPost(invokeMethod.getFullMethodName()).setBody("*").build();
+                            var httpRule = HttpRule.newBuilder()
+                                    .setPost(invokeMethod.getFullMethodName())
+                                    .setBody("*")
+                                    .build();
                             autoMappingRoutes.put(
                                     httpRule.getPost(),
-                                    new Route<>(
-                                            httpRule,
-                                            invokeMethod, methodDescriptor, t -> false, List.of()));
+                                    new Route<>(httpRule, invokeMethod, methodDescriptor, t -> false, List.of()));
                         }
                     });
         }
