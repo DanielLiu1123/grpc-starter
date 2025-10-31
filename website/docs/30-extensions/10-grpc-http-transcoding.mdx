@@ -278,6 +278,43 @@ Refer to the [examples/transcoding-springdoc](https://github.com/DanielLiu1123/g
 
 ## Extension Points
 
+### TranscodingCustomizer
+
+**Available since version 4.0.0**
+
+`TranscodingCustomizer` allows you to customize HTTP routing rules for gRPC methods during transcoding setup.
+
+It applies to both manually defined HTTP rules (via `google.api.http` annotations) and auto-mapped rules.
+
+Common use cases:
+- Adding path prefixes (e.g., `/api/v1`) to specific services
+- Modifying HTTP methods for certain endpoints
+- Adjusting request/response body mappings
+
+```java
+@Bean
+public TranscodingCustomizer apiPrefixCustomizer() {
+    return (httpRule, descriptor) -> {
+        // Add /api/v1 prefix to "mypkg.MyService" service
+        if (!descriptor.getService().getFullName().equals("mypkg.MyService")) {
+            return httpRule;
+        }
+        String prefix = "/api/v1";
+        HttpRule.Builder builder = httpRule.toBuilder();
+        switch (httpRule.getPatternCase()) {
+            case GET -> builder.setGet(prefix + httpRule.getGet());
+            case POST -> builder.setPost(prefix + httpRule.getPost());
+            case PUT -> builder.setPut(prefix + httpRule.getPut());
+            case DELETE -> builder.setDelete(prefix + httpRule.getDelete());
+            case PATCH -> builder.setPatch(prefix + httpRule.getPatch());
+        }
+        return builder.build();
+    };
+}
+```
+
+Multiple `TranscodingCustomizer` beans will be applied in order.
+
 ### HeaderConverter
 
 `HeaderConverter` is used to

@@ -7,7 +7,7 @@ import static grpcstarter.extensions.transcoding.Util.buildRequestMessage;
 import static grpcstarter.extensions.transcoding.Util.getReactiveRoutes;
 import static grpcstarter.extensions.transcoding.Util.getTranscodingChannel;
 import static grpcstarter.extensions.transcoding.Util.shutdown;
-import static grpcstarter.extensions.transcoding.Util.trim;
+import static grpcstarter.extensions.transcoding.Util.trimRight;
 import static io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING;
 import static io.grpc.MethodDescriptor.MethodType.UNARY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -82,8 +82,9 @@ public class DefaultReactiveTranscoder
             HeaderConverter headerConverter,
             GrpcTranscodingProperties grpcTranscodingProperties,
             GrpcServerProperties grpcServerProperties,
-            ReactiveTranscodingExceptionResolver transcodingExceptionResolver) {
-        getReactiveRoutes(services, autoMappingRoutes, customRoutes, grpcTranscodingProperties);
+            ReactiveTranscodingExceptionResolver transcodingExceptionResolver,
+            List<TranscodingCustomizer> transcodingCustomizers) {
+        getReactiveRoutes(services, autoMappingRoutes, customRoutes, grpcTranscodingProperties, transcodingCustomizers);
         this.headerConverter = headerConverter;
         this.grpcTranscodingProperties = grpcTranscodingProperties;
         this.grpcServerProperties = grpcServerProperties;
@@ -98,7 +99,7 @@ public class DefaultReactiveTranscoder
     @Override
     public Mono<HandlerFunction<ServerResponse>> route(ServerRequest request) {
         if (Objects.equals(request.method(), HttpMethod.POST)) {
-            var route = autoMappingRoutes.get(trim(request.path(), '/'));
+            var route = autoMappingRoutes.get(trimRight(request.path(), '/'));
             if (route != null) {
                 request.attributes().put(MATCHING_ROUTE, route);
                 return Mono.just(this);

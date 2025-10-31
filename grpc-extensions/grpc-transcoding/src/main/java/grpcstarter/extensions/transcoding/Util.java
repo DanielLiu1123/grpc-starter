@@ -57,9 +57,6 @@ class Util {
 
     public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE = Util.class + ".matchingPattern";
 
-    private static final HttpRule defaultHttpRule =
-            HttpRule.newBuilder().setBody("*").build();
-
     /**
      * Cache for the default message of the method input type.
      *
@@ -72,7 +69,8 @@ class Util {
             List<Util.Route<T>> customRoutes,
             List<ServerServiceDefinition> definitions,
             BiFunction<HttpMethod, PathTemplate, Predicate<T>> predicateCreator,
-            GrpcTranscodingProperties grpcTranscodingProperties) {
+            GrpcTranscodingProperties grpcTranscodingProperties,
+            List<TranscodingCustomizer> transcodingCustomizers) {
         for (ServerServiceDefinition ssd : definitions) {
             Descriptors.ServiceDescriptor serviceDescriptor = Util.getServiceDescriptor(ssd);
             if (serviceDescriptor == null) {
@@ -94,41 +92,61 @@ class Util {
 
                         boolean hasHttpExtension = methodDescriptor.getOptions().hasExtension(AnnotationsProto.http);
                         if (hasHttpExtension) {
-                            HttpRule httpRule = methodDescriptor.getOptions().getExtension(AnnotationsProto.http);
                             Optional.ofNullable(createRouteWithBindings(
-                                            httpRule, invokeMethod, methodDescriptor, predicateCreator))
+                                            invokeMethod, methodDescriptor, predicateCreator, transcodingCustomizers))
                                     .ifPresent(customRoutes::add);
                         } else if (grpcTranscodingProperties.isAutoMapping()) {
+                            var httpRule = HttpRule.newBuilder()
+                                    .setPost("/" + invokeMethod.getFullMethodName())
+                                    .setBody("*")
+                                    .build();
+                            httpRule = applyCustomizers(transcodingCustomizers, httpRule, methodDescriptor);
+                            if (!StringUtils.hasText(httpRule.getPost())) {
+                                throw new IllegalStateException("Auto mapping requires POST method.");
+                            }
                             autoMappingRoutes.put(
-                                    invokeMethod.getFullMethodName(),
-                                    new Route<>(
-                                            defaultHttpRule, invokeMethod, methodDescriptor, t -> false, List.of()));
+                                    httpRule.getPost(),
+                                    new Route<>(httpRule, invokeMethod, methodDescriptor, t -> false, List.of()));
                         }
                     });
         }
         return customRoutes;
     }
 
-    private static <T> Util.@Nullable Route<T> createRouteWithBindings(
+    private static HttpRule applyCustomizers(
+            List<TranscodingCustomizer> transcodingCustomizers,
             HttpRule httpRule,
+            Descriptors.MethodDescriptor methodDescriptor) {
+        var result = httpRule;
+        for (var customizer : transcodingCustomizers) {
+            result = customizer.customize(result, methodDescriptor);
+        }
+        return result;
+    }
+
+    private static <T> Util.@Nullable Route<T> createRouteWithBindings(
             MethodDescriptor<?, ?> invokeMethod,
             Descriptors.MethodDescriptor methodDescriptor,
-            BiFunction<HttpMethod, PathTemplate, Predicate<T>> predicateCreator) {
+            BiFunction<HttpMethod, PathTemplate, Predicate<T>> predicateCreator,
+            List<TranscodingCustomizer> transcodingCustomizers) {
+        var httpRule = methodDescriptor.getOptions().getExtension(AnnotationsProto.http);
         List<Predicate<T>> additionalPredicates = new ArrayList<>();
         // Process only one level of additional_bindings
-        for (HttpRule binding : httpRule.getAdditionalBindingsList()) {
-            HttpMethod method = extractHttpMethod(binding);
-            String path = extractPath(binding);
+        for (HttpRule rule : httpRule.getAdditionalBindingsList()) {
+            var additionalRule = applyCustomizers(transcodingCustomizers, rule, methodDescriptor);
+            HttpMethod method = extractHttpMethod(additionalRule);
+            String path = extractPath(additionalRule);
             if (method != null && path != null) {
                 additionalPredicates.add(predicateCreator.apply(method, PathTemplate.create(path)));
             }
         }
 
-        HttpMethod mainMethod = extractHttpMethod(httpRule);
-        String mainPath = extractPath(httpRule);
+        var rule = applyCustomizers(transcodingCustomizers, httpRule, methodDescriptor);
+        HttpMethod mainMethod = extractHttpMethod(rule);
+        String mainPath = extractPath(rule);
         if (mainMethod != null && mainPath != null) {
             Predicate<T> mainPredicate = predicateCreator.apply(mainMethod, PathTemplate.create(mainPath));
-            return new Route<>(httpRule, invokeMethod, methodDescriptor, mainPredicate, additionalPredicates);
+            return new Route<>(rule, invokeMethod, methodDescriptor, mainPredicate, additionalPredicates);
         }
         return null;
     }
@@ -169,26 +187,30 @@ class Util {
             List<BindableService> services,
             Map<String, Route<ServerRequest>> autoMappingRoutes,
             List<Util.Route<ServerRequest>> customRoutes,
-            GrpcTranscodingProperties grpcTranscodingProperties) {
+            GrpcTranscodingProperties grpcTranscodingProperties,
+            List<TranscodingCustomizer> transcodingCustomizers) {
         return fillRoutes(
                 autoMappingRoutes,
                 customRoutes,
                 listDefinition(services),
                 ServletPredicate::new,
-                grpcTranscodingProperties);
+                grpcTranscodingProperties,
+                transcodingCustomizers);
     }
 
     public static List<Util.Route<org.springframework.web.reactive.function.server.ServerRequest>> getReactiveRoutes(
             List<BindableService> services,
             Map<String, Route<org.springframework.web.reactive.function.server.ServerRequest>> autoMappingRoutes,
             List<Util.Route<org.springframework.web.reactive.function.server.ServerRequest>> customRoutes,
-            GrpcTranscodingProperties grpcTranscodingProperties) {
+            GrpcTranscodingProperties grpcTranscodingProperties,
+            List<TranscodingCustomizer> transcodingCustomizers) {
         return fillRoutes(
                 autoMappingRoutes,
                 customRoutes,
                 listDefinition(services),
                 ReactivePredicate::new,
-                grpcTranscodingProperties);
+                grpcTranscodingProperties,
+                transcodingCustomizers);
     }
 
     static String snakeToPascal(String input) {
@@ -377,22 +399,29 @@ class Util {
         return true;
     }
 
+    static String trimRight(String str, char c) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        int end = str.length();
+        while (end > 0 && str.charAt(end - 1) == c) {
+            end--;
+        }
+        return str.substring(0, end);
+    }
+
     static String trim(String str, char c) {
         if (str == null || str.isEmpty()) {
             return str;
         }
-
         int start = 0;
         int end = str.length();
-
         while (start < end && str.charAt(start) == c) {
             start++;
         }
-
         while (end > start && str.charAt(end - 1) == c) {
             end--;
         }
-
         return str.substring(start, end);
     }
 
