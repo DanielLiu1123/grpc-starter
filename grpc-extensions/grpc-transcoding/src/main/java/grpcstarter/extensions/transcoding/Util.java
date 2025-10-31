@@ -100,9 +100,7 @@ class Util {
                                     .setPost(invokeMethod.getFullMethodName())
                                     .setBody("*")
                                     .build();
-                            for (var customizer : transcodingCustomizers) {
-                                httpRule = customizer.customize(methodDescriptor, httpRule);
-                            }
+                            httpRule = applyCustomizers(transcodingCustomizers, httpRule, methodDescriptor);
                             if (!StringUtils.hasText(httpRule.getPost())) {
                                 throw new IllegalStateException("Auto mapping requires POST method.");
                             }
@@ -115,6 +113,17 @@ class Util {
         return customRoutes;
     }
 
+    private static HttpRule applyCustomizers(
+            List<TranscodingCustomizer> transcodingCustomizers,
+            HttpRule httpRule,
+            Descriptors.MethodDescriptor methodDescriptor) {
+        var result = httpRule;
+        for (var customizer : transcodingCustomizers) {
+            result = customizer.customize(result, methodDescriptor);
+        }
+        return result;
+    }
+
     private static <T> Util.@Nullable Route<T> createRouteWithBindings(
             MethodDescriptor<?, ?> invokeMethod,
             Descriptors.MethodDescriptor methodDescriptor,
@@ -123,25 +132,21 @@ class Util {
         var httpRule = methodDescriptor.getOptions().getExtension(AnnotationsProto.http);
         List<Predicate<T>> additionalPredicates = new ArrayList<>();
         // Process only one level of additional_bindings
-        for (HttpRule binding : httpRule.getAdditionalBindingsList()) {
-            for (var customizer : transcodingCustomizers) {
-                binding = customizer.customize(methodDescriptor, binding);
-            }
-            HttpMethod method = extractHttpMethod(binding);
-            String path = extractPath(binding);
+        for (HttpRule rule : httpRule.getAdditionalBindingsList()) {
+            var additionalRule = applyCustomizers(transcodingCustomizers, rule, methodDescriptor);
+            HttpMethod method = extractHttpMethod(additionalRule);
+            String path = extractPath(additionalRule);
             if (method != null && path != null) {
                 additionalPredicates.add(predicateCreator.apply(method, PathTemplate.create(path)));
             }
         }
 
-        for (var customizer : transcodingCustomizers) {
-            httpRule = customizer.customize(methodDescriptor, httpRule);
-        }
-        HttpMethod mainMethod = extractHttpMethod(httpRule);
-        String mainPath = extractPath(httpRule);
+        var rule = applyCustomizers(transcodingCustomizers, httpRule, methodDescriptor);
+        HttpMethod mainMethod = extractHttpMethod(rule);
+        String mainPath = extractPath(rule);
         if (mainMethod != null && mainPath != null) {
             Predicate<T> mainPredicate = predicateCreator.apply(mainMethod, PathTemplate.create(mainPath));
-            return new Route<>(httpRule, invokeMethod, methodDescriptor, mainPredicate, additionalPredicates);
+            return new Route<>(rule, invokeMethod, methodDescriptor, mainPredicate, additionalPredicates);
         }
         return null;
     }
