@@ -8,7 +8,7 @@ import static grpcstarter.extensions.transcoding.Util.buildRequestMessage;
 import static grpcstarter.extensions.transcoding.Util.fillRoutes;
 import static grpcstarter.extensions.transcoding.Util.getTranscodingChannel;
 import static grpcstarter.extensions.transcoding.Util.shutdown;
-import static grpcstarter.extensions.transcoding.Util.trim;
+import static grpcstarter.extensions.transcoding.Util.trimRight;
 import static io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING;
 import static io.grpc.MethodDescriptor.MethodType.UNARY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -96,7 +96,7 @@ public class DefaultServletTranscoder
     @Override
     public Optional<HandlerFunction<ServerResponse>> route(ServerRequest request) {
         if (Objects.equals(request.method(), HttpMethod.POST)) {
-            var route = autoMappingRoutes.get(trim(request.path(), '/'));
+            var route = autoMappingRoutes.get(trimRight(request.path(), '/'));
             if (route != null) {
                 request.attributes().put(MATCHING_ROUTE, route);
                 return Optional.of(this);

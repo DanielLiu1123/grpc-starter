@@ -97,7 +97,7 @@ class Util {
                                     .ifPresent(customRoutes::add);
                         } else if (grpcTranscodingProperties.isAutoMapping()) {
                             var httpRule = HttpRule.newBuilder()
-                                    .setPost(invokeMethod.getFullMethodName())
+                                    .setPost("/" + invokeMethod.getFullMethodName())
                                     .setBody("*")
                                     .build();
                             httpRule = applyCustomizers(transcodingCustomizers, httpRule, methodDescriptor);
@@ -399,22 +399,29 @@ class Util {
         return true;
     }
 
+    static String trimRight(String str, char c) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        int end = str.length();
+        while (end > 0 && str.charAt(end - 1) == c) {
+            end--;
+        }
+        return str.substring(0, end);
+    }
+
     static String trim(String str, char c) {
         if (str == null || str.isEmpty()) {
             return str;
         }
-
         int start = 0;
         int end = str.length();
-
         while (start < end && str.charAt(start) == c) {
             start++;
         }
-
         while (end > start && str.charAt(end - 1) == c) {
             end--;
         }
-
         return str.substring(start, end);
     }
 
