@@ -48,13 +48,11 @@ allprojects {
         maven { url = "https://repo.spring.io/milestone" }
     }
 
-    compileJava {
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs += ["-parameters"]
+        // https://github.com/uber/NullAway/wiki/JSpecify-Support#supported-jdk-versions
+        options.compilerArgs += ["-XDaddTypeAnnotationsToSymbol=true"]
         options.encoding = "UTF-8"
-        options.compilerArgs << "-parameters"
-    }
-    compileTestJava {
-        options.encoding = "UTF-8"
-        options.compilerArgs << "-parameters"
     }
 
     test {
