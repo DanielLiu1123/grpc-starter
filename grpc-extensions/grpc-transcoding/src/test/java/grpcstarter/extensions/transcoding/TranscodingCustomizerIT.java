@@ -40,7 +40,6 @@ class TranscodingCustomizerIT {
             // Test that original path (without prefix) returns NOT_FOUND
             var respOriginal = client.post()
                     .uri("http://localhost:%d/v1/unaryrpc".formatted(port))
-                    .body("{\"requestMessage\":\"World!\"}")
                     .exchange();
             respOriginal.expectStatus().isEqualTo(NOT_FOUND);
 
@@ -73,7 +72,6 @@ class TranscodingCustomizerIT {
             // Original auto-mapped path should NOT work
             var respNoPrefix = client.post()
                     .uri("http://localhost:%d/transcoding.SimpleService/UseAnotherPackageRequestRpc".formatted(port))
-                    .body("{}")
                     .exchange();
             respNoPrefix.expectStatus().isEqualTo(NOT_FOUND);
 
