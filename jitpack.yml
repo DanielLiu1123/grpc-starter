@@ -1,0 +1,3 @@
+# https://docs.jitpack.io/building/#guide-to-publishing-libraries
+install:
+  - ./gradlew clean publishToMavenLocal -x test
