@@ -31,6 +31,11 @@ allprojects {
     apply plugin: "java"
     apply plugin: "java-library"
 
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
     javadoc {
         // Suppress warnings about missing Javadoc comments
         options.addStringOption('Xdoclint:none', '-quiet')
