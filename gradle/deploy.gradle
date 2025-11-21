@@ -48,7 +48,8 @@ publishing {
                     url = "${githubUrl.get()}"
                 }
                 // Capture optional dependencies at configuration time for Configuration Cache compatibility
-                def optionalDeps = getOptionalDependencies()
+                def optionalDeps = getDependencies("optional")
+                def providedDeps = getDependencies("provided")
                 withXml {
                     // Generate optional dependencies for optional configuration
                     def dependencies = asNode().dependencies[0] ?: asNode().appendNode("dependencies")
@@ -58,6 +59,13 @@ publishing {
                         dependency.appendNode("artifactId", dep.name)
                         dependency.appendNode("version", dep.version)
                         dependency.appendNode("optional", "true")
+                    }
+                    for (dep in providedDeps) {
+                        def dependency = dependencies.appendNode("dependency")
+                        dependency.appendNode("groupId", dep.group)
+                        dependency.appendNode("artifactId", dep.name)
+                        dependency.appendNode("version", dep.version)
+                        dependency.appendNode("scope", "provided")
                     }
                 }
             }
@@ -71,15 +79,17 @@ publishing {
     }
 }
 
-def getOptionalDependencies() {
+def getDependencies(String configurationName) {
     def result = []
+    def cfg = project.configurations.findByName(configurationName)
+    if (cfg == null) return result
 
-    def resolvedDeps = project.configurations.optional.resolvedConfiguration.resolvedArtifacts
+    def resolvedDeps = cfg.resolvedConfiguration.resolvedArtifacts
             .stream()
             .map(e -> e.moduleVersion.id)
-            .collect(java.util.stream.Collectors.toMap(dep -> dep.group + ":" + dep.name, dep -> dep.version))
+            .collect(java.util.stream.Collectors.toMap(dep -> dep.group + ":" + dep.name, dep -> dep.version, (o, n) -> o))
 
-    for (dep in project.configurations.optional.allDependencies) {
+    for (dep in cfg.allDependencies) {
         def version = resolvedDeps[dep.group + ":" + dep.name]
         if (dep.group && dep.name && version) {
             result.add([group: dep.group, name: dep.name, version: version])
