@@ -6,7 +6,7 @@ grpc:
   server:
     reflection:
       enabled: true
-    port: 9099
+    port: 9101
   client:
     authority: localhost:${grpc.server.port:9090}
 
@@ -16,4 +16,4 @@ management:
       export:
         enabled: true
         url: http://localhost:4318/v1/metrics
-        step: 5s
+        step: 3s
