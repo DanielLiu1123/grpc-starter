@@ -12,6 +12,8 @@ dependencies {
     optional("org.springframework.boot:spring-boot-starter-jdbc")
     optional("org.springframework.boot:spring-boot-starter-data-redis")
 
+    optional("org.springframework.boot:spring-boot-starter-opentelemetry")
+
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testRuntimeOnly("io.grpc:grpc-netty-shaded")

@@ -1,0 +1,49 @@
+# Prometheus 全局配置
+global:
+  scrape_interval: 15s      # 抓取间隔
+  evaluation_interval: 15s  # 规则评估间隔
+  scrape_timeout: 10s       # 抓取超时
+
+# Alertmanager 配置（可选）
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# 告警规则文件（可选）
+rule_files:
+  # - "alerts/*.yml"
+
+# 抓取配置
+scrape_configs:
+  # 抓取 Prometheus 自身的 metrics
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          instance: 'prometheus'
+          environment: 'production'
+
+  # 抓取 OpenTelemetry Collector 的 metrics
+  - job_name: 'otel-collector'
+    static_configs:
+      - targets: ['otel-collector:8889']
+        labels:
+          instance: 'otel-collector'
+          environment: 'production'
+
+  # 抓取 Grafana 的 metrics
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+        labels:
+          instance: 'grafana'
+          environment: 'production'
+
+  # Node Exporter - 系统指标（可选但推荐）
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          instance: 'docker-host'
+          environment: 'production'

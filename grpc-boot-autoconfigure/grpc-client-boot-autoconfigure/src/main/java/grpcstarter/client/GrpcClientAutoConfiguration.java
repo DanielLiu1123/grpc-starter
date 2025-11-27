@@ -1,6 +1,12 @@
 package grpcstarter.client;
 
 import grpcstarter.server.GrpcServerShutdownEvent;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.grpc.MetricCollectingClientInterceptor;
+import io.micrometer.core.instrument.binder.grpc.ObservationGrpcClientInterceptor;
+import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
+import io.micrometer.observation.ObservationRegistry;
+import java.util.Optional;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -68,6 +74,34 @@ public class GrpcClientAutoConfiguration implements DisposableBean, ApplicationL
         @ConditionalOnProperty(prefix = GrpcClientProperties.Refresh.PREFIX, name = "enabled", havingValue = "true")
         public GrpcClientRefreshScopeRefreshedEventListener grpcClientRefreshScopeRefreshedEventListener() {
             return new GrpcClientRefreshScopeRefreshedEventListener();
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass({
+        ObservationRegistry.class,
+        ObservationGrpcClientInterceptor.class,
+    })
+    static class TraceConfiguration {
+        @Bean
+        @ConditionalOnMissingBean
+        public ObservationGrpcClientInterceptor observationGrpcClientInterceptor(
+                Optional<ObservationRegistry> observationRegistry) {
+            return new ObservationGrpcClientInterceptor(observationRegistry.orElse(ObservationRegistry.NOOP));
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass({
+        MeterRegistry.class,
+        MetricCollectingClientInterceptor.class,
+    })
+    static class MetricsConfiguration {
+        @Bean
+        @ConditionalOnMissingBean
+        public MetricCollectingClientInterceptor metricCollectingClientInterceptor(
+                Optional<MeterRegistry> meterRegistry) {
+            return new MetricCollectingClientInterceptor(meterRegistry.orElseGet(CompositeMeterRegistry::new));
         }
     }
 
