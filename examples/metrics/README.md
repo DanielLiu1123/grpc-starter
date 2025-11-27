@@ -1,3 +1,10 @@
-1. Start application
+```shell
+cd $(git rev-parse --show-toplevel)/examples/metrics
+cd prometheus-grafana-stack
+mkdir -p config prometheus-data grafana-data
+chmod 777 prometheus-data grafana-data
+```
 
-2. Visit http://localhost:8080/actuator/prometheus
+```shell
+docker compose up -d
+```
