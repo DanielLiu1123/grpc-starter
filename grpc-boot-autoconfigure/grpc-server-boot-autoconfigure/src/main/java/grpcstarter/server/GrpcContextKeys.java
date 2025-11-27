@@ -6,15 +6,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-import lombok.experimental.UtilityClass;
 import org.jspecify.annotations.Nullable;
 
 /**
  * @author Freeman
  * @since 3.2.3
  */
-@UtilityClass
-public class GrpcContextKeys {
+public final class GrpcContextKeys {
+
+    private GrpcContextKeys() {}
 
     /**
      * Modify gRPC response metadata, e.g. add custom headers/trailers.

@@ -9,8 +9,15 @@ import grpcstarter.server.feature.reflection.Reflection;
 import io.grpc.BindableService;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptor;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.grpc.MetricCollectingServerInterceptor;
+import io.micrometer.core.instrument.binder.grpc.ObservationGrpcServerInterceptor;
+import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
+import io.micrometer.observation.ObservationRegistry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnThreading;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -55,6 +62,34 @@ public class GrpcServerAutoConfiguration {
     @ConditionalOnMissingBean
     public VirtualThreadGrpcServerCustomizer virtualThreadGrpcServerCustomizer() {
         return new VirtualThreadGrpcServerCustomizer();
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass({
+        ObservationRegistry.class,
+        ObservationGrpcServerInterceptor.class,
+    })
+    static class TraceConfiguration {
+        @Bean
+        @ConditionalOnMissingBean
+        public ObservationGrpcServerInterceptor observationGrpcServerInterceptor(
+                Optional<ObservationRegistry> observationRegistry) {
+            return new ObservationGrpcServerInterceptor(observationRegistry.orElse(ObservationRegistry.NOOP));
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass({
+        MeterRegistry.class,
+        MetricCollectingServerInterceptor.class,
+    })
+    static class MetricsConfiguration {
+        @Bean
+        @ConditionalOnMissingBean
+        public MetricCollectingServerInterceptor metricCollectingServerInterceptor(
+                Optional<MeterRegistry> meterRegistry) {
+            return new MetricCollectingServerInterceptor(meterRegistry.orElseGet(CompositeMeterRegistry::new));
+        }
     }
 
     @Configuration(proxyBeanMethods = false)

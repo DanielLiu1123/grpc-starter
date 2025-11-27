@@ -10,6 +10,7 @@ dependencies {
 
     // dynamic refresh configuration for grpc clients
     optional("org.springframework.cloud:spring-cloud-context:${springCloudCommonsVersion}")
+    optional("org.springframework.boot:spring-boot-starter-opentelemetry")
 
     compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
 
