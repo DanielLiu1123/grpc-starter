@@ -1,7 +1,6 @@
 ## Setting up Prometheus and Grafana
 ```shell
-cd $(git rev-parse --show-toplevel)/examples/metrics
-cd prometheus-grafana-stack
+cd $(git rev-parse --show-toplevel)/examples/metrics/prometheus-grafana-stack
 mkdir -p config prometheus-data grafana-data
 chmod 777 prometheus-data grafana-data
 
@@ -24,7 +23,7 @@ open http://localhost:3000
 ## Clean Up
 
 ```shell
-cd $(git rev-parse --show-toplevel)/examples/metrics
+cd $(git rev-parse --show-toplevel)/examples/metrics/prometheus-grafana-stack
 
 docker compose down
 ```

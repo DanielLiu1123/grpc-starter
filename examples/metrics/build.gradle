@@ -7,7 +7,6 @@ dependencies {
     implementation(project(":grpc-starters:grpc-boot-starter"))
 
     implementation("org.springframework.boot:spring-boot-starter-opentelemetry")
-//    implementation("io.micrometer:micrometer-registry-prometheus")
 
     testImplementation(project(":grpc-starters:grpc-starter-test"))
 }

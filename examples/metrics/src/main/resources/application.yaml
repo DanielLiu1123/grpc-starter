@@ -8,7 +8,7 @@ grpc:
       enabled: true
     port: 9101
   client:
-    authority: localhost:${grpc.server.port:9090}
+    authority: localhost:${grpc.server.port}
 
 management:
   otlp:
@@ -17,3 +17,6 @@ management:
         enabled: true
         url: http://localhost:4318/v1/metrics
         step: 3s
+  tracing:
+    export:
+      enabled: false
