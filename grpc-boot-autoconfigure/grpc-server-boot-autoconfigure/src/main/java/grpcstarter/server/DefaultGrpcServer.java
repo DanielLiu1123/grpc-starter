@@ -1,6 +1,5 @@
 package grpcstarter.server;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.grpc.BindableService;
 import io.grpc.Grpc;
 import io.grpc.InsecureServerCredentials;
@@ -42,7 +41,6 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
     @SuppressWarnings("NullAway")
     private ApplicationEventPublisher publisher;
 
-    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public DefaultGrpcServer(
             GrpcServerProperties properties,
             SslBundles sslBundles,

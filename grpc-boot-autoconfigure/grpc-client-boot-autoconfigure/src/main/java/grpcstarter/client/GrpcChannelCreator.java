@@ -14,12 +14,9 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.MetadataUtils;
 import java.util.Optional;
 import lombok.SneakyThrows;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.ssl.SslBundle;
 import org.springframework.boot.ssl.SslBundles;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 import org.springframework.util.unit.DataSize;
@@ -28,8 +25,6 @@ import org.springframework.util.unit.DataSize;
  * @author Freeman
  */
 class GrpcChannelCreator {
-
-    private static final Logger log = LoggerFactory.getLogger(GrpcChannelCreator.class);
 
     private final BeanFactory beanFactory;
     private final GrpcClientProperties.Refresh refreshConfig;
@@ -101,9 +96,13 @@ class GrpcChannelCreator {
         }
 
         // set interceptors, gRPC invoke interceptors in reverse order
-        beanFactory.getBeanProvider(ClientInterceptor.class).stream()
-                .sorted(AnnotationAwareOrderComparator.INSTANCE.reversed())
-                .forEach(builder::intercept);
+        var interceptors = beanFactory
+                .getBeanProvider(ClientInterceptor.class)
+                .orderedStream()
+                .toList();
+        for (var i = interceptors.size() - 1; i >= 0; i--) {
+            builder.intercept(interceptors.get(i));
+        }
 
         // apply customizers
         beanFactory
@@ -135,7 +134,6 @@ class GrpcChannelCreator {
     }
 
     @SneakyThrows
-    @SuppressWarnings("deprecation")
     private ManagedChannelBuilder<?> getManagedChannelBuilder(GrpcClientProperties.Channel channelConfig) {
         if (channelConfig.getInProcess() != null) {
             var name = channelConfig.getInProcess().name();
