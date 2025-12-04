@@ -1,6 +1,5 @@
 package grpcstarter.server;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.grpc.Context;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
@@ -11,7 +10,6 @@ import org.jspecify.annotations.Nullable;
  * @author Freeman
  */
 @Data
-@SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
 public class GrpcRequestContext {
     static final Context.Key<GrpcRequestContext> INSTANCE = Context.key("GrpcRequestContext");
 

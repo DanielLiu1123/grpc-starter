@@ -6,17 +6,17 @@ grpc:
   server:
     reflection:
       enabled: true
+    port: 9101
   client:
-    authority: localhost:${grpc.server.port:9090}
+    authority: localhost:${grpc.server.port}
 
 management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
-  observations:
-    key-values:
-      app: ${spring.application.name:UNKNOWN}
-    annotations:
-      enabled: true
-debug: true
+  otlp:
+    metrics:
+      export:
+        enabled: true
+        url: http://localhost:4318/v1/metrics
+        step: 3s
+  tracing:
+    export:
+      enabled: false

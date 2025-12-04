@@ -3,17 +3,13 @@ dependencies {
     optional(project(":grpc-starters:grpc-server-boot-starter"))
 
     optional("org.springframework.boot:spring-boot-starter-aspectj")
-
-    optional("org.springframework.boot:spring-boot-starter-actuator")
-
-    optional("io.micrometer:micrometer-registry-prometheus")
-    optional("io.micrometer:micrometer-registry-otlp")
+    optional("org.springframework.boot:spring-boot-starter-opentelemetry")
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation(project(":grpc-starters:grpc-starter-test"))
     testImplementation(project(":grpc-starters:grpc-boot-starter"))
-    testImplementation("org.springframework.boot:spring-boot-starter-actuator")
+    testImplementation("org.springframework.boot:spring-boot-starter-opentelemetry")
     testImplementation("io.github.danielliu1123:classpath-replacer:${classpathReplacerVersion}")
 }
 

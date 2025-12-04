@@ -9,8 +9,8 @@ import grpcstarter.server.feature.reflection.Reflection;
 import io.grpc.BindableService;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptor;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.ObjectProvider;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnThreading;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -33,12 +33,11 @@ public class GrpcServerAutoConfiguration {
     public GrpcServer grpcServer(
             GrpcServerProperties properties,
             SslBundles sslBundles,
-            ObjectProvider<ServerBuilder<?>> serverBuilder,
-            ObjectProvider<BindableService> services,
-            ObjectProvider<ServerInterceptor> interceptors,
-            ObjectProvider<GrpcServerCustomizer> customizers) {
-        return properties.isEnableEmptyServer()
-                        || !allInternalServices(services.stream().collect(Collectors.toSet()))
+            Optional<ServerBuilder<?>> serverBuilder,
+            List<BindableService> services,
+            List<ServerInterceptor> interceptors,
+            List<GrpcServerCustomizer> customizers) {
+        return (properties.isEnableEmptyServer() || !allInternalServices(services))
                 ? new DefaultGrpcServer(properties, sslBundles, serverBuilder, services, interceptors, customizers)
                 : new DummyGrpcServer();
     }

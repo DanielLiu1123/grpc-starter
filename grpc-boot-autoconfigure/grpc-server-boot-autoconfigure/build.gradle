@@ -14,7 +14,7 @@ dependencies {
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-    testRuntimeOnly("io.grpc:grpc-netty-shaded")
+    testRuntimeOnly("io.grpc:grpc-netty")
     testImplementation("io.grpc:grpc-testing-proto")
     testImplementation(project(":grpc-starters:grpc-starter-test"))
     testImplementation(project(":grpc-starters:grpc-client-boot-starter"))

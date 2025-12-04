@@ -1,6 +1,5 @@
 package grpcstarter.server;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.grpc.BindableService;
 import io.grpc.Grpc;
 import io.grpc.InsecureServerCredentials;
@@ -11,19 +10,17 @@ import io.grpc.TlsServerCredentials;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.internal.GrpcUtil;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import lombok.SneakyThrows;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.ssl.SslBundle;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.unit.DataSize;
@@ -44,14 +41,13 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
     @SuppressWarnings("NullAway")
     private ApplicationEventPublisher publisher;
 
-    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public DefaultGrpcServer(
             GrpcServerProperties properties,
             SslBundles sslBundles,
-            ObjectProvider<ServerBuilder<?>> serverBuilder,
-            ObjectProvider<BindableService> serviceProvider,
-            ObjectProvider<ServerInterceptor> interceptorProvider,
-            ObjectProvider<GrpcServerCustomizer> customizers) {
+            Optional<ServerBuilder<?>> serverBuilder,
+            List<BindableService> serviceProvider,
+            List<ServerInterceptor> interceptorProvider,
+            List<GrpcServerCustomizer> customizers) {
         this.properties = properties;
         this.server = buildGrpcServer(
                 properties, sslBundles, serverBuilder, serviceProvider, interceptorProvider, customizers);
@@ -60,19 +56,20 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
     private static Server buildGrpcServer(
             GrpcServerProperties properties,
             SslBundles sslBundles,
-            ObjectProvider<ServerBuilder<?>> serverBuilder,
-            ObjectProvider<BindableService> serviceProvider,
-            ObjectProvider<ServerInterceptor> interceptorProvider,
-            ObjectProvider<GrpcServerCustomizer> customizers) {
-        ServerBuilder<?> builder = serverBuilder.getIfUnique(() -> getDefaultServerBuilder(properties, sslBundles));
+            Optional<ServerBuilder<?>> serverBuilder,
+            List<BindableService> services,
+            List<ServerInterceptor> interceptors,
+            List<GrpcServerCustomizer> customizers) {
+        ServerBuilder<?> builder = serverBuilder.orElseGet(() -> getDefaultServerBuilder(properties, sslBundles));
 
-        // add services
-        serviceProvider.forEach(builder::addService);
+        for (var service : services) {
+            builder.addService(service);
+        }
 
         // add interceptors, gRPC applies interceptors in reversed order
-        interceptorProvider.stream()
-                .sorted(AnnotationAwareOrderComparator.INSTANCE.reversed())
-                .forEach(builder::intercept);
+        for (int i = interceptors.size() - 1; i >= 0; i--) {
+            builder.intercept(interceptors.get(i));
+        }
 
         Optional.ofNullable(properties.getMaxInboundMessageSize())
                 .map(DataSize::toBytes)
@@ -83,13 +80,13 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
                 .map(Long::intValue)
                 .ifPresent(builder::maxInboundMetadataSize);
 
-        // apply customizers
-        customizers.orderedStream().forEach(customizer -> customizer.customize(builder));
+        for (var customizer : customizers) {
+            customizer.customize(builder);
+        }
 
         return builder.build();
     }
 
-    @SneakyThrows
     private static ServerBuilder<? extends ServerBuilder<?>> getDefaultServerBuilder(
             GrpcServerProperties properties, SslBundles sslBundles) {
         if (properties.getInProcess() != null) {

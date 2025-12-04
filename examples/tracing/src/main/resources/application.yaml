@@ -10,9 +10,16 @@ grpc:
     authority: localhost:${grpc.server.port:9090}
 
 management:
-  otlp:
+  opentelemetry:
     tracing:
-      endpoint: http://localhost:4317
+      export:
+        otlp:
+          transport: http
+          endpoint: http://localhost:4318/v1/traces
   tracing:
     sampling:
-      probability: 1.0
+      probability: 1
+  otlp:
+    metrics:
+      export:
+        enabled: false
