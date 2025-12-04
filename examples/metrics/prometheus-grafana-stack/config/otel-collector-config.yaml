@@ -22,7 +22,7 @@ processors:
         action: upsert
 
 exporters:
-  # 导出到 Prometheus（暴露 metrics 端点供 Prometheus 抓取）
+  # Export to Prometheus (expose metrics endpoint for Prometheus scraping)
   prometheus:
     endpoint: "0.0.0.0:8889"
     namespace: otel
