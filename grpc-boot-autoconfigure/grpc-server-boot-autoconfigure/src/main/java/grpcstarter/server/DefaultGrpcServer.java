@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import lombok.SneakyThrows;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +89,6 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
         return builder.build();
     }
 
-    @SneakyThrows
     private static ServerBuilder<? extends ServerBuilder<?>> getDefaultServerBuilder(
             GrpcServerProperties properties, SslBundles sslBundles) {
         if (properties.getInProcess() != null) {
