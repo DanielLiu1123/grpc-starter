@@ -12,11 +12,9 @@ dependencies {
     optional("org.springframework.boot:spring-boot-starter-jdbc")
     optional("org.springframework.boot:spring-boot-starter-data-redis")
 
-    optional("org.springframework.boot:spring-boot-starter-opentelemetry")
-
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-    testRuntimeOnly("io.grpc:grpc-netty-shaded")
+    testRuntimeOnly("io.grpc:grpc-netty")
     testImplementation("io.grpc:grpc-testing-proto")
     testImplementation(project(":grpc-starters:grpc-starter-test"))
     testImplementation(project(":grpc-starters:grpc-client-boot-starter"))
