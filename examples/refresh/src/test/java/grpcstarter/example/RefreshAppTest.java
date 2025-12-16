@@ -2,84 +2,108 @@ package grpcstarter.example;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.springframework.test.util.TestSocketUtils.findAvailableTcpPort;
 
 import io.grpc.StatusRuntimeException;
 import io.grpc.testing.protobuf.SimpleRequest;
 import io.grpc.testing.protobuf.SimpleServiceGrpc.SimpleServiceBlockingStub;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.endpoint.event.RefreshEvent;
-import org.springframework.context.ApplicationContext;
 
-@SpringBootTest(
-        properties = {
-            "grpc.test.enabled=false",
-            "grpc.server.port=52330",
-            "grpc.client.authority=localhost:${grpc.server.port}",
-        })
 class RefreshAppTest {
-
-    @Autowired
-    SimpleServiceBlockingStub simpleStub;
-
-    @Autowired
-    ApplicationContext ctx;
-
-    static SimpleRequest request =
-            SimpleRequest.newBuilder().setRequestMessage("Hello").build();
 
     @Test
     void testDeadline() {
-        normalRequest();
+        var port = findAvailableTcpPort();
+        try (var ctx = new SpringApplicationBuilder(RefreshApp.class)
+                .properties("grpc.server.port= " + port)
+                .properties("grpc.client.authority=localhost:" + port)
+                .run()) {
 
-        // change deadline to 500ms
-        System.setProperty("grpc.client.deadline", "500");
+            var simpleStub = ctx.getBean(SimpleServiceBlockingStub.class);
+            var responseMessage = simpleStub
+                    .unaryRpc(SimpleRequest.newBuilder()
+                            .setRequestMessage("Hello")
+                            .build())
+                    .getResponseMessage();
 
-        ctx.publishEvent(new RefreshEvent(ctx, null, null));
+            assertThat(responseMessage).isEqualTo("Hello");
 
-        assertThatCode(() -> simpleStub.unaryRpc(request))
-                .isInstanceOf(StatusRuntimeException.class)
-                .hasMessageContaining("DEADLINE_EXCEEDED: CallOptions deadline exceeded after");
+            // change deadline to 500ms
+            System.setProperty("grpc.client.deadline", "500");
+            ctx.publishEvent(new RefreshEvent(ctx, null, null));
 
-        System.clearProperty("grpc.client.deadline");
+            assertThatCode(() -> simpleStub.unaryRpc(SimpleRequest.newBuilder()
+                            .setRequestMessage("Hello")
+                            .build()))
+                    .isInstanceOf(StatusRuntimeException.class)
+                    .hasMessageContaining("DEADLINE_EXCEEDED: CallOptions deadline exceeded after");
+        } finally {
+            System.clearProperty("grpc.client.deadline");
+        }
     }
 
     @Test
     @Disabled("Can't gracefully exit in this test case")
     void testMaxOutboundMessageSize() {
-        normalRequest();
+        var port = findAvailableTcpPort();
+        try (var ctx = new SpringApplicationBuilder(RefreshApp.class)
+                .properties("grpc.server.port= " + port)
+                .properties("grpc.client.authority=localhost:" + port)
+                .run()) {
 
-        // change max outbound message size to 1B
-        System.setProperty("grpc.client.max-outbound-message-size", "3B");
+            var simpleStub = ctx.getBean(SimpleServiceBlockingStub.class);
+            var responseMessage = simpleStub
+                    .unaryRpc(SimpleRequest.newBuilder()
+                            .setRequestMessage("Hello")
+                            .build())
+                    .getResponseMessage();
 
-        ctx.publishEvent(new RefreshEvent(ctx, null, null));
+            assertThat(responseMessage).isEqualTo("Hello");
 
-        assertThatCode(() -> simpleStub.unaryRpc(request))
-                .isInstanceOf(StatusRuntimeException.class)
-                .hasMessageContaining("INTERNAL: Failed to frame message");
+            // change max outbound message size to 1B
+            System.setProperty("grpc.client.max-outbound-message-size", "1B");
+            ctx.publishEvent(new RefreshEvent(ctx, null, null));
 
-        System.clearProperty("grpc.client.max-outbound-message-size");
+            assertThatCode(() -> simpleStub.unaryRpc(SimpleRequest.newBuilder()
+                            .setRequestMessage("Hello")
+                            .build()))
+                    .isInstanceOf(StatusRuntimeException.class)
+                    .hasMessageContaining("RESOURCE_EXHAUSTED: message too large");
+        } finally {
+            System.clearProperty("grpc.client.max-outbound-message-size");
+        }
     }
 
     @Test
     void testCompression() {
-        normalRequest();
+        var port = findAvailableTcpPort();
+        try (var ctx = new SpringApplicationBuilder(RefreshApp.class)
+                .properties("grpc.server.port= " + port)
+                .properties("grpc.client.authority=localhost:" + port)
+                .run()) {
 
-        // change compression to identity
-        System.setProperty("grpc.client.compression", "identity");
+            var simpleStub = ctx.getBean(SimpleServiceBlockingStub.class);
+            var responseMessage = simpleStub
+                    .unaryRpc(SimpleRequest.newBuilder()
+                            .setRequestMessage("Hello")
+                            .build())
+                    .getResponseMessage();
 
-        ctx.publishEvent(new RefreshEvent(ctx, null, null));
+            assertThat(responseMessage).isEqualTo("Hello");
 
-        assertThatCode(() -> simpleStub.unaryRpc(request)).doesNotThrowAnyException();
+            // change compression to gzip
+            System.setProperty("grpc.client.compression", "gzip");
+            ctx.publishEvent(new RefreshEvent(ctx, null, null));
 
-        System.clearProperty("grpc.client.compression");
-    }
-
-    private void normalRequest() {
-        String responseMessage = simpleStub.unaryRpc(request).getResponseMessage();
-
-        assertThat(responseMessage).isEqualTo("Hello");
+            assertThatCode(() -> simpleStub.unaryRpc(SimpleRequest.newBuilder()
+                            .setRequestMessage("Hello")
+                            .build()))
+                    .doesNotThrowAnyException();
+        } finally {
+            System.clearProperty("grpc.client.max-outbound-message-size");
+        }
     }
 }
