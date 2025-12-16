@@ -42,5 +42,5 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           tag=${{ github.ref_name }}
-          ./gradlew clean publish --no-daemon -Pversion=${tag#v}
+          ./gradlew clean publish --no-daemon --no-configuration-cache -Pversion=${tag#v}
           ./gradlew deploy --no-daemon

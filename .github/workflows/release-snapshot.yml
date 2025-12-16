@@ -28,4 +28,4 @@ jobs:
           MAVENCENTRAL_USERNAME: ${{ secrets.MAVENCENTRAL_USERNAME }}
           MAVENCENTRAL_PASSWORD: ${{ secrets.MAVENCENTRAL_PASSWORD }}
         run: |
-          ./gradlew clean publish --no-daemon
+          ./gradlew clean publish --no-daemon --no-configuration-cache

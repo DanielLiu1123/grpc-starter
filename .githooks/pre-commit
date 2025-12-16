@@ -7,7 +7,7 @@ set -e
 
 # generate configuration properties docs
 ./gradlew classes
-./gradlew generateConfigurationPropertiesDocs
+./gradlew generateConfigurationPropertiesDocs --no-configuration-cache
 
 # escape {} in md
 perl -pi -e 's/{/\\{/g' build/configuration-properties.md
