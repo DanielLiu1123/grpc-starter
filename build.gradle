@@ -19,7 +19,10 @@ plugins {
 }
 
 deploy {
-    dirs = subprojects.collect { e -> e.layout.buildDirectory.dir("repo").get().getAsFile() }
+    dirs = subprojects.stream()
+            .map(e -> e.layout.buildDirectory.dir("repo").get().getAsFile())
+            .filter(e -> e.exists())
+            .toList()
     username = System.getenv("MAVENCENTRAL_USERNAME")
     password = System.getenv("MAVENCENTRAL_PASSWORD")
     publishingType = io.github.danielliu1123.deployer.PublishingType.AUTOMATIC
