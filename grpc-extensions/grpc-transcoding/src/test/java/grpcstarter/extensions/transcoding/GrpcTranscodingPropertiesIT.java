@@ -101,9 +101,7 @@ class GrpcTranscodingPropertiesIT {
 
             if (addWhitespace) {
                 resp.expectStatus().isEqualTo(OK);
-                resp.expectBody(String.class)
-                        .isEqualTo(
-                                """
+                resp.expectBody(String.class).isEqualTo("""
                                 {
                                   "text": "Hello World!"
                                 }""");

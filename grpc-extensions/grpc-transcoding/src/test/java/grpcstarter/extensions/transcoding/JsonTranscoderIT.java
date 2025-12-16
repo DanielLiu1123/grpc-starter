@@ -40,8 +40,7 @@ class JsonTranscoderIT {
             // path alias
             var resp = client.post()
                     .uri("http://localhost:" + port + "/v1/unaryrpc")
-                    .body(
-                            """
+                    .body("""
                             {
                                 "requestMessage": "Hi"
                             }
@@ -68,8 +67,7 @@ class JsonTranscoderIT {
             // google.protobuf.StringValue convert to JSON, the result is "foo", not {"value":"foo"}
             resp = client.post()
                     .uri("http://localhost:" + port + "/v1/unaryrpc")
-                    .body(
-                            """
+                    .body("""
                             {
                                 "int32_wrapper": 1
                             }
@@ -81,8 +79,7 @@ class JsonTranscoderIT {
             // test wrong format
             resp = client.post()
                     .uri("http://localhost:" + port + "/v1/unaryrpc")
-                    .body(
-                            """
+                    .body("""
                             {
                                 "int32_wrapper": {
                                     "value": 1
@@ -149,8 +146,7 @@ class JsonTranscoderIT {
 
             var resp = client.post()
                     .uri("http://localhost:" + port + "/v1/unaryrpc")
-                    .body(
-                            """
+                    .body("""
                             {
                                 "requestMessage": "Hi"
                             }
@@ -179,8 +175,7 @@ class JsonTranscoderIT {
 
             var resp = client.post()
                     .uri("http://localhost:" + port + "/v1/unaryrpc")
-                    .body(
-                            """
+                    .body("""
                             {
                                 "requestMessage": "Hi"
                             }

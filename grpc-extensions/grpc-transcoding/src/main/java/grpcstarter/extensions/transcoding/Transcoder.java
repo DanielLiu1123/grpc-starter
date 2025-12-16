@@ -199,5 +199,7 @@ class Transcoder {
     }
 
     public record Variable(
-            byte[] body, @Nullable Map<String, String[]> parameters, @Nullable Map<String, String> pathVariables) {}
+            byte[] body,
+            @Nullable Map<String, String[]> parameters,
+            @Nullable Map<String, String> pathVariables) {}
 }

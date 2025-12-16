@@ -108,8 +108,7 @@ class TranscoderTest {
 
     @Test
     void testComplexBody() {
-        var body =
-                """
+        var body = """
                 {
                     "requestMessage": "Hi",
                     "some_message": "Hi",

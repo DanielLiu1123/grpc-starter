@@ -1,9 +1,6 @@
-apply plugin: 'java-platform'
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
-
-version = version as String
-version = System.getenv('RELEASE') ? version.substring(0, version.lastIndexOf('-SNAPSHOT')) : version
+apply plugin: "java-platform"
+apply plugin: "maven-publish"
+apply plugin: "signing"
 
 repositories {
     mavenLocal()
@@ -54,13 +51,13 @@ def githubUrl = 'https://github.com/DanielLiu1123/grpc-starter'
 
 publishing {
     publications {
-        maven(MavenPublication) {
+        register("maven", MavenPublication) {
             from components.javaPlatform
 
             pom {
                 url = "${githubUrl}"
-                name = project.name
-                description = project.description ?: project.name
+                name = "grpc-starter-dependencies"
+                description = "gRPC Starter Dependencies BOM"
                 licenses {
                     license {
                         name = 'MIT License'
@@ -86,7 +83,27 @@ publishing {
 
     repositories {
         maven {
-            url = "${rootDir}/build/staging-deploy"
+            if (version.toString().endsWith("-SNAPSHOT")) {
+                url = "https://central.sonatype.com/repository/maven-snapshots"
+                credentials {
+                    username = System.getenv("MAVENCENTRAL_USERNAME")
+                    password = System.getenv("MAVENCENTRAL_PASSWORD")
+                }
+            } else {
+                url = layout.buildDirectory.dir("repo")
+            }
         }
+    }
+}
+
+signing {
+    if (!version.toString().endsWith('-SNAPSHOT')) {
+        def signingKey = System.getenv("GPG_SECRET_KEY")
+        def signingPassphrase = System.getenv("GPG_PASSPHRASE")
+        if (signingKey == null || signingPassphrase == null) {
+            throw new GradleException("Need to set GPG_SECRET_KEY and GPG_PASSPHRASE environment variables for signing.")
+        }
+        useInMemoryPgpKeys(signingKey, signingPassphrase)
+        sign publishing.publications.maven
     }
 }
