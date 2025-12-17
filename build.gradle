@@ -25,7 +25,7 @@ deploy {
             .toList()
     username = System.getenv("MAVENCENTRAL_USERNAME")
     password = System.getenv("MAVENCENTRAL_PASSWORD")
-    publishingType = io.github.danielliu1123.deployer.PublishingType.AUTOMATIC
+    publishingType = io.github.danielliu1123.deployer.PublishingType.WAIT_FOR_PUBLISHED
 }
 
 //allprojects { // uncomment this if you want to get IDE support, only for debugging purpose!
