@@ -70,12 +70,15 @@ final class Util {
                     .map(it -> it.getName() != null ? it.getName() : "unnamed")
                     .collect(Collectors.joining(", "));
             GrpcClientProperties.Channel chosen = matchedChannels.get(0);
-            String authority = chosen.getAuthority() != null ? chosen.getAuthority() : properties.getAuthority();
+            String target = chosen.getInProcess() != null
+                    ? "in-process: " + chosen.getInProcess().name()
+                    : "authority: "
+                            + (chosen.getAuthority() != null ? chosen.getAuthority() : properties.getAuthority());
             log.warn(
-                    "gRPC client [{}] matched multiple channels: [{}], using the first one with authority: [{}]",
+                    "gRPC client [{}] matched multiple channels: [{}], using the first one with {}",
                     stubClass.getName(),
                     matchedNames,
-                    authority);
+                    target);
         }
 
         return matchedChannels.isEmpty() ? Optional.empty() : Optional.of(matchedChannels.get(0));
