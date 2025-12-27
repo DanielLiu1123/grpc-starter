@@ -6,7 +6,9 @@ import io.grpc.ManagedChannel;
 import io.grpc.stub.AbstractStub;
 import java.lang.reflect.Method;
 import java.util.Optional;
-import org.springframework.aop.framework.AopProxyUtils;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -16,6 +18,8 @@ import org.springframework.util.unit.DataSize;
  * @author Freeman
  */
 class GrpcClientCreator {
+    private static final Logger log = LoggerFactory.getLogger(GrpcClientCreator.class);
+
     static final String NEW_BLOCKING_STUB_METHOD = "newBlockingStub";
     static final String NEW_BLOCKING_V2_STUB_METHOD = "newBlockingV2Stub";
     static final String NEW_FUTURE_STUB_METHOD = "newFutureStub";
@@ -46,8 +50,8 @@ class GrpcClientCreator {
 
         GrpcClientProperties properties = beanFactory.getBean(GrpcClientProperties.class);
 
-        String channelBeanName = GrpcClientUtil.CHANNEL_BEAN_NAME_PREFIX
-                + getMatchedConfig(properties).getName();
+        var matchedChannel = getMatchedChannel(stubClass, properties);
+        String channelBeanName = GrpcClientUtil.CHANNEL_BEAN_NAME_PREFIX + matchedChannel.getName();
         if (!beanFactory.containsBean(channelBeanName)) {
             throw new MissingChannelConfigurationException(stubClass);
         }
@@ -57,21 +61,38 @@ class GrpcClientCreator {
 
         Assert.isTrue(stub != null, "stub must not be null");
 
-        stub = setOptions(stub, properties);
+        stub = setOptions(stub, matchedChannel);
 
         Cache.addStubClass(stubClass);
         return stub;
     }
 
-    private GrpcClientProperties.Channel getMatchedConfig(GrpcClientProperties properties) {
-        return GrpcChannelCreator.getMatchedConfig(stubClass, properties);
+    private static GrpcClientProperties.Channel getMatchedChannel(Class<?> stubClass, GrpcClientProperties properties) {
+        var matchedChannels = Util.findMatchedConfigs(stubClass, properties);
+        if (matchedChannels.isEmpty()) {
+            return properties.defaultChannel();
+        }
+        if (matchedChannels.size() > 1) {
+            String matchedNames = matchedChannels.stream()
+                    .map(it -> it.getName() != null ? it.getName() : "unnamed")
+                    .collect(Collectors.joining(", "));
+            var chosen = matchedChannels.get(0);
+            String target = chosen.getInProcess() != null
+                    ? "in-process: " + chosen.getInProcess().name()
+                    : "authority: "
+                            + (chosen.getAuthority() != null ? chosen.getAuthority() : properties.getAuthority());
+            log.warn(
+                    "gRPC client [{}] matched multiple channels: [{}], using '{}' with {}",
+                    stubClass.getName(),
+                    matchedNames,
+                    chosen.getName() != null ? chosen.getName() : "unnamed",
+                    target);
+        }
+        return matchedChannels.get(0);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static <T> T setOptions(T stub, GrpcClientProperties properties) {
-        GrpcClientProperties.Channel cfg =
-                GrpcChannelCreator.getMatchedConfig(AopProxyUtils.ultimateTargetClass(stub), properties);
-
+    private static <T> T setOptions(T stub, GrpcClientProperties.Channel cfg) {
         GrpcClientOptions opt = new GrpcClientOptions();
 
         setOptionValues(opt, cfg);

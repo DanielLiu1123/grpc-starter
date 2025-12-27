@@ -6,9 +6,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +38,7 @@ final class Util {
 
     private static final AntPathMatcher matcher = new AntPathMatcher(".");
 
-    public static Optional<GrpcClientProperties.Channel> findMatchedConfig(
+    public static List<GrpcClientProperties.Channel> findMatchedConfigs(
             Class<?> stubClass, GrpcClientProperties properties) {
         List<GrpcClientProperties.Channel> matchedChannels = new ArrayList<>();
 
@@ -65,23 +63,7 @@ final class Util {
             }
         }
 
-        if (matchedChannels.size() > 1) {
-            String matchedNames = matchedChannels.stream()
-                    .map(it -> it.getName() != null ? it.getName() : "unnamed")
-                    .collect(Collectors.joining(", "));
-            GrpcClientProperties.Channel chosen = matchedChannels.get(0);
-            String target = chosen.getInProcess() != null
-                    ? "in-process: " + chosen.getInProcess().name()
-                    : "authority: "
-                            + (chosen.getAuthority() != null ? chosen.getAuthority() : properties.getAuthority());
-            log.warn(
-                    "gRPC client [{}] matched multiple channels: [{}], using the first one with {}",
-                    stubClass.getName(),
-                    matchedNames,
-                    target);
-        }
-
-        return matchedChannels.isEmpty() ? Optional.empty() : Optional.of(matchedChannels.get(0));
+        return matchedChannels;
     }
 
     private static boolean matchAnyServicesConfig(Class<?> stubClass, GrpcClientProperties.Channel channelConfig) {

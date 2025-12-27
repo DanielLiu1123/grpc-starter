@@ -53,32 +53,10 @@ class UtilTest {
         properties.setChannels(List.of(channel1, channel2));
 
         // Should return the first matched one
-        var matched = Util.findMatchedConfig(HealthGrpc.HealthBlockingStub.class, properties);
+        var matchedChannels = Util.findMatchedConfigs(HealthGrpc.HealthBlockingStub.class, properties);
 
-        assertThat(matched).isPresent();
-        assertThat(matched.get().getName()).isEqualTo("channel1");
-    }
-
-    @Test
-    void testFindMatchedConfig_multipleMatches_inProcess() {
-        GrpcClientProperties properties = new GrpcClientProperties();
-
-        GrpcClientProperties.Channel channel1 = new GrpcClientProperties.Channel();
-        channel1.setName("channel1");
-        channel1.setInProcess(new GrpcClientProperties.InProcess("test-in-process"));
-        channel1.setServices(List.of("grpc.health.v1.Health"));
-
-        GrpcClientProperties.Channel channel2 = new GrpcClientProperties.Channel();
-        channel2.setName("channel2");
-        channel2.setAuthority("localhost:1002");
-        channel2.setServices(List.of("grpc.health.v*.*"));
-
-        properties.setChannels(List.of(channel1, channel2));
-
-        // Should return the first matched one
-        var matched = Util.findMatchedConfig(HealthGrpc.HealthBlockingStub.class, properties);
-
-        assertThat(matched).isPresent();
-        assertThat(matched.get().getName()).isEqualTo("channel1");
+        assertThat(matchedChannels).hasSize(2);
+        assertThat(matchedChannels.get(0).getName()).isEqualTo("channel1");
+        assertThat(matchedChannels.get(1).getName()).isEqualTo("channel2");
     }
 }
