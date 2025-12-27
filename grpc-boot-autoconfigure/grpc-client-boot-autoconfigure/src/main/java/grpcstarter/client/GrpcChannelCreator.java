@@ -64,11 +64,6 @@ class GrpcChannelCreator {
         return channelConfig;
     }
 
-    static GrpcClientProperties.Channel getMatchedConfig(
-            Class<?> stubClass, GrpcClientProperties grpcClientProperties) {
-        return Util.findMatchedConfig(stubClass, grpcClientProperties).orElseGet(grpcClientProperties::defaultChannel);
-    }
-
     private ManagedChannel buildChannel(GrpcClientProperties.Channel channelConfig) {
         ManagedChannelBuilder<?> builder = getManagedChannelBuilder(channelConfig);
 

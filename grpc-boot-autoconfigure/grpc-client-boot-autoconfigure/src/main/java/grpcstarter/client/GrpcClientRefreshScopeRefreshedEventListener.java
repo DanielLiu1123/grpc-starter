@@ -58,9 +58,11 @@ public class GrpcClientRefreshScopeRefreshedEventListener
                 .forEach(stub -> {
                     GrpcClientOptions opt = stub.getCallOptions().getOption(GrpcClientOptions.KEY);
                     if (opt != null) {
-                        GrpcClientProperties.Channel config = GrpcChannelCreator.getMatchedConfig(
-                                AopProxyUtils.ultimateTargetClass(stub), properties);
-                        GrpcClientCreator.setOptionValues(opt, config);
+                        var matchedChannels =
+                                Util.findMatchedConfigs(AopProxyUtils.ultimateTargetClass(stub), properties);
+                        var channelToUse =
+                                !matchedChannels.isEmpty() ? matchedChannels.get(0) : properties.defaultChannel();
+                        GrpcClientCreator.setOptionValues(opt, channelToUse);
                     }
                 });
     }

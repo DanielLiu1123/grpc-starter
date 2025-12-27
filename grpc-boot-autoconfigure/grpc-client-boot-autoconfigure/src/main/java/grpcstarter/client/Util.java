@@ -3,10 +3,10 @@ package grpcstarter.client;
 import io.grpc.ManagedChannel;
 import java.lang.reflect.Field;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import lombok.experimental.UtilityClass;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +24,12 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Freeman
  */
-@UtilityClass
-class Util {
+final class Util {
     private static final Logger log = LoggerFactory.getLogger(Util.class);
+
+    private Util() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     /**
      * Service name field name for gRPC service.
@@ -35,28 +38,32 @@ class Util {
 
     private static final AntPathMatcher matcher = new AntPathMatcher(".");
 
-    public static Optional<GrpcClientProperties.Channel> findMatchedConfig(
+    public static List<GrpcClientProperties.Channel> findMatchedConfigs(
             Class<?> stubClass, GrpcClientProperties properties) {
+        List<GrpcClientProperties.Channel> matchedChannels = new ArrayList<>();
+
         // find from classes first
-        Optional<GrpcClientProperties.Channel> foundClassConfig = properties.getChannels().stream()
-                .filter(ch -> matchAnyClassesConfig(stubClass, ch))
-                .findFirst();
-        if (foundClassConfig.isPresent()) {
-            return foundClassConfig;
+        for (var channel : properties.getChannels()) {
+            if (matchAnyClassesConfig(stubClass, channel)) {
+                matchedChannels.add(channel);
+            }
         }
 
         // then, find from stubs
-        Optional<GrpcClientProperties.Channel> foundStubConfig = properties.getChannels().stream()
-                .filter(ch -> matchAnyStubsConfig(stubClass, ch))
-                .findFirst();
-        if (foundStubConfig.isPresent()) {
-            return foundStubConfig;
+        for (var channel : properties.getChannels()) {
+            if (matchAnyStubsConfig(stubClass, channel)) {
+                matchedChannels.add(channel);
+            }
         }
 
         // finally, find from services
-        return properties.getChannels().stream()
-                .filter(it -> matchAnyServicesConfig(stubClass, it))
-                .findFirst();
+        for (var channel : properties.getChannels()) {
+            if (matchAnyServicesConfig(stubClass, channel)) {
+                matchedChannels.add(channel);
+            }
+        }
+
+        return matchedChannels;
     }
 
     private static boolean matchAnyServicesConfig(Class<?> stubClass, GrpcClientProperties.Channel channelConfig) {
