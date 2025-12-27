@@ -1,5 +1,6 @@
 package grpcstarter.extensions.transcoding;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.grpc.Metadata;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -26,6 +27,7 @@ public class DefaultHeaderConverter implements HeaderConverter {
 
     private final Set<String> removeHeaders; // lower case
 
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public DefaultHeaderConverter() {
         this.removeHeaders = getRemoveHeaders();
     }
