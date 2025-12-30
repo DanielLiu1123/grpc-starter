@@ -9,6 +9,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -51,8 +52,9 @@ public class Health {
 
         @Bean
         @ConditionalOnMissingBean
-        public DataSourceHealthChecker grpcDataSourceHealthChecker(GrpcServerProperties properties) {
-            return new DataSourceHealthChecker(properties.getHealth().getDatasource());
+        public DataSourceHealthChecker grpcDataSourceHealthChecker(
+                ApplicationContext ctx, GrpcServerProperties properties) {
+            return new DataSourceHealthChecker(ctx, properties.getHealth().getDatasource());
         }
     }
 

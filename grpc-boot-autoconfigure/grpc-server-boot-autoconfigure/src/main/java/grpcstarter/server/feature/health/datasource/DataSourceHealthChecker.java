@@ -5,26 +5,24 @@ import grpcstarter.server.feature.health.HealthChecker;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.context.ApplicationContext;
 
 /**
  * @author Freeman
  */
-public class DataSourceHealthChecker implements HealthChecker, BeanFactoryAware, SmartInitializingSingleton {
+public class DataSourceHealthChecker implements HealthChecker, SmartInitializingSingleton {
     private static final Logger log = LoggerFactory.getLogger(DataSourceHealthChecker.class);
 
-    private BeanFactory beanFactory;
+    private final ApplicationContext ctx;
     private final List<DataSource> dataSources = new ArrayList<>();
     private final GrpcServerProperties.Health.DataSource config;
 
-    public DataSourceHealthChecker(GrpcServerProperties.Health.DataSource config) {
+    public DataSourceHealthChecker(ApplicationContext ctx, GrpcServerProperties.Health.DataSource config) {
+        this.ctx = ctx;
         this.config = config;
     }
 
@@ -54,15 +52,10 @@ public class DataSourceHealthChecker implements HealthChecker, BeanFactoryAware,
     }
 
     @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.beanFactory = beanFactory;
-    }
-
-    @Override
     public void afterSingletonsInstantiated() {
         // Do NOT inject DataSource here, we don't want to effect the order of auto-configurations
         List<DataSource> sources =
-                beanFactory.getBeanProvider(DataSource.class).orderedStream().collect(Collectors.toList());
+                ctx.getBeanProvider(DataSource.class).orderedStream().toList();
         this.dataSources.addAll(sources);
     }
 }
