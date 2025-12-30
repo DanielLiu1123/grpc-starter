@@ -14,8 +14,8 @@ plugins {
     id "com.github.spotbugs" version "${spotbugsVersion}" apply false
     id "com.google.protobuf" version "${protobufPluginVersion}" apply false
     id "org.graalvm.buildtools.native" version "${graalvmBuildToolsVersion}" apply false
-    id "io.spring.nullability" version "${springNullabilityPluginVersion}" apply false
     id "io.github.danielliu1123.deployer" version "${deployerVersion}"
+    id "net.ltgt.errorprone" version "${errorPronePluginVersion}"
 }
 
 deploy {
@@ -129,7 +129,19 @@ subprojects {
         excludeFilter = file("${rootDir}/config/spotbugs/exclude.xml")
     }
 
-    apply plugin: "io.spring.nullability"
+    apply plugin: "net.ltgt.errorprone"
+    dependencies {
+        errorprone "com.uber.nullaway:nullaway:${nullAwayVersion}"
+        errorprone "com.google.errorprone:error_prone_core:${errorProneCoreVersion}"
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.errorprone {
+            disableAllChecks = true
+            check("NullAway", net.ltgt.gradle.errorprone.CheckSeverity.ERROR)
+            option("NullAway:AnnotatedPackages", "grpcstarter")
+        }
+    }
 }
 
 apply from: "${rootDir}/gradle/generate-configuration-properties-docs.gradle"

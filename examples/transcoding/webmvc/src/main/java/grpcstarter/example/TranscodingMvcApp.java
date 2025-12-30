@@ -69,9 +69,12 @@ public class TranscodingMvcApp extends SimpleServiceImplBase {
     @Bean
     ApplicationRunner runner(RestClient.Builder builder, WebServerApplicationContext ctx) {
         return args -> {
-            var client = builder.baseUrl(
-                            "http://localhost:" + ctx.getWebServer().getPort())
-                    .build();
+            var webServer = ctx.getWebServer();
+            if (webServer == null) {
+                return;
+            }
+            var client =
+                    builder.baseUrl("http://localhost:" + webServer.getPort()).build();
 
             var response = client.post()
                     .uri("/unary")

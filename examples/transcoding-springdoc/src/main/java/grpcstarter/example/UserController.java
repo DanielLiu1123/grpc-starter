@@ -228,7 +228,7 @@ public class UserController {
                 .profileId(profileId)
                 .gender(filterGender)
                 .status(filterStatus)
-                .availableThemes(themes != null ? new HashSet<>(themes) : null)
+                .availableThemes(themes != null ? new HashSet<>(themes) : Set.of())
                 .build();
     }
 
@@ -264,7 +264,7 @@ public class UserController {
             @RequestParam(defaultValue = "10") Integer limit) {
         return CollectionWrapper.builder()
                 .collectionId(collectionId)
-                .availableGenders(filterGenders != null ? new HashSet<>(filterGenders) : null)
+                .availableGenders(filterGenders != null ? new HashSet<>(filterGenders) : Set.of())
                 .build();
     }
 

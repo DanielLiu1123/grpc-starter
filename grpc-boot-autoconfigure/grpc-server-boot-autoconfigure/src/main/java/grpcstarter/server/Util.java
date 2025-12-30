@@ -25,6 +25,7 @@ class Util {
             Class<?> clz = Class.forName("io.grpc.reflection.v1alpha.ServerReflectionGrpc$ServerReflectionImplBase");
             result.add(clz);
         } catch (ClassNotFoundException ignored) {
+            // It's OK if not found
         }
 
         try {
@@ -32,6 +33,7 @@ class Util {
             Class<?> clz = Class.forName("io.grpc.reflection.v1.ServerReflectionGrpc$ServerReflectionImplBase");
             result.add(clz);
         } catch (ClassNotFoundException ignored) {
+            // It's OK if not found
         }
 
         result.add(HealthGrpc.HealthImplBase.class);

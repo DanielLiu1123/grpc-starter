@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
+ * gRPC Health Server Interceptor.
+ *
  * @author Freeman
  */
 public class HealthServerInterceptor implements ServerInterceptor {

@@ -12,6 +12,8 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.ApplicationContext;
 
 /**
+ * DataSource health checker.
+ *
  * @author Freeman
  */
 public class DataSourceHealthChecker implements HealthChecker, SmartInitializingSingleton {

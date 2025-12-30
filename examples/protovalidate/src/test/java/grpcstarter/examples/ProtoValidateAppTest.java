@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 class ProtoValidateAppTest {
 
     @InProcessName
+    @SuppressWarnings("NullAway")
     String name;
 
     @Test

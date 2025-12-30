@@ -50,9 +50,10 @@ public class ProtoValidateApp extends FooServiceGrpc.FooServiceImplBase {
             try {
                 stub.insertFoo(request);
             } catch (StatusRuntimeException e) {
+                String message = e.getMessage();
                 Assert.isTrue(
-                        e.getMessage()
-                                .contains(
+                        message != null
+                                && message.contains(
                                         "INVALID_ARGUMENT: id: at least 5 characters, name: value length must be at least 5 characters"),
                         "Message not match");
             }

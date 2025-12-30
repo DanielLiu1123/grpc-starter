@@ -69,9 +69,12 @@ public class TranscodingWebFluxApp extends SimpleServiceImplBase {
     @Bean
     ApplicationRunner runner(WebClient.Builder builder, ReactiveWebServerApplicationContext ctx) {
         return args -> {
-            var client = builder.baseUrl(
-                            "http://localhost:" + ctx.getWebServer().getPort())
-                    .build();
+            var webServer = ctx.getWebServer();
+            if (webServer == null) {
+                return;
+            }
+            var client =
+                    builder.baseUrl("http://localhost:" + webServer.getPort()).build();
 
             var response = client.post()
                     .uri("/unary")

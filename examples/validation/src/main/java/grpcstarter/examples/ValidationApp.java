@@ -51,10 +51,11 @@ public class ValidationApp extends FooServiceGrpc.FooServiceImplBase {
             try {
                 stub.insertFoo(request);
             } catch (StatusRuntimeException e) {
+                String message = e.getMessage();
                 Assert.isTrue(
-                        e.getMessage()
-                                .contains(
-                                        "INVALID_ARGUMENT: .foo.Foo.name: length must be at least 2 but got: 1 - Got \"x\""),
+                        message != null
+                                && message.contains(
+                                        "INVALID_ARGUMENT: insertFoo.arg0.id: length must be between 5 and 2147483647, insertFoo.arg0.name: length must be between 5 and 2147483647"),
                         "Message not match");
             }
         };

@@ -4,6 +4,8 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.context.SmartLifecycle;
 
 /**
+ * gRPC server.
+ *
  * @author Freeman
  */
 public interface GrpcServer extends SmartLifecycle {
