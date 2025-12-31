@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import lombok.SneakyThrows;
 import org.jspecify.annotations.Nullable;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
@@ -67,7 +66,7 @@ class GrpcTranscodingBeanFactoryInitializationAotProcessor implements BeanFactor
         }
     }
 
-    private static LinkedHashSet<Class<?>> getMessages(Map<String, BeanDefinition> beanNameToBeanDefinition) {
+    private static Set<Class<?>> getMessages(Map<String, BeanDefinition> beanNameToBeanDefinition) {
         var messages = new LinkedHashSet<Class<?>>();
         for (var entry : beanNameToBeanDefinition.entrySet()) {
             var beanDefinition = entry.getValue();
@@ -111,7 +110,6 @@ class GrpcTranscodingBeanFactoryInitializationAotProcessor implements BeanFactor
         return messages;
     }
 
-    @SneakyThrows
     private static void registerReflectionForMessages(ReflectionHints reflection, Set<Class<?>> messages) {
         for (var message : messages) {
 

@@ -5,6 +5,7 @@ import io.grpc.Metadata;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -36,7 +37,7 @@ public class DefaultHeaderConverter implements HeaderConverter {
     public Metadata toMetadata(HttpHeaders headers) {
         Metadata metadata = new Metadata();
         headers.forEach((k, values) -> {
-            if (!removeHeaders.contains(k.toLowerCase())) {
+            if (!removeHeaders.contains(k.toLowerCase(Locale.ROOT))) {
                 values.forEach(v -> metadata.put(Metadata.Key.of(k, Metadata.ASCII_STRING_MARSHALLER), v));
             }
         });
@@ -47,7 +48,7 @@ public class DefaultHeaderConverter implements HeaderConverter {
     public HttpHeaders toHttpHeaders(Metadata headers) {
         HttpHeaders result = new HttpHeaders();
         for (String key : headers.keys()) {
-            if (!removeHeaders.contains(key.toLowerCase())
+            if (!removeHeaders.contains(key.toLowerCase(Locale.ROOT))
                     && !key.startsWith("grpc-")
                     && !key.endsWith(Metadata.BINARY_HEADER_SUFFIX)) {
                 Optional.ofNullable(headers.getAll(Metadata.Key.of(key, Metadata.ASCII_STRING_MARSHALLER)))

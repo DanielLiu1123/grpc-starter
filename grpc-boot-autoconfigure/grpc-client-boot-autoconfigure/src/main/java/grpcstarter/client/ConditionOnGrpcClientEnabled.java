@@ -9,6 +9,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 /**
+ * gRPC client enabled condition.
+ *
  * @author Freeman
  */
 @Retention(RetentionPolicy.RUNTIME)

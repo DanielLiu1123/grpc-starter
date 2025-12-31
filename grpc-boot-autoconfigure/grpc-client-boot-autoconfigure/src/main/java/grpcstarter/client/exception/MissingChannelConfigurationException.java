@@ -1,11 +1,10 @@
 package grpcstarter.client.exception;
 
-import lombok.Getter;
-
 /**
+ * gRPC channel authority not configured exception.
+ *
  * @author Freeman
  */
-@Getter
 public class MissingChannelConfigurationException extends RuntimeException {
 
     private final Class<?> stubClass;
@@ -13,5 +12,9 @@ public class MissingChannelConfigurationException extends RuntimeException {
     public MissingChannelConfigurationException(Class<?> stubClass) {
         super("gRPC channel authority is not configured for stub: " + stubClass.getCanonicalName());
         this.stubClass = stubClass;
+    }
+
+    public Class<?> getStubClass() {
+        return stubClass;
     }
 }

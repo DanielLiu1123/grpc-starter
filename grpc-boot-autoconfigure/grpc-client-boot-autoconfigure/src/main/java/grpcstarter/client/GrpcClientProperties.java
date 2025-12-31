@@ -259,6 +259,8 @@ public class GrpcClientProperties implements InitializingBean {
     }
 
     /**
+     * Metadata entry representing a header key and its values.
+     *
      * @param key    Header key.
      * @param values Header values.
      */

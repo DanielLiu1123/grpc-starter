@@ -102,6 +102,7 @@ public final class ProtobufJavaTypeUtil {
                 clazz = Class.forName(className);
                 break;
             } catch (ClassNotFoundException ignored) {
+                // It's OK, try the next one
             }
         }
 

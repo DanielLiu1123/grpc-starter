@@ -52,6 +52,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
+ * Default implementation of {@link ReactiveTranscoder}.
+ *
  * @author Freeman
  * @since 3.3.0
  */

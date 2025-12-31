@@ -73,7 +73,7 @@ class Transcoder {
                 String key = entry.getKey();
                 String[] values = entry.getValue();
 
-                String[] fieldPath = key.split("\\.");
+                String[] fieldPath = key.split("\\.", -1);
 
                 // Navigate to the last field descriptor
                 Message.Builder lastBuilder = messageBuilder;
@@ -176,6 +176,7 @@ class Transcoder {
                         var e = field.getEnumType().findValueByNumber(Integer.parseInt(value));
                         if (e != null) yield e;
                     } catch (NumberFormatException ignored) {
+                        // It's OK, try by name
                     }
                 } else {
                     var e = field.getEnumType().findValueByName(value);

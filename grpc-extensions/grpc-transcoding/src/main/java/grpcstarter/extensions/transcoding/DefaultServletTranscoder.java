@@ -49,6 +49,8 @@ import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 
 /**
+ * Default implementation of {@link ServletTranscoder}.
+ *
  * @author Freeman
  * @since 3.3.0
  */
@@ -193,7 +195,7 @@ public class DefaultServletTranscoder
                         headerConverter.toMetadata(request.headers().asHttpHeaders())));
         var call = getCall(chan, route);
         return ServerResponse.sse(
-                (sse -> {
+                sse -> {
                     // Cancel the call when SSE error occurs, possibly due to client disconnect
                     sse.onError(t -> call.cancel("SSE error", null));
 
@@ -220,7 +222,7 @@ public class DefaultServletTranscoder
                             sse.complete();
                         }
                     });
-                }),
+                },
                 Duration.ZERO);
     }
 

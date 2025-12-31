@@ -21,6 +21,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 
 /**
+ * Auto-configuration for gRPC transcoding.
+ *
  * @author Freeman
  */
 @Configuration(proxyBeanMethods = false)
