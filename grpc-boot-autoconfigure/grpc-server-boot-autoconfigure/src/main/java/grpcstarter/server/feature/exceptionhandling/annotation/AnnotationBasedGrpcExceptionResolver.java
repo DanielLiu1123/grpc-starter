@@ -230,7 +230,6 @@ public class AnnotationBasedGrpcExceptionResolver
     }
 
     private static final class GrpcAdviceBean {
-        private final Object bean;
 
         @Nullable
         private final Integer order;
@@ -238,20 +237,16 @@ public class AnnotationBasedGrpcExceptionResolver
         private final List<GrpcExceptionHandlerMethod> methods;
 
         private GrpcAdviceBean(Object bean, List<GrpcExceptionHandlerMethod> methods) {
-            this.bean = bean;
             this.order = OrderUtils.getOrder(AopProxyUtils.ultimateTargetClass(bean));
             this.methods = methods;
         }
 
-        public Object getBean() {
-            return bean;
-        }
-
-        public @Nullable Integer getOrder() {
+        @Nullable
+        Integer getOrder() {
             return order;
         }
 
-        public List<GrpcExceptionHandlerMethod> getMethods() {
+        List<GrpcExceptionHandlerMethod> getMethods() {
             return methods;
         }
     }

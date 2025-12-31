@@ -87,6 +87,7 @@ class ProtoGenValidateBeanFactoryInitializationAotProcessor implements BeanFacto
         return messageTypes;
     }
 
+    @SuppressWarnings("NonApiType")
     private static void collectMessageTypesFromType(Type type, HashSet<Class<?>> messageTypes) {
         if (type instanceof Class<?> clazz) {
             if (Message.class.isAssignableFrom(clazz)) {

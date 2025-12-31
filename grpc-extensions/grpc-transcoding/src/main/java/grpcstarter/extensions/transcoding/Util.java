@@ -219,7 +219,8 @@ class Util {
         StringBuilder result = new StringBuilder(input.length());
         boolean toUpperCase = true;
 
-        for (char c : input.toCharArray()) {
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
             if (c == '_') {
                 toUpperCase = true;
             } else {

@@ -274,9 +274,9 @@ public class GrpcClientProperties implements InitializingBean {
     }
 
     /**
-     * @param name In-process client name.
+     * If set, will create an in-process channel by default, usually for testing. </p>
      *
-     *             <p> If set, will create an in-process channel by default, usually for testing. </p>
+     * @param name In-process client name.
      */
     public record InProcess(String name) {
         public InProcess {

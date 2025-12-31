@@ -111,13 +111,13 @@ class GrpcChannelCreator {
     private static void setRetry(GrpcClientProperties.Channel channelConfig, ManagedChannelBuilder<?> builder) {
         GrpcClientProperties.Retry retry = channelConfig.getRetry();
         if (retry != null) {
-            Optional.ofNullable(retry.getEnabled()).ifPresent((enabled -> {
+            Optional.ofNullable(retry.getEnabled()).ifPresent(enabled -> {
                 if (enabled) {
                     builder.enableRetry();
                 } else {
                     builder.disableRetry();
                 }
-            }));
+            });
             Optional.ofNullable(retry.getMaxRetryAttempts()).ifPresent(builder::maxRetryAttempts);
             Optional.ofNullable(retry.getRetryBufferSize())
                     .map(DataSize::toBytes)

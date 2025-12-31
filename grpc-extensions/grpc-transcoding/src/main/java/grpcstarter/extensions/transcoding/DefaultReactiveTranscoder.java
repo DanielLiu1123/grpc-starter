@@ -12,6 +12,7 @@ import static io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING;
 import static io.grpc.MethodDescriptor.MethodType.UNARY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import grpcstarter.extensions.transcoding.Util.Route;
@@ -191,7 +192,8 @@ public class DefaultReactiveTranscoder
         @SuppressWarnings("unchecked")
         Map<String, String> templateVars =
                 uriTemplateVariables != null ? (Map<String, String>) uriTemplateVariables : Map.of();
-        return Transcoder.create(new Transcoder.Variable(getBytes(buf), convert(request.queryParams()), templateVars));
+        return Transcoder.create(
+                new Transcoder.Variable(getByteString(buf), convert(request.queryParams()), templateVars));
     }
 
     private Mono<ServerResponse> processUnaryCall(ServerRequest request, Route<ServerRequest> route) {
@@ -250,9 +252,9 @@ public class DefaultReactiveTranscoder
         }
     }
 
-    private static byte[] getBytes(DataBuffer buf) {
+    private static ByteString getByteString(DataBuffer buf) {
         try (InputStream is = buf.asInputStream(true)) {
-            return is.readAllBytes();
+            return ByteString.copyFrom(is.readAllBytes());
         } catch (IOException e) {
             throw new IllegalStateException("Failed to read DataBuffer", e);
         }

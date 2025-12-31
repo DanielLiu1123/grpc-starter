@@ -38,8 +38,7 @@ class Transcoder {
         // request body.
 
         if (!httpRule.getBody().isBlank()) {
-            var bodyStringOpt =
-                    Optional.of(variable.body()).map(e -> new String(e, UTF_8)).filter(e -> !e.isBlank());
+            var bodyStringOpt = Optional.of(variable.body().toStringUtf8()).filter(e -> !e.isBlank());
             if (bodyStringOpt.isPresent()) {
                 if (Objects.equals(httpRule.getBody(), "*")) {
                     merge(messageBuilder, bodyStringOpt.get());
@@ -200,7 +199,7 @@ class Transcoder {
     }
 
     public record Variable(
-            byte[] body,
+            ByteString body,
             @Nullable Map<String, String[]> parameters,
             @Nullable Map<String, String> pathVariables) {}
 }

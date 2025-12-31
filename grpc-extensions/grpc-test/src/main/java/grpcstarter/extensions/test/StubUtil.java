@@ -4,15 +4,17 @@ import io.grpc.Channel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.AbstractStub;
 import java.lang.reflect.Method;
-import lombok.experimental.UtilityClass;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
+ * Utility class for creating gRPC stubs.
+ *
  * @author Freeman
  */
-@UtilityClass
-public class StubUtil {
+public final class StubUtil {
+
+    private StubUtil() {}
 
     private static final String NEW_BLOCKING_STUB_METHOD = "newBlockingStub";
     private static final String NEW_BLOCKING_V2_STUB_METHOD = "newBlockingV2Stub";
