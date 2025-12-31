@@ -10,6 +10,7 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
@@ -69,10 +70,7 @@ public class TranscodingWebFluxApp extends SimpleServiceImplBase {
     @Bean
     ApplicationRunner runner(WebClient.Builder builder, ReactiveWebServerApplicationContext ctx) {
         return args -> {
-            var webServer = ctx.getWebServer();
-            if (webServer == null) {
-                return;
-            }
+            var webServer = Optional.ofNullable(ctx.getWebServer()).orElseThrow();
             var client =
                     builder.baseUrl("http://localhost:" + webServer.getPort()).build();
 

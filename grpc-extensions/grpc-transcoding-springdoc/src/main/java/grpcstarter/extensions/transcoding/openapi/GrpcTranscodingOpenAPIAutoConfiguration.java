@@ -15,6 +15,8 @@ import springdocbridge.protobuf.SpringDocBridgeProtobufAutoConfiguration;
 import springdocbridge.protobuf.SpringDocBridgeProtobufProperties;
 
 /**
+ * Auto-configuration for gRPC Transcoding OpenAPI customization.
+ *
  * @author Freeman
  */
 @AutoConfiguration(after = {GrpcTranscodingAutoConfiguration.class, SpringDocBridgeProtobufAutoConfiguration.class})

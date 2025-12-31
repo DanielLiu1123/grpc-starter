@@ -6,25 +6,29 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.context.ApplicationContext;
 
 /**
  * DataSource health checker.
  *
  * @author Freeman
  */
-public class DataSourceHealthChecker implements HealthChecker, SmartInitializingSingleton {
+public class DataSourceHealthChecker implements HealthChecker, BeanFactoryAware, SmartInitializingSingleton {
     private static final Logger log = LoggerFactory.getLogger(DataSourceHealthChecker.class);
 
-    private final ApplicationContext ctx;
+    @Nullable
+    private BeanFactory beanFactory;
+
     private final List<DataSource> dataSources = new ArrayList<>();
     private final GrpcServerProperties.Health.DataSource config;
 
-    public DataSourceHealthChecker(ApplicationContext ctx, GrpcServerProperties.Health.DataSource config) {
-        this.ctx = ctx;
+    public DataSourceHealthChecker(GrpcServerProperties.Health.DataSource config) {
         this.config = config;
     }
 
@@ -54,10 +58,18 @@ public class DataSourceHealthChecker implements HealthChecker, SmartInitializing
     }
 
     @Override
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = beanFactory;
+    }
+
+    @Override
     public void afterSingletonsInstantiated() {
+        if (beanFactory == null) {
+            return;
+        }
         // Do NOT inject DataSource here, we don't want to effect the order of auto-configurations
         List<DataSource> sources =
-                ctx.getBeanProvider(DataSource.class).orderedStream().toList();
+                beanFactory.getBeanProvider(DataSource.class).orderedStream().toList();
         this.dataSources.addAll(sources);
     }
 }

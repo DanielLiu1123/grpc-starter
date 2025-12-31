@@ -121,13 +121,13 @@ subprojects {
 
     apply plugin: "net.ltgt.errorprone"
     dependencies {
-        errorprone "com.uber.nullaway:nullaway:${nullAwayVersion}"
         errorprone "com.google.errorprone:error_prone_core:${errorProneCoreVersion}"
+        errorprone "com.uber.nullaway:nullaway:${nullAwayVersion}"
     }
 
     tasks.withType(JavaCompile).configureEach {
         options.errorprone {
-            excludedPaths = ".*/(generated|example)/.*"
+            excludedPaths = ".*/(generated|examples)/.*"
             check("NullAway", net.ltgt.gradle.errorprone.CheckSeverity.ERROR)
             option("NullAway:AnnotatedPackages", "grpcstarter")
         }

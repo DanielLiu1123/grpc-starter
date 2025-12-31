@@ -6,6 +6,7 @@ import grpcstarter.server.GrpcServer;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import java.util.Optional;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -51,11 +52,10 @@ public class ValidationApp extends FooServiceGrpc.FooServiceImplBase {
             try {
                 stub.insertFoo(request);
             } catch (StatusRuntimeException e) {
-                String message = e.getMessage();
+                String message = Optional.ofNullable(e.getMessage()).orElse("");
                 Assert.isTrue(
-                        message != null
-                                && message.contains(
-                                        "INVALID_ARGUMENT: insertFoo.arg0.id: length must be between 5 and 2147483647, insertFoo.arg0.name: length must be between 5 and 2147483647"),
+                        message.contains(
+                                "INVALID_ARGUMENT: insertFoo.arg0.id: length must be between 5 and 2147483647, insertFoo.arg0.name: length must be between 5 and 2147483647"),
                         "Message not match");
             }
         };

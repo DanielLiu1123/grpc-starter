@@ -6,6 +6,7 @@ import grpcstarter.server.GrpcServer;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import java.util.Optional;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -50,11 +51,10 @@ public class ProtoValidateApp extends FooServiceGrpc.FooServiceImplBase {
             try {
                 stub.insertFoo(request);
             } catch (StatusRuntimeException e) {
-                String message = e.getMessage();
+                String message = Optional.ofNullable(e.getMessage()).orElse("");
                 Assert.isTrue(
-                        message != null
-                                && message.contains(
-                                        "INVALID_ARGUMENT: id: at least 5 characters, name: value length must be at least 5 characters"),
+                        message.contains(
+                                "INVALID_ARGUMENT: id: at least 5 characters, name: value length must be at least 5 characters"),
                         "Message not match");
             }
         };

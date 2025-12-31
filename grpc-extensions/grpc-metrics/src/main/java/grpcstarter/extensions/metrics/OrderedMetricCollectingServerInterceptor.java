@@ -5,6 +5,8 @@ import io.micrometer.core.instrument.binder.grpc.MetricCollectingServerIntercept
 import org.springframework.core.Ordered;
 
 /**
+ * Ordered gRPC server interceptor for Micrometer metrics.
+ *
  * @author Freeman
  */
 public class OrderedMetricCollectingServerInterceptor extends MetricCollectingServerInterceptor implements Ordered {

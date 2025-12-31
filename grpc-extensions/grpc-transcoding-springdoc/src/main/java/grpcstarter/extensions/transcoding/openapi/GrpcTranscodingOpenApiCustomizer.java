@@ -47,6 +47,8 @@ import springdocbridge.protobuf.ProtobufNameResolver;
 import springdocbridge.protobuf.SpringDocBridgeProtobufProperties;
 
 /**
+ * OpenAPI customizer for gRPC Transcoding.
+ *
  * @author Freeman
  */
 public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {

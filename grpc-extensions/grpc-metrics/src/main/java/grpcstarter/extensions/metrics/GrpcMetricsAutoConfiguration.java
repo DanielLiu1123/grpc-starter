@@ -18,6 +18,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * Auto-configuration for gRPC metrics with Micrometer.
+ *
  * @author Freeman
  */
 @AutoConfiguration(after = CompositeMeterRegistryAutoConfiguration.class)

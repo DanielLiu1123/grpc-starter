@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -230,7 +229,6 @@ public class AnnotationBasedGrpcExceptionResolver
         return method.getDeclaringClass().getSimpleName() + "#" + method.getName();
     }
 
-    @Getter
     private static final class GrpcAdviceBean {
         private final Object bean;
 
@@ -243,6 +241,18 @@ public class AnnotationBasedGrpcExceptionResolver
             this.bean = bean;
             this.order = OrderUtils.getOrder(AopProxyUtils.ultimateTargetClass(bean));
             this.methods = methods;
+        }
+
+        public Object getBean() {
+            return bean;
+        }
+
+        public @Nullable Integer getOrder() {
+            return order;
+        }
+
+        public List<GrpcExceptionHandlerMethod> getMethods() {
+            return methods;
         }
     }
 }
