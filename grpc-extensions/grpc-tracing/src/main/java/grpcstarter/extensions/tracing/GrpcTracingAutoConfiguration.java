@@ -19,6 +19,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * Auto-configuration for gRPC tracing with Micrometer Observation.
+ *
  * @author Freeman
  */
 @AutoConfiguration(after = ObservationAutoConfiguration.class)

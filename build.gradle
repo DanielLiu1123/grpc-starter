@@ -14,8 +14,8 @@ plugins {
     id "com.github.spotbugs" version "${spotbugsVersion}" apply false
     id "com.google.protobuf" version "${protobufPluginVersion}" apply false
     id "org.graalvm.buildtools.native" version "${graalvmBuildToolsVersion}" apply false
-    id "io.spring.nullability" version "${springNullabilityPluginVersion}" apply false
     id "io.github.danielliu1123.deployer" version "${deployerVersion}"
+    id "net.ltgt.errorprone" version "${errorPronePluginVersion}"
 }
 
 deploy {
@@ -56,8 +56,6 @@ subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven { url = "https://repo.spring.io/snapshot" }
-        maven { url = "https://repo.spring.io/milestone" }
     }
 
     tasks.withType(JavaCompile).configureEach {
@@ -121,15 +119,22 @@ subprojects {
         }
     }
 
-    // spotbugs
-    apply plugin: "com.github.spotbugs"
-    spotbugs {
-        spotbugsTest.enabled = false
-        omitVisitors.addAll "FindReturnRef", "DontReusePublicIdentifiers"
-        excludeFilter = file("${rootDir}/config/spotbugs/exclude.xml")
+    apply plugin: "net.ltgt.errorprone"
+    dependencies {
+        errorprone "com.google.errorprone:error_prone_core:${errorProneCoreVersion}"
+        errorprone "com.uber.nullaway:nullaway:${nullAwayVersion}"
     }
 
-    apply plugin: "io.spring.nullability"
+    tasks.withType(JavaCompile).configureEach {
+        options.errorprone {
+            // https://github.com/tbroyer/gradle-errorprone-plugin?tab=readme-ov-file#properties
+            excludedPaths = ".*/(generated|examples)/.*"
+            // https://github.com/uber/NullAway/wiki/Configuration
+            check("NullAway", net.ltgt.gradle.errorprone.CheckSeverity.ERROR)
+            option("NullAway:AnnotatedPackages", "grpcstarter")
+            option("NullAway:HandleTestAssertionLibraries", "true")
+        }
+    }
 }
 
 apply from: "${rootDir}/gradle/generate-configuration-properties-docs.gradle"

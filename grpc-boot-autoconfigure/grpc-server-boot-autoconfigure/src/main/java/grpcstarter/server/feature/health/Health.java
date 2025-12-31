@@ -15,6 +15,8 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
+ * gRPC Health configuration.
+ *
  * @author Freeman
  */
 @Configuration(proxyBeanMethods = false)

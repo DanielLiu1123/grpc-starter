@@ -28,6 +28,8 @@ import org.springframework.stereotype.Component;
 @Component
 public @interface GrpcAdvice {
     /**
+     * Alias for {@link Component#value}.
+     *
      * @see Component#value()
      */
     @AliasFor(annotation = Component.class)

@@ -8,6 +8,7 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
@@ -69,9 +70,10 @@ public class TranscodingMvcApp extends SimpleServiceImplBase {
     @Bean
     ApplicationRunner runner(RestClient.Builder builder, WebServerApplicationContext ctx) {
         return args -> {
-            var client = builder.baseUrl(
-                            "http://localhost:" + ctx.getWebServer().getPort())
-                    .build();
+            var webServer = Optional.ofNullable(ctx.getWebServer()).orElseThrow();
+
+            var client =
+                    builder.baseUrl("http://localhost:" + webServer.getPort()).build();
 
             var response = client.post()
                     .uri("/unary")

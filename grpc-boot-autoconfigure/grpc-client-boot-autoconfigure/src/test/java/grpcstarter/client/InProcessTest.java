@@ -2,9 +2,8 @@ package grpcstarter.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import grpcstarter.server.DefaultGrpcServer;
+import grpcstarter.server.GrpcServer;
 import grpcstarter.server.GrpcService;
-import io.grpc.Server;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.protobuf.SimpleRequest;
 import io.grpc.testing.protobuf.SimpleResponse;
@@ -15,7 +14,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * @author Freeman
@@ -37,9 +35,8 @@ class InProcessTest {
 
     @Test
     void testInProcess() {
-        Server server = (Server) ReflectionTestUtils.getField(ctx.getBean(DefaultGrpcServer.class), "server");
+        var server = ctx.getBean(GrpcServer.class);
 
-        assertThat(server).isNotNull();
         assertThat(server.getPort()).isEqualTo(-1);
 
         SimpleResponse resp = stub.unaryRpc(

@@ -1,14 +1,16 @@
 package grpcstarter.extensions.transcoding;
 
 import io.grpc.Status;
-import lombok.experimental.UtilityClass;
 import org.springframework.http.HttpStatus;
 
 /**
+ * Utility class for transcoding between gRPC and HTTP.
+ *
  * @author Freeman
  */
-@UtilityClass
-public class TranscodingUtil {
+public final class TranscodingUtil {
+
+    private TranscodingUtil() {}
 
     /**
      * Convert gRPC status to HTTP status.

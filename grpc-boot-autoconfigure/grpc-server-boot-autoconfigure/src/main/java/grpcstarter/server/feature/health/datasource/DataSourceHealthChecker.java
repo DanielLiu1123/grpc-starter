@@ -5,8 +5,8 @@ import grpcstarter.server.feature.health.HealthChecker;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.sql.DataSource;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -15,12 +15,16 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 
 /**
+ * DataSource health checker.
+ *
  * @author Freeman
  */
 public class DataSourceHealthChecker implements HealthChecker, BeanFactoryAware, SmartInitializingSingleton {
     private static final Logger log = LoggerFactory.getLogger(DataSourceHealthChecker.class);
 
+    @Nullable
     private BeanFactory beanFactory;
+
     private final List<DataSource> dataSources = new ArrayList<>();
     private final GrpcServerProperties.Health.DataSource config;
 
@@ -60,9 +64,12 @@ public class DataSourceHealthChecker implements HealthChecker, BeanFactoryAware,
 
     @Override
     public void afterSingletonsInstantiated() {
+        if (beanFactory == null) {
+            return;
+        }
         // Do NOT inject DataSource here, we don't want to effect the order of auto-configurations
         List<DataSource> sources =
-                beanFactory.getBeanProvider(DataSource.class).orderedStream().collect(Collectors.toList());
+                beanFactory.getBeanProvider(DataSource.class).orderedStream().toList();
         this.dataSources.addAll(sources);
     }
 }

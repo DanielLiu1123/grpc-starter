@@ -14,6 +14,8 @@ import java.util.Optional;
 import org.springframework.core.PriorityOrdered;
 
 /**
+ * gRPC Request Context Server Interceptor.
+ *
  * @author Freeman
  */
 public class GrpcRequestContextServerInterceptor implements ServerInterceptor, PriorityOrdered {

@@ -42,6 +42,8 @@ final class Cache {
     }
 
     /**
+     * Get all service names that already created stub beans.
+     *
      * @return all service names that already created stub beans.
      */
     public static Set<String> getServices() {

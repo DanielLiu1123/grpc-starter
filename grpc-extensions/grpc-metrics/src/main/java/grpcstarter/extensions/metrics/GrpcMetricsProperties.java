@@ -6,6 +6,8 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
+ * gRPC metrics properties.
+ *
  * @author Freeman
  */
 @Data

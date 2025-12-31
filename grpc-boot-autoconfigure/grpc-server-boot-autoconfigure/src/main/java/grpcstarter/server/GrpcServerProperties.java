@@ -76,7 +76,6 @@ public class GrpcServerProperties {
      * SSL bundle name for TLS configuration.
      * <p>
      * This is the preferred way to configure SSL/TLS for gRPC server.
-     * When specified, it takes precedence over the deprecated {@link #tls} configuration.
      * </p>
      *
      * @since 3.5.3
@@ -205,6 +204,8 @@ public class GrpcServerProperties {
     }
 
     /**
+     * In-process server configuration.
+     *
      * @param name In-process server name, if configured, will create an in-process server, usually for testing.
      */
     public record InProcess(String name) {

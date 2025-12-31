@@ -7,6 +7,8 @@ import lombok.Data;
 import org.jspecify.annotations.Nullable;
 
 /**
+ * gRPC request context.
+ *
  * @author Freeman
  */
 @Data

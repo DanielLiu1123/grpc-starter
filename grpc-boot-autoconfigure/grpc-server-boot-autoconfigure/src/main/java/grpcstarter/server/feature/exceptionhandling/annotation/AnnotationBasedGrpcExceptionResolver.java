@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -39,6 +38,8 @@ import org.springframework.core.annotation.OrderUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
+ * Annotation-based gRPC exception resolver.
+ *
  * @author Freeman
  */
 @Slf4j
@@ -55,9 +56,11 @@ public class AnnotationBasedGrpcExceptionResolver
 
     private final List<GrpcAdviceBean> advices = new ArrayList<>();
 
+    @Nullable
     private ApplicationContext ctx;
 
     @Override
+    @Nullable
     public StatusRuntimeException resolve(Throwable throwable, ServerCall<?, ?> call, Metadata headers) {
         Map.Entry<Throwable, GrpcExceptionHandlerMethod> entry = findHandlerMethod(throwable);
         if (entry == null) {
@@ -96,7 +99,11 @@ public class AnnotationBasedGrpcExceptionResolver
         return convertResponseToStatusRuntimeException(res, method.getMethod());
     }
 
+    @SuppressWarnings("ReturnValueIgnored")
     private void populateGrpcAdviceBeans() {
+        if (ctx == null) {
+            return;
+        }
         List<GrpcAdviceBean> beans = new ArrayList<>();
         ctx.getBeansWithAnnotation(GrpcAdvice.class).forEach((beanName, bean) -> {
             List<GrpcExceptionHandlerMethod> beanMethods = new ArrayList<>();
@@ -169,26 +176,26 @@ public class AnnotationBasedGrpcExceptionResolver
         return null;
     }
 
+    @Nullable
     private Object invokeHandlerMethod(
             GrpcExceptionHandlerMethod method, Throwable throwable, ServerCall<?, ?> call, Metadata headers) {
         Object[] args = getArgs(method.getMethod(), throwable, call, headers);
         return ReflectionUtils.invokeMethod(method.getMethod(), method.getBean(), args);
     }
 
-    private StatusRuntimeException convertResponseToStatusRuntimeException(Object response, Method method) {
-        if (response instanceof StatusRuntimeException) {
-            return (StatusRuntimeException) response;
+    private StatusRuntimeException convertResponseToStatusRuntimeException(@Nullable Object response, Method method) {
+        if (response instanceof StatusRuntimeException sre) {
+            return sre;
         }
-        if (response instanceof StatusException) {
-            StatusException statusException = (StatusException) response;
+        if (response instanceof StatusException statusException) {
             return new StatusRuntimeException(statusException.getStatus(), statusException.getTrailers());
         }
-        if (response instanceof Status) {
-            return new StatusRuntimeException((Status) response);
+        if (response instanceof Status status) {
+            return new StatusRuntimeException(status);
         }
-        if (response instanceof Throwable) {
-            Status status = Status.fromThrowable((Throwable) response);
-            Metadata trailers = Status.trailersFromThrowable((Throwable) response);
+        if (response instanceof Throwable t) {
+            Status status = Status.fromThrowable(t);
+            Metadata trailers = Status.trailersFromThrowable(t);
             return new StatusRuntimeException(
                     status, Optional.ofNullable(trailers).orElseGet(Metadata::new));
         }
@@ -222,16 +229,25 @@ public class AnnotationBasedGrpcExceptionResolver
         return method.getDeclaringClass().getSimpleName() + "#" + method.getName();
     }
 
-    @Getter
     private static final class GrpcAdviceBean {
-        private final Object bean;
+
+        @Nullable
         private final Integer order;
+
         private final List<GrpcExceptionHandlerMethod> methods;
 
-        public GrpcAdviceBean(Object bean, List<GrpcExceptionHandlerMethod> methods) {
-            this.bean = bean;
+        private GrpcAdviceBean(Object bean, List<GrpcExceptionHandlerMethod> methods) {
             this.order = OrderUtils.getOrder(AopProxyUtils.ultimateTargetClass(bean));
             this.methods = methods;
+        }
+
+        @Nullable
+        Integer getOrder() {
+            return order;
+        }
+
+        List<GrpcExceptionHandlerMethod> getMethods() {
+            return methods;
         }
     }
 }

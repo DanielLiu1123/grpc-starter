@@ -5,6 +5,8 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
+ * Properties for gRPC validation support.
+ *
  * @author Freeman
  */
 @Data

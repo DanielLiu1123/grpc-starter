@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Configuration;
 class MaxResponseLengthIT {
 
     @InProcessName
+    @SuppressWarnings("NullAway")
     String inProcessName;
 
     @Test

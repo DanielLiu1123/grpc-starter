@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * gRPC Reflection configuration.
+ *
  * @author Freeman
  */
 @Configuration(proxyBeanMethods = false)

@@ -16,6 +16,8 @@ import io.grpc.MethodDescriptor;
 import org.springframework.core.Ordered;
 
 /**
+ * gRPC Client Interceptor for Proto Validate.
+ *
  * @author Freeman
  */
 public class ProtoValidateClientInterceptor implements ClientInterceptor, Ordered {

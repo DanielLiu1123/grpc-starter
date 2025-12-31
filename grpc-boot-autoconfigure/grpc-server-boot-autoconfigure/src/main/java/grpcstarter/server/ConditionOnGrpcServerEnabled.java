@@ -9,6 +9,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 /**
+ * A condition that checks if the gRPC server is enabled.
+ *
  * @author Freeman
  */
 @Retention(RetentionPolicy.RUNTIME)

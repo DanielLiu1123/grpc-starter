@@ -5,6 +5,7 @@ import grpcstarter.server.feature.health.HealthChecker;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -15,12 +16,16 @@ import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 /**
+ * gRPC Redis Health Checker.
+ *
  * @author Freeman
  */
 public class RedisHealthChecker implements HealthChecker, BeanFactoryAware, SmartInitializingSingleton {
     private static final Logger log = LoggerFactory.getLogger(RedisHealthChecker.class);
 
+    @Nullable
     private BeanFactory beanFactory;
+
     private final List<RedisConnectionFactory> connectionFactories = new ArrayList<>();
     private final GrpcServerProperties.Health.Redis config;
 
@@ -54,6 +59,9 @@ public class RedisHealthChecker implements HealthChecker, BeanFactoryAware, Smar
     @Override
     public void afterSingletonsInstantiated() {
         // Do NOT inject RedisConnectionFactory here, we don't want to effect the order of auto-configurations
+        if (beanFactory == null) {
+            return;
+        }
         List<RedisConnectionFactory> factories = beanFactory
                 .getBeanProvider(RedisConnectionFactory.class)
                 .orderedStream()

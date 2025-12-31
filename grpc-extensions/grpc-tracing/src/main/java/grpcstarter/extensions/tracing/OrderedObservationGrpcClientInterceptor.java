@@ -5,6 +5,8 @@ import io.micrometer.observation.ObservationRegistry;
 import org.springframework.core.Ordered;
 
 /**
+ * Ordered gRPC client interceptor for Micrometer Observation.
+ *
  * @author Freeman
  */
 public class OrderedObservationGrpcClientInterceptor extends ObservationGrpcClientInterceptor implements Ordered {

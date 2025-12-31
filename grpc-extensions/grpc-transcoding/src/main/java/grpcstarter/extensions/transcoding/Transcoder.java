@@ -38,8 +38,7 @@ class Transcoder {
         // request body.
 
         if (!httpRule.getBody().isBlank()) {
-            var bodyStringOpt =
-                    Optional.of(variable.body()).map(e -> new String(e, UTF_8)).filter(e -> !e.isBlank());
+            var bodyStringOpt = Optional.of(variable.body().toStringUtf8()).filter(e -> !e.isBlank());
             if (bodyStringOpt.isPresent()) {
                 if (Objects.equals(httpRule.getBody(), "*")) {
                     merge(messageBuilder, bodyStringOpt.get());
@@ -73,7 +72,7 @@ class Transcoder {
                 String key = entry.getKey();
                 String[] values = entry.getValue();
 
-                String[] fieldPath = key.split("\\.");
+                String[] fieldPath = key.split("\\.", -1);
 
                 // Navigate to the last field descriptor
                 Message.Builder lastBuilder = messageBuilder;
@@ -176,6 +175,7 @@ class Transcoder {
                         var e = field.getEnumType().findValueByNumber(Integer.parseInt(value));
                         if (e != null) yield e;
                     } catch (NumberFormatException ignored) {
+                        // It's OK, try by name
                     }
                 } else {
                     var e = field.getEnumType().findValueByName(value);
@@ -199,7 +199,7 @@ class Transcoder {
     }
 
     public record Variable(
-            byte[] body,
+            ByteString body,
             @Nullable Map<String, String[]> parameters,
             @Nullable Map<String, String> pathVariables) {}
 }

@@ -41,7 +41,7 @@ jobs:
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v5
       - name: Lint
-        run: ./gradlew spotlessCheck spotbugsMain --no-daemon
+        run: ./gradlew spotlessCheck --no-daemon
 
   test:
     runs-on: ubuntu-latest

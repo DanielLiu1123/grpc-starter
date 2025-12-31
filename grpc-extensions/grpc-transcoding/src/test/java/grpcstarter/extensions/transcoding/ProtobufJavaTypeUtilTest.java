@@ -43,14 +43,6 @@ class ProtobufJavaTypeUtilTest {
     }
 
     @Test
-    void testFindJavaClass_NullDescriptor() {
-        // When & Then
-        assertThatThrownBy(() -> ProtobufJavaTypeUtil.findJavaClass(null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Message descriptor cannot be null");
-    }
-
-    @Test
     void testFindJavaFieldType_StringField() {
         // Given
         Class<?> javaClass = TranscoderTest.SimpleRequest.class;
@@ -123,29 +115,6 @@ class ProtobufJavaTypeUtilTest {
         ParameterizedType parameterizedType = (ParameterizedType) fieldType;
         assertThat(parameterizedType.getRawType()).isEqualTo(List.class);
         assertThat(parameterizedType.getActualTypeArguments()[0]).isEqualTo(TranscoderTest.SimpleRequest.class);
-    }
-
-    @Test
-    void testFindJavaFieldType_NullJavaClass() {
-        // Given
-        Descriptors.FieldDescriptor fieldDescriptor =
-                TranscoderTest.SimpleRequest.getDescriptor().findFieldByName("requestMessage");
-
-        // When & Then
-        assertThatThrownBy(() -> ProtobufJavaTypeUtil.findJavaFieldType(null, fieldDescriptor))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Java class cannot be null");
-    }
-
-    @Test
-    void testFindJavaFieldType_NullFieldDescriptor() {
-        // Given
-        Class<?> javaClass = TranscoderTest.SimpleRequest.class;
-
-        // When & Then
-        assertThatThrownBy(() -> ProtobufJavaTypeUtil.findJavaFieldType(javaClass, null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Field descriptor cannot be null");
     }
 
     @Test

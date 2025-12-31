@@ -5,6 +5,8 @@ import io.envoyproxy.pgv.grpc.ValidatingClientInterceptor;
 import org.springframework.core.Ordered;
 
 /**
+ * gRPC Client Interceptor for PGV.
+ *
  * @author Freeman
  */
 public class OrderedValidatingClientInterceptor extends ValidatingClientInterceptor implements Ordered {

@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * Auto-configuration for gRPC testing support.
+ *
  * @author Freeman
  */
 @Configuration(proxyBeanMethods = false)

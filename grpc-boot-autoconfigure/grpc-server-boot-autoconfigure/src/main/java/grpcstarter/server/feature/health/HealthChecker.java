@@ -1,6 +1,8 @@
 package grpcstarter.server.feature.health;
 
 /**
+ * gRPC Health Checker.
+ *
  * @author Freeman
  */
 public interface HealthChecker {

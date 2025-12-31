@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.Getter;
+import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.OrderUtils;
@@ -26,7 +27,10 @@ import org.springframework.util.ObjectUtils;
 class GrpcExceptionHandlerMethod {
 
     private final Object bean;
+
+    @Nullable
     private final Integer beanOrder;
+
     private final Method method;
     private final Class<? extends Throwable>[] exceptions;
 

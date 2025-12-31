@@ -1,10 +1,11 @@
 package grpcstarter.extensions.transcoding;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.google.api.HttpRule;
+import com.google.protobuf.ByteString;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -47,8 +48,8 @@ class TranscoderTest {
     @Test
     void testNested() {
         var request = buildRequest(
-                null,
-                null,
+                Map.of(),
+                "",
                 Map.of(
                         "some_message", new String[] {"x1"},
                         "requestMessage", new String[] {"y1"},
@@ -70,8 +71,8 @@ class TranscoderTest {
     @Test
     void testRepeated() {
         var request = buildRequest(
-                null,
-                null,
+                Map.of(),
+                "",
                 Map.of(
                         "repeated_message.some_message", new String[] {"x2"},
                         "repeated_message.requestMessage", new String[] {"y2"},
@@ -81,7 +82,7 @@ class TranscoderTest {
         assertThat(request.getRepeatedStringList()).containsExactly("v1", "v2");
 
         // test empty array
-        request = buildRequest(null, null, Map.of("repeated_string", new String[] {}));
+        request = buildRequest(Map.of(), "", Map.of("repeated_string", new String[] {}));
 
         assertThat(request.getRepeatedMessageList()).isEmpty();
         assertThat(request.getRepeatedStringList()).isEmpty();
@@ -137,7 +138,7 @@ class TranscoderTest {
                 }""";
 
         var request = buildRequest(
-                null, body, null, HttpRule.newBuilder().setBody("*").build());
+                Map.of(), body, Map.of(), HttpRule.newBuilder().setBody("*").build());
 
         assertThat(request.getRequestMessage()).isEqualTo("Hi");
         assertThat(request.getSomeMessage()).isEqualTo("Hi");
@@ -166,8 +167,10 @@ class TranscoderTest {
     @SneakyThrows
     private static transcoding.TranscoderTest.SimpleRequest buildRequest(
             Map<String, String> pathVariables, String body, Map<String, String[]> parameterMap, HttpRule httpRule) {
-        Transcoder transcoder = Transcoder.create(
-                new Transcoder.Variable(body != null ? body.getBytes(UTF_8) : null, parameterMap, pathVariables));
+        Transcoder transcoder = Transcoder.create(new Transcoder.Variable(
+                body != null ? ByteString.copyFrom(body.getBytes(StandardCharsets.UTF_8)) : ByteString.EMPTY,
+                parameterMap,
+                pathVariables));
 
         // body is empty, body is ignored
         var builder = transcoding.TranscoderTest.SimpleRequest.newBuilder();
@@ -176,7 +179,7 @@ class TranscoderTest {
     }
 
     private static void testEnumParsing(String enumValue, transcoding.TranscoderTest.SimpleRequest.Enum expectedEnum) {
-        var request = buildRequest(null, null, Map.of("enum", new String[] {enumValue}));
+        var request = buildRequest(Map.of(), "", Map.of("enum", new String[] {enumValue}));
 
         assertThat(request.getEnum()).isEqualTo(expectedEnum);
     }

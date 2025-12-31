@@ -21,6 +21,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
+ * gRPC Server Auto-configuration.
+ *
  * @author Freeman
  */
 @Configuration(proxyBeanMethods = false)

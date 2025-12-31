@@ -4,6 +4,8 @@ import org.springframework.boot.diagnostics.AbstractFailureAnalyzer;
 import org.springframework.boot.diagnostics.FailureAnalysis;
 
 /**
+ * gRPC client failure analyzer.
+ *
  * @author Freeman
  */
 public class GrpcClientFailureAnalyzer extends AbstractFailureAnalyzer<MissingChannelConfigurationException> {

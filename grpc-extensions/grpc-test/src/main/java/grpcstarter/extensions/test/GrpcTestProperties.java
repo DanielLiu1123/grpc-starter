@@ -4,6 +4,8 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
+ * Properties for gRPC testing support.
+ *
  * @author Freeman
  */
 @Data

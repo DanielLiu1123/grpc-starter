@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * gRPC Exception Handling configuration.
+ *
  * @author Freeman
  */
 @Configuration(proxyBeanMethods = false)

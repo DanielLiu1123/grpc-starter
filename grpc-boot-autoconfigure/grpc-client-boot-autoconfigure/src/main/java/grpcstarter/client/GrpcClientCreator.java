@@ -42,7 +42,7 @@ class GrpcClientCreator {
      * @param <T>            stub type
      * @return gRPC stub instance
      */
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})
     public <T> T create() {
         Method stubMethod =
                 ReflectionUtils.findMethod(stubClass.getEnclosingClass(), getStubMethodName(stubClass), Channel.class);
@@ -57,14 +57,13 @@ class GrpcClientCreator {
         }
 
         ManagedChannel channel = beanFactory.getBean(channelBeanName, ManagedChannel.class);
-        T stub = (T) ReflectionUtils.invokeMethod(stubMethod, null, channel);
+        var stub = (AbstractStub<?>) ReflectionUtils.invokeMethod(stubMethod, null, channel);
 
         Assert.isTrue(stub != null, "stub must not be null");
 
-        stub = setOptions(stub, matchedChannel);
-
         Cache.addStubClass(stubClass);
-        return stub;
+
+        return (T) withOptions(stub, matchedChannel);
     }
 
     private static GrpcClientProperties.Channel getMatchedChannel(Class<?> stubClass, GrpcClientProperties properties) {
@@ -91,13 +90,12 @@ class GrpcClientCreator {
         return matchedChannels.get(0);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static <T> T setOptions(T stub, GrpcClientProperties.Channel cfg) {
+    private AbstractStub<?> withOptions(AbstractStub<?> stub, GrpcClientProperties.Channel cfg) {
         GrpcClientOptions opt = new GrpcClientOptions();
 
         setOptionValues(opt, cfg);
 
-        return (T) ((AbstractStub) stub).withOption(GrpcClientOptions.KEY, opt);
+        return stub.withOption(GrpcClientOptions.KEY, opt);
     }
 
     static void setOptionValues(GrpcClientOptions opt, GrpcClientProperties.Channel cfg) {

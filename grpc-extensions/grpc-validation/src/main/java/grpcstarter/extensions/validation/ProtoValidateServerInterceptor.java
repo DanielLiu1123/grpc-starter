@@ -16,6 +16,8 @@ import java.util.Optional;
 import org.springframework.core.Ordered;
 
 /**
+ * gRPC Server Interceptor for Proto Validate.
+ *
  * @author Freeman
  * @see io.envoyproxy.pgv.grpc.ValidatingServerInterceptor
  */

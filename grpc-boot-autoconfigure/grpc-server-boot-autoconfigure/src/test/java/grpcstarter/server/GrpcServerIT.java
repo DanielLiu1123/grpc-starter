@@ -25,7 +25,7 @@ class GrpcServerIT {
             assertThatCode(() -> ctx.getBean(DefaultGrpcServer.class)).doesNotThrowAnyException();
             assertThatCode(() -> ctx.getBean(GrpcRequestContextServerInterceptor.class))
                     .doesNotThrowAnyException();
-            assertThatCode(() -> ctx.getBean((ServerReflectionGrpc.ServerReflectionImplBase.class)))
+            assertThatCode(() -> ctx.getBean(ServerReflectionGrpc.ServerReflectionImplBase.class))
                     .isInstanceOf(NoSuchBeanDefinitionException.class);
         }
     }

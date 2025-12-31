@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
+ * gRPC transcoding runtime exception.
+ *
  * @author Freeman
  */
 public class TranscodingRuntimeException extends ResponseStatusException {

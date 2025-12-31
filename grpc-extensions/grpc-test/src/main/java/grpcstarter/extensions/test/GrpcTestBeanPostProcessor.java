@@ -5,7 +5,6 @@ import grpcstarter.server.GrpcServerStartedEvent;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.IdentityHashMap;
-import java.util.Map;
 import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -25,7 +24,7 @@ import org.springframework.util.ReflectionUtils;
 class GrpcTestBeanPostProcessor
         implements ApplicationListener<GrpcServerStartedEvent>, BeanPostProcessor, BeanFactoryAware, DisposableBean {
 
-    private final Map<Object, Boolean> beanToInjected = new IdentityHashMap<>();
+    private final IdentityHashMap<Object, Boolean> beanToInjected = new IdentityHashMap<>();
 
     @Nullable
     private BeanFactory beanFactory;

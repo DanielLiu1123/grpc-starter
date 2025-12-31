@@ -22,6 +22,7 @@ class LocalGrpcPortTest {
     int port;
 
     @InProcessName
+    @SuppressWarnings("NullAway")
     String inProcessName;
 
     @Autowired

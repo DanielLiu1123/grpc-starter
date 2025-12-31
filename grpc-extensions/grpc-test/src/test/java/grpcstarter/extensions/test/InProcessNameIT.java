@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 class InProcessNameIT {
 
     @InProcessName
+    @SuppressWarnings("NullAway")
     String name;
 
     @Test

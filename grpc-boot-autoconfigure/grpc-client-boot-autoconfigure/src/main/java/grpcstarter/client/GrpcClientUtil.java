@@ -23,6 +23,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
+ * gRPC client utility class.
+ *
  * @author Freeman
  */
 public final class GrpcClientUtil {

@@ -5,6 +5,8 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
+ * Properties for gRPC transcoding.
+ *
  * @author Freeman
  */
 @Data
@@ -53,6 +55,8 @@ public class GrpcTranscodingProperties {
     private PrintOptions printOptions = new PrintOptions();
 
     /**
+     * Options for printing JSON output.
+     *
      * @see <a href="https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/grpc_json_transcoder/v3/transcoder.proto#extensions-filters-http-grpc-json-transcoder-v3-grpcjsontranscoder-printoptions">Envoy gRPC-JSON Transcoder PrintOptions</a>
      */
     @Data

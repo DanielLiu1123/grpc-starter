@@ -13,6 +13,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.Ordered;
 
 /**
+ * A gRPC ServerInterceptor that handles exceptions thrown during RPC calls.
+ *
  * @author Freeman
  */
 public class ExceptionHandlingServerInterceptor implements ServerInterceptor, Ordered {
