@@ -24,6 +24,7 @@ import org.springframework.stereotype.Controller;
 class PgvValidationClientDisabledIT {
 
     @InProcessName
+    @SuppressWarnings("NullAway")
     String name;
 
     @Test

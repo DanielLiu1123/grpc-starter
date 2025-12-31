@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 class GrpcResponseMetadataModifierIT {
 
     @InProcessName
+    @SuppressWarnings("NullAway")
     String inProcessName;
 
     @Test
@@ -45,7 +46,9 @@ class GrpcResponseMetadataModifierIT {
         SimpleResponse okResponse = stub.unaryRpc(okRequest);
 
         assertThat(okResponse.getResponseMessage()).isEqualTo("ok");
-        assertThat(responseHeaders.get().get(Metadata.Key.of("status", Metadata.ASCII_STRING_MARSHALLER)))
+        var metadata = responseHeaders.get();
+        assertThat(metadata).isNotNull();
+        assertThat(metadata.get(Metadata.Key.of("status", Metadata.ASCII_STRING_MARSHALLER)))
                 .isEqualTo("ok");
 
         // Test set metadata to error response trailers
@@ -54,7 +57,9 @@ class GrpcResponseMetadataModifierIT {
 
         assertThatCode(() -> stub.unaryRpc(errorRequest)).isInstanceOfSatisfying(StatusRuntimeException.class, e -> {
             assertThat(e.getStatus()).isEqualTo(Status.INVALID_ARGUMENT);
-            assertThat(responseTrailers.get().get(Metadata.Key.of("status", Metadata.ASCII_STRING_MARSHALLER)))
+            var trailers = responseTrailers.get();
+            assertThat(trailers).isNotNull();
+            assertThat(trailers.get(Metadata.Key.of("status", Metadata.ASCII_STRING_MARSHALLER)))
                     .isEqualTo("error");
         });
     }

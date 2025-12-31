@@ -36,6 +36,7 @@ import org.springframework.core.annotation.Order;
 class AnnotationBasedExceptionHandlingIT {
 
     @InProcessName
+    @SuppressWarnings("NullAway")
     String name;
 
     @Test
@@ -83,21 +84,17 @@ class AnnotationBasedExceptionHandlingIT {
         public void unaryRpc(SimpleRequest request, StreamObserver<SimpleResponse> responseObserver) {
             String msg = request.getRequestMessage();
             switch (msg) {
-                case "IllegalArgumentException":
-                    throw new IllegalArgumentException();
-                case "MissingResourceException":
+                case "IllegalArgumentException" -> throw new IllegalArgumentException();
+                case "MissingResourceException" ->
                     throw new MissingResourceException(null, "SimpleService", "unaryRpc");
-                case "RuntimeException":
-                    throw new RuntimeException();
-                case "NestedException":
-                    throw new IllegalArgumentException(new RuntimeException());
-                case "UnsupportedOperationException":
-                    throw new UnsupportedOperationException();
-                default:
+                case "RuntimeException" -> throw new RuntimeException();
+                case "NestedException" -> throw new IllegalArgumentException(new RuntimeException());
+                case "UnsupportedOperationException" -> throw new UnsupportedOperationException();
+                default -> {
                     responseObserver.onNext(
                             SimpleResponse.newBuilder().setResponseMessage(msg).build());
                     responseObserver.onCompleted();
-                    break;
+                }
             }
         }
 

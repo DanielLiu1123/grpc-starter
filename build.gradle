@@ -127,9 +127,12 @@ subprojects {
 
     tasks.withType(JavaCompile).configureEach {
         options.errorprone {
+            // https://github.com/tbroyer/gradle-errorprone-plugin?tab=readme-ov-file#properties
             excludedPaths = ".*/(generated|examples)/.*"
+            // https://github.com/uber/NullAway/wiki/Configuration
             check("NullAway", net.ltgt.gradle.errorprone.CheckSeverity.ERROR)
             option("NullAway:AnnotatedPackages", "grpcstarter")
+            option("NullAway:HandleTestAssertionLibraries", "true")
         }
     }
 }
