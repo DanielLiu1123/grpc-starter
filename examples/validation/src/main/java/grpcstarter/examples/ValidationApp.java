@@ -55,7 +55,7 @@ public class ValidationApp extends FooServiceGrpc.FooServiceImplBase {
                 String message = Optional.ofNullable(e.getMessage()).orElse("");
                 Assert.isTrue(
                         message.contains(
-                                "INVALID_ARGUMENT: insertFoo.arg0.id: length must be between 5 and 2147483647, insertFoo.arg0.name: length must be between 5 and 2147483647"),
+                                "INVALID_ARGUMENT: .foo.Foo.name: length must be at least 2 but got: 1 - Got \"x\""),
                         "Message not match");
             }
         };
