@@ -42,23 +42,17 @@ final class Util {
             Class<?> stubClass, GrpcClientProperties properties) {
         List<GrpcClientProperties.Channel> matchedChannels = new ArrayList<>();
 
-        // find from classes first
         for (var channel : properties.getChannels()) {
+            boolean matched = false;
             if (matchAnyClassesConfig(stubClass, channel)) {
                 matchedChannels.add(channel);
+                matched = true;
             }
-        }
-
-        // then, find from stubs
-        for (var channel : properties.getChannels()) {
-            if (matchAnyStubsConfig(stubClass, channel)) {
+            if (!matched && matchAnyStubsConfig(stubClass, channel)) {
                 matchedChannels.add(channel);
+                matched = true;
             }
-        }
-
-        // finally, find from services
-        for (var channel : properties.getChannels()) {
-            if (matchAnyServicesConfig(stubClass, channel)) {
+            if (!matched && matchAnyServicesConfig(stubClass, channel)) {
                 matchedChannels.add(channel);
             }
         }
