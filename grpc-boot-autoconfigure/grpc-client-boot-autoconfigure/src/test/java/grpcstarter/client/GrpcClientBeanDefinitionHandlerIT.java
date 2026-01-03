@@ -153,9 +153,8 @@ class GrpcClientBeanDefinitionHandlerIT {
     static class Cfg2 {}
 
     static class NoneBeanDefinitionHandler implements GrpcClientBeanDefinitionHandler {
-        @Nullable
         @Override
-        public BeanDefinition handle(BeanDefinition beanDefinition, Class<?> clazz) {
+        public @Nullable BeanDefinition handle(BeanDefinition beanDefinition, Class<?> clazz) {
             return null;
         }
     }

@@ -24,8 +24,7 @@ import org.springframework.util.ObjectUtils;
 public class GrpcClientRefreshScopeRefreshedEventListener
         implements ApplicationListener<RefreshScopeRefreshedEvent>, BeanFactoryAware {
 
-    @Nullable
-    private DefaultListableBeanFactory beanFactory;
+    private @Nullable DefaultListableBeanFactory beanFactory;
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {

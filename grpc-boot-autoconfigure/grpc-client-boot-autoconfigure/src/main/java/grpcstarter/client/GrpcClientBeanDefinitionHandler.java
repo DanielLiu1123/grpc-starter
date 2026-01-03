@@ -23,8 +23,7 @@ public interface GrpcClientBeanDefinitionHandler {
      * @param clazz          gRPC client class
      * @return the handled bean definition, or {@code null} if you want to skip this bean definition to be registered
      */
-    @Nullable
-    BeanDefinition handle(BeanDefinition beanDefinition, Class<?> clazz);
+    @Nullable BeanDefinition handle(BeanDefinition beanDefinition, Class<?> clazz);
 
     /**
      * Default {@link GrpcClientBeanDefinitionHandler} implementation.
@@ -32,9 +31,8 @@ public interface GrpcClientBeanDefinitionHandler {
      * <p> This implementation does nothing and just returns the given bean definition.
      */
     class Default implements GrpcClientBeanDefinitionHandler {
-        @Nullable
         @Override
-        public BeanDefinition handle(BeanDefinition beanDefinition, Class<?> clazz) {
+        public @Nullable BeanDefinition handle(BeanDefinition beanDefinition, Class<?> clazz) {
             return beanDefinition;
         }
     }
@@ -45,9 +43,8 @@ public interface GrpcClientBeanDefinitionHandler {
      * <p> This is a convenience class for users who only want to use blocking stubs.
      */
     class Blocking implements GrpcClientBeanDefinitionHandler {
-        @Nullable
         @Override
-        public BeanDefinition handle(BeanDefinition beanDefinition, Class<?> clazz) {
+        public @Nullable BeanDefinition handle(BeanDefinition beanDefinition, Class<?> clazz) {
             return AbstractBlockingStub.class.isAssignableFrom(clazz) ? beanDefinition : null;
         }
     }
@@ -58,9 +55,8 @@ public interface GrpcClientBeanDefinitionHandler {
      * <p> This is a convenience class for users who only want to use future stubs.
      */
     class Future implements GrpcClientBeanDefinitionHandler {
-        @Nullable
         @Override
-        public BeanDefinition handle(BeanDefinition beanDefinition, Class<?> clazz) {
+        public @Nullable BeanDefinition handle(BeanDefinition beanDefinition, Class<?> clazz) {
             return AbstractFutureStub.class.isAssignableFrom(clazz) ? beanDefinition : null;
         }
     }
@@ -71,9 +67,8 @@ public interface GrpcClientBeanDefinitionHandler {
      * <p> This is a convenience class for users who only want to use async stubs.
      */
     class Async implements GrpcClientBeanDefinitionHandler {
-        @Nullable
         @Override
-        public BeanDefinition handle(BeanDefinition beanDefinition, Class<?> clazz) {
+        public @Nullable BeanDefinition handle(BeanDefinition beanDefinition, Class<?> clazz) {
             return AbstractAsyncStub.class.isAssignableFrom(clazz) ? beanDefinition : null;
         }
     }

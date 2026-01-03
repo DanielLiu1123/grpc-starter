@@ -32,8 +32,7 @@ public final class GrpcContextKeys {
          *
          * @return {@link ResponseMetadataModifier} bound to current gRPC request
          */
-        @Nullable
-        static ResponseMetadataModifier get() {
+        static @Nullable ResponseMetadataModifier get() {
             return INSTANCE.get();
         }
 

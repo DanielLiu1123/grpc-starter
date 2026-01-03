@@ -56,12 +56,10 @@ public class AnnotationBasedGrpcExceptionResolver
 
     private final List<GrpcAdviceBean> advices = new ArrayList<>();
 
-    @Nullable
-    private ApplicationContext ctx;
+    private @Nullable ApplicationContext ctx;
 
     @Override
-    @Nullable
-    public StatusRuntimeException resolve(Throwable throwable, ServerCall<?, ?> call, Metadata headers) {
+    public @Nullable StatusRuntimeException resolve(Throwable throwable, ServerCall<?, ?> call, Metadata headers) {
         Map.Entry<Throwable, GrpcExceptionHandlerMethod> entry = findHandlerMethod(throwable);
         if (entry == null) {
             return null;
@@ -176,8 +174,7 @@ public class AnnotationBasedGrpcExceptionResolver
         return null;
     }
 
-    @Nullable
-    private Object invokeHandlerMethod(
+    private @Nullable Object invokeHandlerMethod(
             GrpcExceptionHandlerMethod method, Throwable throwable, ServerCall<?, ?> call, Metadata headers) {
         Object[] args = getArgs(method.getMethod(), throwable, call, headers);
         return ReflectionUtils.invokeMethod(method.getMethod(), method.getBean(), args);
@@ -231,8 +228,7 @@ public class AnnotationBasedGrpcExceptionResolver
 
     private static final class GrpcAdviceBean {
 
-        @Nullable
-        private final Integer order;
+        private final @Nullable Integer order;
 
         private final List<GrpcExceptionHandlerMethod> methods;
 
@@ -241,8 +237,7 @@ public class AnnotationBasedGrpcExceptionResolver
             this.methods = methods;
         }
 
-        @Nullable
-        Integer getOrder() {
+        @Nullable Integer getOrder() {
             return order;
         }
 

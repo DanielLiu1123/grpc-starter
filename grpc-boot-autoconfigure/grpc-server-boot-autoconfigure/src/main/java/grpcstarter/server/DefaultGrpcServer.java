@@ -160,9 +160,8 @@ public class DefaultGrpcServer implements GrpcServer, ApplicationEventPublisherA
         return server.getPort();
     }
 
-    @Nullable
     @Override
-    public Object getServer() {
+    public @Nullable Object getServer() {
         return server;
     }
 

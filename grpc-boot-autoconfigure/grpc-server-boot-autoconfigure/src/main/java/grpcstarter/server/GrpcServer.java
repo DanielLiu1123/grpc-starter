@@ -20,6 +20,5 @@ public interface GrpcServer extends SmartLifecycle {
     /**
      * Get the server object.
      */
-    @Nullable
-    Object getServer();
+    @Nullable Object getServer();
 }

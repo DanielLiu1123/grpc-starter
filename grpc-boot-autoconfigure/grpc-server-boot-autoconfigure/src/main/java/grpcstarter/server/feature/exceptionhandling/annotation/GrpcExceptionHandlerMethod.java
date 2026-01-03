@@ -28,8 +28,7 @@ class GrpcExceptionHandlerMethod {
 
     private final Object bean;
 
-    @Nullable
-    private final Integer beanOrder;
+    private final @Nullable Integer beanOrder;
 
     private final Method method;
     private final Class<? extends Throwable>[] exceptions;

@@ -77,8 +77,7 @@ public class DefaultReactiveTranscoder
     private final GrpcServerProperties grpcServerProperties;
     private final ReactiveTranscodingExceptionResolver transcodingExceptionResolver;
 
-    @Nullable
-    private Channel channel;
+    private @Nullable Channel channel;
 
     public DefaultReactiveTranscoder(
             List<BindableService> services,

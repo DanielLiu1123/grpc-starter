@@ -36,8 +36,7 @@ public class DummyGrpcServer implements GrpcServer {
     }
 
     @Override
-    @Nullable
-    public Object getServer() {
+    public @Nullable Object getServer() {
         return null;
     }
 }

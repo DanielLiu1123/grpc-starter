@@ -151,8 +151,7 @@ class Util {
         return null;
     }
 
-    @Nullable
-    private static HttpMethod extractHttpMethod(HttpRule httpRule) {
+    private static @Nullable HttpMethod extractHttpMethod(HttpRule httpRule) {
         return switch (httpRule.getPatternCase()) {
             case GET -> HttpMethod.GET;
             case PUT -> HttpMethod.PUT;
@@ -165,8 +164,7 @@ class Util {
         };
     }
 
-    @Nullable
-    private static String extractPath(HttpRule httpRule) {
+    private static @Nullable String extractPath(HttpRule httpRule) {
         return switch (httpRule.getPatternCase()) {
             case GET -> httpRule.getGet();
             case PUT -> httpRule.getPut();

@@ -32,9 +32,9 @@ import org.springframework.util.ReflectionUtils;
  */
 class ProtoGenValidateBeanFactoryInitializationAotProcessor implements BeanFactoryInitializationAotProcessor {
 
-    @Nullable
     @Override
-    public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
+    public @Nullable BeanFactoryInitializationAotContribution processAheadOfTime(
+            ConfigurableListableBeanFactory beanFactory) {
         return (generationContext, beanFactoryInitializationCode) -> {
             var reflection = generationContext.getRuntimeHints().reflection();
 

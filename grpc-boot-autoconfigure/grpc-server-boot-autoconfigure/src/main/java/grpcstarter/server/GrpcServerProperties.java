@@ -58,20 +58,17 @@ public class GrpcServerProperties {
      *
      * @see GrpcUtil#DEFAULT_MAX_MESSAGE_SIZE
      */
-    @Nullable
-    private DataSize maxInboundMessageSize;
+    private @Nullable DataSize maxInboundMessageSize;
     /**
      * The maximum size of metadata allowed to be received, default 8KB.
      *
      * @see GrpcUtil#DEFAULT_MAX_HEADER_LIST_SIZE
      */
-    @Nullable
-    private DataSize maxInboundMetadataSize;
+    private @Nullable DataSize maxInboundMetadataSize;
     /**
      * In-process server configuration.
      */
-    @Nullable
-    private InProcess inProcess;
+    private @Nullable InProcess inProcess;
     /**
      * SSL bundle name for TLS configuration.
      * <p>
@@ -80,8 +77,7 @@ public class GrpcServerProperties {
      *
      * @since 3.5.3
      */
-    @Nullable
-    private String sslBundle;
+    private @Nullable String sslBundle;
 
     /**
      * Response configuration.

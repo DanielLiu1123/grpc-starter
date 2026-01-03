@@ -33,9 +33,9 @@ class GrpcTranscodingBeanFactoryInitializationAotProcessor implements BeanFactor
         this.env = env;
     }
 
-    @Nullable
     @Override
-    public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
+    public @Nullable BeanFactoryInitializationAotContribution processAheadOfTime(
+            ConfigurableListableBeanFactory beanFactory) {
         return (generationContext, beanFactoryInitializationCode) -> {
             var enabled = env.getProperty(GrpcTranscodingProperties.PREFIX + ".enabled", Boolean.class, true);
             if (!enabled) {
@@ -123,8 +123,7 @@ class GrpcTranscodingBeanFactoryInitializationAotProcessor implements BeanFactor
         }
     }
 
-    @Nullable
-    private static Class<?> getBuilderClass(Class<?> message) {
+    private static @Nullable Class<?> getBuilderClass(Class<?> message) {
         try {
             return ClassUtils.forName(message.getName() + "$Builder", null);
         } catch (ClassNotFoundException e) {
