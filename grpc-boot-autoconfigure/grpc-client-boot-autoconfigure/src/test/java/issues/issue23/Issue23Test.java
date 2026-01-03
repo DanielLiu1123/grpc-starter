@@ -1,4 +1,4 @@
-package issues;
+package issues.issue23;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
