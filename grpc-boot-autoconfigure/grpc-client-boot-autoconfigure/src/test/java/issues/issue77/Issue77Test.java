@@ -16,11 +16,10 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
  */
 class Issue77Test {
 
-    static int port = findAvailableTcpPort();
-
     @Test
     void useManualRegisteredBean_whenManualRegisteredBeanExists() {
-        try (var ctx = new SpringApplicationBuilder(CfgWithHttpClientConfiguration.class)
+        int port = findAvailableTcpPort();
+        try (var ctx = new SpringApplicationBuilder(CfgWithGrpcClientConfiguration.class)
                 .properties("grpc.server.port=" + port)
                 .properties("grpc.client.base-packages="
                         + SimpleServiceGrpc.SimpleServiceBlockingStub.class.getPackageName())
@@ -39,7 +38,8 @@ class Issue77Test {
 
     @Test
     void useAutoRegisteredBean_whenNoManualRegisteredBeanAndUsingWrongBaseUrl_thenThrowException() {
-        try (var ctx = new SpringApplicationBuilder(CfgWithoutHttpClientConfiguration.class)
+        int port = findAvailableTcpPort();
+        try (var ctx = new SpringApplicationBuilder(CfgWithoutGrpcClientConfiguration.class)
                 .properties("grpc.server.port=" + port)
                 .properties("grpc.client.base-packages="
                         + SimpleServiceGrpc.SimpleServiceBlockingStub.class.getPackageName())
@@ -57,7 +57,8 @@ class Issue77Test {
 
     @Test
     void useAutoRegisteredBean_whenNoManualRegisteredBeanAndUsingCorrectBaseUrl_thenGotCorrectResult() {
-        try (var ctx = new SpringApplicationBuilder(CfgWithoutHttpClientConfiguration.class)
+        int port = findAvailableTcpPort();
+        try (var ctx = new SpringApplicationBuilder(CfgWithoutGrpcClientConfiguration.class)
                 .properties("grpc.server.port=" + port)
                 .properties("grpc.client.base-packages="
                         + SimpleServiceGrpc.SimpleServiceBlockingStub.class.getPackageName())
