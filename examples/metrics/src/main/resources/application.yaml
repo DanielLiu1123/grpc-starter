@@ -11,6 +11,10 @@ grpc:
     authority: localhost:${grpc.server.port}
 
 management:
+  metrics:
+    tags:
+      app: ${spring.application.name}
+      profile: ${spring.profiles.active:default}
   otlp:
     metrics:
       export:
