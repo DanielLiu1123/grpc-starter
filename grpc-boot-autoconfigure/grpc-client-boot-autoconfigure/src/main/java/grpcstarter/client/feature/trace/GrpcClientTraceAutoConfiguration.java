@@ -1,7 +1,7 @@
-package grpcstarter.server.feature.trace;
+package grpcstarter.client.feature.trace;
 
-import grpcstarter.server.ConditionOnGrpcServerEnabled;
-import io.micrometer.core.instrument.binder.grpc.ObservationGrpcServerInterceptor;
+import grpcstarter.client.ConditionOnGrpcClientEnabled;
+import io.micrometer.core.instrument.binder.grpc.ObservationGrpcClientInterceptor;
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.tracing.Tracer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -18,10 +18,10 @@ import org.springframework.core.annotation.Order;
  * @author Freeman
  */
 @AutoConfiguration(after = ObservationAutoConfiguration.class)
-@ConditionOnGrpcServerEnabled
+@ConditionOnGrpcClientEnabled
 @ConditionalOnClass(ObservationRegistry.class)
 @ConditionalOnBean(ObservationRegistry.class)
-public class GrpcServerTraceAutoConfiguration {
+public class GrpcClientTraceAutoConfiguration {
 
     /**
      * A relatively high priority.
@@ -30,8 +30,8 @@ public class GrpcServerTraceAutoConfiguration {
 
     @Bean
     @Order(ORDER)
-    @ConditionalOnMissingBean(ObservationGrpcServerInterceptor.class)
-    public ObservationGrpcServerInterceptor observationGrpcServerInterceptor(ObservationRegistry registry) {
-        return new ObservationGrpcServerInterceptor(registry);
+    @ConditionalOnMissingBean(ObservationGrpcClientInterceptor.class)
+    public ObservationGrpcClientInterceptor observationGrpcClientInterceptor(ObservationRegistry registry) {
+        return new ObservationGrpcClientInterceptor(registry);
     }
 }

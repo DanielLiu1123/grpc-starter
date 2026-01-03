@@ -1,8 +1,10 @@
-package grpcstarter.server.feature.metrics;
+package grpcstarter.client.feature.metrics;
 
-import grpcstarter.server.ConditionOnGrpcServerEnabled;
+import grpcstarter.client.ConditionOnGrpcClientEnabled;
+import grpcstarter.client.GrpcClientAutoConfiguration;
+import grpcstarter.client.GrpcClientProperties;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.binder.grpc.MetricCollectingServerInterceptor;
+import io.micrometer.core.instrument.binder.grpc.MetricCollectingClientInterceptor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -17,10 +19,10 @@ import org.springframework.core.annotation.Order;
  * @author Freeman
  */
 @AutoConfiguration(after = CompositeMeterRegistryAutoConfiguration.class)
-@ConditionOnGrpcServerEnabled
+@ConditionOnGrpcClientEnabled
 @ConditionalOnClass(MeterRegistry.class)
 @ConditionalOnBean(MeterRegistry.class)
-public class GrpcServerMetricsAutoConfiguration {
+public class GrpcClientMetricsAutoConfiguration {
 
     /**
      * A relatively high priority.
@@ -29,8 +31,8 @@ public class GrpcServerMetricsAutoConfiguration {
 
     @Bean
     @Order(ORDER)
-    @ConditionalOnMissingBean(MetricCollectingServerInterceptor.class)
-    public MetricCollectingServerInterceptor metricCollectingServerInterceptor(MeterRegistry registry) {
-        return new MetricCollectingServerInterceptor(registry);
+    @ConditionalOnMissingBean(MetricCollectingClientInterceptor.class)
+    public MetricCollectingClientInterceptor metricCollectingClientInterceptor(MeterRegistry registry) {
+        return new MetricCollectingClientInterceptor(registry);
     }
 }
