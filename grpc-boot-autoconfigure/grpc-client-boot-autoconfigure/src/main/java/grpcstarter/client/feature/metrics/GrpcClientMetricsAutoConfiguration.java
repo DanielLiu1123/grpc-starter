@@ -1,8 +1,6 @@
 package grpcstarter.client.feature.metrics;
 
 import grpcstarter.client.ConditionOnGrpcClientEnabled;
-import grpcstarter.client.GrpcClientAutoConfiguration;
-import grpcstarter.client.GrpcClientProperties;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.grpc.MetricCollectingClientInterceptor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
