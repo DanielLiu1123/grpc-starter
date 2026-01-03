@@ -4,7 +4,7 @@ import io.grpc.Channel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.stub.AbstractStub;
 import java.lang.reflect.Method;
-import org.springframework.util.Assert;
+import java.util.Objects;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -32,16 +32,13 @@ public final class StubUtil {
      * @param <T>           stub type
      * @return gRPC stub instance
      */
-    @SuppressWarnings("unchecked")
     public static <T extends AbstractStub<T>> T createStub(String inProcessName, Class<T> stubClass) {
-        Class<?> grpcClass = stubClass.getEnclosingClass();
-        Assert.notNull(grpcClass, "grpcClass must not be null");
-        Method stubMethod = ReflectionUtils.findMethod(grpcClass, getStubMethodName(stubClass), Channel.class);
-        Assert.notNull(stubMethod, "stubMethod must not be null");
-        Object stub = ReflectionUtils.invokeMethod(
-                stubMethod, null, InProcessChannelBuilder.forName(inProcessName).build());
-        Assert.notNull(stub, "stub must not be null");
-        return (T) stub;
+        Class<?> grpcClass = Objects.requireNonNull(stubClass.getEnclosingClass());
+        Method stubMethod = Objects.requireNonNull(
+                ReflectionUtils.findMethod(grpcClass, getStubMethodName(stubClass), Channel.class));
+        Object stub = Objects.requireNonNull(ReflectionUtils.invokeMethod(
+                stubMethod, null, InProcessChannelBuilder.forName(inProcessName).build()));
+        return stubClass.cast(stub);
     }
 
     private static String getStubMethodName(Class<?> stubClass) {
