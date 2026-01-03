@@ -18,9 +18,7 @@ dependencies {
         api(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
 
         // extensions
-        api(project(":grpc-extensions:grpc-metrics"))
         api(project(":grpc-extensions:grpc-test"))
-        api(project(":grpc-extensions:grpc-tracing"))
         api(project(":grpc-extensions:grpc-transcoding"))
         api(project(":grpc-extensions:grpc-transcoding-springdoc"))
         api(project(":grpc-extensions:grpc-validation"))
@@ -29,10 +27,8 @@ dependencies {
         api(project(":grpc-starters:grpc-boot-starter"))
         api(project(":grpc-starters:grpc-client-boot-starter"))
         api(project(":grpc-starters:grpc-server-boot-starter"))
-        api(project(":grpc-starters:grpc-starter-metrics"))
         api(project(":grpc-starters:grpc-starter-protovalidate"))
         api(project(":grpc-starters:grpc-starter-test"))
-        api(project(":grpc-starters:grpc-starter-tracing"))
         api(project(":grpc-starters:grpc-starter-transcoding"))
         api(project(":grpc-starters:grpc-starter-transcoding-springdoc"))
         api(project(":grpc-starters:grpc-starter-validation"))

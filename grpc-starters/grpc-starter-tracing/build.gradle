@@ -1,7 +1,0 @@
-dependencies {
-    api(project(":grpc-extensions:grpc-tracing"))
-    api("io.micrometer:micrometer-core")
-    api("io.micrometer:micrometer-tracing")
-}
-
-apply from: "${rootDir}/gradle/deploy.gradle"

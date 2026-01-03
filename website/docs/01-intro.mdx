@@ -24,17 +24,17 @@ While there are existing gRPC Spring Boot starters such as:
 ### Client
 - **Autoconfiguration**: Automatically configure gRPC clients, allowing direct injection with `@Autowired` while fully respecting the Spring Bean lifecycle.
 - **Dynamic Refreshing**: Modify gRPC client configurations at runtime without restarting the application.
+- **Metrics & Tracing**: Built-in support through Micrometer.
 
 ### Server
 - **Autoconfiguration**: Write your gRPC service implementation and expose it as a Spring bean. The framework handles the rest.
 - **Exception Handling**: Provides `@ExceptionHandler`-like exception handling for gRPC servers through `@GrpcAdvice` and `@GrpcExceptionHandler`.
 - **Health Check**: Built-in health check support for gRPC servers.
+- **Metrics & Tracing**: Built-in support through Micrometer.
 
 ### Extensions
 - **gRPC HTTP Transcoding**: Enable a single codebase to support both gRPC and HTTP/JSON, similar to [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) but for Java.
 - **Protobuf Validation**: Integrate with [protovalidate](https://github.com/bufbuild/protovalidate) and [protoc-gen-validate](https://github.com/bufbuild/protoc-gen-validate) for Protobuf message validation.
-- **Metrics**: Support for metrics through Spring Boot Actuator.
-- **Tracing**: Support for tracing through Spring Boot Actuator.
 - **Testing**: Integration with `SpringBootTest` for comprehensive testing support.
 
 This framework is designed with extensibility in mind, allowing you to easily extend it to meet your specific needs.
@@ -47,9 +47,7 @@ This framework is designed with extensibility in mind, allowing you to easily ex
 │   ├── grpc-client-boot-autoconfigure      # gRPC client autoconfiguration
 │   └── grpc-server-boot-autoconfigure      # gRPC server autoconfiguration
 ├── grpc-extensions
-│   ├── grpc-metrics                        # Metrics extension
 │   ├── grpc-test                           # Test extension
-│   ├── grpc-tracing                        # Tracing extension
 │   ├── grpc-transcoding                    # HTTP transcoding extension
 │   ├── grpc-transcoding-springdoc          # HTTP transcoding with OpenAPI integration
 │   └── grpc-validation                     # Protobuf validation extension
@@ -58,10 +56,8 @@ This framework is designed with extensibility in mind, allowing you to easily ex
 │   ├── grpc-boot-starter                   # Core starter, including grpc-client-boot-starter and grpc-server-boot-starter
 │   ├── grpc-client-boot-starter            # gRPC client starter
 │   ├── grpc-server-boot-starter            # gRPC server starter
-│   ├── grpc-starter-metrics                # Metrics starter
 │   ├── grpc-starter-protovalidate          # Protobuf validation starter, implemented by protovalidate
 │   ├── grpc-starter-test                   # Test starter
-│   ├── grpc-starter-tracing                # Tracing starter
 │   ├── grpc-starter-transcoding            # HTTP transcoding starter for WebMVC/WebFlux
 │   ├── grpc-starter-transcoding-springdoc  # HTTP transcoding starter with OpenAPI integration
 │   └── grpc-starter-validation             # Protobuf validation starter, implemented by protoc-gen-validate

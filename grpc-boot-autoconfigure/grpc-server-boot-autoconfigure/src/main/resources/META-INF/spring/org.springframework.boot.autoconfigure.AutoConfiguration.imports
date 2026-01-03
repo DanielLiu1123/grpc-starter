@@ -1,1 +1,3 @@
 grpcstarter.server.GrpcServerAutoConfiguration
+grpcstarter.server.feature.metrics.GrpcServerMetricsAutoConfiguration
+grpcstarter.server.feature.trace.GrpcServerTraceAutoConfiguration

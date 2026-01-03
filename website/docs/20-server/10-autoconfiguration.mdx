@@ -162,6 +162,18 @@ spring:
 Virtual threads are only available in Java 21+. This feature will be ignored on older Java versions.
 :::
 
+## Observability
+
+### Metrics
+
+`grpc-starter` provides out-of-the-box support for gRPC metrics through `Micrometer`.
+When `MeterRegistry` bean is present, it will be automatically configured.
+
+### Tracing
+
+`grpc-starter` provides out-of-the-box support for distributed tracing through `Micrometer Observation`.
+When `ObservationRegistry` bean is present, it will be automatically configured.
+
 ## Configurations
 
 Full configuration is available in the [`GrpcServerProperties`](https://github.com/DanielLiu1123/grpc-starter/blob/main/grpc-boot-autoconfigure/grpc-server-boot-autoconfigure/src/main/java/grpcstarter/server/GrpcServerProperties.java).

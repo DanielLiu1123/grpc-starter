@@ -29,9 +29,5 @@ grpc:
     channelz:
       enabled: true                             # whether to enable channelz
       max-page-size: 100                        # max page size
-    tls:
-      key-manager:
-        cert-chain: classpath:server.crt
-        private-key: classpath:server.key
     response:
       max-description-length: 2048              # max description length
