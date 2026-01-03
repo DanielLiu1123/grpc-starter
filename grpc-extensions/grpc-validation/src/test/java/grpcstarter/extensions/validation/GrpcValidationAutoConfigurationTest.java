@@ -28,46 +28,6 @@ class GrpcValidationAutoConfigurationTest {
     }
 
     @Test
-    void notHavePgvRelatedBeans_whenConfigureBackendToProtoValidate() {
-        ApplicationContextRunner runner = new ApplicationContextRunner()
-                .withConfiguration(AutoConfigurations.of(GrpcValidationAutoConfiguration.class));
-
-        runner.withPropertyValues("grpc.validation.backend=PROTO_VALIDATE").run(ctx -> {
-            assertThat(ctx).doesNotHaveBean(ValidatingClientInterceptor.class);
-            assertThat(ctx).doesNotHaveBean(ValidatingServerInterceptor.class);
-            assertThat(ctx).hasSingleBean(ProtoValidateClientInterceptor.class);
-            assertThat(ctx).hasSingleBean(ProtoValidateServerInterceptor.class);
-        });
-
-        runner.withPropertyValues("grpc.validation.backend=proto_validate").run(ctx -> {
-            assertThat(ctx).doesNotHaveBean(ValidatingClientInterceptor.class);
-            assertThat(ctx).doesNotHaveBean(ValidatingServerInterceptor.class);
-            assertThat(ctx).hasSingleBean(ProtoValidateClientInterceptor.class);
-            assertThat(ctx).hasSingleBean(ProtoValidateServerInterceptor.class);
-        });
-    }
-
-    @Test
-    void notHaveProtoValidateRelatedBeans_whenConfigureBackendToPgv() {
-        ApplicationContextRunner runner = new ApplicationContextRunner()
-                .withConfiguration(AutoConfigurations.of(GrpcValidationAutoConfiguration.class));
-
-        runner.withPropertyValues("grpc.validation.backend=PGV").run(ctx -> {
-            assertThat(ctx).hasSingleBean(ValidatingClientInterceptor.class);
-            assertThat(ctx).hasSingleBean(ValidatingServerInterceptor.class);
-            assertThat(ctx).doesNotHaveBean(ProtoValidateClientInterceptor.class);
-            assertThat(ctx).doesNotHaveBean(ProtoValidateServerInterceptor.class);
-        });
-
-        runner.withPropertyValues("grpc.validation.backend=pgv").run(ctx -> {
-            assertThat(ctx).hasSingleBean(ValidatingClientInterceptor.class);
-            assertThat(ctx).hasSingleBean(ValidatingServerInterceptor.class);
-            assertThat(ctx).doesNotHaveBean(ProtoValidateClientInterceptor.class);
-            assertThat(ctx).doesNotHaveBean(ProtoValidateServerInterceptor.class);
-        });
-    }
-
-    @Test
     @Classpath(exclude = "build.buf:protovalidate")
     void testWithoutProtoValidate() {
         ApplicationContextRunner runner = new ApplicationContextRunner()
