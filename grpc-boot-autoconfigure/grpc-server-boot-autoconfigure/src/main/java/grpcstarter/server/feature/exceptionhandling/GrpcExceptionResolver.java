@@ -22,6 +22,5 @@ public interface GrpcExceptionResolver {
      * @param headers   headers
      * @return {@link StatusRuntimeException} or null
      */
-    @Nullable
-    StatusRuntimeException resolve(Throwable throwable, ServerCall<?, ?> call, Metadata headers);
+    @Nullable StatusRuntimeException resolve(Throwable throwable, ServerCall<?, ?> call, Metadata headers);
 }

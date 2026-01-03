@@ -142,8 +142,7 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
         }
     }
 
-    @Nullable
-    private HttpRule extractHttpRule(Descriptors.MethodDescriptor md) {
+    private @Nullable HttpRule extractHttpRule(Descriptors.MethodDescriptor md) {
         HttpRule httpRule = null;
 
         if (md.getOptions().hasExtension(AnnotationsProto.http)) {
@@ -269,8 +268,7 @@ public class GrpcTranscodingOpenApiCustomizer implements OpenApiCustomizer {
         return ModelConverters.getInstance(springDocConfigProperties.isOpenapi31());
     }
 
-    @Nullable
-    private static String getPath(HttpRule httpRule) {
+    private static @Nullable String getPath(HttpRule httpRule) {
         return switch (httpRule.getPatternCase()) {
             case GET -> httpRule.getGet();
             case PUT -> httpRule.getPut();

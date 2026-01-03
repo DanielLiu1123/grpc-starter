@@ -48,9 +48,9 @@ class ProtoValidateBeanFactoryInitializationAotProcessor implements BeanFactoryI
 
     private final ClassPathScanningCandidateComponentProvider scanner = getScanner();
 
-    @Nullable
     @Override
-    public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
+    public @Nullable BeanFactoryInitializationAotContribution processAheadOfTime(
+            ConfigurableListableBeanFactory beanFactory) {
         return (generationContext, beanFactoryInitializationCode) -> {
             var reflection = generationContext.getRuntimeHints().reflection();
 

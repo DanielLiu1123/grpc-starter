@@ -35,9 +35,9 @@ class GrpcClientBeanFactoryInitializationAotProcessor
         return isGrpcClient(registeredBean) || isManagedChannel(registeredBean);
     }
 
-    @Nullable
     @Override
-    public BeanFactoryInitializationAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
+    public @Nullable BeanFactoryInitializationAotContribution processAheadOfTime(
+            ConfigurableListableBeanFactory beanFactory) {
         return (generationContext, beanFactoryInitializationCode) -> {
             var clientBeanDefinitions = listClientDefinitions(beanFactory);
             var channelBeanDefinitions = listChannelDefinitions(beanFactory);

@@ -22,8 +22,7 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 public class DataSourceHealthChecker implements HealthChecker, BeanFactoryAware, SmartInitializingSingleton {
     private static final Logger log = LoggerFactory.getLogger(DataSourceHealthChecker.class);
 
-    @Nullable
-    private BeanFactory beanFactory;
+    private @Nullable BeanFactory beanFactory;
 
     private final List<DataSource> dataSources = new ArrayList<>();
     private final GrpcServerProperties.Health.DataSource config;

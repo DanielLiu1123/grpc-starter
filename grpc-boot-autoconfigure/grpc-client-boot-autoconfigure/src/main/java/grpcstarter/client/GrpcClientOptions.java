@@ -22,12 +22,9 @@ public class GrpcClientOptions {
     public static final CallOptions.Key<GrpcClientOptions> KEY =
             CallOptions.Key.createWithDefault("grpcClientOptions", new GrpcClientOptions());
 
-    @Nullable
-    private Long deadline;
+    private @Nullable Long deadline;
 
-    @Nullable
-    private Integer maxOutboundMessageSize;
+    private @Nullable Integer maxOutboundMessageSize;
 
-    @Nullable
-    private String compression;
+    private @Nullable String compression;
 }

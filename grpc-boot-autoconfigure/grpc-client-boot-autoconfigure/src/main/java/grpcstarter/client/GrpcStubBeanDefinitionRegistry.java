@@ -19,8 +19,7 @@ class GrpcStubBeanDefinitionRegistry implements BeanDefinitionRegistryPostProces
 
     static final ScanInfo scanInfo = new ScanInfo();
 
-    @Nullable
-    private Environment environment;
+    private @Nullable Environment environment;
 
     @Override
     public void setEnvironment(Environment environment) {

@@ -24,8 +24,7 @@ public class GrpcRequestContext {
      *
      * @return {@link GrpcRequestContext} bound to current gRPC request
      */
-    @Nullable
-    public static GrpcRequestContext get() {
+    public static @Nullable GrpcRequestContext get() {
         return INSTANCE.get();
     }
 }

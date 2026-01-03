@@ -23,8 +23,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 public class RedisHealthChecker implements HealthChecker, BeanFactoryAware, SmartInitializingSingleton {
     private static final Logger log = LoggerFactory.getLogger(RedisHealthChecker.class);
 
-    @Nullable
-    private BeanFactory beanFactory;
+    private @Nullable BeanFactory beanFactory;
 
     private final List<RedisConnectionFactory> connectionFactories = new ArrayList<>();
     private final GrpcServerProperties.Health.Redis config;

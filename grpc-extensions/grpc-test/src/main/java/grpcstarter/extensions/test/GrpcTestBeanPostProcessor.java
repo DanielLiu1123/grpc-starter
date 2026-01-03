@@ -26,13 +26,11 @@ class GrpcTestBeanPostProcessor
 
     private final IdentityHashMap<Object, Boolean> beanToInjected = new IdentityHashMap<>();
 
-    @Nullable
-    private BeanFactory beanFactory;
+    private @Nullable BeanFactory beanFactory;
 
     private int port;
 
-    @Nullable
-    private String inProcessName;
+    private @Nullable String inProcessName;
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {

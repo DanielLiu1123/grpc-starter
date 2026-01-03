@@ -24,8 +24,7 @@ public class GrpcTranscodingProperties {
      *
      * <p> In most cases, do not need to set this property explicitly.
      */
-    @Nullable
-    private String endpoint;
+    private @Nullable String endpoint;
 
     /**
      * Whether to route methods without the `google.api.http` option, default true.

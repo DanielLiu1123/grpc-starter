@@ -74,8 +74,7 @@ public class DefaultServletTranscoder
     private final GrpcServerProperties grpcServerProperties;
     private final TranscodingExceptionResolver transcodingExceptionResolver;
 
-    @Nullable
-    private Channel channel;
+    private @Nullable Channel channel;
 
     public DefaultServletTranscoder(
             List<BindableService> services,

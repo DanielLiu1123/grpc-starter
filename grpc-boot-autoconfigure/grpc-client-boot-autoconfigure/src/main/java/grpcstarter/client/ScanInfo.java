@@ -13,8 +13,7 @@ final class ScanInfo {
     public final LinkedHashSet<String> basePackages = new LinkedHashSet<>();
     public final LinkedHashSet<Class<?>> clients = new LinkedHashSet<>();
 
-    @Nullable
-    public Class<? extends GrpcClientBeanDefinitionHandler> beanDefinitionHandler;
+    public @Nullable Class<? extends GrpcClientBeanDefinitionHandler> beanDefinitionHandler;
 
     public void clear() {
         basePackages.clear();

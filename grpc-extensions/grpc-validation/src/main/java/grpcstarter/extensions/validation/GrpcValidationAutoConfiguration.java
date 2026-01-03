@@ -34,11 +34,6 @@ public class GrpcValidationAutoConfiguration {
      */
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(ValidatorIndex.class)
-    @ConditionalOnProperty(
-            prefix = GrpcValidationProperties.PREFIX,
-            name = "backend",
-            havingValue = "PGV",
-            matchIfMissing = true)
     static class Pgv {
 
         @Configuration(proxyBeanMethods = false)
@@ -84,11 +79,6 @@ public class GrpcValidationAutoConfiguration {
      */
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(Validator.class)
-    @ConditionalOnProperty(
-            prefix = GrpcValidationProperties.PREFIX,
-            name = "backend",
-            havingValue = "PROTO_VALIDATE",
-            matchIfMissing = true)
     static class ProtoValidate {
 
         @Bean

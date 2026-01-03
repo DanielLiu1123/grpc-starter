@@ -134,8 +134,7 @@ final class Util {
      * @param beanDefinition bean definition
      * @return class of bean definition
      */
-    @Nullable
-    public static Class<?> getBeanDefinitionClass(BeanDefinition beanDefinition) {
+    public static @Nullable Class<?> getBeanDefinitionClass(BeanDefinition beanDefinition) {
         // try to get class from factory method metadata
         // @Configuration + @Bean
         if (beanDefinition instanceof AnnotatedBeanDefinition abd) {
@@ -157,8 +156,7 @@ final class Util {
         return rt.resolve();
     }
 
-    @Nullable
-    public static Class<?> forName(String beanClassName) {
+    public static @Nullable Class<?> forName(String beanClassName) {
         try {
             return Class.forName(beanClassName);
         } catch (ClassNotFoundException e) {
