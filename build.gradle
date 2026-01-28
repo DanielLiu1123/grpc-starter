@@ -14,8 +14,8 @@ plugins {
     id "com.github.spotbugs" version "${spotbugsVersion}" apply false
     id "com.google.protobuf" version "${protobufPluginVersion}" apply false
     id "org.graalvm.buildtools.native" version "${graalvmBuildToolsVersion}" apply false
+    id "net.ltgt.errorprone" version "${errorPronePluginVersion}" apply false
     id "io.github.danielliu1123.deployer" version "${deployerVersion}"
-    id "net.ltgt.errorprone" version "${errorPronePluginVersion}"
 }
 
 deploy {
