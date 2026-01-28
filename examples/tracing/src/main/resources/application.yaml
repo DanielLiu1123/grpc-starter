@@ -10,6 +10,10 @@ grpc:
     authority: localhost:${grpc.server.port:9090}
 
 management:
+  observations:
+    key-values:
+      app: ${spring.application.name}
+      profile: ${spring.profiles.active:default}
   opentelemetry:
     tracing:
       export:

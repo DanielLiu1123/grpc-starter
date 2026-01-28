@@ -18,8 +18,4 @@ perl -pi -e 's/This is a generated file.*\n//g' build/configuration-properties.m
 
 cp -f build/configuration-properties.md website/docs/40-configuration-properties.md
 
-# grpc-extensions/grpc-metrics/src/test/java/grpcstarter/extensions/metrics/Deps.java sync with springBootVersion in gradle.properties
-springBootVersion=$(grep '^springBootVersion=' gradle.properties | cut -d'=' -f2)
-perl -pi -e "s/SPRING_BOOT_VERSION = \".*\"/SPRING_BOOT_VERSION = \"${springBootVersion}\"/" grpc-extensions/grpc-metrics/src/test/java/grpcstarter/extensions/metrics/Deps.java
-
 git add -u

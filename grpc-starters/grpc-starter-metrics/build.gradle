@@ -1,6 +1,0 @@
-dependencies {
-    api(project(":grpc-extensions:grpc-metrics"))
-    api("org.springframework.boot:spring-boot-starter-actuator")
-}
-
-apply from: "${rootDir}/gradle/deploy.gradle"

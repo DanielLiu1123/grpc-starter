@@ -13,6 +13,8 @@ dependencies {
 
     compileOnly(project(":grpc-boot-autoconfigure:grpc-server-boot-autoconfigure"))
 
+    optional("org.springframework.boot:spring-boot-starter-opentelemetry")
+
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation("io.grpc:grpc-testing-proto")
