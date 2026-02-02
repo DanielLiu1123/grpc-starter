@@ -2,7 +2,6 @@ package grpcstarter.client;
 
 import static grpcstarter.client.GrpcClientUtil.getRefresh;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.grpc.ClientInterceptor;
 import io.grpc.Grpc;
 import io.grpc.InsecureChannelCredentials;
@@ -30,7 +29,6 @@ class GrpcChannelCreator {
     private final GrpcClientProperties.Refresh refreshConfig;
     private final GrpcClientProperties.Channel channelConfig;
 
-    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     GrpcChannelCreator(BeanFactory beanFactory, GrpcClientProperties.Channel channelConfig) {
         this.beanFactory = beanFactory;
         this.refreshConfig = getRefresh(beanFactory.getBean(Environment.class));

@@ -1,6 +1,5 @@
 package grpcstarter.server.feature.exceptionhandling.annotation;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.Status;
@@ -33,7 +32,6 @@ class GrpcExceptionHandlerMethod {
     private final Method method;
     private final Class<? extends Throwable>[] exceptions;
 
-    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public GrpcExceptionHandlerMethod(Object bean, Method method) {
         this.bean = bean;
         checkMethod(method);

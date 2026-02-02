@@ -11,7 +11,6 @@ plugins {
     id "org.springframework.boot" version "${springBootVersion}" apply false
     id "io.spring.dependency-management" version "${springDependencyManagementPluginVersion}" apply false
     id "com.diffplug.spotless" version "${spotlessVersion}" apply false
-    id "com.github.spotbugs" version "${spotbugsVersion}" apply false
     id "com.google.protobuf" version "${protobufPluginVersion}" apply false
     id "org.graalvm.buildtools.native" version "${graalvmBuildToolsVersion}" apply false
     id "net.ltgt.errorprone" version "${errorPronePluginVersion}" apply false
@@ -93,7 +92,6 @@ subprojects {
         annotationProcessor("org.projectlombok:lombok")
         testCompileOnly("org.projectlombok:lombok")
         testAnnotationProcessor("org.projectlombok:lombok")
-        compileOnly("com.github.spotbugs:spotbugs-annotations:${spotbugsAnnotationsVersion}")
         // https://docs.gradle.org/current/userguide/upgrading_version_8.html#test_framework_implementation_dependencies
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     }
