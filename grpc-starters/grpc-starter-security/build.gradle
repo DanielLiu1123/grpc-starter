@@ -1,5 +1,0 @@
-dependencies {
-    api(project(":grpc-extensions:grpc-security"))
-}
-
-apply from: "${rootDir}/gradle/deploy.gradle"
