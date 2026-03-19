@@ -4,6 +4,7 @@ import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.ClientCall;
 import io.grpc.ClientInterceptor;
+import io.grpc.Context;
 import io.grpc.Deadline;
 import io.grpc.MethodDescriptor;
 import java.util.concurrent.TimeUnit;
@@ -27,8 +28,15 @@ public class GrpcClientOptionsClientInterceptor implements ClientInterceptor {
         }
 
         Deadline deadline = callOptions.getDeadline();
-        if (deadline == null && opt.getDeadline() != null) {
-            callOptions = callOptions.withDeadlineAfter(opt.getDeadline(), TimeUnit.MILLISECONDS);
+        if (deadline == null) {
+            if (opt.getDeadline() != null) {
+                callOptions = callOptions.withDeadlineAfter(opt.getDeadline(), TimeUnit.MILLISECONDS);
+            } else {
+                var contextDeadline = Context.current().getDeadline();
+                if (contextDeadline != null) {
+                    callOptions = callOptions.withDeadline(contextDeadline);
+                }
+            }
         }
 
         Integer maxOutboundMessageSize = callOptions.getMaxOutboundMessageSize();
