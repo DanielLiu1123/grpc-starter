@@ -1,3 +1,4 @@
 grpcstarter.client.GrpcClientAutoConfiguration
+grpcstarter.client.feature.deadlinepropagation.GrpcClientDeadlinePropagationAutoConfiguration
 grpcstarter.client.feature.metrics.GrpcClientMetricsAutoConfiguration
 grpcstarter.client.feature.trace.GrpcClientTraceAutoConfiguration

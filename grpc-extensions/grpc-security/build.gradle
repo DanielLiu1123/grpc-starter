@@ -1,0 +1,17 @@
+dependencies {
+    optional(project(":grpc-starters:grpc-server-boot-starter"))
+    optional("org.springframework.boot:spring-boot-starter-security")
+    optional("org.springframework.boot:spring-boot-starter-web")
+    optional("org.springframework.security:spring-security-oauth2-resource-server")
+    optional("org.springframework.security:spring-security-oauth2-jose")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+    testImplementation(project(":grpc-starters:grpc-boot-starter"))
+    testImplementation(project(":grpc-starters:grpc-starter-test"))
+    testImplementation("org.springframework.boot:spring-boot-starter-security")
+    testImplementation("org.springframework.security:spring-security-oauth2-resource-server")
+    testImplementation("org.springframework.security:spring-security-oauth2-jose")
+    testImplementation("io.grpc:grpc-testing-proto")
+}
+
+apply from: "${rootDir}/gradle/deploy.gradle"
