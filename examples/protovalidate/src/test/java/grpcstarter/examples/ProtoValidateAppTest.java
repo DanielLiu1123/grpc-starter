@@ -43,7 +43,7 @@ class ProtoValidateAppTest {
                         .build()))
                 .isInstanceOf(StatusRuntimeException.class)
                 .hasMessage(
-                        "INVALID_ARGUMENT: name: value length must be at least 5 characters, hobbies: value must contain at least 1 item(s), nested.msg: value length must be at least 5 characters");
+                        "INVALID_ARGUMENT: name: must be at least 5 characters, hobbies: must contain at least 1 item(s), nested.msg: must be at least 5 characters");
     }
 
     @Test
