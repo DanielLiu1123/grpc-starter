@@ -82,4 +82,4 @@ jobs:
 
       - name: Build native image
         run: |
-          ./gradlew nativeRun
+          ./gradlew nativeRun --no-configuration-cache
